@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorB, effetto, finitura } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorB, effetto, finitura, facadeLayout, context } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -64,19 +64,35 @@ module.exports = async function handler(req, res) {
   };
   const textureDesc = MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`;
 
+  // Layout facciata (solo Imbiancatura Esterno con 2 colori): marcapiano = fascia
+  // orizzontale che divide basamento/piano terra da resto della facciata, oppure
+  // righe orizzontali/verticali alternate tra i due colori.
+  const FACADE_LAYOUT_DESC = {
+    marcapiano: `Dividi la facciata in due zone con una fascia orizzontale decorativa (il "marcapiano"), tipica delle palazzine italiane: il basamento/piano terra della facciata nel colore "${colorB}", e il resto della facciata sopra la fascia nel colore "${colorA}". La linea di separazione deve essere orizzontale, netta e ben visibile.`,
+    righe_orizzontali: `Dipingi la facciata a bande orizzontali alternate, alternando il colore "${colorA}" e il colore "${colorB}" su strisce orizzontali di uguale altezza lungo tutta la facciata.`,
+    righe_verticali: `Dipingi la facciata a bande verticali alternate, alternando il colore "${colorA}" e il colore "${colorB}" su strisce verticali di uguale larghezza lungo tutta la facciata.`
+  };
+  const isFacadeTwoTone = materialId === "imbiancatura" && context === "esterno" && facadeLayout && FACADE_LAYOUT_DESC[facadeLayout] && colorB;
+
   // Costruzione del prompt descrittivo per il modello di editing immagine.
-  const colorDesc = colorB
-    ? `un effetto nuvolato che miscela il colore "${colorA}" con il colore "${colorB}"`
-    : `il colore uniforme "${colorA}"`;
+  const colorDesc = isFacadeTwoTone
+    ? FACADE_LAYOUT_DESC[facadeLayout]
+    : (colorB
+      ? `un effetto nuvolato che miscela il colore "${colorA}" con il colore "${colorB}"`
+      : `il colore uniforme "${colorA}"`);
+
+  const sceneDesc = (materialId === "imbiancatura" && context === "esterno")
+    ? "questa foto reale della facciata esterna di un edificio"
+    : "questa foto reale di un ambiente domestico";
 
   const prompt = [
-    `Modifica questa foto reale di un ambiente domestico.`,
+    `Modifica ${sceneDesc}.`,
     `Applica alla superficie del pavimento/parete inquadrata la seguente lavorazione: ${textureDesc}.`,
-    `Il colore/tonalità da usare è ${colorDesc}.`,
+    isFacadeTwoTone ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
     `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).`,
-    `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza:`,
-    `cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico,`,
-    `come se fosse una vera posa professionale.`
+    isFacadeTwoTone
+      ? `Mantieni identica la prospettiva, la luce, le ombre, gli infissi, il tetto e tutto il resto dell'edificio e dell'ambiente circostante: cambia solo il colore/texture della facciata indicata, in modo fotorealistico, come se fosse una vera tinteggiatura professionale.`
+      : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`
   ].join(" ");
 
   // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
