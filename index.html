@@ -98,13 +98,25 @@
   .chip .dot{ width:14px; height:14px; border-radius:4px; flex:none; }
   .chip button{ border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:13px; padding:0 0 0 2px; }
 
-  .swatch-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px 6px; margin-bottom:6px; }
+  .swatch-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px 12px; margin-bottom:6px; }
   .swatch{ background:none; border:none; cursor:pointer; padding:0; text-align:center; }
-  .swatch .sw-color{ width:100%; aspect-ratio:1; border-radius:7px; border:1.5px solid rgba(0,0,0,0.08); box-shadow: inset 0 -6px 8px rgba(0,0,0,0.08); }
-  .swatch .sw-name{ font-size:9px; margin-top:4px; color:var(--ink-soft); line-height:1.2; display:block; }
-  .swatch.selected .sw-color{ outline:2.5px solid var(--accent); outline-offset:2px; }
+  .swatch .sw-color{ width:100%; aspect-ratio:1; border-radius:12px; border:1.5px solid rgba(0,0,0,0.08); box-shadow: inset 0 -10px 16px rgba(0,0,0,0.10); }
+  .swatch .sw-name{ font-size:13px; margin-top:7px; color:var(--ink-soft); line-height:1.25; display:block; font-weight:500; }
+  .swatch.selected .sw-color{ outline:3px solid var(--accent); outline-offset:3px; }
   .swatch.selected .sw-name{ color:var(--ink); font-weight:700; }
   .swatch:disabled{ opacity:0.3; cursor:not-allowed; }
+  @media (min-width:480px){ .swatch-grid{ grid-template-columns:repeat(4,1fr); } }
+
+  .family-row{ display:flex; gap:0; border-radius:10px; overflow:hidden; margin:2px 0 14px; border:1px solid var(--line); }
+  .family-row button{ flex:1; height:44px; border:none; cursor:pointer; position:relative; padding:0; }
+  .family-row button:not(:last-child){ border-right:1px solid rgba(255,255,255,0.35); }
+  .family-row button .fr-check{ display:none; color:#fff; font-size:16px; font-weight:800; text-shadow:0 1px 2px rgba(0,0,0,0.5); }
+  .family-row button.active .fr-check{ display:inline; }
+  .family-row button.all{ flex:0 0 auto; width:64px; background:var(--surface); color:var(--ink); font-size:11px; font-weight:700; }
+  .family-row button.all.active{ background:var(--accent); color:var(--accent-ink); }
+  .color-search{ width:100%; box-sizing:border-box; padding:11px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font-family:inherit; font-size:14px; margin-bottom:14px; }
+  .color-search:focus{ outline:none; border-color:var(--accent); }
+  .cluster-empty{ font-size:13px; color:var(--ink-soft); padding:20px 0; text-align:center; }
 
   .ai-btn{ display:block; width:100%; margin-top:4px; border:none; border-radius:8px; padding:14px 16px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent); color:var(--accent-ink); }
   .ai-btn:disabled{ opacity:0.5; cursor:wait; }
@@ -210,8 +222,11 @@
     <div class="seg-hint" id="effettoHint">Un unico colore steso in modo uniforme.</div>
 
     <div class="chip-row" id="colorChips"></div>
+    <div class="family-row" id="familyRow" style="display:none"></div>
+    <input type="text" id="colorSearch" class="color-search" placeholder="Cerca per codice (es. B6.38.18)" style="display:none">
     <div class="section-label" id="clusterLabel">Colore</div>
     <div class="swatch-grid" id="colorCluster"></div>
+    <div class="cluster-empty" id="clusterEmpty" style="display:none">Nessun colore trovato con questo codice.</div>
 
     <div class="section-label">Finitura</div>
     <div class="seg-control" id="finituraControl">
@@ -300,11 +315,132 @@
       {name:"Verde Salvia", hex:"#7C8B70", code:"S-09"}, {name:"Blu Petrolio", hex:"#375A64", code:"S-10"}
     ],
     imbiancatura: [
-      {name:"Bianco Puro", hex:"#F6F4EF", code:"I-01"}, {name:"Bianco Latte", hex:"#EFE9DC", code:"I-02"},
-      {name:"Grigio Chiaro", hex:"#D6D2C8", code:"I-03"}, {name:"Tortora", hex:"#B8AE9E", code:"I-04"},
-      {name:"Azzurro Polvere", hex:"#B7C4C2", code:"I-05"}, {name:"Verde Salvia", hex:"#9AA68F", code:"I-06"},
-      {name:"Giallo Paglierino", hex:"#E4D9A8", code:"I-07"}, {name:"Rosa Cipria", hex:"#DCC2BE", code:"I-08"},
-      {name:"Blu Cielo", hex:"#A9C0D0", code:"I-09"}, {name:"Grigio Perla", hex:"#CFCBC2", code:"I-10"}
+      { name:"UN.00.87", code:"UN.00.87", hex:"#E1DBDD", family:"Rossi" },
+      { name:"BN.02.77", code:"BN.02.77", hex:"#CBBEC1", family:"Rossi" },
+      { name:"C0.05.65", code:"C0.05.65", hex:"#B4979F", family:"Rossi" },
+      { name:"B1.04.58", code:"B1.04.58", hex:"#A3848C", family:"Rossi" },
+      { name:"B7.17.39", code:"B7.17.39", hex:"#864052", family:"Rossi" },
+      { name:"A5.23.32", code:"A5.23.32", hex:"#762D3F", family:"Rossi" },
+      { name:"B6.38.18", code:"B6.38.18", hex:"#4D0E1E", family:"Rossi" },
+      { name:"BN.01.87", code:"BN.01.87", hex:"#E1DCDB", family:"Rossi" },
+      { name:"B6.05.73", code:"B6.05.73", hex:"#C5B4AF", family:"Rossi" },
+      { name:"C0.10.60", code:"C0.10.60", hex:"#B18A81", family:"Rossi" },
+      { name:"B6.20.50", code:"B6.20.50", hex:"#B2614D", family:"Rossi" },
+      { name:"B6.30.40", code:"B6.30.40", hex:"#9F442D", family:"Rossi" },
+      { name:"C4.41.40", code:"C4.41.40", hex:"#AD3B1F", family:"Rossi" },
+      { name:"C3.38.25", code:"C3.38.25", hex:"#6C2514", family:"Rossi" },
+      { name:"D5.03.82", code:"D5.03.82", hex:"#D7D0CB", family:"Rossi" },
+      { name:"D0.07.67", code:"D0.07.67", hex:"#BBA89B", family:"Rossi" },
+      { name:"D2.15.55", code:"D2.15.55", hex:"#B18668", family:"Rossi" },
+      { name:"D0.31.44", code:"D0.31.44", hex:"#B16530", family:"Rossi" },
+      { name:"C5.39.34", code:"C5.39.34", hex:"#934D1A", family:"Rossi" },
+      { name:"C8.42.29", code:"C8.42.29", hex:"#7E4116", family:"Rossi" },
+      { name:"C0.23.18", code:"C0.23.18", hex:"#422A19", family:"Rossi" },
+      { name:"EN.02.87", code:"EN.02.87", hex:"#E2DDDA", family:"Arancioni" },
+      { name:"E0.10.70", code:"E0.10.70", hex:"#C5AFA0", family:"Arancioni" },
+      { name:"D5.10.65", code:"D5.10.65", hex:"#BBA290", family:"Arancioni" },
+      { name:"D5.12.55", code:"D5.12.55", hex:"#AB876D", family:"Arancioni" },
+      { name:"D2.20.50", code:"D2.20.50", hex:"#B2774D", family:"Arancioni" },
+      { name:"D0.22.41", code:"D0.22.41", hex:"#96613B", family:"Arancioni" },
+      { name:"D6.40.35", code:"D6.40.35", hex:"#984F1B", family:"Arancioni" },
+      { name:"FN.02.88", code:"FN.02.88", hex:"#E4E1DD", family:"Arancioni" },
+      { name:"F1.10.79", code:"F1.10.79", hex:"#D6CABD", family:"Arancioni" },
+      { name:"F3.13.73", code:"F3.13.73", hex:"#CEBBA6", family:"Arancioni" },
+      { name:"E8.20.60", code:"E8.20.60", hex:"#C29C70", family:"Arancioni" },
+      { name:"E4.22.49", code:"E4.22.49", hex:"#B38147", family:"Arancioni" },
+      { name:"E8.30.29", code:"E8.30.29", hex:"#734D21", family:"Arancioni" },
+      { name:"E6.14.23", code:"E6.14.23", hex:"#4C3C29", family:"Arancioni" },
+      { name:"G3.03.84", code:"G3.03.84", hex:"#DBD9D1", family:"Arancioni" },
+      { name:"G0.12.83", code:"G0.12.83", hex:"#DFDBC8", family:"Arancioni" },
+      { name:"G2.16.81", code:"G2.16.81", hex:"#DFD8BE", family:"Arancioni" },
+      { name:"F8.29.75", code:"F8.29.75", hex:"#E2D49D", family:"Arancioni" },
+      { name:"F6.35.68", code:"F6.35.68", hex:"#E2CD79", family:"Arancioni" },
+      { name:"F1.34.58", code:"F1.34.58", hex:"#D7BC51", family:"Arancioni" },
+      { name:"F3.28.38", code:"F3.28.38", hex:"#94802E", family:"Arancioni" },
+      { name:"GN.01.88", code:"GN.01.88", hex:"#E3E3DD", family:"Verdi-Azzurri" },
+      { name:"G4.05.81", code:"G4.05.81", hex:"#D4D6C7", family:"Verdi-Azzurri" },
+      { name:"G5.09.78", code:"G5.09.78", hex:"#D0D3BA", family:"Verdi-Azzurri" },
+      { name:"G0.16.68", code:"G0.16.68", hex:"#C2C992", family:"Verdi-Azzurri" },
+      { name:"G5.17.58", code:"G5.17.58", hex:"#B0BA6E", family:"Verdi-Azzurri" },
+      { name:"G8.20.50", code:"G8.20.50", hex:"#A5B24D", family:"Verdi-Azzurri" },
+      { name:"G9.20.19", code:"G9.20.19", hex:"#3F441D", family:"Verdi-Azzurri" },
+      { name:"J0.03.86", code:"J0.03.86", hex:"#D7E0D7", family:"Verdi-Azzurri" },
+      { name:"J5.03.71", code:"J5.03.71", hex:"#ACBFAD", family:"Verdi-Azzurri" },
+      { name:"J0.10.60", code:"J0.10.60", hex:"#81B185", family:"Verdi-Azzurri" },
+      { name:"J3.14.63", code:"J3.14.63", hex:"#84BD89", family:"Verdi-Azzurri" },
+      { name:"L1.11.53", code:"L1.11.53", hex:"#68A66E", family:"Verdi-Azzurri" },
+      { name:"J9.21.41", code:"J9.21.41", hex:"#3D9444", family:"Verdi-Azzurri" },
+      { name:"J8.19.33", code:"J8.19.33", hex:"#347439", family:"Verdi-Azzurri" },
+      { name:"PN.00.81", code:"PN.00.81", hex:"#CBD2D2", family:"Verdi-Azzurri" },
+      { name:"LN.02.71", code:"LN.02.71", hex:"#ADBCBD", family:"Verdi-Azzurri" },
+      { name:"N1.06.61", code:"N1.06.61", hex:"#8AAAAD", family:"Verdi-Azzurri" },
+      { name:"P2.15.51", code:"P2.15.51", hex:"#5AA3AA", family:"Verdi-Azzurri" },
+      { name:"P0.10.40", code:"P0.10.40", hex:"#4E7A7E", family:"Verdi-Azzurri" },
+      { name:"M2.16.41", code:"M2.16.41", hex:"#45868C", family:"Verdi-Azzurri" },
+      { name:"M9.21.31", code:"M9.21.31", hex:"#2E6A70", family:"Verdi-Azzurri" },
+      { name:"R7.04.82", code:"R7.04.82", hex:"#CAD4D8", family:"Blu" },
+      { name:"Q5.04.72", code:"Q5.04.72", hex:"#ADBDC2", family:"Blu" },
+      { name:"R1.10.65", code:"R1.10.65", hex:"#90B0BB", family:"Blu" },
+      { name:"R0.13.56", code:"R0.13.56", hex:"#6E9FAF", family:"Blu" },
+      { name:"Q4.16.46", code:"Q4.16.46", hex:"#4E899D", family:"Blu" },
+      { name:"Q9.23.29", code:"Q9.23.29", hex:"#295B6B", family:"Blu" },
+      { name:"Q0.40.20", code:"Q0.40.20", hex:"#0F4557", family:"Blu" },
+      { name:"S9.03.81", code:"S9.03.81", hex:"#C8CED5", family:"Blu" },
+      { name:"T0.10.70", code:"T0.10.70", hex:"#A0B1C5", family:"Blu" },
+      { name:"S2.11.63", code:"S2.11.63", hex:"#889FB9", family:"Blu" },
+      { name:"S2.14.54", code:"S2.14.54", hex:"#6687AD", family:"Blu" },
+      { name:"S0.20.40", code:"S0.20.40", hex:"#3D638F", family:"Blu" },
+      { name:"S2.17.39", code:"S2.17.39", hex:"#406186", family:"Blu" },
+      { name:"S9.20.21", code:"S9.20.21", hex:"#20344B", family:"Blu" },
+      { name:"U0.03.81", code:"U0.03.81", hex:"#C8CBD5", family:"Blu" },
+      { name:"U1.06.71", code:"U1.06.71", hex:"#A8ADC2", family:"Blu" },
+      { name:"U1.09.60", code:"U1.09.60", hex:"#828BB0", family:"Blu" },
+      { name:"T3.14.55", code:"T3.14.55", hex:"#6977AF", family:"Blu" },
+      { name:"T0.10.40", code:"T0.10.40", hex:"#4E577E", family:"Blu" },
+      { name:"T1.23.25", code:"T1.23.25", hex:"#232F5C", family:"Blu" },
+      { name:"U0.30.16", code:"U0.30.16", hex:"#121B40", family:"Blu" },
+      { name:"RN.01.82", code:"RN.01.82", hex:"#CDD0D6", family:"Neutri freddi" },
+      { name:"SN.02.77", code:"SN.02.77", hex:"#BEC3CB", family:"Neutri freddi" },
+      { name:"T4.04.66", code:"T4.04.66", hex:"#9CA6B5", family:"Neutri freddi" },
+      { name:"S0.10.50", code:"S0.10.50", hex:"#617A9E", family:"Neutri freddi" },
+      { name:"S2.13.39", code:"S2.13.39", hex:"#475F80", family:"Neutri freddi" },
+      { name:"S2.18.28", code:"S2.18.28", hex:"#2D4362", family:"Neutri freddi" },
+      { name:"T0.10.20", code:"T0.10.20", hex:"#27313F", family:"Neutri freddi" },
+      { name:"LN.00.86", code:"LN.00.86", hex:"#DCDED8", family:"Neutri freddi" },
+      { name:"JN.00.81", code:"JN.00.81", hex:"#D0D2CB", family:"Neutri freddi" },
+      { name:"H3.04.72", code:"H3.04.72", hex:"#BBC2AD", family:"Neutri freddi" },
+      { name:"L0.04.65", code:"L0.04.65", hex:"#AAB399", family:"Neutri freddi" },
+      { name:"L0.05.55", code:"L0.05.55", hex:"#929F7A", family:"Neutri freddi" },
+      { name:"K0.05.47", code:"K0.05.47", hex:"#7E8B65", family:"Neutri freddi" },
+      { name:"J0.10.30", code:"J0.10.30", hex:"#535F3A", family:"Neutri freddi" },
+      { name:"HN.02.82", code:"HN.02.82", hex:"#D1D6CC", family:"Neutri freddi" },
+      { name:"HN.02.77", code:"HN.02.77", hex:"#C4CBBE", family:"Neutri freddi" },
+      { name:"G0.05.65", code:"G0.05.65", hex:"#A6B497", family:"Neutri freddi" },
+      { name:"G3.12.56", code:"G3.12.56", hex:"#8FAD70", family:"Neutri freddi" },
+      { name:"G5.19.40", code:"G5.19.40", hex:"#668D3F", family:"Neutri freddi" },
+      { name:"H1.09.41", code:"H1.09.41", hex:"#698051", family:"Neutri freddi" },
+      { name:"G0.11.31", code:"G0.11.31", hex:"#4F633B", family:"Neutri freddi" },
+      { name:"F9.06.81", code:"F9.06.81", hex:"#D7D2C6", family:"Neutri caldi" },
+      { name:"G0.05.75", code:"G0.05.75", hex:"#C9C3B5", family:"Neutri caldi" },
+      { name:"F6.05.70", code:"F6.05.70", hex:"#BFB7A6", family:"Neutri caldi" },
+      { name:"F8.05.55", code:"F8.05.55", hex:"#9F947A", family:"Neutri caldi" },
+      { name:"F6.08.48", code:"F6.08.48", hex:"#948561", family:"Neutri caldi" },
+      { name:"F9.05.35", code:"F9.05.35", hex:"#685F4B", family:"Neutri caldi" },
+      { name:"G2.04.26", code:"G2.04.26", hex:"#4C4639", family:"Neutri caldi" },
+      { name:"F0.03.84", code:"F0.03.84", hex:"#DBD8D1", family:"Neutri caldi" },
+      { name:"F4.04.73", code:"F4.04.73", hex:"#C4BDB0", family:"Neutri caldi" },
+      { name:"F2.10.70", code:"F2.10.70", hex:"#C5B7A0", family:"Neutri caldi" },
+      { name:"F0.11.61", code:"F0.11.61", hex:"#B5A282", family:"Neutri caldi" },
+      { name:"E7.10.53", code:"E7.10.53", hex:"#A48F6A", family:"Neutri caldi" },
+      { name:"E7.10.35", code:"E7.10.35", hex:"#6F5F44", family:"Neutri caldi" },
+      { name:"E5.09.13", code:"E5.09.13", hex:"#29231A", family:"Neutri caldi" },
+      { name:"DN.02.77", code:"DN.02.77", hex:"#CBC5BE", family:"Neutri caldi" },
+      { name:"E0.03.72", code:"E0.03.72", hex:"#C1B8AE", family:"Neutri caldi" },
+      { name:"E1.08.63", code:"E1.08.63", hex:"#B4A28D", family:"Neutri caldi" },
+      { name:"D2.08.53", code:"D2.08.53", hex:"#A0896E", family:"Neutri caldi" },
+      { name:"C8.04.45", code:"C8.04.45", hex:"#837462", family:"Neutri caldi" },
+      { name:"D2.10.30", code:"D2.10.30", hex:"#5F4E3A", family:"Neutri caldi" },
+      { name:"DN.00.11", code:"DN.00.11", hex:"#1E1C1A", family:"Neutri caldi" }
     ],
     decorazioni: [
       {name:"Legno Chiaro", hex:"#C7A57A", code:"D-01"}, {name:"Legno Scuro", hex:"#6B4A34", code:"D-02"},
@@ -329,6 +465,8 @@
 
   var state = { material:null, effetto:'liscio', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var pickPhase = 'A';
+  var familyFilter = null; // famiglia colore attiva (solo per palette con "family", es. Sikkens), null = tutte
+  var colorSearchQuery = '';
   var photoImg = null;
   var isTemplate = false;
   var aiResultImage = null; // Image() dell'anteprima generata davvero dall'AI, null finché non c'è
@@ -340,7 +478,8 @@
     card.type='button'; card.className='material-card';
     card.innerHTML = '<span class="sw" style="background:'+m.swatch+'"></span><span class="m-name">'+m.name+'</span><span class="m-desc">'+m.desc+'</span>';
     card.addEventListener('click', function(){
-      state.material = m; state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null;
+      state.material = m; state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
+      document.getElementById('colorSearch').value='';
       Array.prototype.forEach.call(materialGrid.children, function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
       document.getElementById('next1').disabled = false;
@@ -529,13 +668,58 @@
     }
   }
 
+  function familyRepColor(list, fam){
+    var found = list.filter(function(c){ return c.family===fam; });
+    return found.length ? found[Math.floor(found.length/2)].hex : '#999';
+  }
+
+  function renderFamilyRow(list){
+    var row = document.getElementById('familyRow');
+    var hasFamilies = list.length && list[0].family;
+    if(!hasFamilies){ row.style.display='none'; return; }
+    row.style.display = 'flex';
+    row.innerHTML = '';
+    var families = [];
+    list.forEach(function(c){ if(c.family && families.indexOf(c.family)===-1) families.push(c.family); });
+
+    var allBtn = document.createElement('button');
+    allBtn.type='button'; allBtn.className='all' + (familyFilter===null ? ' active' : '');
+    allBtn.textContent = 'Tutti';
+    allBtn.addEventListener('click', function(){ familyFilter=null; renderStep2UI(); });
+    row.appendChild(allBtn);
+
+    families.forEach(function(fam){
+      var btn=document.createElement('button');
+      btn.type='button'; btn.title=fam;
+      btn.style.background = familyRepColor(list, fam);
+      btn.className = familyFilter===fam ? 'active' : '';
+      btn.innerHTML = '<span class="fr-check">✓</span>';
+      btn.addEventListener('click', function(){ familyFilter = (familyFilter===fam ? null : fam); renderStep2UI(); });
+      row.appendChild(btn);
+    });
+  }
+
   function renderCluster(){
     var grid=document.getElementById('colorCluster'); grid.innerHTML='';
     var label=document.getElementById('clusterLabel');
     if(state.effetto==='nuvolato'){
       label.textContent = pickPhase==='A' ? 'Colore principale' : 'Colore secondario';
     } else { label.textContent = 'Colore'; }
-    var list = PALETTES[state.material.id] || [];
+    var fullList = PALETTES[state.material.id] || [];
+
+    renderFamilyRow(fullList);
+    var searchBox = document.getElementById('colorSearch');
+    searchBox.style.display = (fullList.length && fullList[0].family) ? 'block' : 'none';
+
+    var list = fullList;
+    if(familyFilter) list = list.filter(function(c){ return c.family===familyFilter; });
+    if(colorSearchQuery){
+      var q = colorSearchQuery.toLowerCase();
+      list = list.filter(function(c){ return c.code.toLowerCase().indexOf(q)>-1 || c.name.toLowerCase().indexOf(q)>-1; });
+    }
+
+    document.getElementById('clusterEmpty').style.display = list.length ? 'none' : 'block';
+
     list.forEach(function(c){
       var cell=document.createElement('button');
       cell.type='button'; cell.className='swatch';
@@ -555,6 +739,11 @@
       grid.appendChild(cell);
     });
   }
+
+  document.getElementById('colorSearch').addEventListener('input', function(){
+    colorSearchQuery = this.value.trim();
+    renderCluster();
+  });
 
   function renderStep2UI(){ renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next(); }
 
