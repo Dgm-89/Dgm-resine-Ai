@@ -261,7 +261,7 @@
 
   <!-- 2: SOTTO-MATERIALE (solo Monolith) -->
   <section class="panel" id="panelSub">
-    <h1 class="title" id="subTitle">Quale finitura Monolith?</h1>
+    <h1 class="title" id="subTitle">Quale finitura Resina?</h1>
     <div class="material-grid" id="subGrid"></div>
   </section>
 
@@ -443,14 +443,14 @@
   }
 
   var CATEGORIES = [
-    { id:"monolith", name:"Monolith", desc:"Resina spatolata Loggia: scegli la finitura (Spatolato, Marmo, Pietra, Terrazzo)", swatch:"#9C9186", subs:[
-      { id:"monolith_spatolato", name:"Monolith Spatolato", desc:"Resina spatolata monocomponente, effetto liscio, per interni", swatch:"#9C9186" },
-      { id:"monolith_marmo", name:"Monolith Marmo", desc:"Resina spatolata, effetto marmorizzato, per interni", swatch:"#B8B8B0" },
-      { id:"monolith_pietra", name:"Monolith Pietra", desc:"Resina con graniglie colorate, effetto pietra — solo per pavimenti interni", swatch:"#C9C7BD" },
-      { id:"monolith_terrazzo", name:"Monolith Terrazzo", desc:"Resina con graniglie effetto terrazzo — solo per pavimenti interni", swatch:"#8B8D89" }
+    { id:"monolith", name:"Resina", desc:"Resina spatolata: scegli la finitura (Spatolato, Marmo, Pietra, Terrazzo)", swatch:"#9C9186", subs:[
+      { id:"monolith_spatolato", name:"Resina Spatolata", desc:"Resina spatolata monocomponente, effetto liscio, per interni", swatch:"#9C9186" },
+      { id:"monolith_marmo", name:"Resina Marmo", desc:"Resina spatolata, effetto marmorizzato, per interni", swatch:"#B8B8B0" },
+      { id:"monolith_pietra", name:"Resina Pietra", desc:"Resina con graniglie colorate, effetto pietra — solo per pavimenti interni", swatch:"#C9C7BD" },
+      { id:"monolith_terrazzo", name:"Resina Terrazzo", desc:"Resina con graniglie effetto terrazzo — solo per pavimenti interni", swatch:"#8B8D89" }
     ]},
     { id:"microcemento", name:"Microcemento", desc:"Superfici continue, effetto materico", swatch:"#8F8B82" },
-    { id:"scale", name:"Scale", desc:"Rivestimento di scale interne ed esterne, colori ed effetti Monolith Spatolato", swatch:"#9C9186" },
+    { id:"scale", name:"Scale", desc:"Rivestimento di scale interne ed esterne, colori ed effetti Resina Spatolata", swatch:"#9C9186" },
     { id:"imbiancatura", name:"Imbiancatura", desc:"Interventi civili e industriali", swatch:"#D6D2C8" },
     { id:"decorazioni", name:"Decorazioni", desc:"Finiture e boiserie su misura", swatch:"#B5652E" }
   ];
@@ -1671,7 +1671,7 @@
   // Sequenza: 1 Categoria -> (2 Sotto-materiale, solo se la categoria ha "subs") ->
   // 3 Colore -> 4 Finitura -> 5 Carica foto -> 6 Risultato -> 7 Dati -> Confirm.
   var ALL_PANELS = ['panelLanding','panel1','panelSub','panelColor','panelFinitura','panelPhoto','panelResult','panel3','panelConfirm'];
-  var STEP_LABELS = { panel1:'Lavorazione', panelSub:'Finitura Monolith', panelColor:'Colore', panelFinitura:'Finitura', panelPhoto:'Carica foto', panelResult:'Risultato', panel3:'Contatti' };
+  var STEP_LABELS = { panel1:'Lavorazione', panelSub:'Finitura Resina', panelColor:'Colore', panelFinitura:'Finitura', panelPhoto:'Carica foto', panelResult:'Risultato', panel3:'Contatti' };
   var currentPanel = 'panelLanding';
 
   function currentSeq(){
