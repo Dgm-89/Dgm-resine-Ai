@@ -38,14 +38,10 @@
   .brand-text .tag{ font-size:10.5px; color:var(--ink-soft); }
   .theme-btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink); width:32px; height:32px; border-radius:50%; font-size:13px; cursor:pointer; }
 
-  .stepper{ display:flex; align-items:center; gap:6px; padding:14px 20px 4px; max-width:640px; margin:0 auto; }
-  .step-dot{ display:flex; align-items:center; gap:8px; flex:1; }
-  .step-dot .circle{ width:24px; height:24px; border-radius:50%; border:1.5px solid var(--line); color:var(--ink-soft); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none; background:var(--surface); }
-  .step-dot.done .circle{ background:var(--success); border-color:var(--success); color:#fff; }
-  .step-dot.active .circle{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
-  .step-dot .lbl{ font-size:11.5px; color:var(--ink-soft); white-space:nowrap; }
-  .step-dot.active .lbl{ color:var(--ink); font-weight:600; }
-  .step-line{ flex:1; height:1.5px; background:var(--line); margin:0 -2px 18px; }
+  .progress-wrap{ padding:14px 20px 4px; max-width:640px; margin:0 auto; }
+  .progress-track{ height:5px; border-radius:3px; background:var(--line); overflow:hidden; }
+  .progress-fill{ height:100%; width:0%; background:var(--accent); border-radius:3px; transition:width .25s ease; }
+  .progress-label{ font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-top:8px; }
 
   main{ max-width:640px; margin:0 auto; padding: 18px 20px 150px; }
   .panel{ display:none; }
@@ -195,71 +191,27 @@
   <button class="theme-btn" id="themeBtn" aria-label="Cambia tema">◐</button>
 </header>
 
-<div class="stepper" id="stepper">
-  <div class="step-dot active" data-s="1"><span class="circle">1</span><span class="lbl">Lavorazione</span></div>
-  <div class="step-line"></div>
-  <div class="step-dot" data-s="2"><span class="circle">2</span><span class="lbl">Personalizza</span></div>
-  <div class="step-line"></div>
-  <div class="step-dot" data-s="3"><span class="circle">3</span><span class="lbl">Contatti</span></div>
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label" id="progressLabel">Passo 1 di 7 · Lavorazione</div>
 </div>
 
 <main>
-  <!-- STEP 1 -->
+  <!-- 1: CATEGORIA -->
   <section class="panel active" id="panel1">
     <h1 class="title">Cosa vuoi realizzare?</h1>
     <div class="material-grid" id="materialGrid"></div>
   </section>
 
-  <!-- STEP 2 -->
-  <section class="panel" id="panel2">
-    <h1 class="title">Personalizza la finitura</h1>
+  <!-- 2: SOTTO-MATERIALE (solo Monolith) -->
+  <section class="panel" id="panelSub">
+    <h1 class="title" id="subTitle">Quale finitura Monolith?</h1>
+    <div class="material-grid" id="subGrid"></div>
+  </section>
 
-    <div class="hero" id="hero">
-      <div class="hero-slides" id="heroSlides">
-        <div class="hero-slide"><canvas id="canvasBefore"></canvas><span class="tag" id="tagBefore" style="display:none">PRIMA</span></div>
-        <div class="hero-slide"><canvas id="canvasAfter"></canvas><span class="tag" id="tagAfter" style="display:none">DOPO</span></div>
-      </div>
-      <div class="hero-empty" id="heroEmpty">
-        <span class="icon">🏠</span>
-        <span>Carica una foto del tuo ambiente o scegli un esempio qui sotto per vedere subito il risultato</span>
-      </div>
-      <span class="hero-swipe-hint" id="heroSwipeHint" style="display:none">Scorri ⟷</span>
-      <button class="hero-expand" id="heroExpand" style="display:none" aria-label="Schermo intero">⤢</button>
-      <div class="hero-dots" id="heroDots" style="display:none">
-        <button type="button" class="active" data-i="0"></button>
-        <button type="button" data-i="1"></button>
-      </div>
-      <div class="hero-actions">
-        <label class="hero-btn primary" for="photoInput">📷 Carica foto</label>
-        <input type="file" id="photoInput" accept="image/*" style="display:none">
-      </div>
-    </div>
-    <div class="hero-hint" id="heroHint">Carica una foto reale del tuo ambiente, poi genera l'anteprima AI per vedere il risultato fotorealistico</div>
-
-    <div class="color-preview-modal" id="colorPreviewModal">
-      <div class="cpm-card">
-        <button type="button" class="cpm-close" id="cpmClose" aria-label="Chiudi">✕</button>
-        <div class="cpm-swatch" id="cpmSwatch"></div>
-        <div class="cpm-name" id="cpmName"></div>
-        <div class="cpm-code" id="cpmCode"></div>
-        <button type="button" class="cpm-select" id="cpmSelect">✓ Seleziona questo colore</button>
-      </div>
-    </div>
-
-    <div class="fs-viewer" id="fsViewer">
-      <button class="fs-close" id="fsClose" aria-label="Chiudi">✕</button>
-      <img id="fsImage" alt="Anteprima a schermo intero">
-      <div class="fs-tabs" id="fsTabs">
-        <button type="button" data-i="0" class="active">Prima</button>
-        <button type="button" data-i="1">Dopo</button>
-      </div>
-    </div>
-
-    <div id="templateSection">
-      <div class="section-label" style="margin-top:0">Oppure prova su un ambiente di esempio</div>
-      <div class="template-row" id="templateRow"></div>
-    </div>
-    <button id="toggleTemplates" style="display:none; background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:600; text-decoration:underline; cursor:pointer; font-family:inherit; margin:-6px 0 16px; padding:0;">Prova invece su un ambiente di esempio</button>
+  <!-- 3: COLORE -->
+  <section class="panel" id="panelColor">
+    <h1 class="title">Scegli il colore</h1>
 
     <div class="section-label" id="contextLabel" style="display:none">Ambiente</div>
     <div class="seg-control" id="contextControl" style="display:none">
@@ -268,12 +220,12 @@
     </div>
     <div class="seg-hint" id="contextHint" style="display:none">Colori pensati per pareti e superfici interne.</div>
 
-    <div class="section-label">Effetto</div>
-    <div class="seg-control" id="effettoControl">
+    <div class="section-label" style="display:none">Effetto</div>
+    <div class="seg-control" id="effettoControl" style="display:none">
       <button data-v="liscio" class="active">Liscio uniforme</button>
-      <button data-v="nuvolato">Nuvolato</button>
     </div>
-    <div class="seg-hint" id="effettoHint">Un unico colore steso in modo uniforme.</div>
+    <div class="seg-hint" id="effettoHint" style="display:none">Un unico colore steso in modo uniforme.</div>
+    <!-- "Nuvolato" temporaneamente tolto ovunque su richiesta: si sceglie sempre un solo colore uniforme. -->
 
     <div class="chip-row" id="colorChips"></div>
     <div class="family-row" id="familyRow" style="display:none"></div>
@@ -281,20 +233,65 @@
     <div class="section-label" id="clusterLabel">Colore</div>
     <div class="swatch-grid" id="colorCluster"></div>
     <div class="cluster-empty" id="clusterEmpty" style="display:none">Nessun colore trovato con questo codice.</div>
+  </section>
 
-    <div class="section-label">Finitura</div>
+  <!-- 4: FINITURA -->
+  <section class="panel" id="panelFinitura">
+    <h1 class="title">Scegli la finitura</h1>
+    <div class="section-label" style="margin-top:0">Finitura</div>
     <div class="seg-control" id="finituraControl">
       <button data-v="opaco">Opaco</button>
       <button data-v="satinato" class="active">Satinato</button>
       <button data-v="lucido">Lucido</button>
     </div>
     <div class="seg-hint" id="finituraHint">Via di mezzo tra opaco e lucido, la più richiesta.</div>
+  </section>
+
+  <!-- 5: CARICA FOTO -->
+  <section class="panel" id="panelPhoto">
+    <h1 class="title">Carica la foto del tuo ambiente</h1>
+    <div class="hero" id="heroPhoto">
+      <img id="photoPreviewImg" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" alt="Foto caricata">
+      <div class="hero-empty" id="heroEmptyPhoto">
+        <span class="icon">🏠</span>
+        <span>Carica una foto del tuo ambiente o scegli un esempio qui sotto</span>
+      </div>
+      <div class="hero-actions">
+        <label class="hero-btn primary" for="photoInput">📷 Carica foto</label>
+        <input type="file" id="photoInput" accept="image/*" style="display:none">
+      </div>
+    </div>
+    <div class="hero-hint">Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica</div>
+
+    <div id="templateSection">
+      <div class="section-label" style="margin-top:0">Oppure prova su un ambiente di esempio</div>
+      <div class="template-row" id="templateRow"></div>
+    </div>
+    <button id="toggleTemplates" style="display:none; background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:600; text-decoration:underline; cursor:pointer; font-family:inherit; margin:-6px 0 16px; padding:0;">Prova invece su un ambiente di esempio</button>
+  </section>
+
+  <!-- 6: RISULTATO -->
+  <section class="panel" id="panelResult">
+    <h1 class="title">Anteprima del risultato</h1>
+    <div class="hero" id="hero">
+      <div class="hero-slides" id="heroSlides">
+        <div class="hero-slide"><canvas id="canvasBefore"></canvas><span class="tag" id="tagBefore" style="display:none">PRIMA</span></div>
+        <div class="hero-slide"><canvas id="canvasAfter"></canvas><span class="tag" id="tagAfter" style="display:none">DOPO</span></div>
+      </div>
+      <span class="hero-swipe-hint" id="heroSwipeHint" style="display:none">Scorri ⟷</span>
+      <button class="hero-expand" id="heroExpand" style="display:none" aria-label="Schermo intero">⤢</button>
+      <div class="hero-dots" id="heroDots" style="display:none">
+        <button type="button" class="active" data-i="0"></button>
+        <button type="button" data-i="1"></button>
+      </div>
+    </div>
+    <div class="hero-hint" id="heroHint">Genera l'anteprima AI per vedere il risultato fotorealistico</div>
 
     <button class="ai-btn" id="aiGenerateBtn" disabled>✨ Genera anteprima AI fotorealistica</button>
     <div class="ai-status" id="aiStatus"></div>
   </section>
 
-  <!-- STEP 3 -->
+  <!-- 7: DATI CLIENTE -->
   <section class="panel" id="panel3">
     <h1 class="title">I tuoi dati</h1>
     <div class="summary" id="summaryBox"></div>
@@ -318,10 +315,29 @@
       <p>Si è aperto WhatsApp con il messaggio già compilato: ti basta premere invia. In alternativa scrivici via email qui sotto.</p>
     </div>
   </section>
+
+  <div class="color-preview-modal" id="colorPreviewModal">
+    <div class="cpm-card">
+      <button type="button" class="cpm-close" id="cpmClose" aria-label="Chiudi">✕</button>
+      <div class="cpm-swatch" id="cpmSwatch"></div>
+      <div class="cpm-name" id="cpmName"></div>
+      <div class="cpm-code" id="cpmCode"></div>
+      <button type="button" class="cpm-select" id="cpmSelect">✓ Seleziona questo colore</button>
+    </div>
+  </div>
+
+  <div class="fs-viewer" id="fsViewer">
+    <button class="fs-close" id="fsClose" aria-label="Chiudi">✕</button>
+    <img id="fsImage" alt="Anteprima a schermo intero">
+    <div class="fs-tabs" id="fsTabs">
+      <button type="button" data-i="0" class="active">Prima</button>
+      <button type="button" data-i="1">Dopo</button>
+    </div>
+  </div>
 </main>
 
 <div class="bar" id="bar1"><button class="btn btn-primary" id="next1" disabled>Continua</button></div>
-<div class="bar" id="bar2" style="display:none"><button class="btn btn-ghost" id="back2">Indietro</button><button class="btn btn-primary" id="next2" disabled>Continua</button></div>
+<div class="bar" id="barStep" style="display:none"><button class="btn btn-ghost" id="backStep">Indietro</button><button class="btn btn-primary" id="nextStep" disabled>Continua</button></div>
 <div class="bar" id="bar3" style="display:none; flex-direction:column;">
   <div style="display:flex; gap:10px;"><button class="btn btn-ghost" id="back3">Indietro</button><button class="btn btn-wa" id="sendWa" disabled>Invia via WhatsApp</button></div>
   <a href="#" id="sendEmail" style="text-align:center; font-size:12px; color:var(--ink-soft); text-decoration:underline; padding-top:8px; display:block;">oppure invia via email</a>
@@ -341,56 +357,55 @@
     } else if(btn){ btn.style.display='none'; }
   }
 
-  var MATERIALS = [
-    { id:"resina", name:"Resina - Monolith", desc:"Effetto spatolato Monolith: Spatolato, Marmo, Pietra, Terrazzo", swatch:"#9C9186" },
+  var CATEGORIES = [
+    { id:"monolith", name:"Monolith", desc:"Resina spatolata Loggia: scegli la finitura (Spatolato, Marmo, Pietra, Terrazzo)", swatch:"#9C9186", subs:[
+      { id:"monolith_spatolato", name:"Monolith Spatolato", desc:"Resina spatolata monocomponente, effetto liscio, per interni", swatch:"#9C9186" },
+      { id:"monolith_marmo", name:"Monolith Marmo", desc:"Resina spatolata, effetto marmorizzato, per interni", swatch:"#B8B8B0" },
+      { id:"monolith_pietra", name:"Monolith Pietra", desc:"Resina spatolata con graniglie colorate, effetto pietra, per interni", swatch:"#C9C7BD" },
+      { id:"monolith_terrazzo", name:"Monolith Terrazzo", desc:"Resina con graniglie effetto terrazzo, per pavimenti interni", swatch:"#8B8D89" }
+    ]},
     { id:"microcemento", name:"Microcemento", desc:"Superfici continue, effetto materico", swatch:"#8F8B82" },
-    { id:"scale", name:"Scale", desc:"Rivestimento di scale interne ed esterne in resina o microcemento", swatch:"#BDB4A4" },
+    { id:"scale", name:"Scale", desc:"Rivestimento di scale interne ed esterne, colori ed effetti Monolith Spatolato", swatch:"#9C9186" },
     { id:"imbiancatura", name:"Imbiancatura", desc:"Interventi civili e industriali", swatch:"#D6D2C8" },
     { id:"decorazioni", name:"Decorazioni", desc:"Finiture e boiserie su misura", swatch:"#B5652E" }
   ];
 
+  // Cartella colori generale Monolith (Loggia Industria Vernici, catalogo "Flooring
+  // Line"): stessa lista di tonalità condivisa da Spatolato/Marmo/Terrazzo, ognuno
+  // colorato con lo stesso pigmento ma un prefisso prodotto diverso (A343/A459/A475).
+  // Qui la teniamo in un'unica lista, senza ripeterla 3 volte, e la riusiamo per i
+  // 3 materiali: niente colori doppi in giro. Colori a schermo indicativi (stimati
+  // dalle foto del catalogo): il match preciso resta sulla mazzetta fisica.
+  var MONOLITH_CHART = [
+    { name:"Bianco", code:"10000", hex:"#E7E5DF" },
+    { name:"10050",  code:"10050", hex:"#C7C2A8" },
+    { name:"10520",  code:"10520", hex:"#8D949D" },
+    { name:"10090",  code:"10090", hex:"#7E838A" },
+    { name:"10330",  code:"10330", hex:"#8B8D89" },
+    { name:"10100",  code:"10100", hex:"#B8B8B0" },
+    { name:"10180",  code:"10180", hex:"#9C9186" },
+    { name:"10120",  code:"10120", hex:"#AFB1AD" },
+    { name:"10170",  code:"10170", hex:"#8C7D68" },
+    { name:"10070",  code:"10070", hex:"#6C7073" },
+    { name:"10420",  code:"10420", hex:"#5F84B8" },
+    { name:"10450",  code:"10450", hex:"#6FA184" },
+    { name:"10340",  code:"10340", hex:"#B99A4E" },
+    { name:"10190",  code:"10190", hex:"#B8503A" }
+  ];
+  // Finitura Pietra: 5 graniglie colorate dedicate (non la cartella generale sopra).
+  var MONOLITH_PIETRA = [
+    { name:"Bianco 430", code:"430", hex:"#E9E3CE" },
+    { name:"Grigio 350", code:"350", hex:"#C9C7BD" },
+    { name:"Rosa 560",   code:"560", hex:"#D9C7B0" },
+    { name:"Giallo 130", code:"130", hex:"#D8C9A0" },
+    { name:"Verde 270",  code:"270", hex:"#A9AE99" }
+  ];
+
   var PALETTES = {
-    // Colori reali Monolith (Loggia Industria Vernici) dal catalogo "Flooring Line".
-    // Cartella colori generale condivisa da tutte le finiture Monolith tramite un
-    // prefisso prodotto (A343 Spatolato, A459 Marmo, A475 Terrazzo). La finitura
-    // Pietra usa invece 5 graniglie colorate dedicate (prefisso A458).
-    // Colori a schermo indicativi (stimati dalle foto del catalogo): il match
-    // preciso resta sulla mazzetta fisica / campione applicato.
-    resina: (function(){
-      var chart = [
-        { code:"Bianco", hex:"#E7E5DF" },
-        { code:"10050",  hex:"#C7C2A8" },
-        { code:"10520",  hex:"#8D949D" },
-        { code:"10090",  hex:"#7E838A" },
-        { code:"10330",  hex:"#8B8D89" },
-        { code:"10100",  hex:"#B8B8B0" },
-        { code:"10180",  hex:"#9C9186" },
-        { code:"10120",  hex:"#AFB1AD" },
-        { code:"10170",  hex:"#8C7D68" },
-        { code:"10070",  hex:"#6C7073" },
-        { code:"10420",  hex:"#5F84B8" },
-        { code:"10450",  hex:"#6FA184" },
-        { code:"10340",  hex:"#B99A4E" },
-        { code:"10190",  hex:"#B8503A" }
-      ];
-      var out = [];
-      [ ["Spatolato","A343"], ["Marmo","A459"], ["Terrazzo","A475"] ].forEach(function(f){
-        chart.forEach(function(c){
-          out.push({ name:c.code, code:f[1]+"-"+c.code, hex:c.hex, family:f[0] });
-        });
-      });
-      // Finitura Pietra: graniglie colorate dedicate (non la cartella generale).
-      [
-        { code:"Bianco 430", hex:"#E9E3CE" },
-        { code:"Grigio 350", hex:"#C9C7BD" },
-        { code:"Rosa 560",   hex:"#D9C7B0" },
-        { code:"Giallo 130", hex:"#D8C9A0" },
-        { code:"Verde 270",  hex:"#A9AE99" }
-      ].forEach(function(c){
-        out.push({ name:c.code, code:"A458-"+c.code.split(" ")[1], hex:c.hex, family:"Pietra" });
-      });
-      return out;
-    })(),
+    monolith_spatolato: MONOLITH_CHART,
+    monolith_marmo: MONOLITH_CHART,
+    monolith_terrazzo: MONOLITH_CHART,
+    monolith_pietra: MONOLITH_PIETRA,
     microcemento: [
       {name:"Grigio Cemento", hex:"#8F8B82", code:"M-01"}, {name:"Grigio Perla", hex:"#C9C5BC", code:"M-02"},
       {name:"Tortora Chiaro", hex:"#BDB4A4", code:"M-03"}, {name:"Antracite", hex:"#403E3B", code:"M-04"},
@@ -398,13 +413,8 @@
       {name:"Bianco Sporco", hex:"#E7E2D6", code:"M-07"}, {name:"Verde Muschio", hex:"#6E7A5E", code:"M-08"},
       {name:"Blu Notte", hex:"#2E3A4A", code:"M-09"}, {name:"Sabbia Dorata", hex:"#C7AD7C", code:"M-10"}
     ],
-    scale: [
-      {name:"Grigio Tortora", hex:"#A9A296", code:"S-01"}, {name:"Grigio Cemento", hex:"#8F8B82", code:"S-02"},
-      {name:"Antracite", hex:"#3B3A38", code:"S-03"}, {name:"Bianco Calce", hex:"#EDEAE2", code:"S-04"},
-      {name:"Tortora Chiaro", hex:"#BDB4A4", code:"S-05"}, {name:"Sabbia", hex:"#C9B896", code:"S-06"},
-      {name:"Testa di Moro", hex:"#4A3B30", code:"S-07"}, {name:"Grigio Perla", hex:"#C9C5BC", code:"S-08"},
-      {name:"Verde Salvia", hex:"#7C8B70", code:"S-09"}, {name:"Blu Petrolio", hex:"#375A64", code:"S-10"}
-    ],
+    // Scale usa gli stessi colori/effetti di Monolith Spatolato (richiesta esplicita).
+    scale: MONOLITH_CHART,
     imbiancatura: [
       { name:"UN.00.87", code:"UN.00.87", hex:"#E1DBDD", family:"Rossi" },
       { name:"BN.02.77", code:"BN.02.77", hex:"#CBBEC1", family:"Rossi" },
@@ -964,7 +974,7 @@
   var EFFETTO_HINT = { liscio:"Un unico colore steso in modo uniforme.", nuvolato:"Due colori miscelati con effetto marmorizzato, tipico delle resine decorative." };
   var FINITURA_HINT = { opaco:"Superficie piena, senza riflessi.", satinato:"Via di mezzo tra opaco e lucido, la più richiesta.", lucido:"Massima brillantezza e profondità del colore." };
 
-  var state = { material:null, effetto:'liscio', context:'interno', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { category:null, material:null, effetto:'liscio', context:'interno', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = { interno:"Colori pensati per pareti e superfici interne.", esterno:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni." };
   var pickPhase = 'A';
   var familyFilter = null; // famiglia colore attiva (solo per palette con "family", es. Sikkens), null = tutte
@@ -973,30 +983,62 @@
   var isTemplate = false;
   var aiResultImage = null; // Image() dell'anteprima generata davvero dall'AI, null finché non c'è
 
-  // ---------- STEP 1 ----------
+  function resetSelectionForNewCategory(){
+    state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
+    state.context = 'interno';
+    document.getElementById('colorSearch').value='';
+  }
+
+  function syncContextVisibility(){
+    var isImb = state.material && state.material.id === 'imbiancatura';
+    document.getElementById('contextLabel').style.display = isImb ? 'block' : 'none';
+    document.getElementById('contextControl').style.display = isImb ? 'flex' : 'none';
+    document.getElementById('contextHint').style.display = isImb ? 'block' : 'none';
+    if(isImb){
+      Array.prototype.forEach.call(document.getElementById('contextControl').children, function(b){ b.classList.toggle('active', b.dataset.v==='interno'); });
+      document.getElementById('contextHint').textContent = CONTEXT_HINT.interno;
+    }
+  }
+
+  // ---------- 1: CATEGORIA ----------
   var materialGrid = document.getElementById('materialGrid');
-  MATERIALS.forEach(function(m){
+  CATEGORIES.forEach(function(cat){
     var card = document.createElement('button');
     card.type='button'; card.className='material-card';
-    card.innerHTML = '<span class="sw" style="background:'+m.swatch+'"></span><span class="m-name">'+m.name+'</span><span class="m-desc">'+m.desc+'</span>';
+    card.innerHTML = '<span class="sw" style="background:'+cat.swatch+'"></span><span class="m-name">'+cat.name+'</span><span class="m-desc">'+cat.desc+'</span>';
     card.addEventListener('click', function(){
-      state.material = m; state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
-      state.context = 'interno';
-      document.getElementById('colorSearch').value='';
+      state.category = cat;
+      state.material = cat.subs ? null : cat;
+      resetSelectionForNewCategory();
       Array.prototype.forEach.call(materialGrid.children, function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
       document.getElementById('next1').disabled = false;
-      var isImb = m.id === 'imbiancatura';
-      document.getElementById('contextLabel').style.display = isImb ? 'block' : 'none';
-      document.getElementById('contextControl').style.display = isImb ? 'flex' : 'none';
-      document.getElementById('contextHint').style.display = isImb ? 'block' : 'none';
-      if(isImb){
-        Array.prototype.forEach.call(document.getElementById('contextControl').children, function(b){ b.classList.toggle('active', b.dataset.v==='interno'); });
-        document.getElementById('contextHint').textContent = CONTEXT_HINT.interno;
-      }
+      if(cat.subs) buildSubGrid(cat);
+      syncContextVisibility();
     });
     materialGrid.appendChild(card);
   });
+
+  // ---------- 2: SOTTO-MATERIALE (solo per categorie con "subs", es. Monolith) ----------
+  var subGrid = document.getElementById('subGrid');
+  function buildSubGrid(cat){
+    subGrid.innerHTML = '';
+    document.getElementById('subTitle').textContent = 'Quale finitura ' + cat.name + '?';
+    cat.subs.forEach(function(sub){
+      var card = document.createElement('button');
+      card.type='button'; card.className='material-card';
+      card.innerHTML = '<span class="sw" style="background:'+sub.swatch+'"></span><span class="m-name">'+sub.name+'</span><span class="m-desc">'+sub.desc+'</span>';
+      card.addEventListener('click', function(){
+        state.material = sub;
+        resetSelectionForNewCategory();
+        Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
+        card.classList.add('selected');
+        syncNextStepEnabled();
+        syncContextVisibility();
+      });
+      subGrid.appendChild(card);
+    });
+  }
 
   // ---------- room templates ----------
   var templateRow = document.getElementById('templateRow');
@@ -1012,10 +1054,7 @@
         photoImg = img; isTemplate = true; aiResultImage = null;
         state.photoBase64 = null; state.photoMime = null;
         showHeroLoaded();
-        document.getElementById('aiGenerateBtn').disabled = true;
-        document.getElementById('aiStatus').classList.remove('error');
-        document.getElementById('aiStatus').textContent = "L'anteprima AI fotorealistica richiede una foto vera del tuo ambiente: qui vedi solo il colore/effetto/finitura su uno schema.";
-        updateAllPreviews();
+        syncNextStepEnabled();
       };
       img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(t.svg);
     });
@@ -1023,7 +1062,9 @@
   });
 
   function showHeroLoaded(){
-    document.getElementById('heroEmpty').style.display = 'none';
+    document.getElementById('heroEmptyPhoto').style.display = 'none';
+    var prev = document.getElementById('photoPreviewImg');
+    prev.src = photoImg.src; prev.style.display = 'block';
     document.getElementById('templateSection').style.display = 'none';
     document.getElementById('toggleTemplates').style.display = 'block';
   }
@@ -1060,10 +1101,9 @@
           photoImg = img; isTemplate = false; aiResultImage = null;
           Array.prototype.forEach.call(templateRow.children, function(c){ c.classList.remove('selected'); });
           showHeroLoaded();
-          document.getElementById('aiGenerateBtn').disabled = !state.colorA;
           document.getElementById('aiStatus').classList.remove('error');
           document.getElementById('aiStatus').textContent = '';
-          updateAllPreviews();
+          syncNextStepEnabled();
         };
         img.src = resizedDataUrl;
       };
@@ -1330,16 +1370,10 @@
     } else { state.colorB=c; }
     aiResultImage=null;
     cpm.classList.remove('open');
-    renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next();
-    document.getElementById('aiGenerateBtn').disabled = !(state.photoBase64 && state.colorA);
+    renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled();
   });
 
-  function renderStep2UI(){ renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next(); }
-
-  function checkStep2Next(){
-    var ok = state.colorA && (state.effetto!=='nuvolato' || state.colorB);
-    document.getElementById('next2').disabled = !ok;
-  }
+  function renderStep2UI(){ renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled(); }
 
   document.getElementById('effettoControl').addEventListener('click', function(e){
     var btn = e.target.closest('button'); if(!btn) return;
@@ -1367,7 +1401,6 @@
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('finituraHint').textContent = FINITURA_HINT[v];
     aiResultImage=null;
-    updateAllPreviews();
   });
 
   // ---------- AI generation ----------
@@ -1379,7 +1412,7 @@
     fetch(AI_ENDPOINT, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name,
+        imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name, materialId: state.material.id,
         colorA: state.colorA.name, colorB: state.colorB ? state.colorB.name : null,
         effetto: state.effetto, finitura: state.finitura
       })
@@ -1421,20 +1454,76 @@
       .finally(function(){ btn.disabled = false; });
   });
 
-  // ---------- navigation ----------
-  function goStep(n){
-    ['panel1','panel2','panel3','panelConfirm'].forEach(function(id,i){ document.getElementById(id).classList.toggle('active',(i+1)===n); });
-    ['bar1','bar2','bar3'].forEach(function(id,i){ document.getElementById(id).style.display=(i+1)===n?'flex':'none'; });
-    if(n<=3){
-      document.querySelectorAll('.step-dot').forEach(function(d){
-        var s = parseInt(d.dataset.s,10);
-        d.classList.toggle('done', s < n);
-        d.classList.toggle('active', s === n);
-      });
+  // ---------- navigation a passi ----------
+  // Sequenza: 1 Categoria -> (2 Sotto-materiale, solo se la categoria ha "subs") ->
+  // 3 Colore -> 4 Finitura -> 5 Carica foto -> 6 Risultato -> 7 Dati -> Confirm.
+  var ALL_PANELS = ['panel1','panelSub','panelColor','panelFinitura','panelPhoto','panelResult','panel3','panelConfirm'];
+  var STEP_LABELS = { panel1:'Lavorazione', panelSub:'Finitura Monolith', panelColor:'Colore', panelFinitura:'Finitura', panelPhoto:'Carica foto', panelResult:'Risultato', panel3:'Contatti' };
+  var currentPanel = 'panel1';
+
+  function currentSeq(){
+    var seq = ALL_PANELS.slice();
+    if(!(state.category && state.category.subs)){
+      seq = seq.filter(function(id){ return id!=='panelSub'; });
     }
-    if(n===2){ renderStep2UI(); }
-    if(n===4){ document.getElementById('bar3').style.display='flex'; }
-    if(n===3) renderSummary();
+    return seq;
+  }
+
+  function syncNextStepEnabled(){
+    var btn = document.getElementById('nextStep');
+    if(!btn) return;
+    var ok = true;
+    if(currentPanel==='panelSub') ok = !!state.material;
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (state.effetto!=='nuvolato' || state.colorB));
+    else if(currentPanel==='panelPhoto') ok = !!photoImg;
+    btn.disabled = !ok;
+  }
+
+  function updateProgress(id, seq){
+    var idx = seq.indexOf(id);
+    var totalSteps = seq.length - 1; // panelConfirm non conta come "passo"
+    var stepNum = Math.min(idx+1, totalSteps);
+    var pct = totalSteps>0 ? Math.round((idx/totalSteps)*100) : 0;
+    document.getElementById('progressFill').style.width = pct+'%';
+    var label = STEP_LABELS[id] || '';
+    document.getElementById('progressLabel').textContent = id==='panelConfirm' ? 'Richiesta inviata' : ('Passo '+stepNum+' di '+totalSteps+(label?' · '+label:''));
+  }
+
+  function goTo(id){
+    currentPanel = id;
+    var seq = currentSeq();
+    ALL_PANELS.forEach(function(pid){ document.getElementById(pid).classList.toggle('active', pid===id); });
+
+    var showBar1 = id==='panel1';
+    var showBar3 = id==='panel3';
+    var showBarStep = !showBar1 && !showBar3 && id!=='panelConfirm';
+    document.getElementById('bar1').style.display = showBar1 ? 'flex' : 'none';
+    document.getElementById('bar3').style.display = showBar3 ? 'flex' : 'none';
+    document.getElementById('barStep').style.display = showBarStep ? 'flex' : 'none';
+
+    if(showBarStep){
+      document.getElementById('backStep').style.display = (seq.indexOf(id) > 0) ? 'inline-block' : 'none';
+    }
+
+    if(id==='panelColor') renderStep2UI();
+    if(id==='panelFinitura') syncNextStepEnabled();
+    if(id==='panelPhoto') syncNextStepEnabled();
+    if(id==='panelResult'){
+      updateAllPreviews();
+      document.getElementById('aiGenerateBtn').disabled = !(state.photoBase64 && state.colorA);
+      var statusEl = document.getElementById('aiStatus');
+      if(isTemplate){
+        statusEl.classList.remove('error');
+        statusEl.textContent = "L'anteprima AI fotorealistica richiede una foto vera del tuo ambiente: con un esempio qui vedi solo la foto originale.";
+      } else if(!aiResultImage){
+        statusEl.classList.remove('error');
+        statusEl.textContent = '';
+      }
+    }
+    if(id==='panelSub') syncNextStepEnabled();
+    if(id==='panel3') renderSummary();
+
+    updateProgress(id, seq);
     window.scrollTo(0,0);
   }
 
@@ -1444,15 +1533,24 @@
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+state.material.name+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>Effetto '+(state.effetto==='nuvolato'?'Nuvolato':'Liscio uniforme')+' · Finitura '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
+      '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>Finitura '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">modifica selezione</span>';
-    document.getElementById('editSel').addEventListener('click', function(){ goStep(1); });
+    document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
   }
 
-  document.getElementById('next1').addEventListener('click', function(){ goStep(2); });
-  document.getElementById('back2').addEventListener('click', function(){ goStep(1); });
-  document.getElementById('next2').addEventListener('click', function(){ goStep(3); });
-  document.getElementById('back3').addEventListener('click', function(){ goStep(2); });
+  document.getElementById('next1').addEventListener('click', function(){
+    var seq = currentSeq();
+    goTo(seq[seq.indexOf('panel1')+1]);
+  });
+  document.getElementById('nextStep').addEventListener('click', function(){
+    var seq = currentSeq(); var idx = seq.indexOf(currentPanel);
+    if(idx>=0 && idx+1<seq.length) goTo(seq[idx+1]);
+  });
+  document.getElementById('backStep').addEventListener('click', function(){
+    var seq = currentSeq(); var idx = seq.indexOf(currentPanel);
+    if(idx>0) goTo(seq[idx-1]);
+  });
+  document.getElementById('back3').addEventListener('click', function(){ goTo('panelResult'); });
 
   function checkForm(){
     var ok=document.getElementById('fName').value.trim() && document.getElementById('fPhone').value.trim();
@@ -1469,7 +1567,6 @@
     var colorLine = state.colorA.name+' ('+state.colorA.code+')' + (state.colorB ? ' + '+state.colorB.name+' ('+state.colorB.code+')' : '');
     var lines=[
       "Richiesta preventivo dall'app DGM Resine", "Lavorazione: "+state.material.name, "Colore: "+colorLine,
-      "Effetto: "+(state.effetto==='nuvolato'?'Nuvolato':'Liscio uniforme'),
       "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
       "Nome: "+name, "Telefono: "+phone
     ];
@@ -1481,7 +1578,7 @@
 
   document.getElementById('sendWa').addEventListener('click', function(){
     window.open(WHATSAPP_LINK+"?text="+encodeURIComponent(buildMessage()), '_blank');
-    goStep(4);
+    goTo('panelConfirm');
   });
   document.getElementById('sendEmail').addEventListener('click', function(e){
     e.preventDefault();
@@ -1551,6 +1648,7 @@
   });
 
   initDownloads();
+  goTo('panel1');
 })();
 </script>
 </body>
