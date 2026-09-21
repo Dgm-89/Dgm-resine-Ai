@@ -68,18 +68,31 @@
 
   /* hero preview */
   .hero{ position:relative; width:100%; aspect-ratio:4/3; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line); background:var(--surface); margin-bottom:16px; }
-  .hero canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-  .hero .hero-empty{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:24px; color:var(--ink-soft); font-size:13px; }
+  .hero-slides{ position:absolute; inset:0; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .hero-slides::-webkit-scrollbar{ display:none; }
+  .hero-slide{ position:relative; flex:0 0 100%; width:100%; height:100%; scroll-snap-align:start; scroll-snap-stop:always; }
+  .hero-slide canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
+  .hero .hero-empty{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:24px; color:var(--ink-soft); font-size:13px; z-index:5; background:var(--surface); }
   .hero .hero-empty .icon{ font-size:32px; }
-  .hero .hero-actions{ position:absolute; left:0; right:0; bottom:0; display:flex; gap:8px; padding:10px; background:linear-gradient(to top, rgba(0,0,0,0.55), transparent); }
+  .hero .hero-actions{ position:absolute; left:0; right:0; bottom:0; display:flex; gap:8px; padding:10px; background:linear-gradient(to top, rgba(0,0,0,0.55), transparent); z-index:6; }
   .hero-btn{ flex:1; border:none; border-radius:7px; padding:10px 8px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; background:rgba(255,255,255,0.92); color:#1C1B18; }
   .hero-btn.primary{ background:var(--accent); color:var(--accent-ink); }
-  .hero .tag{ position:absolute; top:10px; font-size:9.5px; font-weight:700; letter-spacing:0.04em; background:rgba(0,0,0,0.6); color:#fff; padding:4px 8px; border-radius:20px; z-index:3; }
-  .hero .tag.before{ left:10px; } .hero .tag.after{ right:10px; }
-  .hero .compare-handle{ position:absolute; top:0; bottom:0; width:2px; background:#fff; left:50%; z-index:3; box-shadow:0 0 0 1px rgba(0,0,0,0.3); pointer-events:none; }
-  .hero .compare-handle::after{ content:"◂▸"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; color:#111; font-size:10px; padding:3px 5px; border-radius:12px; letter-spacing:2px; }
-  .hero .compare-range{ position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:ew-resize; z-index:4; }
+  .hero .tag{ position:absolute; top:10px; left:10px; font-size:9.5px; font-weight:700; letter-spacing:0.04em; background:rgba(0,0,0,0.6); color:#fff; padding:4px 8px; border-radius:20px; z-index:3; }
+  .hero-dots{ position:absolute; left:50%; bottom:64px; transform:translateX(-50%); display:flex; gap:6px; z-index:6; background:rgba(0,0,0,0.35); padding:6px 8px; border-radius:20px; backdrop-filter:blur(4px); }
+  .hero-dots button{ border:none; padding:0; width:22px; height:5px; border-radius:3px; background:rgba(255,255,255,0.45); cursor:pointer; transition:background .2s, width .2s; }
+  .hero-dots button.active{ background:#fff; width:30px; }
+  .hero-swipe-hint{ position:absolute; top:10px; right:10px; z-index:6; font-size:9.5px; font-weight:700; letter-spacing:0.03em; background:rgba(0,0,0,0.5); color:#fff; padding:4px 9px; border-radius:20px; display:flex; align-items:center; gap:4px; animation:heroSwipePulse 1.8s ease-in-out infinite; }
+  @keyframes heroSwipePulse{ 0%,100%{ opacity:0.55; transform:translateX(0);} 50%{ opacity:1; transform:translateX(-3px);} }
+  .hero-expand{ position:absolute; right:10px; bottom:64px; z-index:6; width:34px; height:34px; border-radius:50%; border:none; background:rgba(0,0,0,0.45); color:#fff; font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
   .hero-hint{ font-size:11.5px; color:var(--ink-soft); margin:-8px 0 18px; text-align:center; }
+
+  .fs-viewer{ position:fixed; inset:0; z-index:999; background:rgba(10,10,12,0.96); display:none; align-items:center; justify-content:center; flex-direction:column; }
+  .fs-viewer.open{ display:flex; }
+  .fs-viewer img{ max-width:94vw; max-height:78vh; object-fit:contain; border-radius:8px; }
+  .fs-viewer .fs-tabs{ display:flex; gap:8px; margin-top:18px; }
+  .fs-viewer .fs-tabs button{ border:1.5px solid rgba(255,255,255,0.3); background:transparent; color:#fff; padding:8px 18px; border-radius:20px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .fs-viewer .fs-tabs button.active{ background:#fff; color:#111; border-color:#fff; }
+  .fs-viewer .fs-close{ position:absolute; top:18px; right:18px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.12); color:#fff; font-size:18px; cursor:pointer; }
 
   .template-row{ display:flex; gap:8px; margin-bottom:16px; }
   .template-card{ flex:1; border:1.5px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface); cursor:pointer; padding:0; text-align:center; }
@@ -100,7 +113,7 @@
 
   .swatch-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px 12px; margin-bottom:6px; }
   .swatch{ background:none; border:none; cursor:pointer; padding:0; text-align:center; }
-  .swatch .sw-color{ width:100%; aspect-ratio:1; border-radius:12px; border:1.5px solid rgba(0,0,0,0.08); box-shadow: inset 0 -10px 16px rgba(0,0,0,0.10); }
+  .swatch .sw-color{ position:relative; display:block; width:100%; aspect-ratio:1; border-radius:12px; border:1.5px solid rgba(0,0,0,0.08); box-shadow: inset 0 -10px 16px rgba(0,0,0,0.10); }
   .swatch .sw-name{ font-size:13px; margin-top:7px; color:var(--ink-soft); line-height:1.25; display:block; font-weight:500; }
   .swatch.selected .sw-color{ outline:3px solid var(--accent); outline-offset:3px; }
   .swatch.selected .sw-name{ color:var(--ink); font-weight:700; }
@@ -117,6 +130,20 @@
   .color-search{ width:100%; box-sizing:border-box; padding:11px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font-family:inherit; font-size:14px; margin-bottom:14px; }
   .color-search:focus{ outline:none; border-color:var(--accent); }
   .cluster-empty{ font-size:13px; color:var(--ink-soft); padding:20px 0; text-align:center; }
+
+  .swatch{ position:relative; }
+  .sw-check{ position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:5px; border:1.5px solid rgba(255,255,255,0.85); background:rgba(255,255,255,0.15); box-shadow:0 1px 3px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:transparent; }
+  .swatch.selected .sw-check{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .swatch.selected .sw-check::after{ content:"✓"; }
+
+  .color-preview-modal{ position:fixed; inset:0; z-index:999; background:rgba(10,10,12,0.6); display:none; align-items:center; justify-content:center; padding:20px; }
+  .color-preview-modal.open{ display:flex; }
+  .cpm-card{ position:relative; background:var(--surface); border-radius:16px; padding:24px 24px 20px; width:100%; max-width:340px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.35); }
+  .cpm-swatch{ width:100%; aspect-ratio:1; border-radius:14px; margin-bottom:16px; border:1px solid rgba(0,0,0,0.08); box-shadow: inset 0 -14px 22px rgba(0,0,0,0.12); }
+  .cpm-name{ font-size:17px; font-weight:800; color:var(--ink); }
+  .cpm-code{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; margin-bottom:18px; }
+  .cpm-select{ width:100%; border:none; border-radius:10px; padding:13px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; }
+  .cpm-close{ position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--ink); font-size:14px; cursor:pointer; }
 
   .ai-btn{ display:block; width:100%; margin-top:4px; border:none; border-radius:8px; padding:14px 16px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent); color:var(--accent-ink); }
   .ai-btn:disabled{ opacity:0.5; cursor:wait; }
@@ -188,16 +215,20 @@
     <h1 class="title">Personalizza la finitura</h1>
 
     <div class="hero" id="hero">
-      <canvas id="canvasBefore"></canvas>
-      <canvas id="canvasAfter"></canvas>
+      <div class="hero-slides" id="heroSlides">
+        <div class="hero-slide"><canvas id="canvasBefore"></canvas><span class="tag" id="tagBefore" style="display:none">PRIMA</span></div>
+        <div class="hero-slide"><canvas id="canvasAfter"></canvas><span class="tag" id="tagAfter" style="display:none">DOPO</span></div>
+      </div>
       <div class="hero-empty" id="heroEmpty">
         <span class="icon">🏠</span>
         <span>Carica una foto del tuo ambiente o scegli un esempio qui sotto per vedere subito il risultato</span>
       </div>
-      <span class="tag before" id="tagBefore" style="display:none">PRIMA</span>
-      <span class="tag after" id="tagAfter" style="display:none">DOPO</span>
-      <div class="compare-handle" id="compareHandle" style="display:none"></div>
-      <input type="range" class="compare-range" id="compareSlider" min="0" max="100" value="50" style="display:none">
+      <span class="hero-swipe-hint" id="heroSwipeHint" style="display:none">Scorri ⟷</span>
+      <button class="hero-expand" id="heroExpand" style="display:none" aria-label="Schermo intero">⤢</button>
+      <div class="hero-dots" id="heroDots" style="display:none">
+        <button type="button" class="active" data-i="0"></button>
+        <button type="button" data-i="1"></button>
+      </div>
       <div class="hero-actions">
         <label class="hero-btn primary" for="photoInput">📷 Carica foto</label>
         <input type="file" id="photoInput" accept="image/*" style="display:none">
@@ -205,14 +236,30 @@
     </div>
     <div class="hero-hint" id="heroHint">Carica una foto reale del tuo ambiente, poi genera l'anteprima AI per vedere il risultato fotorealistico</div>
 
+    <div class="color-preview-modal" id="colorPreviewModal">
+      <div class="cpm-card">
+        <button type="button" class="cpm-close" id="cpmClose" aria-label="Chiudi">✕</button>
+        <div class="cpm-swatch" id="cpmSwatch"></div>
+        <div class="cpm-name" id="cpmName"></div>
+        <div class="cpm-code" id="cpmCode"></div>
+        <button type="button" class="cpm-select" id="cpmSelect">✓ Seleziona questo colore</button>
+      </div>
+    </div>
+
+    <div class="fs-viewer" id="fsViewer">
+      <button class="fs-close" id="fsClose" aria-label="Chiudi">✕</button>
+      <img id="fsImage" alt="Anteprima a schermo intero">
+      <div class="fs-tabs" id="fsTabs">
+        <button type="button" data-i="0" class="active">Prima</button>
+        <button type="button" data-i="1">Dopo</button>
+      </div>
+    </div>
+
     <div id="templateSection">
       <div class="section-label" style="margin-top:0">Oppure prova su un ambiente di esempio</div>
       <div class="template-row" id="templateRow"></div>
     </div>
     <button id="toggleTemplates" style="display:none; background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:600; text-decoration:underline; cursor:pointer; font-family:inherit; margin:-6px 0 16px; padding:0;">Prova invece su un ambiente di esempio</button>
-
-    <button class="ai-btn" id="aiGenerateBtn" disabled>✨ Genera anteprima AI fotorealistica</button>
-    <div class="ai-status" id="aiStatus"></div>
 
     <div class="section-label">Effetto</div>
     <div class="seg-control" id="effettoControl">
@@ -235,6 +282,9 @@
       <button data-v="lucido">Lucido</button>
     </div>
     <div class="seg-hint" id="finituraHint">Via di mezzo tra opaco e lucido, la più richiesta.</div>
+
+    <button class="ai-btn" id="aiGenerateBtn" disabled>✨ Genera anteprima AI fotorealistica</button>
+    <div class="ai-status" id="aiStatus"></div>
   </section>
 
   <!-- STEP 3 -->
@@ -513,10 +563,6 @@
 
   function showHeroLoaded(){
     document.getElementById('heroEmpty').style.display = 'none';
-    document.getElementById('tagBefore').style.display = 'block';
-    document.getElementById('tagAfter').style.display = 'block';
-    document.getElementById('compareHandle').style.display = 'block';
-    document.getElementById('compareSlider').style.display = 'block';
     document.getElementById('templateSection').style.display = 'none';
     document.getElementById('toggleTemplates').style.display = 'block';
   }
@@ -616,40 +662,88 @@
     return ctx;
   }
 
-  function applySlider(){
-    var v=document.getElementById('compareSlider').value;
-    document.getElementById('canvasAfter').style.clipPath='inset(0 '+(100-v)+'% 0 0)';
-    document.getElementById('compareHandle').style.left=v+'%';
+  // ---------- hero: confronto Prima/Dopo a scorrimento (swipe), niente più slider a tendina ----------
+  var heroSlides = document.getElementById('heroSlides');
+  var heroDots = document.getElementById('heroDots');
+  var heroSwipeHint = document.getElementById('heroSwipeHint');
+  var heroExpand = document.getElementById('heroExpand');
+  var swipeHintTimer = null;
+
+  function goToHeroSlide(i){
+    heroSlides.scrollTo({ left: i * heroSlides.clientWidth, behavior:'smooth' });
+    setHeroDotActive(i);
   }
+  function setHeroDotActive(i){
+    Array.prototype.forEach.call(heroDots.children, function(d,idx){ d.classList.toggle('active', idx===i); });
+  }
+  heroDots.addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    goToHeroSlide(parseInt(btn.dataset.i,10));
+  });
+  heroSlides.addEventListener('scroll', function(){
+    var i = Math.round(heroSlides.scrollLeft / Math.max(1,heroSlides.clientWidth));
+    setHeroDotActive(i);
+  });
 
   // Il riquadro mostra sempre la foto vera e propria, senza colorazioni finte.
-  // Solo dopo che l'AI ha generato davvero l'immagine modificata, mostriamo un
-  // confronto reale PRIMA (foto originale) / DOPO (immagine generata dall'AI).
+  // Solo dopo che l'AI ha generato davvero l'immagine modificata, diventa uno
+  // swipe reale PRIMA (foto originale) / DOPO (immagine generata dall'AI),
+  // in stile "storie", invece del vecchio cursore a tendina.
   function renderHeroPreview(){
     if(!photoImg) return;
     drawCover(document.getElementById('canvasBefore'), photoImg);
     var after=document.getElementById('canvasAfter');
     if(!aiResultImage){
       drawCover(after, photoImg);
-      after.style.clipPath = 'inset(0 100% 0 0)';
       document.getElementById('tagBefore').style.display='none';
       document.getElementById('tagAfter').style.display='none';
-      document.getElementById('compareHandle').style.display='none';
-      document.getElementById('compareSlider').style.display='none';
+      heroDots.style.display='none';
+      heroSwipeHint.style.display='none';
+      heroExpand.style.display='none';
+      heroSlides.style.overflowX='hidden';
+      goToHeroSlide(0);
       return;
     }
+    drawCover(after, aiResultImage);
+    document.getElementById('tagBefore').textContent='PRIMA';
+    document.getElementById('tagAfter').textContent='DOPO';
     document.getElementById('tagBefore').style.display='block';
     document.getElementById('tagAfter').style.display='block';
-    document.getElementById('compareHandle').style.display='block';
-    document.getElementById('compareSlider').style.display='block';
-    drawCover(after, aiResultImage);
-    applySlider();
+    heroExpand.style.display='flex';
+    heroSlides.style.overflowX='auto';
+    heroDots.style.display='flex';
+    goToHeroSlide(1);
+    heroSwipeHint.style.display='flex';
+    clearTimeout(swipeHintTimer);
+    swipeHintTimer = setTimeout(function(){ heroSwipeHint.style.display='none'; }, 3200);
   }
 
   function updateAllPreviews(){ if(photoImg) renderHeroPreview(); }
 
-  document.getElementById('compareSlider').addEventListener('input', applySlider);
   window.addEventListener('resize', updateAllPreviews);
+
+  // ---------- visualizzazione a schermo intero ----------
+  var fsViewer = document.getElementById('fsViewer');
+  var fsImage = document.getElementById('fsImage');
+  var fsTabs = document.getElementById('fsTabs');
+
+  function openFullscreen(which){
+    if(which==='after' && !aiResultImage) which='before';
+    fsImage.src = which==='after' ? aiResultImage.src : photoImg.src;
+    Array.prototype.forEach.call(fsTabs.children, function(b){ b.classList.toggle('active', b.dataset.i===(which==='after'?'1':'0')); });
+    fsTabs.children[1].style.display = aiResultImage ? 'inline-block' : 'none';
+    fsViewer.classList.add('open');
+  }
+  heroExpand.addEventListener('click', function(){
+    var i = Math.round(heroSlides.scrollLeft / Math.max(1,heroSlides.clientWidth));
+    openFullscreen(i===1 ? 'after' : 'before');
+  });
+  fsTabs.addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    openFullscreen(btn.dataset.i==='1' ? 'after' : 'before');
+  });
+  document.getElementById('fsClose').addEventListener('click', function(){ fsViewer.classList.remove('open'); });
+  fsViewer.addEventListener('click', function(e){ if(e.target===fsViewer) fsViewer.classList.remove('open'); });
 
   // ---------- colors / chips ----------
   function renderChips(){
@@ -706,19 +800,32 @@
       label.textContent = pickPhase==='A' ? 'Colore principale' : 'Colore secondario';
     } else { label.textContent = 'Colore'; }
     var fullList = PALETTES[state.material.id] || [];
+    var hasFamilies = fullList.length && fullList[0].family;
 
     renderFamilyRow(fullList);
     var searchBox = document.getElementById('colorSearch');
-    searchBox.style.display = (fullList.length && fullList[0].family) ? 'block' : 'none';
+    searchBox.style.display = hasFamilies ? 'block' : 'none';
 
     var list = fullList;
+    var emptyEl = document.getElementById('clusterEmpty');
+
+    // Con palette grandi (tipo Sikkens) non mostriamo tutti i colori insieme:
+    // serve prima scegliere una famiglia o cercare un codice, altrimenti la
+    // pagina diventa lunghissima e ingestibile per il cliente.
+    if(hasFamilies && !familyFilter && !colorSearchQuery){
+      emptyEl.textContent = 'Scegli una famiglia di colore qui sopra (o cerca un codice) per vedere le tonalità disponibili.';
+      emptyEl.style.display = 'block';
+      return;
+    }
+
     if(familyFilter) list = list.filter(function(c){ return c.family===familyFilter; });
     if(colorSearchQuery){
       var q = colorSearchQuery.toLowerCase();
       list = list.filter(function(c){ return c.code.toLowerCase().indexOf(q)>-1 || c.name.toLowerCase().indexOf(q)>-1; });
     }
 
-    document.getElementById('clusterEmpty').style.display = list.length ? 'none' : 'block';
+    emptyEl.textContent = 'Nessun colore trovato con questo codice.';
+    emptyEl.style.display = list.length ? 'none' : 'block';
 
     list.forEach(function(c){
       var cell=document.createElement('button');
@@ -726,16 +833,8 @@
       var excluded = state.effetto==='nuvolato' && pickPhase==='B' && state.colorA && c.code===state.colorA.code;
       if(excluded) cell.disabled = true;
       if((pickPhase==='A' && state.colorA && state.colorA.code===c.code) || (pickPhase==='B' && state.colorB && state.colorB.code===c.code)) cell.classList.add('selected');
-      cell.innerHTML='<span class="sw-color" style="background:'+c.hex+'"></span><span class="sw-name">'+c.name+'</span>';
-      cell.addEventListener('click', function(){
-        if(pickPhase==='A'){
-          state.colorA=c;
-          if(state.effetto==='nuvolato'){ pickPhase='B'; }
-        } else { state.colorB=c; }
-        aiResultImage=null;
-        renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next();
-        document.getElementById('aiGenerateBtn').disabled = !(state.photoBase64 && state.colorA);
-      });
+      cell.innerHTML='<span class="sw-color" style="background:'+c.hex+'"><span class="sw-check"></span></span><span class="sw-name">'+c.name+'</span>';
+      cell.addEventListener('click', function(){ openColorPreview(c); });
       grid.appendChild(cell);
     });
   }
@@ -743,6 +842,33 @@
   document.getElementById('colorSearch').addEventListener('input', function(){
     colorSearchQuery = this.value.trim();
     renderCluster();
+  });
+
+  // ---------- anteprima colore a schermo intero prima di selezionarlo ----------
+  var cpm = document.getElementById('colorPreviewModal');
+  var cpmCandidate = null;
+  function openColorPreview(c){
+    cpmCandidate = c;
+    document.getElementById('cpmSwatch').style.background = c.hex;
+    document.getElementById('cpmName').textContent = c.name;
+    document.getElementById('cpmCode').textContent = c.code && c.code!==c.name ? 'Codice: '+c.code : '';
+    var already = (pickPhase==='A' && state.colorA && state.colorA.code===c.code) || (pickPhase==='B' && state.colorB && state.colorB.code===c.code);
+    document.getElementById('cpmSelect').textContent = already ? '✓ Colore già selezionato' : '✓ Seleziona questo colore';
+    cpm.classList.add('open');
+  }
+  document.getElementById('cpmClose').addEventListener('click', function(){ cpm.classList.remove('open'); });
+  cpm.addEventListener('click', function(e){ if(e.target===cpm) cpm.classList.remove('open'); });
+  document.getElementById('cpmSelect').addEventListener('click', function(){
+    if(!cpmCandidate) return;
+    var c = cpmCandidate;
+    if(pickPhase==='A'){
+      state.colorA=c;
+      if(state.effetto==='nuvolato'){ pickPhase='B'; }
+    } else { state.colorB=c; }
+    aiResultImage=null;
+    cpm.classList.remove('open');
+    renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next();
+    document.getElementById('aiGenerateBtn').disabled = !(state.photoBase64 && state.colorA);
   });
 
   function renderStep2UI(){ renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next(); }
