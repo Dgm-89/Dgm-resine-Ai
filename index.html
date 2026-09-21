@@ -261,6 +261,13 @@
     </div>
     <button id="toggleTemplates" style="display:none; background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:600; text-decoration:underline; cursor:pointer; font-family:inherit; margin:-6px 0 16px; padding:0;">Prova invece su un ambiente di esempio</button>
 
+    <div class="section-label" id="contextLabel" style="display:none">Ambiente</div>
+    <div class="seg-control" id="contextControl" style="display:none">
+      <button data-v="interno" class="active">Interno</button>
+      <button data-v="esterno">Esterno</button>
+    </div>
+    <div class="seg-hint" id="contextHint" style="display:none">Colori pensati per pareti e superfici interne.</div>
+
     <div class="section-label">Effetto</div>
     <div class="seg-control" id="effettoControl">
       <button data-v="liscio" class="active">Liscio uniforme</button>
@@ -335,7 +342,7 @@
   }
 
   var MATERIALS = [
-    { id:"resina", name:"Resina", desc:"Pavimenti e rivestimenti civili e industriali", swatch:"#A9A296" },
+    { id:"resina", name:"Resina - Monolith", desc:"Effetto spatolato Monolith: Spatolato, Marmo, Pietra, Terrazzo", swatch:"#9C9186" },
     { id:"microcemento", name:"Microcemento", desc:"Superfici continue, effetto materico", swatch:"#8F8B82" },
     { id:"scale", name:"Scale", desc:"Rivestimento di scale interne ed esterne in resina o microcemento", swatch:"#BDB4A4" },
     { id:"imbiancatura", name:"Imbiancatura", desc:"Interventi civili e industriali", swatch:"#D6D2C8" },
@@ -343,13 +350,47 @@
   ];
 
   var PALETTES = {
-    resina: [
-      {name:"Grigio Tortora", hex:"#A9A296", code:"T-01"}, {name:"Antracite", hex:"#3B3A38", code:"T-02"},
-      {name:"Bianco Calce", hex:"#EDEAE2", code:"T-03"}, {name:"Sabbia", hex:"#C9B896", code:"T-04"},
-      {name:"Terra di Siena", hex:"#A9662E", code:"T-05"}, {name:"Verde Salvia", hex:"#7C8B70", code:"T-06"},
-      {name:"Grigio Perla", hex:"#C9C5BC", code:"T-07"}, {name:"Blu Petrolio", hex:"#375A64", code:"T-08"},
-      {name:"Rosso Mattone", hex:"#8C4A3A", code:"T-09"}, {name:"Grigio Piombo", hex:"#5C5A54", code:"T-10"}
-    ],
+    // Colori reali Monolith (Loggia Industria Vernici) dal catalogo "Flooring Line".
+    // Cartella colori generale condivisa da tutte le finiture Monolith tramite un
+    // prefisso prodotto (A343 Spatolato, A459 Marmo, A475 Terrazzo). La finitura
+    // Pietra usa invece 5 graniglie colorate dedicate (prefisso A458).
+    // Colori a schermo indicativi (stimati dalle foto del catalogo): il match
+    // preciso resta sulla mazzetta fisica / campione applicato.
+    resina: (function(){
+      var chart = [
+        { code:"Bianco", hex:"#E7E5DF" },
+        { code:"10050",  hex:"#C7C2A8" },
+        { code:"10520",  hex:"#8D949D" },
+        { code:"10090",  hex:"#7E838A" },
+        { code:"10330",  hex:"#8B8D89" },
+        { code:"10100",  hex:"#B8B8B0" },
+        { code:"10180",  hex:"#9C9186" },
+        { code:"10120",  hex:"#AFB1AD" },
+        { code:"10170",  hex:"#8C7D68" },
+        { code:"10070",  hex:"#6C7073" },
+        { code:"10420",  hex:"#5F84B8" },
+        { code:"10450",  hex:"#6FA184" },
+        { code:"10340",  hex:"#B99A4E" },
+        { code:"10190",  hex:"#B8503A" }
+      ];
+      var out = [];
+      [ ["Spatolato","A343"], ["Marmo","A459"], ["Terrazzo","A475"] ].forEach(function(f){
+        chart.forEach(function(c){
+          out.push({ name:c.code, code:f[1]+"-"+c.code, hex:c.hex, family:f[0] });
+        });
+      });
+      // Finitura Pietra: graniglie colorate dedicate (non la cartella generale).
+      [
+        { code:"Bianco 430", hex:"#E9E3CE" },
+        { code:"Grigio 350", hex:"#C9C7BD" },
+        { code:"Rosa 560",   hex:"#D9C7B0" },
+        { code:"Giallo 130", hex:"#D8C9A0" },
+        { code:"Verde 270",  hex:"#A9AE99" }
+      ].forEach(function(c){
+        out.push({ name:c.code, code:"A458-"+c.code.split(" ")[1], hex:c.hex, family:"Pietra" });
+      });
+      return out;
+    })(),
     microcemento: [
       {name:"Grigio Cemento", hex:"#8F8B82", code:"M-01"}, {name:"Grigio Perla", hex:"#C9C5BC", code:"M-02"},
       {name:"Tortora Chiaro", hex:"#BDB4A4", code:"M-03"}, {name:"Antracite", hex:"#403E3B", code:"M-04"},
@@ -492,6 +533,416 @@
       { name:"D2.10.30", code:"D2.10.30", hex:"#5F4E3A", family:"Neutri caldi" },
       { name:"DN.00.11", code:"DN.00.11", hex:"#1E1C1A", family:"Neutri caldi" }
     ],
+    // Collezione Sikkens Match Point 360 per esterni (404 colori reali), stessa logica
+    // a famiglie/filtro degli interni. Colori a schermo stimati dal codice colore
+    // Sikkens (letra=tonalita, 1o numero=saturazione, 2o numero=luminosita%): il match
+    // preciso resta sulla mazzetta fisica.
+    imbiancatura_esterni: [
+      { name:"F9.07.76", code:"F9.07.76", hex:"#C7CABA", family:"Arancioni" },
+      { name:"G6.03.87", code:"G6.03.87", hex:"#DEE0DC", family:"Neutri freddi" },
+      { name:"GN.00.81", code:"GN.00.81", hex:"#CFCFCF", family:"Neutri freddi" },
+      { name:"GN.01.88", code:"GN.01.88", hex:"#E0E1E0", family:"Neutri freddi" },
+      { name:"HN.02.77", code:"HN.02.77", hex:"#C3C7C2", family:"Neutri freddi" },
+      { name:"LN.00.85", code:"LN.00.85", hex:"#D9D9D9", family:"Neutri freddi" },
+      { name:"NN.00.76", code:"NN.00.76", hex:"#C2C2C2", family:"Neutri freddi" },
+      { name:"NN.00.83", code:"NN.00.83", hex:"#D4D4D4", family:"Neutri freddi" },
+      { name:"G0.05.70", code:"G0.05.70", hex:"#B5BAAB", family:"Neutri freddi" },
+      { name:"GN.02.83", code:"GN.02.83", hex:"#D4D5D2", family:"Neutri freddi" },
+      { name:"F7.07.72", code:"F7.07.72", hex:"#BEC1AE", family:"Arancioni" },
+      { name:"F9.06.81", code:"F9.06.81", hex:"#D2D4C9", family:"Arancioni" },
+      { name:"F4.07.76", code:"F4.07.76", hex:"#C8CABA", family:"Arancioni" },
+      { name:"F5.04.84", code:"F5.04.84", hex:"#D9D9D3", family:"Neutri caldi" },
+      { name:"F4.07.79", code:"F4.07.79", hex:"#CFD1C2", family:"Arancioni" },
+      { name:"F4.10.70", code:"F4.10.70", hex:"#BEC1A4", family:"Arancioni" },
+      { name:"F6.12.69", code:"F6.12.69", hex:"#BDC29E", family:"Arancioni" },
+      { name:"G4.08.80", code:"G4.08.80", hex:"#CDD4C4", family:"Verdi-Azzurri" },
+      { name:"E9.07.71", code:"E9.07.71", hex:"#BFBEAB", family:"Arancioni" },
+      { name:"F6.08.77", code:"F6.08.77", hex:"#CBCDBB", family:"Arancioni" },
+      { name:"E4.06.61", code:"E4.06.61", hex:"#A7A490", family:"Arancioni" },
+      { name:"E5.05.79", code:"E5.05.79", hex:"#CFCDC4", family:"Neutri caldi" },
+      { name:"E3.07.66", code:"E3.07.66", hex:"#B4B09D", family:"Arancioni" },
+      { name:"E4.05.75", code:"E4.05.75", hex:"#C5C4B9", family:"Neutri caldi" },
+      { name:"D8.06.67", code:"D8.06.67", hex:"#B4AFA1", family:"Rossi" },
+      { name:"E1.03.79", code:"E1.03.79", hex:"#CDCBC6", family:"Neutri caldi" },
+      { name:"D0.04.55", code:"D0.04.55", hex:"#958D84", family:"Neutri caldi" },
+      { name:"DN.01.71", code:"DN.01.71", hex:"#B6B5B4", family:"Neutri caldi" },
+      { name:"CN.00.70", code:"CN.00.70", hex:"#B2B2B2", family:"Neutri caldi" },
+      { name:"CN.02.57", code:"CN.02.57", hex:"#96908D", family:"Neutri caldi" },
+      { name:"E1.04.64", code:"E1.04.64", hex:"#AAA79C", family:"Neutri caldi" },
+      { name:"EN.02.77", code:"EN.02.77", hex:"#C7C6C2", family:"Neutri caldi" },
+      { name:"F2.11.50", code:"F2.11.50", hex:"#979A65", family:"Arancioni" },
+      { name:"F5.05.75", code:"F5.05.75", hex:"#C4C5B9", family:"Neutri caldi" },
+      { name:"F2.04.72", code:"F2.04.72", hex:"#BCBDB2", family:"Neutri caldi" },
+      { name:"F2.10.51", code:"F2.10.51", hex:"#979A6A", family:"Arancioni" },
+      { name:"F1.13.48", code:"F1.13.48", hex:"#97995C", family:"Arancioni" },
+      { name:"F2.10.60", code:"F2.10.60", hex:"#AAAC86", family:"Arancioni" },
+      { name:"E5.05.60", code:"E5.05.60", hex:"#A3A08F", family:"Neutri caldi" },
+      { name:"E6.05.65", code:"E6.05.65", hex:"#AEAC9D", family:"Neutri caldi" },
+      { name:"E0.10.49", code:"E0.10.49", hex:"#958A65", family:"Arancioni" },
+      { name:"E1.08.63", code:"E1.08.63", hex:"#AFA992", family:"Arancioni" },
+      { name:"D8.12.46", code:"D8.12.46", hex:"#90805B", family:"Rossi" },
+      { name:"E1.11.61", code:"E1.11.61", hex:"#B0A887", family:"Arancioni" },
+      { name:"E0.07.57", code:"E0.07.57", hex:"#A09983", family:"Arancioni" },
+      { name:"E0.10.40", code:"E0.10.40", hex:"#797153", family:"Arancioni" },
+      { name:"E7.10.59", code:"E7.10.59", hex:"#AAA783", family:"Arancioni" },
+      { name:"E8.10.70", code:"E8.10.70", hex:"#C1BFA4", family:"Arancioni" },
+      { name:"E8.15.56", code:"E8.15.56", hex:"#AFAB6F", family:"Arancioni" },
+      { name:"E8.15.65", code:"E8.15.65", hex:"#BFBC8C", family:"Arancioni" },
+      { name:"F0.12.47", code:"F0.12.47", hex:"#93935D", family:"Arancioni" },
+      { name:"F1.09.71", code:"F1.09.71", hex:"#C1C2A8", family:"Arancioni" },
+      { name:"G0.10.70", code:"G0.10.70", hex:"#B7C1A4", family:"Verdi-Azzurri" },
+      { name:"G4.09.61", code:"G4.09.61", hex:"#9EAD8B", family:"Verdi-Azzurri" },
+      { name:"F7.10.76", code:"F7.10.76", hex:"#CACDB6", family:"Arancioni" },
+      { name:"F8.14.62", code:"F8.14.62", hex:"#AFB884", family:"Arancioni" },
+      { name:"G0.10.50", code:"G0.10.50", hex:"#879867", family:"Verdi-Azzurri" },
+      { name:"G0.11.60", code:"G0.11.60", hex:"#A0AE84", family:"Verdi-Azzurri" },
+      { name:"F3.12.56", code:"F3.12.56", hex:"#A5A875", family:"Arancioni" },
+      { name:"F6.16.65", code:"F6.16.65", hex:"#BAC18B", family:"Arancioni" },
+      { name:"F0.14.38", code:"F0.14.38", hex:"#7A7B47", family:"Arancioni" },
+      { name:"F2.20.50", code:"F2.20.50", hex:"#ABB04F", family:"Arancioni" },
+      { name:"ON.00.78", code:"ON.00.78", hex:"#C7C7C7", family:"Neutri caldi" },
+      { name:"ON.00.86", code:"ON.00.86", hex:"#DBDBDB", family:"Neutri caldi" },
+      { name:"ON.00.69", code:"ON.00.69", hex:"#B0B0B0", family:"Neutri caldi" },
+      { name:"ON.00.89", code:"ON.00.89", hex:"#E3E3E3", family:"Neutri caldi" },
+      { name:"ON.00.59", code:"ON.00.59", hex:"#969696", family:"Neutri caldi" },
+      { name:"ON.00.67", code:"ON.00.67", hex:"#ABABAB", family:"Neutri caldi" },
+      { name:"ON.00.49", code:"ON.00.49", hex:"#7D7D7D", family:"Neutri caldi" },
+      { name:"ON.00.62", code:"ON.00.62", hex:"#9E9E9E", family:"Neutri caldi" },
+      { name:"ON.00.53", code:"ON.00.53", hex:"#878787", family:"Neutri caldi" },
+      { name:"ON.01.26", code:"ON.01.26", hex:"#444141", family:"Neutri caldi" },
+      { name:"F1.04.56", code:"F1.04.56", hex:"#979786", family:"Neutri caldi" },
+      { name:"F2.06.65", code:"F2.06.65", hex:"#AFB09C", family:"Arancioni" },
+      { name:"F0.03.66", code:"F0.03.66", hex:"#ADADA3", family:"Neutri caldi" },
+      { name:"F6.04.72", code:"F6.04.72", hex:"#BCBDB2", family:"Neutri caldi" },
+      { name:"F6.04.63", code:"F6.04.63", hex:"#A6A899", family:"Neutri caldi" },
+      { name:"F6.07.74", code:"F6.07.74", hex:"#C3C6B4", family:"Arancioni" },
+      { name:"F5.09.61", code:"F5.09.61", hex:"#A9AD8B", family:"Arancioni" },
+      { name:"G0.06.70", code:"G0.06.70", hex:"#B5BBAA", family:"Verdi-Azzurri" },
+      { name:"H1.05.54", code:"H1.05.54", hex:"#85957F", family:"Neutri freddi" },
+      { name:"H2.06.65", code:"H2.06.65", hex:"#A1B09C", family:"Verdi-Azzurri" },
+      { name:"G0.06.65", code:"G0.06.65", hex:"#A9B09C", family:"Verdi-Azzurri" },
+      { name:"H0.03.32", code:"H0.03.32", hex:"#50564D", family:"Neutri freddi" },
+      { name:"G4.05.55", code:"G4.05.55", hex:"#8E9781", family:"Neutri freddi" },
+      { name:"H0.04.39", code:"H0.04.39", hex:"#606B5C", family:"Neutri freddi" },
+      { name:"F7.03.87", code:"F7.03.87", hex:"#DFE0DC", family:"Neutri caldi" },
+      { name:"F7.06.82", code:"F7.06.82", hex:"#D5D6CC", family:"Arancioni" },
+      { name:"F2.05.88", code:"F2.05.88", hex:"#E3E3DD", family:"Neutri caldi" },
+      { name:"G2.03.89", code:"G2.03.89", hex:"#E3E5E1", family:"Neutri freddi" },
+      { name:"F6.06.83", code:"F6.06.83", hex:"#D7D9CF", family:"Arancioni" },
+      { name:"F7.10.79", code:"F7.10.79", hex:"#D1D4BF", family:"Arancioni" },
+      { name:"F5.15.74", code:"F5.15.74", hex:"#CBD0AA", family:"Arancioni" },
+      { name:"F6.10.82", code:"F6.10.82", hex:"#D8DAC8", family:"Arancioni" },
+      { name:"E7.05.85", code:"E7.05.85", hex:"#DCDCD5", family:"Neutri caldi" },
+      { name:"E8.14.79", code:"E8.14.79", hex:"#D8D6BB", family:"Arancioni" },
+      { name:"F0.12.71", code:"F0.12.71", hex:"#C6C6A4", family:"Arancioni" },
+      { name:"F1.07.83", code:"F1.07.83", hex:"#D9D9CE", family:"Arancioni" },
+      { name:"E8.15.66", code:"E8.15.66", hex:"#C1BE90", family:"Arancioni" },
+      { name:"F1.10.79", code:"F1.10.79", hex:"#D3D4BF", family:"Arancioni" },
+      { name:"F4.12.69", code:"F4.12.69", hex:"#BFC29E", family:"Arancioni" },
+      { name:"F6.11.80", code:"F6.11.80", hex:"#D4D7C1", family:"Arancioni" },
+      { name:"F3.12.73", code:"F3.12.73", hex:"#C8CAAA", family:"Arancioni" },
+      { name:"F7.09.84", code:"F7.09.84", hex:"#DBDDCF", family:"Arancioni" },
+      { name:"F1.14.81", code:"F1.14.81", hex:"#DBDBC2", family:"Arancioni" },
+      { name:"F3.17.78", code:"F3.17.78", hex:"#D6D9B5", family:"Arancioni" },
+      { name:"F1.17.81", code:"F1.17.81", hex:"#DDDEBF", family:"Arancioni" },
+      { name:"F1.22.71", code:"F1.22.71", hex:"#D2D496", family:"Arancioni" },
+      { name:"F0.21.78", code:"F0.21.78", hex:"#DDDDB1", family:"Arancioni" },
+      { name:"F1.21.67", code:"F1.21.67", hex:"#CACC89", family:"Arancioni" },
+      { name:"F2.19.61", code:"F2.19.61", hex:"#BCBF78", family:"Arancioni" },
+      { name:"F3.18.70", code:"F3.18.70", hex:"#C9CD98", family:"Arancioni" },
+      { name:"F4.13.61", code:"F4.13.61", hex:"#B0B483", family:"Arancioni" },
+      { name:"F6.16.75", code:"F6.16.75", hex:"#CED3AC", family:"Arancioni" },
+      { name:"F4.12.79", code:"F4.12.79", hex:"#D3D6BD", family:"Arancioni" },
+      { name:"F4.25.59", code:"F4.25.59", hex:"#BFC865", family:"Arancioni" },
+      { name:"E8.35.65", code:"E8.35.65", hex:"#E1DA6A", family:"Arancioni" },
+      { name:"F3.25.78", code:"F3.25.78", hex:"#DEE2AC", family:"Arancioni" },
+      { name:"E8.20.68", code:"E8.20.68", hex:"#CCC88E", family:"Arancioni" },
+      { name:"E9.24.73", code:"E9.24.73", hex:"#DAD79B", family:"Arancioni" },
+      { name:"E7.40.56", code:"E7.40.56", hex:"#E4D63A", family:"Arancioni" },
+      { name:"F2.32.68", code:"F2.32.68", hex:"#DADF7C", family:"Arancioni" },
+      { name:"E8.35.55", code:"E8.35.55", hex:"#D9CF40", family:"Arancioni" },
+      { name:"F0.32.69", code:"F0.32.69", hex:"#DFE080", family:"Arancioni" },
+      { name:"E8.33.65", code:"E8.33.65", hex:"#DED76E", family:"Arancioni" },
+      { name:"E8.42.49", code:"E8.42.49", hex:"#E1D419", family:"Arancioni" },
+      { name:"E8.23.52", code:"E8.23.52", hex:"#BAB34F", family:"Arancioni" },
+      { name:"E8.39.62", code:"E8.39.62", hex:"#E6DD56", family:"Arancioni" },
+      { name:"F4.36.73", code:"F4.36.73", hex:"#E1E98B", family:"Arancioni" },
+      { name:"F7.20.83", code:"F7.20.83", hex:"#DFE4C3", family:"Arancioni" },
+      { name:"F3.24.75", code:"F3.24.75", hex:"#D8DCA2", family:"Arancioni" },
+      { name:"F6.22.82", code:"F6.22.82", hex:"#DFE4BE", family:"Arancioni" },
+      { name:"F6.19.70", code:"F6.19.70", hex:"#C7CE97", family:"Arancioni" },
+      { name:"F8.15.80", code:"F8.15.80", hex:"#D6DBBD", family:"Arancioni" },
+      { name:"F7.25.76", code:"F7.25.76", hex:"#D6DFA5", family:"Arancioni" },
+      { name:"F7.26.63", code:"F7.26.63", hex:"#C1CF72", family:"Arancioni" },
+      { name:"F8.31.69", code:"F8.31.69", hex:"#CFDF81", family:"Arancioni" },
+      { name:"G0.22.83", code:"G0.22.83", hex:"#D9E6C2", family:"Verdi-Azzurri" },
+      { name:"F6.35.77", code:"F6.35.77", hex:"#E1EB9D", family:"Arancioni" },
+      { name:"F6.41.70", code:"F6.41.70", hex:"#DFEE77", family:"Arancioni" },
+      { name:"G0.38.80", code:"G0.38.80", hex:"#D8F1A7", family:"Verdi-Azzurri" },
+      { name:"G1.28.67", code:"G1.28.67", hex:"#B7D87E", family:"Verdi-Azzurri" },
+      { name:"F6.37.65", code:"F6.37.65", hex:"#D4E467", family:"Arancioni" },
+      { name:"F7.42.78", code:"F7.42.78", hex:"#E6F49A", family:"Arancioni" },
+      { name:"F2.50.60", code:"F2.50.60", hex:"#ECF53D", family:"Arancioni" },
+      { name:"F5.47.70", code:"F5.47.70", hex:"#E8F76E", family:"Arancioni" },
+      { name:"D0.03.86", code:"D0.03.86", hex:"#DDDBD9", family:"Neutri caldi" },
+      { name:"E0.04.83", code:"E0.04.83", hex:"#D7D5D0", family:"Neutri caldi" },
+      { name:"E7.25.74", code:"E7.25.74", hex:"#DCD79D", family:"Arancioni" },
+      { name:"F1.11.84", code:"F1.11.84", hex:"#DEDFCE", family:"Arancioni" },
+      { name:"E7.18.76", code:"E7.18.76", hex:"#D7D3AD", family:"Arancioni" },
+      { name:"E8.24.65", code:"E8.24.65", hex:"#CEC97D", family:"Arancioni" },
+      { name:"E8.21.70", code:"E8.21.70", hex:"#D1CD94", family:"Arancioni" },
+      { name:"E8.29.56", code:"E8.29.56", hex:"#CDC551", family:"Arancioni" },
+      { name:"E4.30.74", code:"E4.30.74", hex:"#E2D897", family:"Arancioni" },
+      { name:"E7.19.78", code:"E7.19.78", hex:"#DBD8B3", family:"Arancioni" },
+      { name:"E3.29.71", code:"E3.29.71", hex:"#DED08C", family:"Arancioni" },
+      { name:"E6.21.77", code:"E6.21.77", hex:"#DCD7AD", family:"Arancioni" },
+      { name:"E4.29.62", code:"E4.29.62", hex:"#D3C469", family:"Arancioni" },
+      { name:"E5.21.73", code:"E5.21.73", hex:"#D6CF9F", family:"Arancioni" },
+      { name:"E1.26.54", code:"E1.26.54", hex:"#C4AC50", family:"Arancioni" },
+      { name:"E4.25.67", code:"E4.25.67", hex:"#D3C783", family:"Arancioni" },
+      { name:"E0.30.48", code:"E0.30.48", hex:"#C0A135", family:"Arancioni" },
+      { name:"E0.34.60", code:"E0.34.60", hex:"#DBBD57", family:"Arancioni" },
+      { name:"E0.37.56", code:"E0.37.56", hex:"#DEBA40", family:"Arancioni" },
+      { name:"E4.31.69", code:"E4.31.69", hex:"#DFD181", family:"Arancioni" },
+      { name:"E4.42.62", code:"E4.42.62", hex:"#EBD551", family:"Arancioni" },
+      { name:"E6.33.70", code:"E6.33.70", hex:"#E2D983", family:"Arancioni" },
+      { name:"E6.30.75", code:"E6.30.75", hex:"#E4DC9B", family:"Arancioni" },
+      { name:"E7.58.65", code:"E7.58.65", hex:"#F6E955", family:"Arancioni" },
+      { name:"E8.38.68", code:"E8.38.68", hex:"#E8E172", family:"Arancioni" },
+      { name:"F0.29.76", code:"F0.29.76", hex:"#E3E4A0", family:"Arancioni" },
+      { name:"E6.30.65", code:"E6.30.65", hex:"#D9CE73", family:"Arancioni" },
+      { name:"E8.29.76", code:"E8.29.76", hex:"#E4DFA0", family:"Arancioni" },
+      { name:"E4.54.65", code:"E4.54.65", hex:"#F6DF55", family:"Arancioni" },
+      { name:"E6.34.74", code:"E6.34.74", hex:"#E8DF92", family:"Arancioni" },
+      { name:"E4.40.71", code:"E4.40.71", hex:"#EDDD7D", family:"Arancioni" },
+      { name:"E4.52.59", code:"E4.52.59", hex:"#F5DA38", family:"Arancioni" },
+      { name:"E0.54.53", code:"E0.54.53", hex:"#F3C31B", family:"Arancioni" },
+      { name:"E4.45.65", code:"E4.45.65", hex:"#F2DC59", family:"Arancioni" },
+      { name:"D5.44.54", code:"D5.44.54", hex:"#ECA628", family:"Rossi" },
+      { name:"E0.40.67", code:"E0.40.67", hex:"#EBCE6B", family:"Arancioni" },
+      { name:"C9.39.50", code:"C9.39.50", hex:"#DE7721", family:"Rossi" },
+      { name:"D3.30.65", code:"D3.30.65", hex:"#D9B073", family:"Rossi" },
+      { name:"D4.49.53", code:"D4.49.53", hex:"#F3A21B", family:"Rossi" },
+      { name:"D6.41.60", code:"D6.41.60", hex:"#E8B34A", family:"Rossi" },
+      { name:"D6.51.50", code:"D6.51.50", hex:"#F2A50D", family:"Rossi" },
+      { name:"D7.51.61", code:"D7.51.61", hex:"#F5BC42", family:"Rossi" },
+      { name:"D6.44.38", code:"D6.44.38", hex:"#B27B10", family:"Rossi" },
+      { name:"D7.49.54", code:"D7.49.54", hex:"#F3B020", family:"Rossi" },
+      { name:"E7.05.80", code:"E7.05.80", hex:"#D1D0C7", family:"Neutri caldi" },
+      { name:"EN.02.88", code:"EN.02.88", hex:"#E2E1DF", family:"Neutri caldi" },
+      { name:"E3.11.77", code:"E3.11.77", hex:"#D1CDB8", family:"Arancioni" },
+      { name:"E8.10.85", code:"E8.10.85", hex:"#E0DFD1", family:"Arancioni" },
+      { name:"E0.14.76", code:"E0.14.76", hex:"#D2CBB2", family:"Arancioni" },
+      { name:"E3.10.80", code:"E3.10.80", hex:"#D6D3C2", family:"Arancioni" },
+      { name:"D7.18.64", code:"D7.18.64", hex:"#C3AF84", family:"Rossi" },
+      { name:"E5.12.80", code:"E5.12.80", hex:"#D8D5C0", family:"Arancioni" },
+      { name:"E0.26.55", code:"E0.26.55", hex:"#C5AC54", family:"Arancioni" },
+      { name:"E4.13.75", code:"E4.13.75", hex:"#CFCAB0", family:"Arancioni" },
+      { name:"E3.17.72", code:"E3.17.72", hex:"#CFC7A1", family:"Arancioni" },
+      { name:"E3.19.61", code:"E3.19.61", hex:"#BFB478", family:"Arancioni" },
+      { name:"E4.21.58", code:"E4.21.58", hex:"#BFB269", family:"Arancioni" },
+      { name:"E4.22.70", code:"E4.22.70", hex:"#D2C993", family:"Arancioni" },
+      { name:"E6.20.55", code:"E6.20.55", hex:"#B8AF61", family:"Arancioni" },
+      { name:"E7.14.73", code:"E7.14.73", hex:"#CCC9A8", family:"Arancioni" },
+      { name:"E4.25.50", code:"E4.25.50", hex:"#BCAB43", family:"Arancioni" },
+      { name:"E8.16.75", code:"E8.16.75", hex:"#D3D0AC", family:"Arancioni" },
+      { name:"E6.19.67", code:"E6.19.67", hex:"#C9C38C", family:"Arancioni" },
+      { name:"E7.10.70", code:"E7.10.70", hex:"#C1BFA4", family:"Arancioni" },
+      { name:"E0.10.75", code:"E0.10.75", hex:"#CBC6B3", family:"Arancioni" },
+      { name:"E3.12.60", code:"E3.12.60", hex:"#B0A982", family:"Arancioni" },
+      { name:"E0.08.77", code:"E0.08.77", hex:"#CDC9BB", family:"Arancioni" },
+      { name:"E0.11.67", code:"E0.11.67", hex:"#BCB599", family:"Arancioni" },
+      { name:"E0.09.73", code:"E0.09.73", hex:"#C6C1AE", family:"Arancioni" },
+      { name:"E0.15.56", code:"E0.15.56", hex:"#AFA06F", family:"Arancioni" },
+      { name:"D8.26.46", code:"D8.26.46", hex:"#AF8D3B", family:"Rossi" },
+      { name:"E0.15.65", code:"E0.15.65", hex:"#BFB48C", family:"Arancioni" },
+      { name:"D4.16.56", code:"D4.16.56", hex:"#B1976D", family:"Rossi" },
+      { name:"D6.18.66", code:"D6.18.66", hex:"#C6B28B", family:"Rossi" },
+      { name:"D2.21.60", code:"D2.21.60", hex:"#C2A070", family:"Rossi" },
+      { name:"D2.28.48", code:"D2.28.48", hex:"#BC8539", family:"Rossi" },
+      { name:"D3.24.63", code:"D3.24.63", hex:"#CCAA76", family:"Rossi" },
+      { name:"D5.35.49", code:"D5.35.49", hex:"#D0952A", family:"Rossi" },
+      { name:"D2.25.52", code:"D2.25.52", hex:"#BF8E4A", family:"Rossi" },
+      { name:"D4.23.60", code:"D4.23.60", hex:"#C6A46C", family:"Rossi" },
+      { name:"D3.27.51", code:"D3.27.51", hex:"#C28F42", family:"Rossi" },
+      { name:"D7.28.63", code:"D7.28.63", hex:"#D3B36E", family:"Rossi" },
+      { name:"D7.41.60", code:"D7.41.60", hex:"#E8B64A", family:"Rossi" },
+      { name:"D9.24.72", code:"D9.24.72", hex:"#D8C697", family:"Rossi" },
+      { name:"D3.30.60", code:"D3.30.60", hex:"#D3A55F", family:"Rossi" },
+      { name:"D7.24.72", code:"D7.24.72", hex:"#D8C497", family:"Rossi" },
+      { name:"D3.35.62", code:"D3.35.62", hex:"#DFAB5E", family:"Rossi" },
+      { name:"D6.30.69", code:"D6.30.69", hex:"#DDBF83", family:"Rossi" },
+      { name:"E0.25.75", code:"E0.25.75", hex:"#DED0A1", family:"Arancioni" },
+      { name:"E0.34.56", code:"E0.34.56", hex:"#D7B746", family:"Arancioni" },
+      { name:"D8.34.57", code:"D8.34.57", hex:"#D8AE4B", family:"Rossi" },
+      { name:"E1.28.68", code:"E1.28.68", hex:"#D9C782", family:"Arancioni" },
+      { name:"E3.24.72", code:"E3.24.72", hex:"#D8CE97", family:"Arancioni" },
+      { name:"E4.25.65", code:"E4.25.65", hex:"#D0C47B", family:"Arancioni" },
+      { name:"E3.20.74", code:"E3.20.74", hex:"#D6CEA4", family:"Arancioni" },
+      { name:"E4.20.60", code:"E4.20.60", hex:"#C0B572", family:"Arancioni" },
+      { name:"E2.19.65", code:"E2.19.65", hex:"#C6BA86", family:"Arancioni" },
+      { name:"E2.22.47", code:"E2.22.47", hex:"#AA9846", family:"Arancioni" },
+      { name:"E0.25.61", code:"E0.25.61", hex:"#CBB66C", family:"Arancioni" },
+      { name:"E0.30.50", code:"E0.30.50", hex:"#C8A837", family:"Arancioni" },
+      { name:"BN.01.83", code:"BN.01.83", hex:"#D4D3D3", family:"Neutri caldi" },
+      { name:"CN.01.88", code:"CN.01.88", hex:"#E1E0E0", family:"Neutri caldi" },
+      { name:"AN.02.77", code:"AN.02.77", hex:"#C7C2C3", family:"Neutri caldi" },
+      { name:"AN.02.84", code:"AN.02.84", hex:"#D8D5D5", family:"Neutri caldi" },
+      { name:"C1.05.84", code:"C1.05.84", hex:"#DAD5D2", family:"Neutri caldi" },
+      { name:"C4.11.72", code:"C4.11.72", hex:"#C7B3A9", family:"Rossi" },
+      { name:"D5.10.74", code:"D5.10.74", hex:"#C9C0B0", family:"Rossi" },
+      { name:"D6.08.83", code:"D6.08.83", hex:"#DAD6CD", family:"Rossi" },
+      { name:"D1.20.68", code:"D1.20.68", hex:"#CCB18E", family:"Rossi" },
+      { name:"E4.16.80", code:"E4.16.80", hex:"#DCD7BC", family:"Arancioni" },
+      { name:"D2.23.61", code:"D2.23.61", hex:"#C7A370", family:"Rossi" },
+      { name:"D4.14.73", code:"D4.14.73", hex:"#CCBFA8", family:"Rossi" },
+      { name:"C8.21.60", code:"C8.21.60", hex:"#C29470", family:"Rossi" },
+      { name:"D3.10.76", code:"D3.10.76", hex:"#CDC4B6", family:"Rossi" },
+      { name:"C1.19.64", code:"C1.19.64", hex:"#C49682", family:"Rossi" },
+      { name:"C8.12.72", code:"C8.12.72", hex:"#C8B6A7", family:"Rossi" },
+      { name:"D0.17.70", code:"D0.17.70", hex:"#CBB59A", family:"Rossi" },
+      { name:"D0.18.65", code:"D0.18.65", hex:"#C4A887", family:"Rossi" },
+      { name:"C3.25.60", code:"C3.25.60", hex:"#C98969", family:"Rossi" },
+      { name:"C5.10.73", code:"C5.10.73", hex:"#C7B7AD", family:"Rossi" },
+      { name:"C3.20.59", code:"C3.20.59", hex:"#BE896F", family:"Rossi" },
+      { name:"C4.14.71", code:"C4.14.71", hex:"#C9AFA1", family:"Rossi" },
+      { name:"C2.25.55", code:"C2.25.55", hex:"#C37856", family:"Rossi" },
+      { name:"C3.27.46", code:"C3.27.46", hex:"#B16239", family:"Rossi" },
+      { name:"C3.42.43", code:"C3.42.43", hex:"#C55116", family:"Rossi" },
+      { name:"C6.27.62", code:"C6.27.62", hex:"#D0946C", family:"Rossi" },
+      { name:"C2.35.40", code:"C2.35.40", hex:"#AA4D22", family:"Rossi" },
+      { name:"C8.30.58", code:"C8.30.58", hex:"#D18C57", family:"Rossi" },
+      { name:"C5.40.33", code:"C5.40.33", hex:"#944414", family:"Rossi" },
+      { name:"C7.34.46", code:"C7.34.46", hex:"#C1692A", family:"Rossi" },
+      { name:"C1.35.42", code:"C1.35.42", hex:"#B24E24", family:"Rossi" },
+      { name:"C3.30.32", code:"C3.30.32", hex:"#804223", family:"Rossi" },
+      { name:"C4.49.33", code:"C4.49.33", hex:"#A03E08", family:"Rossi" },
+      { name:"C5.40.48", code:"C5.40.48", hex:"#D7631D", family:"Rossi" },
+      { name:"C3.42.36", code:"C3.42.36", hex:"#A54413", family:"Rossi" },
+      { name:"C8.38.51", code:"C8.38.51", hex:"#DC7728", family:"Rossi" },
+      { name:"C9.34.49", code:"C9.34.49", hex:"#CE762C", family:"Rossi" },
+      { name:"C9.38.35", code:"C9.38.35", hex:"#9A5419", family:"Rossi" },
+      { name:"C2.25.41", code:"C2.25.41", hex:"#9A5637", family:"Rossi" },
+      { name:"C9.23.60", code:"C9.23.60", hex:"#C6956C", family:"Rossi" },
+      { name:"C8.19.55", code:"C8.19.55", hex:"#B68763", family:"Rossi" },
+      { name:"C8.22.41", code:"C8.22.41", hex:"#94633D", family:"Rossi" },
+      { name:"C5.36.25", code:"C5.36.25", hex:"#6B3514", family:"Rossi" },
+      { name:"C8.25.41", code:"C8.25.41", hex:"#9A6237", family:"Rossi" },
+      { name:"D2.30.40", code:"D2.30.40", hex:"#A0702C", family:"Rossi" },
+      { name:"D3.31.30", code:"D3.31.30", hex:"#7A561F", family:"Rossi" },
+      { name:"C3.19.30", code:"C3.19.30", hex:"#684331", family:"Rossi" },
+      { name:"C8.30.41", code:"C8.30.41", hex:"#A4612D", family:"Rossi" },
+      { name:"TN.02.71", code:"TN.02.71", hex:"#B7B2B8", family:"Neutri freddi" },
+      { name:"TN.02.84", code:"TN.02.84", hex:"#D7D5D8", family:"Neutri freddi" },
+      { name:"U6.06.73", code:"U6.06.73", hex:"#C2B2BF", family:"Blu" },
+      { name:"UN.03.81", code:"UN.03.81", hex:"#D1CCD0", family:"Neutri freddi" },
+      { name:"WN.02.77", code:"WN.02.77", hex:"#C7C2C5", family:"Neutri freddi" },
+      { name:"XN.01.80", code:"XN.01.80", hex:"#CDCBCC", family:"Neutri caldi" },
+      { name:"X5.04.69", code:"X5.04.69", hex:"#B6AAAE", family:"Neutri caldi" },
+      { name:"XN.02.77", code:"XN.02.77", hex:"#C7C2C4", family:"Neutri caldi" },
+      { name:"W0.07.77", code:"W0.07.77", hex:"#CCBDC7", family:"Blu" },
+      { name:"W4.08.64", code:"W4.08.64", hex:"#B195A5", family:"Blu" },
+      { name:"A2.05.65", code:"A2.05.65", hex:"#AE9DA1", family:"Neutri caldi" },
+      { name:"Z9.05.54", code:"Z9.05.54", hex:"#957F7F", family:"Neutri caldi" },
+      { name:"AN.02.55", code:"AN.02.55", hex:"#918889", family:"Neutri caldi" },
+      { name:"AN.02.65", code:"AN.02.65", hex:"#A9A2A3", family:"Neutri caldi" },
+      { name:"W0.05.36", code:"W0.05.36", hex:"#65535F", family:"Neutri freddi" },
+      { name:"Z9.04.44", code:"Z9.04.44", hex:"#796868", family:"Neutri caldi" },
+      { name:"RN.01.82", code:"RN.01.82", hex:"#D1D0D2", family:"Neutri freddi" },
+      { name:"S2.04.76", code:"S2.04.76", hex:"#C3BDC6", family:"Neutri freddi" },
+      { name:"R2.04.82", code:"R2.04.82", hex:"#D0CED5", family:"Neutri freddi" },
+      { name:"R3.05.76", code:"R3.05.76", hex:"#C0BCC8", family:"Neutri freddi" },
+      { name:"S0.05.85", code:"S0.05.85", hex:"#D9D5DC", family:"Neutri freddi" },
+      { name:"S0.11.78", code:"S0.11.78", hex:"#C8BBD3", family:"Blu" },
+      { name:"R4.20.65", code:"R4.20.65", hex:"#9C84C8", family:"Blu" },
+      { name:"R9.12.76", code:"R9.12.76", hex:"#C1B4D0", family:"Blu" },
+      { name:"R7.24.71", code:"R7.24.71", hex:"#AF93D7", family:"Blu" },
+      { name:"R9.34.64", code:"R9.34.64", hex:"#9E68DF", family:"Blu" },
+      { name:"R9.18.71", code:"R9.18.71", hex:"#B39CCE", family:"Blu" },
+      { name:"S6.27.56", code:"S6.27.56", hex:"#A255C8", family:"Blu" },
+      { name:"S3.14.64", code:"S3.14.64", hex:"#A88BBC", family:"Blu" },
+      { name:"S6.22.52", code:"S6.22.52", hex:"#9551B8", family:"Blu" },
+      { name:"T1.08.73", code:"T1.08.73", hex:"#C0B0C5", family:"Blu" },
+      { name:"T5.15.47", code:"T5.15.47", hex:"#92569A", family:"Blu" },
+      { name:"T0.10.60", code:"T0.10.60", hex:"#A486AC", family:"Blu" },
+      { name:"T1.08.79", code:"T1.08.79", hex:"#CEC1D2", family:"Blu" },
+      { name:"S7.15.55", code:"S7.15.55", hex:"#986CAD", family:"Blu" },
+      { name:"S8.05.75", code:"S8.05.75", hex:"#C2B9C5", family:"Neutri freddi" },
+      { name:"S8.09.44", code:"S8.09.44", hex:"#785D83", family:"Blu" },
+      { name:"S8.11.60", code:"S8.11.60", hex:"#A284AE", family:"Blu" },
+      { name:"J4.07.70", code:"J4.07.70", hex:"#A8BDAB", family:"Verdi-Azzurri" },
+      { name:"KN.01.86", code:"KN.01.86", hex:"#DBDCDB", family:"Neutri freddi" },
+      { name:"H5.05.83", code:"H5.05.83", hex:"#D1D8D0", family:"Neutri freddi" },
+      { name:"H9.05.75", code:"H9.05.75", hex:"#BBC5B9", family:"Neutri freddi" },
+      { name:"H4.07.72", code:"H4.07.72", hex:"#B2C1AE", family:"Verdi-Azzurri" },
+      { name:"J0.10.61", code:"J0.10.61", hex:"#89AE8A", family:"Verdi-Azzurri" },
+      { name:"G8.10.70", code:"G8.10.70", hex:"#B2C1A4", family:"Verdi-Azzurri" },
+      { name:"H1.10.59", code:"H1.10.59", hex:"#8DAA83", family:"Verdi-Azzurri" },
+      { name:"H1.17.59", code:"H1.17.59", hex:"#87B875", family:"Verdi-Azzurri" },
+      { name:"H4.08.77", code:"H4.08.77", hex:"#BFCDBB", family:"Verdi-Azzurri" },
+      { name:"H5.14.69", code:"H5.14.69", hex:"#A3C59B", family:"Verdi-Azzurri" },
+      { name:"H8.09.87", code:"H8.09.87", hex:"#DAE4D8", family:"Verdi-Azzurri" },
+      { name:"J0.07.79", code:"J0.07.79", hex:"#C2D1C3", family:"Verdi-Azzurri" },
+      { name:"J6.08.63", code:"J6.08.63", hex:"#92AF97", family:"Verdi-Azzurri" },
+      { name:"K2.05.75", code:"K2.05.75", hex:"#B9C5BF", family:"Neutri freddi" },
+      { name:"K2.10.60", code:"K2.10.60", hex:"#86AC97", family:"Verdi-Azzurri" },
+      { name:"N1.05.75", code:"N1.05.75", hex:"#B9C1C5", family:"Neutri freddi" },
+      { name:"N1.07.53", code:"N1.07.53", hex:"#778A97", family:"Verdi-Azzurri" },
+      { name:"P1.11.63", code:"P1.11.63", hex:"#8D99B4", family:"Verdi-Azzurri" },
+      { name:"P6.07.81", code:"P6.07.81", hex:"#C8CBD5", family:"Verdi-Azzurri" },
+      { name:"L1.11.53", code:"L1.11.53", hex:"#6EA096", family:"Verdi-Azzurri" },
+      { name:"L4.07.69", code:"L4.07.69", hex:"#A5BAB7", family:"Verdi-Azzurri" },
+      { name:"J6.09.67", code:"J6.09.67", hex:"#9CB9A1", family:"Verdi-Azzurri" },
+      { name:"M2.16.41", code:"M2.16.41", hex:"#497F88", family:"Verdi-Azzurri" },
+      { name:"J1.13.76", code:"J1.13.76", hex:"#B3D1B5", family:"Verdi-Azzurri" },
+      { name:"J4.15.58", code:"J4.15.58", hex:"#75B27D", family:"Verdi-Azzurri" },
+      { name:"F8.20.68", code:"F8.20.68", hex:"#C2CC8E", family:"Arancioni" },
+      { name:"G0.21.60", code:"G0.21.60", hex:"#A6C270", family:"Verdi-Azzurri" },
+      { name:"C9.21.58", code:"C9.21.58", hex:"#BF9069", family:"Rossi" },
+      { name:"D8.19.66", code:"D8.19.66", hex:"#C8B589", family:"Rossi" },
+      { name:"D8.05.78", code:"D8.05.78", hex:"#CCC9C2", family:"Neutri caldi" },
+      { name:"E0.41.34", code:"E0.41.34", hex:"#9A7C13", family:"Arancioni" },
+      { name:"E5.09.13", code:"E5.09.13", hex:"#27251B", family:"Arancioni" },
+      { name:"F1.34.58", code:"F1.34.58", hex:"#D5D94F", family:"Arancioni" },
+      { name:"G6.04.66", code:"G6.04.66", hex:"#A9AFA2", family:"Neutri freddi" },
+      { name:"N0.03.77", code:"N0.03.77", hex:"#C1C5C8", family:"Neutri freddi" },
+      { name:"S0.05.65", code:"S0.05.65", hex:"#A69DAE", family:"Neutri freddi" },
+      { name:"S0.10.50", code:"S0.10.50", hex:"#826798", family:"Blu" },
+      { name:"S9.30.40", code:"S9.30.40", hex:"#802CA0", family:"Blu" },
+      { name:"T1.23.25", code:"T1.23.25", hex:"#50245C", family:"Blu" },
+      { name:"B5.05.52", code:"B5.05.52", hex:"#907B79", family:"Neutri caldi" },
+      { name:"B7.10.59", code:"B7.10.59", hex:"#AA8883", family:"Rossi" },
+      { name:"B7.25.50", code:"B7.25.50", hex:"#BC5343", family:"Rossi" },
+      { name:"D0.31.44", code:"D0.31.44", hex:"#B2762E", family:"Rossi" },
+      { name:"E4.22.49", code:"E4.22.49", hex:"#B1A249", family:"Arancioni" },
+      { name:"FN.01.79", code:"FN.01.79", hex:"#CACAC8", family:"Neutri caldi" },
+      { name:"G5.07.77", code:"G5.07.77", hex:"#C5CCBD", family:"Verdi-Azzurri" },
+      { name:"L8.04.50", code:"L8.04.50", hex:"#768988", family:"Neutri freddi" },
+      { name:"J5.03.71", code:"J5.03.71", hex:"#B1B9B2", family:"Neutri freddi" },
+      { name:"NN.01.54", code:"NN.01.54", hex:"#878A8C", family:"Neutri freddi" },
+      { name:"CN.02.38", code:"CN.02.38", hex:"#65605D", family:"Neutri caldi" },
+      { name:"ON.01.70", code:"ON.01.70", hex:"#B4B1B1", family:"Neutri caldi" },
+      { name:"E4.10.40", code:"E4.10.40", hex:"#797453", family:"Arancioni" },
+      { name:"E7.10.53", code:"E7.10.53", hex:"#9E9A70", family:"Arancioni" },
+      { name:"C5.39.34", code:"C5.39.34", hex:"#974716", family:"Rossi" },
+      { name:"D5.10.65", code:"D5.10.65", hex:"#B7AB95", family:"Rossi" },
+      { name:"T0.10.70", code:"T0.10.70", hex:"#BBA4C1", family:"Blu" },
+      { name:"T4.04.66", code:"T4.04.66", hex:"#ADA2AF", family:"Neutri freddi" },
+      { name:"E4.06.35", code:"E4.06.35", hex:"#63614F", family:"Arancioni" },
+      { name:"FN.02.77", code:"FN.02.77", hex:"#C6C7C2", family:"Neutri caldi" },
+      { name:"G0.16.68", code:"G0.16.68", hex:"#B5C695", family:"Verdi-Azzurri" },
+      { name:"G3.12.56", code:"G3.12.56", hex:"#94A875", family:"Verdi-Azzurri" },
+      { name:"J0.05.65", code:"J0.05.65", hex:"#9DAE9E", family:"Neutri freddi" },
+      { name:"K0.05.47", code:"K0.05.47", hex:"#6C8376", family:"Neutri freddi" },
+      { name:"AN.02.76", code:"AN.02.76", hex:"#C4BFC0", family:"Neutri caldi" },
+      { name:"E4.28.55", code:"E4.28.55", hex:"#C9B84F", family:"Arancioni" },
+      { name:"D2.35.45", code:"D2.35.45", hex:"#BF7F26", family:"Rossi" },
+      { name:"E1.10.70", code:"E1.10.70", hex:"#C1BBA4", family:"Arancioni" },
+      { name:"F2.40.50", code:"F2.40.50", hex:"#D7E01F", family:"Arancioni" },
+      { name:"F6.48.68", code:"F6.48.68", hex:"#E4F764", family:"Arancioni" },
+      { name:"E5.31.41", code:"E5.31.41", hex:"#A6972B", family:"Arancioni" },
+      { name:"E7.15.62", code:"E7.15.62", hex:"#BAB582", family:"Arancioni" },
+    ],
     decorazioni: [
       {name:"Legno Chiaro", hex:"#C7A57A", code:"D-01"}, {name:"Legno Scuro", hex:"#6B4A34", code:"D-02"},
       {name:"Rame", hex:"#B5652E", code:"D-03"}, {name:"Oro Satinato", hex:"#C7A24A", code:"D-04"},
@@ -513,7 +964,8 @@
   var EFFETTO_HINT = { liscio:"Un unico colore steso in modo uniforme.", nuvolato:"Due colori miscelati con effetto marmorizzato, tipico delle resine decorative." };
   var FINITURA_HINT = { opaco:"Superficie piena, senza riflessi.", satinato:"Via di mezzo tra opaco e lucido, la più richiesta.", lucido:"Massima brillantezza e profondità del colore." };
 
-  var state = { material:null, effetto:'liscio', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { material:null, effetto:'liscio', context:'interno', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var CONTEXT_HINT = { interno:"Colori pensati per pareti e superfici interne.", esterno:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni." };
   var pickPhase = 'A';
   var familyFilter = null; // famiglia colore attiva (solo per palette con "family", es. Sikkens), null = tutte
   var colorSearchQuery = '';
@@ -529,10 +981,19 @@
     card.innerHTML = '<span class="sw" style="background:'+m.swatch+'"></span><span class="m-name">'+m.name+'</span><span class="m-desc">'+m.desc+'</span>';
     card.addEventListener('click', function(){
       state.material = m; state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
+      state.context = 'interno';
       document.getElementById('colorSearch').value='';
       Array.prototype.forEach.call(materialGrid.children, function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
       document.getElementById('next1').disabled = false;
+      var isImb = m.id === 'imbiancatura';
+      document.getElementById('contextLabel').style.display = isImb ? 'block' : 'none';
+      document.getElementById('contextControl').style.display = isImb ? 'flex' : 'none';
+      document.getElementById('contextHint').style.display = isImb ? 'block' : 'none';
+      if(isImb){
+        Array.prototype.forEach.call(document.getElementById('contextControl').children, function(b){ b.classList.toggle('active', b.dataset.v==='interno'); });
+        document.getElementById('contextHint').textContent = CONTEXT_HINT.interno;
+      }
     });
     materialGrid.appendChild(card);
   });
@@ -799,7 +1260,9 @@
     if(state.effetto==='nuvolato'){
       label.textContent = pickPhase==='A' ? 'Colore principale' : 'Colore secondario';
     } else { label.textContent = 'Colore'; }
-    var fullList = PALETTES[state.material.id] || [];
+    var paletteKey = state.material.id;
+    if(paletteKey === 'imbiancatura' && state.context === 'esterno') paletteKey = 'imbiancatura_esterni';
+    var fullList = PALETTES[paletteKey] || [];
     var hasFamilies = fullList.length && fullList[0].family;
 
     renderFamilyRow(fullList);
@@ -885,6 +1348,16 @@
     document.getElementById('effettoHint').textContent = EFFETTO_HINT[v];
     if(v==='liscio'){ state.colorB=null; pickPhase='A'; } else { pickPhase = state.colorA ? 'B' : 'A'; }
     aiResultImage=null;
+    renderStep2UI();
+  });
+
+  document.getElementById('contextControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    var v = btn.dataset.v; state.context = v;
+    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
+    document.getElementById('contextHint').textContent = CONTEXT_HINT[v];
+    state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
+    document.getElementById('colorSearch').value='';
     renderStep2UI();
   });
 
