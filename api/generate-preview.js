@@ -114,6 +114,15 @@ module.exports = async function handler(req, res) {
     ? "questa foto reale della facciata esterna di un edificio"
     : "questa foto reale di un ambiente domestico";
 
+  // La boiserie, più di un semplice colore/texture piatta, è un elemento architettonico
+  // con vero spessore fisico: senza istruzioni extra l'AI tende a "incollarla" sopra la
+  // foto come un adesivo piatto invece di integrarla nella scena (prospettiva, luce,
+  // ombre, mobili davanti). Questa nota extra spinge verso un risultato più fotografico
+  // e meno da rendering 3D.
+  const boiserieRealismNote = materialId === "decorazioni"
+    ? " La boiserie deve avere volume e spessore reali, non un'immagine piatta incollata sopra la foto: segui esattamente la prospettiva e le linee di fuga della parete originale, fai cadere le ombre delle cornici/modanature/scanalature nella stessa direzione della luce già presente nella stanza, usa una texture di legno naturale con leggere variazioni di tono (mai un colore piatto e uniforme), e lascia che mobili/oggetti già presenti nella foto restino davanti alla boiserie dove la coprirebbero nella realtà. Il risultato finale deve sembrare una vera fotografia di una posa reale, non un rendering 3D né un adesivo digitale."
+    : "";
+
   const prompt = [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
@@ -123,7 +132,8 @@ module.exports = async function handler(req, res) {
       ? `Mantieni identica la prospettiva, la luce, le ombre, gli infissi, il tetto e tutto il resto dell'edificio e dell'ambiente circostante: cambia solo il colore/texture della facciata indicata, in modo fotorealistico, come se fosse una vera tinteggiatura professionale.`
       : isFloorOnly
         ? `Mantieni identiche la prospettiva, la luce, le ombre, i mobili, e mantieni assolutamente INVARIATE tutte le pareti/muri della stanza (colore e materiale originali): cambia solo il pavimento, in modo fotorealistico, come se fosse una vera posa professionale.`
-        : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`
+        : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`,
+    boiserieRealismNote
   ].join(" ");
 
   // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
