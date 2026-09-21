@@ -794,7 +794,14 @@
         });
       })
       .then(function(res){
-        if(!res.ok) throw new Error((res.data && res.data.error) ? res.data.error : 'Errore sconosciuto');
+        if(!res.ok){
+          var msg = (res.data && res.data.error) ? res.data.error : 'Errore sconosciuto';
+          if(res.data && res.data.details){
+            var detailStr = typeof res.data.details === 'string' ? res.data.details : JSON.stringify(res.data.details);
+            msg += ' — ' + detailStr.slice(0, 300);
+          }
+          throw new Error(msg);
+        }
         if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
         return new Promise(function(resolve, reject){
           var img = new Image();
