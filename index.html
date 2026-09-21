@@ -191,7 +191,7 @@
         <input type="file" id="photoInput" accept="image/*" style="display:none">
       </div>
     </div>
-    <div class="hero-hint">Trascina l'immagine per confrontare prima/dopo (anteprima indicativa)</div>
+    <div class="hero-hint" id="heroHint">Carica una foto reale del tuo ambiente, poi genera l'anteprima AI per vedere il risultato fotorealistico</div>
 
     <div id="templateSection">
       <div class="section-label" style="margin-top:0">Oppure prova su un ambiente di esempio</div>
@@ -201,7 +201,6 @@
 
     <button class="ai-btn" id="aiGenerateBtn" disabled>✨ Genera anteprima AI fotorealistica</button>
     <div class="ai-status" id="aiStatus"></div>
-    <div class="ai-result" id="aiResult" style="display:none"><img id="aiResultImg" alt="Anteprima generata dall'AI"></div>
 
     <div class="section-label">Effetto</div>
     <div class="seg-control" id="effettoControl">
@@ -332,6 +331,7 @@
   var pickPhase = 'A';
   var photoImg = null;
   var isTemplate = false;
+  var aiResultImage = null; // Image() dell'anteprima generata davvero dall'AI, null finché non c'è
 
   // ---------- STEP 1 ----------
   var materialGrid = document.getElementById('materialGrid');
@@ -340,7 +340,7 @@
     card.type='button'; card.className='material-card';
     card.innerHTML = '<span class="sw" style="background:'+m.swatch+'"></span><span class="m-name">'+m.name+'</span><span class="m-desc">'+m.desc+'</span>';
     card.addEventListener('click', function(){
-      state.material = m; state.colorA=null; state.colorB=null; pickPhase='A';
+      state.material = m; state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null;
       Array.prototype.forEach.call(materialGrid.children, function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
       document.getElementById('next1').disabled = false;
@@ -359,7 +359,7 @@
       card.classList.add('selected');
       var img = new Image();
       img.onload = function(){
-        photoImg = img; isTemplate = true;
+        photoImg = img; isTemplate = true; aiResultImage = null;
         state.photoBase64 = null; state.photoMime = null;
         showHeroLoaded();
         document.getElementById('aiGenerateBtn').disabled = true;
@@ -411,10 +411,9 @@
         if(match){ state.photoMime = match[1]; state.photoBase64 = match[2]; }
         var img = new Image();
         img.onload = function(){
-          photoImg = img; isTemplate = false;
+          photoImg = img; isTemplate = false; aiResultImage = null;
           Array.prototype.forEach.call(templateRow.children, function(c){ c.classList.remove('selected'); });
           showHeroLoaded();
-          document.getElementById('aiResult').style.display = 'none';
           document.getElementById('aiGenerateBtn').disabled = !state.colorA;
           document.getElementById('aiStatus').classList.remove('error');
           document.getElementById('aiStatus').textContent = '';
@@ -484,12 +483,14 @@
     document.getElementById('compareHandle').style.left=v+'%';
   }
 
+  // Il riquadro mostra sempre la foto vera e propria, senza colorazioni finte.
+  // Solo dopo che l'AI ha generato davvero l'immagine modificata, mostriamo un
+  // confronto reale PRIMA (foto originale) / DOPO (immagine generata dall'AI).
   function renderHeroPreview(){
     if(!photoImg) return;
     drawCover(document.getElementById('canvasBefore'), photoImg);
     var after=document.getElementById('canvasAfter');
-    if(!state.colorA){
-      // no color chosen yet: just mirror the plain photo, hide compare UI
+    if(!aiResultImage){
       drawCover(after, photoImg);
       after.style.clipPath = 'inset(0 100% 0 0)';
       document.getElementById('tagBefore').style.display='none';
@@ -502,10 +503,7 @@
     document.getElementById('tagAfter').style.display='block';
     document.getElementById('compareHandle').style.display='block';
     document.getElementById('compareSlider').style.display='block';
-    var ctx=drawCover(after, photoImg);
-    var pattern=buildPatternCanvas(after.width, after.height, state.colorA.hex, state.colorB?state.colorB.hex:null, state.effetto);
-    ctx.globalCompositeOperation='color'; ctx.drawImage(pattern,0,0,after.width,after.height); ctx.globalCompositeOperation='source-over';
-    applyFinishOverlay(ctx, after.width, after.height, state.finitura, true);
+    drawCover(after, aiResultImage);
     applySlider();
   }
 
@@ -520,13 +518,13 @@
     if(state.colorA){
       var chipA=document.createElement('span'); chipA.className='chip';
       chipA.innerHTML='<span class="dot" style="background:'+state.colorA.hex+'"></span>'+state.colorA.name+'<button aria-label="rimuovi">×</button>';
-      chipA.querySelector('button').addEventListener('click', function(){ state.colorA=null; state.colorB=null; pickPhase='A'; renderStep2UI(); });
+      chipA.querySelector('button').addEventListener('click', function(){ state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; renderStep2UI(); });
       row.appendChild(chipA);
     }
     if(state.effetto==='nuvolato' && state.colorB){
       var chipB=document.createElement('span'); chipB.className='chip';
       chipB.innerHTML='<span class="dot" style="background:'+state.colorB.hex+'"></span>'+state.colorB.name+'<button aria-label="rimuovi">×</button>';
-      chipB.querySelector('button').addEventListener('click', function(){ state.colorB=null; pickPhase='B'; renderStep2UI(); });
+      chipB.querySelector('button').addEventListener('click', function(){ state.colorB=null; pickPhase='B'; aiResultImage=null; renderStep2UI(); });
       row.appendChild(chipB);
     }
   }
@@ -550,6 +548,7 @@
           state.colorA=c;
           if(state.effetto==='nuvolato'){ pickPhase='B'; }
         } else { state.colorB=c; }
+        aiResultImage=null;
         renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next();
         document.getElementById('aiGenerateBtn').disabled = !(state.photoBase64 && state.colorA);
       });
@@ -570,6 +569,7 @@
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('effettoHint').textContent = EFFETTO_HINT[v];
     if(v==='liscio'){ state.colorB=null; pickPhase='A'; } else { pickPhase = state.colorA ? 'B' : 'A'; }
+    aiResultImage=null;
     renderStep2UI();
   });
 
@@ -578,6 +578,7 @@
     var v = btn.dataset.v; state.finitura = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('finituraHint').textContent = FINITURA_HINT[v];
+    aiResultImage=null;
     updateAllPreviews();
   });
 
@@ -587,7 +588,6 @@
     var btn = this; var statusEl = document.getElementById('aiStatus');
     btn.disabled = true; statusEl.classList.remove('error');
     statusEl.textContent = 'Generazione in corso… può richiedere 10-20 secondi.';
-    document.getElementById('aiResult').style.display = 'none';
     fetch(AI_ENDPOINT, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -607,9 +607,17 @@
       .then(function(res){
         if(!res.ok) throw new Error((res.data && res.data.error) ? res.data.error : 'Errore sconosciuto');
         if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
-        document.getElementById('aiResultImg').src = 'data:' + res.data.mimeType + ';base64,' + res.data.imageBase64;
-        document.getElementById('aiResult').style.display = 'block';
-        statusEl.textContent = "Fatto — questa è la versione generata dall'AI.";
+        return new Promise(function(resolve, reject){
+          var img = new Image();
+          img.onload = function(){ resolve(img); };
+          img.onerror = function(){ reject(new Error("L'AI ha risposto ma l'immagine non è leggibile")); };
+          img.src = 'data:' + res.data.mimeType + ';base64,' + res.data.imageBase64;
+        });
+      })
+      .then(function(img){
+        aiResultImage = img;
+        renderHeroPreview();
+        statusEl.textContent = "Fatto — questa è la vera immagine generata dall'AI. Trascina per confrontare prima e dopo.";
       })
       .catch(function(err){
         statusEl.classList.add('error');
