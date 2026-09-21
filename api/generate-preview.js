@@ -1,754 +1,140 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>DGM Resine — Preventivo</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+// api/generate-preview.js
+// Funzione serverless (pensata per Vercel) che riceve la foto del cliente
+// e la fa modificare da un modello AI di generazione/editing immagini,
+// applicando in modo fotorealistico la lavorazione/colore/effetto/finitura scelti.
+//
+// COSA FA QUESTO FILE, IN BREVE
+// 1. Riceve dal frontend: la foto (base64), lavorazione, colore/i, effetto, finitura
+// 2. Costruisce un prompt che descrive la modifica da fare
+// 3. Chiama l'API di Google Gemini (modello "gemini-3.1-flash-image-preview", evoluzione
+//    di "nano banana"), pensato apposta per editing fotorealistico di foto esistenti
+// 4. Restituisce al frontend l'immagine generata (base64), pronta da mostrare
+//
+// PRIMA DI USARLO IN PRODUZIONE
+// - Verifica sulla documentazione ufficiale Google (ai.google.dev) l'endpoint e il
+//   formato esatto della richiesta/risposta: le API di generazione immagini cambiano
+//   spesso, questo codice è una base di partenza corretta nella struttura ma va
+//   testata e aggiustata con una chiamata reale prima di andare online.
+// - Serve una API key Gemini (gratuita per iniziare, a consumo dopo una soglia):
+//   si ottiene su https://aistudio.google.com/apikey
+// - Non mettere MAI la API key nel codice del frontend/app: deve stare solo qui,
+//   come variabile d'ambiente sul server (GEMINI_API_KEY).
+//
+// COME SI DISTRIBUISCE (in breve, con Vercel — gratuito per iniziare)
+// 1. Crea un account su vercel.com e installa "Vercel CLI" (o collega una repo GitHub)
+// 2. Metti questo file dentro una cartella "api/" del progetto
+// 3. Su Vercel, in "Settings > Environment Variables", aggiungi:
+//      GEMINI_API_KEY = la-tua-chiave
+// 4. Fai il deploy (vercel --prod). Otterrai un indirizzo tipo:
+//      https://tuo-progetto.vercel.app/api/generate-preview
+// 5. Nell'app, il bottone "Genera anteprima AI" andrà a chiamare quell'indirizzo
+//    (questa parte la collego io appena il backend è online: mandami l'URL).
 
-  :root{
-    --bg:#F7F6F3; --surface:#FFFFFF; --ink:#1C1B18; --ink-soft:#6B6558;
-    --line:#E5E2D9; --accent:#1D3557; --accent-soft:#E8EDF2; --accent-ink:#FFFFFF;
-    --success:#2E7D32; --radius:10px;
-    box-sizing:border-box;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  :root[data-theme="dark"]{
-    --bg:#17181A; --surface:#212226; --ink:#F1EFE9; --ink-soft:#9A968B;
-    --line:#333335; --accent:#5C8AC2; --accent-soft:#233246; --accent-ink:#0E1420;
-  }
-  html{ height:100%; }
-  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  body{
-    margin:0; min-height:100%; background:var(--bg); color:var(--ink);
-    font-family:"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-
-  header{
-    position:sticky; top:0; z-index:20; background:var(--surface); border-bottom:1px solid var(--line);
-    padding: calc(14px + env(safe-area-inset-top,0px)) 20px 14px; display:flex; align-items:center; justify-content:space-between;
-  }
-  .brand{ display:flex; align-items:center; gap:10px; }
-  .brand-mark{ width:32px; height:32px; border-radius:8px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex:none; }
-  .brand-text{ display:flex; flex-direction:column; line-height:1.15; }
-  .brand-text .name{ font-size:14px; font-weight:700; }
-  .brand-text .tag{ font-size:10.5px; color:var(--ink-soft); }
-  .theme-btn{ border:1px solid var(--line); background:var(--surface); color:var(--ink); width:32px; height:32px; border-radius:50%; font-size:13px; cursor:pointer; }
-
-  .stepper{ display:flex; align-items:center; gap:6px; padding:14px 20px 4px; max-width:640px; margin:0 auto; }
-  .step-dot{ display:flex; align-items:center; gap:8px; flex:1; }
-  .step-dot .circle{ width:24px; height:24px; border-radius:50%; border:1.5px solid var(--line); color:var(--ink-soft); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex:none; background:var(--surface); }
-  .step-dot.done .circle{ background:var(--success); border-color:var(--success); color:#fff; }
-  .step-dot.active .circle{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
-  .step-dot .lbl{ font-size:11.5px; color:var(--ink-soft); white-space:nowrap; }
-  .step-dot.active .lbl{ color:var(--ink); font-weight:600; }
-  .step-line{ flex:1; height:1.5px; background:var(--line); margin:0 -2px 18px; }
-
-  main{ max-width:640px; margin:0 auto; padding: 18px 20px 150px; }
-  .panel{ display:none; }
-  .panel.active{ display:block; animation:rise .3s ease; }
-  @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
-  h1.title{ font-size:24px; font-weight:700; margin:2px 0 18px; }
-  .section-label{ font-size:12.5px; font-weight:600; color:var(--ink-soft); margin:20px 0 10px; text-transform:uppercase; letter-spacing:0.02em; }
-  .section-label:first-of-type{ margin-top:0; }
-
-  /* material cards */
-  .material-grid{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-  .material-card{
-    border:1.5px solid var(--line); background:var(--surface); border-radius:var(--radius); padding:16px 14px;
-    text-align:left; cursor:pointer; display:flex; flex-direction:column; gap:10px; min-height:120px;
-  }
-  .material-card .sw{ width:28px; height:28px; border-radius:7px; }
-  .material-card .m-name{ font-size:15.5px; font-weight:700; }
-  .material-card .m-desc{ font-size:11.5px; color:var(--ink-soft); line-height:1.4; }
-  .material-card.selected{ border-color:var(--accent); background:var(--accent-soft); }
-
-  /* hero preview */
-  .hero{ position:relative; width:100%; aspect-ratio:4/3; border-radius:var(--radius); overflow:hidden; border:1px solid var(--line); background:var(--surface); margin-bottom:16px; }
-  .hero canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; }
-  .hero .hero-empty{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; text-align:center; padding:24px; color:var(--ink-soft); font-size:13px; }
-  .hero .hero-empty .icon{ font-size:32px; }
-  .hero .hero-actions{ position:absolute; left:0; right:0; bottom:0; display:flex; gap:8px; padding:10px; background:linear-gradient(to top, rgba(0,0,0,0.55), transparent); }
-  .hero-btn{ flex:1; border:none; border-radius:7px; padding:10px 8px; font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; background:rgba(255,255,255,0.92); color:#1C1B18; }
-  .hero-btn.primary{ background:var(--accent); color:var(--accent-ink); }
-  .hero .tag{ position:absolute; top:10px; font-size:9.5px; font-weight:700; letter-spacing:0.04em; background:rgba(0,0,0,0.6); color:#fff; padding:4px 8px; border-radius:20px; z-index:3; }
-  .hero .tag.before{ left:10px; } .hero .tag.after{ right:10px; }
-  .hero .compare-handle{ position:absolute; top:0; bottom:0; width:2px; background:#fff; left:50%; z-index:3; box-shadow:0 0 0 1px rgba(0,0,0,0.3); pointer-events:none; }
-  .hero .compare-handle::after{ content:"◂▸"; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); background:#fff; color:#111; font-size:10px; padding:3px 5px; border-radius:12px; letter-spacing:2px; }
-  .hero .compare-range{ position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:ew-resize; z-index:4; }
-  .hero-hint{ font-size:11.5px; color:var(--ink-soft); margin:-8px 0 18px; text-align:center; }
-
-  .template-row{ display:flex; gap:8px; margin-bottom:16px; }
-  .template-card{ flex:1; border:1.5px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface); cursor:pointer; padding:0; text-align:center; }
-  .template-card svg{ width:100%; height:44px; display:block; }
-  .template-card .t-name{ display:block; font-size:10px; color:var(--ink-soft); padding:5px 2px; }
-  .template-card.selected{ border-color:var(--accent); }
-
-  .seg-control{ display:flex; border:1.5px solid var(--line); border-radius:8px; overflow:hidden; background:var(--surface); margin-bottom:6px; }
-  .seg-control button{ flex:1; padding:11px 6px; background:transparent; border:none; color:var(--ink-soft); font-size:12.5px; font-weight:600; cursor:pointer; font-family:inherit; border-left:1.5px solid var(--line); }
-  .seg-control button:first-child{ border-left:none; }
-  .seg-control button.active{ background:var(--accent); color:var(--accent-ink); }
-  .seg-hint{ font-size:11px; color:var(--ink-soft); margin-bottom:16px; }
-
-  .chip-row{ display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
-  .chip{ display:flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:20px; padding:5px 10px 5px 6px; font-size:11.5px; background:var(--surface); }
-  .chip .dot{ width:14px; height:14px; border-radius:4px; flex:none; }
-  .chip button{ border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:13px; padding:0 0 0 2px; }
-
-  .swatch-grid{ display:grid; grid-template-columns:repeat(5,1fr); gap:8px 6px; margin-bottom:6px; }
-  .swatch{ background:none; border:none; cursor:pointer; padding:0; text-align:center; }
-  .swatch .sw-color{ width:100%; aspect-ratio:1; border-radius:7px; border:1.5px solid rgba(0,0,0,0.08); box-shadow: inset 0 -6px 8px rgba(0,0,0,0.08); }
-  .swatch .sw-name{ font-size:9px; margin-top:4px; color:var(--ink-soft); line-height:1.2; display:block; }
-  .swatch.selected .sw-color{ outline:2.5px solid var(--accent); outline-offset:2px; }
-  .swatch.selected .sw-name{ color:var(--ink); font-weight:700; }
-  .swatch:disabled{ opacity:0.3; cursor:not-allowed; }
-
-  .ai-btn{ display:block; width:100%; margin-top:4px; border:none; border-radius:8px; padding:14px 16px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent); color:var(--accent-ink); }
-  .ai-btn:disabled{ opacity:0.5; cursor:wait; }
-  .ai-status{ font-size:11.5px; color:var(--ink-soft); margin-top:8px; min-height:14px; }
-  .ai-status.error{ color:#C0392B; }
-  .ai-result{ margin-top:12px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
-  .ai-result img{ width:100%; display:block; }
-
-  .field{ margin-bottom:16px; }
-  .field label{ display:block; font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:6px; }
-  .field input, .field textarea{
-    width:100%; border:1.5px solid var(--line); background:var(--surface); color:var(--ink);
-    padding:12px 12px; font-size:15px; border-radius:8px; font-family:inherit;
-  }
-  .field textarea{ min-height:74px; resize:vertical; }
-  .field input:focus, .field textarea:focus{ outline:none; border-color:var(--accent); }
-  .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-
-  .summary{ border:1.5px solid var(--line); border-radius:var(--radius); padding:14px 16px; margin-bottom:16px; font-size:13px; color:var(--ink-soft); background:var(--surface); }
-  .summary .line{ display:flex; align-items:center; gap:10px; margin-bottom:6px; }
-  .summary .line:last-child{ margin-bottom:0; }
-  .summary .sw{ width:16px; height:16px; border-radius:4px; flex:none; }
-  .summary b{ color:var(--ink); }
-  .summary .edit{ display:inline-block; margin-top:10px; color:var(--accent); text-decoration:underline; cursor:pointer; font-size:11.5px; font-weight:600; }
-
-  .share-btn{ display:block; width:100%; margin-bottom:18px; border:1.5px solid var(--line); border-radius:8px; padding:13px 16px; font-size:13.5px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--surface); color:var(--ink); }
-  .share-btn:disabled{ opacity:0.5; cursor:default; }
-
-  .bar{ position:fixed; left:0; right:0; bottom:0; z-index:30; max-width:640px; margin:0 auto; padding:12px 20px calc(14px + env(safe-area-inset-bottom,0px)); background:linear-gradient(to top, var(--bg) 65%, transparent); display:flex; gap:10px; }
-  .btn{ border:none; border-radius:8px; padding:15px 16px; font-size:14.5px; font-weight:700; cursor:pointer; font-family:inherit; }
-  .btn-primary{ flex:1; background:var(--accent); color:var(--accent-ink); }
-  .btn-ghost{ background:var(--surface); color:var(--ink); border:1.5px solid var(--line); padding-left:18px; padding-right:18px; }
-  .btn:disabled{ opacity:0.4; cursor:not-allowed; }
-  .btn-wa{ flex:1; background:#2E7D32; color:#fff; }
-
-  .confirm{ text-align:center; padding:60px 10px 10px; }
-  .confirm .title{ font-size:22px; font-weight:700; margin-bottom:10px; }
-  .confirm p{ color:var(--ink-soft); font-size:14px; line-height:1.55; max-width:380px; margin:0 auto; }
-  .confirm .icon{ font-size:44px; margin-bottom:14px; }
-</style>
-</head>
-<body>
-
-<header>
-  <div class="brand">
-    <div class="brand-mark">DG</div>
-    <div class="brand-text"><span class="name">DGM Resine</span><span class="tag">Pavimenti · Rivestimenti · Imbiancatura</span></div>
-  </div>
-  <button class="theme-btn" id="themeBtn" aria-label="Cambia tema">◐</button>
-</header>
-
-<div class="stepper" id="stepper">
-  <div class="step-dot active" data-s="1"><span class="circle">1</span><span class="lbl">Lavorazione</span></div>
-  <div class="step-line"></div>
-  <div class="step-dot" data-s="2"><span class="circle">2</span><span class="lbl">Personalizza</span></div>
-  <div class="step-line"></div>
-  <div class="step-dot" data-s="3"><span class="circle">3</span><span class="lbl">Contatti</span></div>
-</div>
-
-<main>
-  <!-- STEP 1 -->
-  <section class="panel active" id="panel1">
-    <h1 class="title">Cosa vuoi realizzare?</h1>
-    <div class="material-grid" id="materialGrid"></div>
-  </section>
-
-  <!-- STEP 2 -->
-  <section class="panel" id="panel2">
-    <h1 class="title">Personalizza la finitura</h1>
-
-    <div class="hero" id="hero">
-      <canvas id="canvasBefore"></canvas>
-      <canvas id="canvasAfter"></canvas>
-      <div class="hero-empty" id="heroEmpty">
-        <span class="icon">🏠</span>
-        <span>Carica una foto del tuo ambiente o scegli un esempio qui sotto per vedere subito il risultato</span>
-      </div>
-      <span class="tag before" id="tagBefore" style="display:none">PRIMA</span>
-      <span class="tag after" id="tagAfter" style="display:none">DOPO</span>
-      <div class="compare-handle" id="compareHandle" style="display:none"></div>
-      <input type="range" class="compare-range" id="compareSlider" min="0" max="100" value="50" style="display:none">
-      <div class="hero-actions">
-        <label class="hero-btn primary" for="photoInput">📷 Carica foto</label>
-        <input type="file" id="photoInput" accept="image/*" style="display:none">
-      </div>
-    </div>
-    <div class="hero-hint">Trascina l'immagine per confrontare prima/dopo (anteprima indicativa)</div>
-
-    <div id="templateSection">
-      <div class="section-label" style="margin-top:0">Oppure prova su un ambiente di esempio</div>
-      <div class="template-row" id="templateRow"></div>
-    </div>
-    <button id="toggleTemplates" style="display:none; background:none; border:none; color:var(--accent); font-size:12.5px; font-weight:600; text-decoration:underline; cursor:pointer; font-family:inherit; margin:-6px 0 16px; padding:0;">Prova invece su un ambiente di esempio</button>
-
-    <button class="ai-btn" id="aiGenerateBtn" disabled>✨ Genera anteprima AI fotorealistica</button>
-    <div class="ai-status" id="aiStatus"></div>
-    <div class="ai-result" id="aiResult" style="display:none"><img id="aiResultImg" alt="Anteprima generata dall'AI"></div>
-
-    <div class="section-label">Effetto</div>
-    <div class="seg-control" id="effettoControl">
-      <button data-v="liscio" class="active">Liscio uniforme</button>
-      <button data-v="nuvolato">Nuvolato</button>
-    </div>
-    <div class="seg-hint" id="effettoHint">Un unico colore steso in modo uniforme.</div>
-
-    <div class="chip-row" id="colorChips"></div>
-    <div class="section-label" id="clusterLabel">Colore</div>
-    <div class="swatch-grid" id="colorCluster"></div>
-
-    <div class="section-label">Finitura</div>
-    <div class="seg-control" id="finituraControl">
-      <button data-v="opaco">Opaco</button>
-      <button data-v="satinato" class="active">Satinato</button>
-      <button data-v="lucido">Lucido</button>
-    </div>
-    <div class="seg-hint" id="finituraHint">Via di mezzo tra opaco e lucido, la più richiesta.</div>
-  </section>
-
-  <!-- STEP 3 -->
-  <section class="panel" id="panel3">
-    <h1 class="title">I tuoi dati</h1>
-    <div class="summary" id="summaryBox"></div>
-    <button class="share-btn" id="shareConfigBtn">📤 Salva o condividi questa selezione</button>
-    <canvas id="shareCardCanvas" width="800" height="1000" style="display:none"></canvas>
-
-    <div class="field"><label for="fName">Nome e cognome</label><input id="fName" type="text" placeholder="Mario Rossi" autocomplete="name"></div>
-    <div class="row2">
-      <div class="field"><label for="fPhone">Telefono</label><input id="fPhone" type="tel" placeholder="333 1234567" autocomplete="tel"></div>
-      <div class="field"><label for="fMq">Mq indicativi</label><input id="fMq" type="text" inputmode="decimal" placeholder="es. 40"></div>
-    </div>
-    <div class="field"><label for="fCity">Città / indirizzo</label><input id="fCity" type="text" placeholder="Via, città" autocomplete="street-address"></div>
-    <div class="field"><label for="fNote">Note (opzionale)</label><textarea id="fNote" placeholder="Ambiente, tempistiche, dettagli utili"></textarea></div>
-  </section>
-
-  <!-- CONFIRM -->
-  <section class="panel" id="panelConfirm">
-    <div class="confirm">
-      <div class="icon">✅</div>
-      <div class="title">Richiesta pronta</div>
-      <p>Si è aperto WhatsApp con il messaggio già compilato: ti basta premere invia. In alternativa scrivici via email qui sotto.</p>
-    </div>
-  </section>
-</main>
-
-<div class="bar" id="bar1"><button class="btn btn-primary" id="next1" disabled>Continua</button></div>
-<div class="bar" id="bar2" style="display:none"><button class="btn btn-ghost" id="back2">Indietro</button><button class="btn btn-primary" id="next2" disabled>Continua</button></div>
-<div class="bar" id="bar3" style="display:none; flex-direction:column;">
-  <div style="display:flex; gap:10px;"><button class="btn btn-ghost" id="back3">Indietro</button><button class="btn btn-wa" id="sendWa" disabled>Invia via WhatsApp</button></div>
-  <a href="#" id="sendEmail" style="text-align:center; font-size:12px; color:var(--ink-soft); text-decoration:underline; padding-top:8px; display:block;">oppure invia via email</a>
-</div>
-
-<script>
-(function(){
-  var WHATSAPP_LINK = "https://wa.me/message/IOK6PQT77DFTJ1";
-  var EMAIL_TO = "info@dgmresine.com";
-  var AI_ENDPOINT = "/api/generate-preview";
-
-  var downloadsApi = null;
-  function initDownloads(){
-    var btn = document.getElementById('shareConfigBtn');
-    if(window.claude && window.claude.use){
-      window.claude.use("downloads").then(function(api){ downloadsApi = api; if(!api && btn) btn.style.display='none'; });
-    } else if(btn){ btn.style.display='none'; }
+module.exports = async function handler(req, res) {
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  var MATERIALS = [
-    { id:"resina", name:"Resina", desc:"Pavimenti e rivestimenti civili e industriali", swatch:"#A9A296" },
-    { id:"microcemento", name:"Microcemento", desc:"Superfici continue, effetto materico", swatch:"#8F8B82" },
-    { id:"scale", name:"Scale", desc:"Rivestimento di scale interne ed esterne in resina o microcemento", swatch:"#BDB4A4" },
-    { id:"imbiancatura", name:"Imbiancatura", desc:"Interventi civili e industriali", swatch:"#D6D2C8" },
-    { id:"decorazioni", name:"Decorazioni", desc:"Finiture e boiserie su misura", swatch:"#B5652E" }
-  ];
+  const { imageBase64, mimeType, material, colorA, colorB, effetto, finitura } = req.body || {};
 
-  var PALETTES = {
-    resina: [
-      {name:"Grigio Tortora", hex:"#A9A296", code:"T-01"}, {name:"Antracite", hex:"#3B3A38", code:"T-02"},
-      {name:"Bianco Calce", hex:"#EDEAE2", code:"T-03"}, {name:"Sabbia", hex:"#C9B896", code:"T-04"},
-      {name:"Terra di Siena", hex:"#A9662E", code:"T-05"}, {name:"Verde Salvia", hex:"#7C8B70", code:"T-06"},
-      {name:"Grigio Perla", hex:"#C9C5BC", code:"T-07"}, {name:"Blu Petrolio", hex:"#375A64", code:"T-08"},
-      {name:"Rosso Mattone", hex:"#8C4A3A", code:"T-09"}, {name:"Grigio Piombo", hex:"#5C5A54", code:"T-10"}
-    ],
-    microcemento: [
-      {name:"Grigio Cemento", hex:"#8F8B82", code:"M-01"}, {name:"Grigio Perla", hex:"#C9C5BC", code:"M-02"},
-      {name:"Tortora Chiaro", hex:"#BDB4A4", code:"M-03"}, {name:"Antracite", hex:"#403E3B", code:"M-04"},
-      {name:"Ecrù", hex:"#DDD3BF", code:"M-05"}, {name:"Testa di Moro", hex:"#4A3B30", code:"M-06"},
-      {name:"Bianco Sporco", hex:"#E7E2D6", code:"M-07"}, {name:"Verde Muschio", hex:"#6E7A5E", code:"M-08"},
-      {name:"Blu Notte", hex:"#2E3A4A", code:"M-09"}, {name:"Sabbia Dorata", hex:"#C7AD7C", code:"M-10"}
-    ],
-    scale: [
-      {name:"Grigio Tortora", hex:"#A9A296", code:"S-01"}, {name:"Grigio Cemento", hex:"#8F8B82", code:"S-02"},
-      {name:"Antracite", hex:"#3B3A38", code:"S-03"}, {name:"Bianco Calce", hex:"#EDEAE2", code:"S-04"},
-      {name:"Tortora Chiaro", hex:"#BDB4A4", code:"S-05"}, {name:"Sabbia", hex:"#C9B896", code:"S-06"},
-      {name:"Testa di Moro", hex:"#4A3B30", code:"S-07"}, {name:"Grigio Perla", hex:"#C9C5BC", code:"S-08"},
-      {name:"Verde Salvia", hex:"#7C8B70", code:"S-09"}, {name:"Blu Petrolio", hex:"#375A64", code:"S-10"}
-    ],
-    imbiancatura: [
-      {name:"Bianco Puro", hex:"#F6F4EF", code:"I-01"}, {name:"Bianco Latte", hex:"#EFE9DC", code:"I-02"},
-      {name:"Grigio Chiaro", hex:"#D6D2C8", code:"I-03"}, {name:"Tortora", hex:"#B8AE9E", code:"I-04"},
-      {name:"Azzurro Polvere", hex:"#B7C4C2", code:"I-05"}, {name:"Verde Salvia", hex:"#9AA68F", code:"I-06"},
-      {name:"Giallo Paglierino", hex:"#E4D9A8", code:"I-07"}, {name:"Rosa Cipria", hex:"#DCC2BE", code:"I-08"},
-      {name:"Blu Cielo", hex:"#A9C0D0", code:"I-09"}, {name:"Grigio Perla", hex:"#CFCBC2", code:"I-10"}
-    ],
-    decorazioni: [
-      {name:"Legno Chiaro", hex:"#C7A57A", code:"D-01"}, {name:"Legno Scuro", hex:"#6B4A34", code:"D-02"},
-      {name:"Rame", hex:"#B5652E", code:"D-03"}, {name:"Oro Satinato", hex:"#C7A24A", code:"D-04"},
-      {name:"Grafite", hex:"#3A3A3A", code:"D-05"}, {name:"Bianco Boiserie", hex:"#EFEAE0", code:"D-06"},
-      {name:"Noce Scuro", hex:"#4A3324", code:"D-07"}, {name:"Argento", hex:"#B8BCC0", code:"D-08"},
-      {name:"Verde Bosco", hex:"#3E4F3C", code:"D-09"}, {name:"Blu Navy", hex:"#233245", code:"D-10"}
-    ]
-  };
-
-  var ROOM_TEMPLATES = [
-    { id:'soggiorno', name:'Soggiorno', svg:
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#DCD6C8"/><rect y="0" width="400" height="90" fill="#EDE8DC"/><polygon points="0,90 400,90 400,300 0,300" fill="#D2CBBA"/><polygon points="0,90 400,90 320,270 80,270" fill="#C7BFAB"/><rect x="40" y="30" width="70" height="50" fill="none" stroke="#B4AC9C" stroke-width="3"/><rect x="130" y="190" width="140" height="55" rx="6" fill="#8C8674" opacity="0.5"/><circle cx="330" cy="60" r="18" fill="#EAD9A0" opacity="0.6"/></svg>' },
-    { id:'bagno', name:'Bagno', svg:
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#DCE0DE"/><rect y="0" width="400" height="100" fill="#EAEDEC"/><polygon points="0,100 400,100 400,300 0,300" fill="#CDD2CF"/><rect x="230" y="150" width="140" height="70" rx="10" fill="#F4F4F2" opacity="0.7" stroke="#B4AC9C" stroke-width="2"/><rect x="40" y="40" width="60" height="60" fill="none" stroke="#B4AC9C" stroke-width="3"/><rect x="20" y="200" width="60" height="40" rx="4" fill="#8C8674" opacity="0.4"/></svg>' },
-    { id:'terrazzo', name:'Terrazzo', svg:
-      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"><rect width="400" height="300" fill="#CFE0DE"/><rect y="0" width="400" height="120" fill="#DCEEEA"/><polygon points="0,120 400,120 400,300 0,300" fill="#C2BDA9"/><circle cx="90" cy="70" r="26" fill="#F2E6B8" opacity="0.7"/><rect x="250" y="170" width="90" height="50" rx="6" fill="#7C8B70" opacity="0.5"/><rect x="270" y="130" width="14" height="45" fill="#5E6A54" opacity="0.5"/></svg>' }
-  ];
-
-  var EFFETTO_HINT = { liscio:"Un unico colore steso in modo uniforme.", nuvolato:"Due colori miscelati con effetto marmorizzato, tipico delle resine decorative." };
-  var FINITURA_HINT = { opaco:"Superficie piena, senza riflessi.", satinato:"Via di mezzo tra opaco e lucido, la più richiesta.", lucido:"Massima brillantezza e profondità del colore." };
-
-  var state = { material:null, effetto:'liscio', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
-  var pickPhase = 'A';
-  var photoImg = null;
-  var isTemplate = false;
-
-  // ---------- STEP 1 ----------
-  var materialGrid = document.getElementById('materialGrid');
-  MATERIALS.forEach(function(m){
-    var card = document.createElement('button');
-    card.type='button'; card.className='material-card';
-    card.innerHTML = '<span class="sw" style="background:'+m.swatch+'"></span><span class="m-name">'+m.name+'</span><span class="m-desc">'+m.desc+'</span>';
-    card.addEventListener('click', function(){
-      state.material = m; state.colorA=null; state.colorB=null; pickPhase='A';
-      Array.prototype.forEach.call(materialGrid.children, function(c){ c.classList.remove('selected'); });
-      card.classList.add('selected');
-      document.getElementById('next1').disabled = false;
-    });
-    materialGrid.appendChild(card);
-  });
-
-  // ---------- room templates ----------
-  var templateRow = document.getElementById('templateRow');
-  ROOM_TEMPLATES.forEach(function(t){
-    var card = document.createElement('button');
-    card.type='button'; card.className='template-card';
-    card.innerHTML = t.svg + '<span class="t-name">'+t.name+'</span>';
-    card.addEventListener('click', function(){
-      Array.prototype.forEach.call(templateRow.children, function(c){ c.classList.remove('selected'); });
-      card.classList.add('selected');
-      var img = new Image();
-      img.onload = function(){
-        photoImg = img; isTemplate = true;
-        state.photoBase64 = null; state.photoMime = null;
-        showHeroLoaded();
-        document.getElementById('aiGenerateBtn').disabled = true;
-        document.getElementById('aiStatus').classList.remove('error');
-        document.getElementById('aiStatus').textContent = "L'anteprima AI fotorealistica richiede una foto vera del tuo ambiente: qui vedi solo il colore/effetto/finitura su uno schema.";
-        updateAllPreviews();
-      };
-      img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(t.svg);
-    });
-    templateRow.appendChild(card);
-  });
-
-  function showHeroLoaded(){
-    document.getElementById('heroEmpty').style.display = 'none';
-    document.getElementById('tagBefore').style.display = 'block';
-    document.getElementById('tagAfter').style.display = 'block';
-    document.getElementById('compareHandle').style.display = 'block';
-    document.getElementById('compareSlider').style.display = 'block';
-    document.getElementById('templateSection').style.display = 'none';
-    document.getElementById('toggleTemplates').style.display = 'block';
+  if (!imageBase64 || !material || !colorA) {
+    return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
   }
 
-  document.getElementById('toggleTemplates').addEventListener('click', function(){
-    document.getElementById('templateSection').style.display = 'block';
-    this.style.display = 'none';
-  });
-
-  document.getElementById('photoInput').addEventListener('change', function(e){
-    var file = e.target.files[0]; if(!file) return;
-    var reader = new FileReader();
-    reader.onload = function(ev){
-      var rawDataUrl = ev.target.result;
-      var rawImg = new Image();
-      rawImg.onerror = function(){
-        alert("Non riesco a leggere questa foto. Prova con un'altra immagine (JPG o PNG).");
-      };
-      rawImg.onload = function(){
-        // Le foto scattate da smartphone/tablet possono pesare molti MB: le
-        // ridimensioniamo qui prima di usarle, sia per la resa nel browser
-        // sia per l'invio all'AI (che ha un limite di dimensione della richiesta).
-        var MAX_DIM = 1600;
-        var w = rawImg.width, h = rawImg.height;
-        var scale = Math.min(1, MAX_DIM / Math.max(w, h));
-        var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
-        var rc = document.createElement('canvas'); rc.width = cw; rc.height = ch;
-        rc.getContext('2d').drawImage(rawImg, 0, 0, cw, ch);
-        var resizedDataUrl = rc.toDataURL('image/jpeg', 0.85);
-        var match = /^data:(.+);base64,(.*)$/.exec(resizedDataUrl);
-        if(match){ state.photoMime = match[1]; state.photoBase64 = match[2]; }
-        var img = new Image();
-        img.onload = function(){
-          photoImg = img; isTemplate = false;
-          Array.prototype.forEach.call(templateRow.children, function(c){ c.classList.remove('selected'); });
-          showHeroLoaded();
-          document.getElementById('aiResult').style.display = 'none';
-          document.getElementById('aiGenerateBtn').disabled = !state.colorA;
-          document.getElementById('aiStatus').classList.remove('error');
-          document.getElementById('aiStatus').textContent = '';
-          updateAllPreviews();
-        };
-        img.src = resizedDataUrl;
-      };
-      rawImg.src = rawDataUrl;
-    };
-    reader.readAsDataURL(file);
-  });
-
-  // ---------- pattern / finish engine ----------
-  function hashStr(s){ var h=0; for(var i=0;i<s.length;i++){ h=(h*31+s.charCodeAt(i))|0; } return Math.abs(h)%233280 || 12345; }
-
-  function buildPatternCanvas(w,h,colorA,colorB,effetto){
-    var c=document.createElement('canvas'); c.width=w; c.height=h;
-    var ctx=c.getContext('2d');
-    ctx.fillStyle=colorA; ctx.fillRect(0,0,w,h);
-    if(effetto==='nuvolato' && colorB){
-      var seed=hashStr(colorA+colorB);
-      function rand(){ seed=(seed*9301+49297)%233280; return seed/233280; }
-      for(var i=0;i<7;i++){
-        var x=rand()*w, y=rand()*h, r=(0.28+rand()*0.35)*Math.max(w,h);
-        var grad=ctx.createRadialGradient(x,y,0,x,y,r);
-        grad.addColorStop(0,colorB); grad.addColorStop(1,'transparent');
-        ctx.globalAlpha=0.55; ctx.fillStyle=grad;
-        ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
-      }
-      ctx.globalAlpha=1;
-    }
-    return c;
+  const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+  if (!apiKey) {
+    return res.status(500).json({ error: "GEMINI_API_KEY non configurata sul server" });
   }
 
-  function applyFinishOverlay(ctx,w,h,finitura,onPhoto){
-    if(finitura==='lucido' || finitura==='satinato'){
-      var alpha = finitura==='lucido' ? (onPhoto?0.28:0.4) : (onPhoto?0.12:0.18);
-      var g=ctx.createLinearGradient(0,0,w*0.6,h);
-      g.addColorStop(0,'rgba(255,255,255,'+alpha+')');
-      g.addColorStop(0.35,'rgba(255,255,255,0)');
-      g.addColorStop(0.5,'rgba(255,255,255,0)');
-      g.addColorStop(0.62,'rgba(255,255,255,'+(alpha*0.6)+')');
-      g.addColorStop(0.8,'rgba(255,255,255,0)');
-      ctx.globalCompositeOperation='screen'; ctx.fillStyle=g; ctx.fillRect(0,0,w,h);
-      ctx.globalCompositeOperation='source-over';
-    } else {
-      ctx.globalCompositeOperation='multiply';
-      ctx.fillStyle= onPhoto ? 'rgba(235,230,222,0.96)' : 'rgba(225,220,210,0.85)';
-      ctx.fillRect(0,0,w,h);
-      ctx.globalCompositeOperation='source-over';
-    }
+  // Costruzione del prompt descrittivo per il modello di editing immagine.
+  const colorDesc = colorB
+    ? `un effetto nuvolato che miscela il colore "${colorA}" con il colore "${colorB}"`
+    : `il colore uniforme "${colorA}"`;
+
+  const prompt = [
+    `Modifica questa foto reale di un ambiente domestico.`,
+    `Applica alla superficie del pavimento/parete inquadrata una finitura in ${material},`,
+    `con ${colorDesc}, effetto ${effetto === "nuvolato" ? "nuvolato/marmorizzato" : "liscio e uniforme"},`,
+    `finitura ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).`,
+    `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza:`,
+    `cambia solo il materiale/colore della superficie indicata, in modo fotorealistico,`,
+    `come se fosse una vera posa professionale.`
+  ].join(" ");
+
+  // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
+  // rifiutiamo esplicitamente payload anomali invece di lasciare che falliscano
+  // in modo silenzioso più avanti (Vercel rifiuta comunque richieste troppo grandi,
+  // ma con un errore poco chiaro per l'utente finale).
+  if (typeof imageBase64 !== "string" || imageBase64.length < 100) {
+    return res.status(400).json({ error: "Immagine mancante o non valida" });
+  }
+  if (imageBase64.length > 8_000_000) {
+    return res.status(413).json({ error: "La foto è troppo pesante, prova con una foto più piccola" });
   }
 
-  function drawCover(canvas, img){
-    var w=canvas.clientWidth, h=canvas.clientHeight;
-    canvas.width=w; canvas.height=h;
-    var ctx=canvas.getContext('2d');
-    var scale=Math.max(w/img.width, h/img.height);
-    var iw=img.width*scale, ih=img.height*scale;
-    ctx.drawImage(img, (w-iw)/2, (h-ih)/2, iw, ih);
-    return ctx;
+  let apiUrl;
+  try {
+    apiUrl = new URL(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent"
+    );
+    apiUrl.searchParams.set("key", apiKey);
+  } catch (err) {
+    return res.status(500).json({ error: "Configurazione AI non valida (URL malformato)", details: String(err) });
   }
 
-  function applySlider(){
-    var v=document.getElementById('compareSlider').value;
-    document.getElementById('canvasAfter').style.clipPath='inset(0 '+(100-v)+'% 0 0)';
-    document.getElementById('compareHandle').style.left=v+'%';
-  }
-
-  function renderHeroPreview(){
-    if(!photoImg) return;
-    drawCover(document.getElementById('canvasBefore'), photoImg);
-    var after=document.getElementById('canvasAfter');
-    if(!state.colorA){
-      // no color chosen yet: just mirror the plain photo, hide compare UI
-      drawCover(after, photoImg);
-      after.style.clipPath = 'inset(0 100% 0 0)';
-      document.getElementById('tagBefore').style.display='none';
-      document.getElementById('tagAfter').style.display='none';
-      document.getElementById('compareHandle').style.display='none';
-      document.getElementById('compareSlider').style.display='none';
-      return;
-    }
-    document.getElementById('tagBefore').style.display='block';
-    document.getElementById('tagAfter').style.display='block';
-    document.getElementById('compareHandle').style.display='block';
-    document.getElementById('compareSlider').style.display='block';
-    var ctx=drawCover(after, photoImg);
-    var pattern=buildPatternCanvas(after.width, after.height, state.colorA.hex, state.colorB?state.colorB.hex:null, state.effetto);
-    ctx.globalCompositeOperation='color'; ctx.drawImage(pattern,0,0,after.width,after.height); ctx.globalCompositeOperation='source-over';
-    applyFinishOverlay(ctx, after.width, after.height, state.finitura, true);
-    applySlider();
-  }
-
-  function updateAllPreviews(){ if(photoImg) renderHeroPreview(); }
-
-  document.getElementById('compareSlider').addEventListener('input', applySlider);
-  window.addEventListener('resize', updateAllPreviews);
-
-  // ---------- colors / chips ----------
-  function renderChips(){
-    var row=document.getElementById('colorChips'); row.innerHTML='';
-    if(state.colorA){
-      var chipA=document.createElement('span'); chipA.className='chip';
-      chipA.innerHTML='<span class="dot" style="background:'+state.colorA.hex+'"></span>'+state.colorA.name+'<button aria-label="rimuovi">×</button>';
-      chipA.querySelector('button').addEventListener('click', function(){ state.colorA=null; state.colorB=null; pickPhase='A'; renderStep2UI(); });
-      row.appendChild(chipA);
-    }
-    if(state.effetto==='nuvolato' && state.colorB){
-      var chipB=document.createElement('span'); chipB.className='chip';
-      chipB.innerHTML='<span class="dot" style="background:'+state.colorB.hex+'"></span>'+state.colorB.name+'<button aria-label="rimuovi">×</button>';
-      chipB.querySelector('button').addEventListener('click', function(){ state.colorB=null; pickPhase='B'; renderStep2UI(); });
-      row.appendChild(chipB);
-    }
-  }
-
-  function renderCluster(){
-    var grid=document.getElementById('colorCluster'); grid.innerHTML='';
-    var label=document.getElementById('clusterLabel');
-    if(state.effetto==='nuvolato'){
-      label.textContent = pickPhase==='A' ? 'Colore principale' : 'Colore secondario';
-    } else { label.textContent = 'Colore'; }
-    var list = PALETTES[state.material.id] || [];
-    list.forEach(function(c){
-      var cell=document.createElement('button');
-      cell.type='button'; cell.className='swatch';
-      var excluded = state.effetto==='nuvolato' && pickPhase==='B' && state.colorA && c.code===state.colorA.code;
-      if(excluded) cell.disabled = true;
-      if((pickPhase==='A' && state.colorA && state.colorA.code===c.code) || (pickPhase==='B' && state.colorB && state.colorB.code===c.code)) cell.classList.add('selected');
-      cell.innerHTML='<span class="sw-color" style="background:'+c.hex+'"></span><span class="sw-name">'+c.name+'</span>';
-      cell.addEventListener('click', function(){
-        if(pickPhase==='A'){
-          state.colorA=c;
-          if(state.effetto==='nuvolato'){ pickPhase='B'; }
-        } else { state.colorB=c; }
-        renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next();
-        document.getElementById('aiGenerateBtn').disabled = !(state.photoBase64 && state.colorA);
-      });
-      grid.appendChild(cell);
-    });
-  }
-
-  function renderStep2UI(){ renderChips(); renderCluster(); updateAllPreviews(); checkStep2Next(); }
-
-  function checkStep2Next(){
-    var ok = state.colorA && (state.effetto!=='nuvolato' || state.colorB);
-    document.getElementById('next2').disabled = !ok;
-  }
-
-  document.getElementById('effettoControl').addEventListener('click', function(e){
-    var btn = e.target.closest('button'); if(!btn) return;
-    var v = btn.dataset.v; state.effetto = v;
-    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
-    document.getElementById('effettoHint').textContent = EFFETTO_HINT[v];
-    if(v==='liscio'){ state.colorB=null; pickPhase='A'; } else { pickPhase = state.colorA ? 'B' : 'A'; }
-    renderStep2UI();
-  });
-
-  document.getElementById('finituraControl').addEventListener('click', function(e){
-    var btn = e.target.closest('button'); if(!btn) return;
-    var v = btn.dataset.v; state.finitura = v;
-    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
-    document.getElementById('finituraHint').textContent = FINITURA_HINT[v];
-    updateAllPreviews();
-  });
-
-  // ---------- AI generation ----------
-  document.getElementById('aiGenerateBtn').addEventListener('click', function(){
-    if(!state.photoBase64 || !state.colorA) return;
-    var btn = this; var statusEl = document.getElementById('aiStatus');
-    btn.disabled = true; statusEl.classList.remove('error');
-    statusEl.textContent = 'Generazione in corso… può richiedere 10-20 secondi.';
-    document.getElementById('aiResult').style.display = 'none';
-    fetch(AI_ENDPOINT, {
-      method:'POST', headers:{'Content-Type':'application/json'},
+  try {
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name,
-        colorA: state.colorA.name, colorB: state.colorB ? state.colorB.name : null,
-        effetto: state.effetto, finitura: state.finitura
+        contents: [
+          {
+            parts: [
+              { text: prompt },
+              {
+                inline_data: {
+                  mime_type: mimeType || "image/jpeg",
+                  data: imageBase64 // base64 SENZA il prefisso "data:image/...;base64,"
+                }
+              }
+            ]
+          }
+        ]
       })
-    })
-      .then(function(r){
-        return r.text().then(function(text){
-          var data = null;
-          try { data = JSON.parse(text); }
-          catch(e){ data = { error: 'Risposta non valida dal server (status ' + r.status + ')' }; }
-          return { ok:r.ok, data:data };
-        });
-      })
-      .then(function(res){
-        if(!res.ok) throw new Error((res.data && res.data.error) ? res.data.error : 'Errore sconosciuto');
-        if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
-        document.getElementById('aiResultImg').src = 'data:' + res.data.mimeType + ';base64,' + res.data.imageBase64;
-        document.getElementById('aiResult').style.display = 'block';
-        statusEl.textContent = "Fatto — questa è la versione generata dall'AI.";
-      })
-      .catch(function(err){
-        statusEl.classList.add('error');
-        statusEl.textContent = "Non sono riuscito a generare l'anteprima AI (" + err.message + "). Il confronto prima/dopo resta comunque valido.";
-      })
-      .finally(function(){ btn.disabled = false; });
-  });
+    });
 
-  // ---------- navigation ----------
-  function goStep(n){
-    ['panel1','panel2','panel3','panelConfirm'].forEach(function(id,i){ document.getElementById(id).classList.toggle('active',(i+1)===n); });
-    ['bar1','bar2','bar3'].forEach(function(id,i){ document.getElementById(id).style.display=(i+1)===n?'flex':'none'; });
-    if(n<=3){
-      document.querySelectorAll('.step-dot').forEach(function(d){
-        var s = parseInt(d.dataset.s,10);
-        d.classList.toggle('done', s < n);
-        d.classList.toggle('active', s === n);
+    const rawText = await response.text();
+    let data;
+    try {
+      data = JSON.parse(rawText);
+    } catch (parseErr) {
+      // La risposta non era JSON (es. pagina di errore intermedia): non tentiamo
+      // di interpretarla oltre, restituiamo un errore chiaro invece di far
+      // fallire il parsing lato frontend con un messaggio criptico.
+      return res.status(502).json({
+        error: "Risposta non valida dal servizio AI",
+        details: rawText.slice(0, 500)
       });
     }
-    if(n===2){ renderStep2UI(); }
-    if(n===4){ document.getElementById('bar3').style.display='flex'; }
-    if(n===3) renderSummary();
-    window.scrollTo(0,0);
-  }
 
-  function renderSummary(){
-    var box=document.getElementById('summaryBox');
-    var colorLine = state.colorA.name+' ('+state.colorA.code+')' + (state.colorB ? ' + '+state.colorB.name+' ('+state.colorB.code+')' : '');
-    box.innerHTML =
-      '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+state.material.name+'</b></span></div>' +
-      '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>Effetto '+(state.effetto==='nuvolato'?'Nuvolato':'Liscio uniforme')+' · Finitura '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
-      '<span class="edit" id="editSel">modifica selezione</span>';
-    document.getElementById('editSel').addEventListener('click', function(){ goStep(1); });
-  }
-
-  document.getElementById('next1').addEventListener('click', function(){ goStep(2); });
-  document.getElementById('back2').addEventListener('click', function(){ goStep(1); });
-  document.getElementById('next2').addEventListener('click', function(){ goStep(3); });
-  document.getElementById('back3').addEventListener('click', function(){ goStep(2); });
-
-  function checkForm(){
-    var ok=document.getElementById('fName').value.trim() && document.getElementById('fPhone').value.trim();
-    document.getElementById('sendWa').disabled = !ok;
-  }
-  ['fName','fPhone','fMq','fCity','fNote'].forEach(function(id){ document.getElementById(id).addEventListener('input', checkForm); });
-
-  function buildMessage(){
-    var name=document.getElementById('fName').value.trim();
-    var phone=document.getElementById('fPhone').value.trim();
-    var mq=document.getElementById('fMq').value.trim();
-    var city=document.getElementById('fCity').value.trim();
-    var note=document.getElementById('fNote').value.trim();
-    var colorLine = state.colorA.name+' ('+state.colorA.code+')' + (state.colorB ? ' + '+state.colorB.name+' ('+state.colorB.code+')' : '');
-    var lines=[
-      "Richiesta preventivo dall'app DGM Resine", "Lavorazione: "+state.material.name, "Colore: "+colorLine,
-      "Effetto: "+(state.effetto==='nuvolato'?'Nuvolato':'Liscio uniforme'),
-      "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
-      "Nome: "+name, "Telefono: "+phone
-    ];
-    if(mq) lines.push("Mq indicativi: "+mq);
-    if(city) lines.push("Città/indirizzo: "+city);
-    if(note) lines.push("Note: "+note);
-    return lines.join("\n");
-  }
-
-  document.getElementById('sendWa').addEventListener('click', function(){
-    window.open(WHATSAPP_LINK+"?text="+encodeURIComponent(buildMessage()), '_blank');
-    goStep(4);
-  });
-  document.getElementById('sendEmail').addEventListener('click', function(e){
-    e.preventDefault();
-    var subject="Richiesta preventivo — "+state.material.name;
-    window.location.href="mailto:"+EMAIL_TO+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(buildMessage());
-  });
-
-  document.getElementById('themeBtn').addEventListener('click', function(){
-    var root=document.documentElement;
-    root.setAttribute('data-theme', root.getAttribute('data-theme')==='dark' ? '' : 'dark');
-  });
-
-  // ---------- share configuration card ----------
-  function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight){
-    var words = text.split(' '); var line=''; var lines=[];
-    for(var i=0;i<words.length;i++){
-      var test=line+words[i]+' ';
-      if(ctx.measureText(test).width > maxWidth && line!==''){ lines.push(line); line=words[i]+' '; } else { line=test; }
+    if (!response.ok) {
+      return res.status(response.status).json({ error: "Errore dal servizio AI", details: data });
     }
-    lines.push(line);
-    lines.forEach(function(l,idx){ ctx.fillText(l.trim(), x, y+idx*lineHeight); });
-    return y + lines.length*lineHeight;
+
+    // Il modello risponde con una lista di "parts": cerchiamo quella che contiene l'immagine generata.
+    const parts = data?.candidates?.[0]?.content?.parts || [];
+    const imagePart = parts.find((p) => p.inline_data || p.inlineData);
+    const inline = imagePart?.inline_data || imagePart?.inlineData;
+
+    if (!inline || !inline.data) {
+      return res.status(502).json({ error: "Il modello non ha restituito un'immagine", details: data });
+    }
+
+    return res.status(200).json({
+      imageBase64: inline.data,
+      mimeType: inline.mime_type || inline.mimeType || "image/png"
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Errore imprevisto lato server", details: String(err && err.message ? err.message : err) });
   }
-
-  function buildShareCanvas(){
-    var canvas = document.getElementById('shareCardCanvas');
-    var w=canvas.width, h=canvas.height;
-    var ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#1D3557'; ctx.fillRect(0,0,w,h);
-    ctx.fillStyle = '#AEC3DA'; ctx.font = '700 24px Inter, sans-serif';
-    ctx.fillText('DGM RESINE', 50, 70);
-    ctx.fillStyle = '#FFFFFF'; ctx.font = '800 40px Inter, sans-serif';
-    ctx.fillText('La tua selezione', 50, 120);
-
-    var pattern = buildPatternCanvas(700, 420, state.colorA.hex, state.colorB?state.colorB.hex:null, state.effetto);
-    var sw = document.createElement('canvas'); sw.width=700; sw.height=420;
-    var swctx = sw.getContext('2d'); swctx.drawImage(pattern,0,0);
-    applyFinishOverlay(swctx, 700, 420, state.finitura, false);
-    ctx.drawImage(sw, 50, 160, 700, 420);
-
-    ctx.fillStyle = '#FFFFFF'; ctx.font = '700 30px Inter, sans-serif';
-    var y = 640;
-    ctx.fillText(state.material.name, 50, y); y += 44;
-    var colorLine = state.colorA.name + (state.colorB ? ' + ' + state.colorB.name : '');
-    ctx.font = '400 24px Inter, sans-serif'; ctx.fillStyle = '#AEC3DA';
-    y = drawWrappedText(ctx, colorLine, 50, y, 700, 32) + 8;
-    ctx.fillText('Effetto ' + (state.effetto==='nuvolato'?'Nuvolato':'Liscio uniforme') + ' · Finitura ' + state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1), 50, y);
-    ctx.fillStyle = '#7C93AC'; ctx.font = '400 18px Inter, sans-serif';
-    ctx.fillText("Configurazione creata con l'app DGM Resine", 50, h-40);
-    return canvas;
-  }
-
-  document.getElementById('shareConfigBtn').addEventListener('click', function(){
-    if(!state.material || !state.colorA) return;
-    var btn=this; var canvas=buildShareCanvas();
-    canvas.toBlob(function(blob){
-      if(!downloadsApi) return;
-      btn.disabled=true; var original=btn.textContent; btn.textContent='Salvataggio…';
-      downloadsApi.save({ filename:'dgm-resine-selezione.png', data:blob })
-        .then(function(){ btn.textContent='Salvata ✓'; setTimeout(function(){ btn.textContent=original; btn.disabled=false; },2000); })
-        .catch(function(err){
-          btn.textContent=original; btn.disabled=false;
-          if(err && err.code==='declined') return;
-          alert("Non sono riuscito a salvare l'immagine (" + (err&&err.message?err.message:'errore sconosciuto') + ").");
-        });
-    }, 'image/png');
-  });
-
-  initDownloads();
-})();
-</script>
-</body>
-</html>
+}
