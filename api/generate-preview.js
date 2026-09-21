@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorB, effetto, finitura, facadeLayout, context } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorB, colorC, effetto, finitura, facadeLayout, context, boiserieStyle } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -60,22 +60,46 @@ module.exports = async function handler(req, res) {
     scale: "resina spatolata effetto liscio (stessa finitura Monolith Spatolato) applicata su gradini e alzate di una scala, superficie continua e uniforme senza fughe",
     microcemento: "microcemento applicato a spatola, superficie continua ma con texture materica leggera, piccole variazioni di tono naturali tipiche della spatolatura, non perfettamente piatta come la resina",
     imbiancatura: "pittura murale opaca stesa in modo uniforme sulla parete, finitura pittorica classica, nessuna texture materica particolare",
-    decorazioni: "rivestimento decorativo/boiserie applicato su parete o elemento d'arredo, finitura curata su misura"
+    decorazioni: "boiserie in legno applicata a parete"
   };
-  const textureDesc = MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`;
 
-  // Layout facciata (solo Imbiancatura Esterno con 2 colori): marcapiano = fascia
-  // orizzontale che divide basamento/piano terra da resto della facciata, oppure
-  // righe orizzontali/verticali alternate tra i due colori.
+  // La boiserie NON è un semplice colore piatto: è una geometria di pannelli/doghe
+  // applicata fisicamente sulla parete, quindi il prompt deve descrivere la forma
+  // reale dei pannelli (rilievo, ombre, linee di giunzione), non solo il colore.
+  const BOISERIE_STYLE_DESC = {
+    arco: "boiserie con specchiatura ad arco: un pannello centrale con la parte superiore che termina con un arco a tutto sesto, incorniciato da una modanatura in rilievo che segue la curva, base/zoccolo dritto sotto, stile classico da ingresso o salone importante, con ombre morbide lungo la modanatura curva",
+    specchiatura: "boiserie a specchiatura classica: pannelli rettangolari incorniciati da una vera modanatura sagomata in rilievo (non un bordo piatto, ma un profilo con più livelli, tipo cornice bugnata), disposti in una griglia regolare sulla parete, con ombre nette e realistiche lungo ogni cornice, stile boiserie tradizionale italiana",
+    righe: "boiserie a righe geometriche scanalate: listelli verticali stretti con scanalatura arrotondata (effetto reeded/fluted), ritmo regolare e continuo dal pavimento al soffitto, ombre sottili e regolari in ogni scanalatura, stile contemporaneo minimale",
+    fascia: "boiserie con fascia decorativa: una fascia orizzontale a circa 90-110cm da terra con un fregio/motivo decorativo ripetuto in leggero rilievo (es. losanghe o righe), sopra e sotto la fascia parete liscia o a pannelli semplici, stile decorativo con un punto focale orizzontale"
+  };
+  const boiserieDesc = BOISERIE_STYLE_DESC[boiserieStyle] || BOISERIE_STYLE_DESC.specchiatura;
+  const textureDesc = materialId === "decorazioni"
+    ? boiserieDesc
+    : (MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`);
+
+  // Monolith Pietra e Terrazzo si posano SOLO a pavimento (non a parete): lo
+  // diciamo esplicitamente all'AI così non applica la lavorazione anche ai muri
+  // inquadrati nella foto.
+  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo"];
+  const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId);
+  const surfaceDesc = isFloorOnly
+    ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
+    : "alla superficie del pavimento/parete inquadrata";
+
+  // Layout facciata (solo Imbiancatura Esterno): il "marcapiano" è la classica
+  // soluzione a TRE fasce delle palazzine italiane — parte alta, la fascia del
+  // marcapiano vero e proprio (spesso a contrasto), e la parte bassa/basamento —
+  // mentre le righe sono più semplici, solo 2 colori alternati.
   const FACADE_LAYOUT_DESC = {
-    marcapiano: `Dividi la facciata in due zone con una fascia orizzontale decorativa (il "marcapiano"), tipica delle palazzine italiane: il basamento/piano terra della facciata nel colore "${colorB}", e il resto della facciata sopra la fascia nel colore "${colorA}". La linea di separazione deve essere orizzontale, netta e ben visibile.`,
+    marcapiano: `Dividi la facciata in tre fasce orizzontali sovrapposte, dall'alto verso il basso: (1) la parte alta della facciata nel colore "${colorA}"; (2) una fascia orizzontale decorativa più stretta, il "marcapiano" vero e proprio, ben visibile e nettamente distinta, nel colore "${colorC}"; (3) la parte bassa/il basamento della facciata (piano terra) nel colore "${colorB}". Le due linee di separazione devono essere orizzontali, nette e ben visibili, come nelle classiche palazzine italiane.`,
     righe_orizzontali: `Dipingi la facciata a bande orizzontali alternate, alternando il colore "${colorA}" e il colore "${colorB}" su strisce orizzontali di uguale altezza lungo tutta la facciata.`,
     righe_verticali: `Dipingi la facciata a bande verticali alternate, alternando il colore "${colorA}" e il colore "${colorB}" su strisce verticali di uguale larghezza lungo tutta la facciata.`
   };
-  const isFacadeTwoTone = materialId === "imbiancatura" && context === "esterno" && facadeLayout && FACADE_LAYOUT_DESC[facadeLayout] && colorB;
+  const isFacadeStyled = materialId === "imbiancatura" && context === "esterno" && facadeLayout && FACADE_LAYOUT_DESC[facadeLayout]
+    && colorB && (facadeLayout !== "marcapiano" || colorC);
 
   // Costruzione del prompt descrittivo per il modello di editing immagine.
-  const colorDesc = isFacadeTwoTone
+  const colorDesc = isFacadeStyled
     ? FACADE_LAYOUT_DESC[facadeLayout]
     : (colorB
       ? `un effetto nuvolato che miscela il colore "${colorA}" con il colore "${colorB}"`
@@ -87,12 +111,14 @@ module.exports = async function handler(req, res) {
 
   const prompt = [
     `Modifica ${sceneDesc}.`,
-    `Applica alla superficie del pavimento/parete inquadrata la seguente lavorazione: ${textureDesc}.`,
-    isFacadeTwoTone ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
+    `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
+    isFacadeStyled ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
     `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).`,
-    isFacadeTwoTone
+    isFacadeStyled
       ? `Mantieni identica la prospettiva, la luce, le ombre, gli infissi, il tetto e tutto il resto dell'edificio e dell'ambiente circostante: cambia solo il colore/texture della facciata indicata, in modo fotorealistico, come se fosse una vera tinteggiatura professionale.`
-      : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`
+      : isFloorOnly
+        ? `Mantieni identiche la prospettiva, la luce, le ombre, i mobili, e mantieni assolutamente INVARIATE tutte le pareti/muri della stanza (colore e materiale originali): cambia solo il pavimento, in modo fotorealistico, come se fosse una vera posa professionale.`
+        : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`
   ].join(" ");
 
   // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
