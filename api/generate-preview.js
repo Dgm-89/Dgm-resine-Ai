@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, colorA, colorB, effetto, finitura } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorB, effetto, finitura } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -46,6 +46,24 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "GEMINI_API_KEY non configurata sul server" });
   }
 
+  // Descrizione della TEXTURE/effetto materico specifica per ogni lavorazione,
+  // così l'AI non genera solo "una superficie di quel colore" ma capisce davvero
+  // che aspetto deve avere: resina spatolata liscia, resina con graniglie a vista
+  // (Pietra/Terrazzo), resina marmorizzata, microcemento, ecc. Senza questo, foto
+  // di materiali diversi rischiano di venire fuori quasi identiche, cambia solo
+  // il colore piatto.
+  const MATERIAL_TEXTURE = {
+    monolith_spatolato: "resina spatolata monocomponente (linea Monolith), superficie continua, compatta, perfettamente liscia e uniforme, senza fughe né giunti, leggerissima texture materica data dalla spatolatura a mano",
+    monolith_marmo: "resina spatolata effetto marmo (linea Monolith), superficie liscia con venature marmoree naturali, sfumature di tono e piccole nuvolature che ricordano il marmo lucidato, senza fughe",
+    monolith_pietra: "resina spatolata effetto pietra (linea Monolith), superficie con graniglie minerali colorate ben visibili e distribuite in modo uniforme sulla superficie, texture granulare simile a un terrazzo fine, non liscia e piatta",
+    monolith_terrazzo: "resina effetto terrazzo (linea Monolith), superficie con graniglie/scaglie di dimensioni miste e colori diversi ben visibili incorporate nella resina, tipico effetto terrazzo veneziano, texture chiaramente granulare",
+    scale: "resina spatolata effetto liscio (stessa finitura Monolith Spatolato) applicata su gradini e alzate di una scala, superficie continua e uniforme senza fughe",
+    microcemento: "microcemento applicato a spatola, superficie continua ma con texture materica leggera, piccole variazioni di tono naturali tipiche della spatolatura, non perfettamente piatta come la resina",
+    imbiancatura: "pittura murale opaca stesa in modo uniforme sulla parete, finitura pittorica classica, nessuna texture materica particolare",
+    decorazioni: "rivestimento decorativo/boiserie applicato su parete o elemento d'arredo, finitura curata su misura"
+  };
+  const textureDesc = MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`;
+
   // Costruzione del prompt descrittivo per il modello di editing immagine.
   const colorDesc = colorB
     ? `un effetto nuvolato che miscela il colore "${colorA}" con il colore "${colorB}"`
@@ -53,11 +71,11 @@ module.exports = async function handler(req, res) {
 
   const prompt = [
     `Modifica questa foto reale di un ambiente domestico.`,
-    `Applica alla superficie del pavimento/parete inquadrata una finitura in ${material},`,
-    `con ${colorDesc}, effetto ${effetto === "nuvolato" ? "nuvolato/marmorizzato" : "liscio e uniforme"},`,
-    `finitura ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).`,
+    `Applica alla superficie del pavimento/parete inquadrata la seguente lavorazione: ${textureDesc}.`,
+    `Il colore/tonalità da usare è ${colorDesc}.`,
+    `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).`,
     `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza:`,
-    `cambia solo il materiale/colore della superficie indicata, in modo fotorealistico,`,
+    `cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico,`,
     `come se fosse una vera posa professionale.`
   ].join(" ");
 
