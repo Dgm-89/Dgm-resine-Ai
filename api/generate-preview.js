@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorB, colorC, effetto, finitura, facadeLayout, context, boiserieStyle } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorB, colorC, effetto, finitura, facadeLayout, context, boiserieStyle, addNicchia } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -74,7 +74,7 @@ module.exports = async function handler(req, res) {
     cassettoni: "boiserie a cassettoni: pannelli quadrati profondi incassati nella parete, ciascuno con una cornice importante in forte rilievo (diversi livelli di modanatura) e un'ombra marcata e realistica sul fondo del cassettone, effetto tridimensionale scenografico, stile importante/classico",
     mezza: "mezza boiserie (wainscoting): solo la parte bassa della parete, fino a circa 100-120cm di altezza da terra, è rivestita con pannelli incorniciati; sopra c'è un cornicione/listello di passaggio orizzontale e poi la parete liscia dipinta o del colore scelto fino al soffitto",
     liscia: "boiserie liscia con cornice perimetrale: un grande pannello liscio e uniforme, bordato da un'unica cornice sottile ed elegante lungo il perimetro, nessuna ulteriore decorazione interna, stile minimale e pulito",
-    nicchia: "boiserie con nicchia incassata: parete pannellata con un vano rettangolare incassato (profondità reale, con ombra interna scura), bordato da una cornice perimetrale, eventualmente con una piccola mensola/ripiano visibile all'interno del vano",
+    nicchia: "un SINGOLO vano rettangolare incassato nella parete (profondità reale, con ombra interna scura), bordato da una sottile cornice perimetrale in rilievo, eventualmente con una piccola mensola/ripiano visibile all'interno del vano. IMPORTANTE: applica SOLO questo vano/nicchia come elemento puntuale, NON rivestire il resto della parete con pannelli: il resto della parete deve restare invariato (stesso colore/materiale della foto originale)",
     specchio: "boiserie con inserto a specchio: pannello incorniciato con una vera lastra di specchio inserita al centro (superficie riflettente con un lieve riflesso/highlight diagonale), cornice in rilievo intorno allo specchio, stile elegante da ingresso o camera"
   };
   const boiserieDesc = BOISERIE_STYLE_DESC[boiserieStyle] || BOISERIE_STYLE_DESC.specchiatura;
@@ -120,7 +120,15 @@ module.exports = async function handler(req, res) {
   // ombre, mobili davanti). Questa nota extra spinge verso un risultato più fotografico
   // e meno da rendering 3D.
   const boiserieRealismNote = materialId === "decorazioni"
-    ? " La boiserie deve avere volume e spessore reali, non un'immagine piatta incollata sopra la foto: segui esattamente la prospettiva e le linee di fuga della parete originale, fai cadere le ombre delle cornici/modanature/scanalature nella stessa direzione della luce già presente nella stanza, usa una texture di legno naturale con leggere variazioni di tono (mai un colore piatto e uniforme), e lascia che mobili/oggetti già presenti nella foto restino davanti alla boiserie dove la coprirebbero nella realtà. Il risultato finale deve sembrare una vera fotografia di una posa reale, non un rendering 3D né un adesivo digitale."
+    ? " La boiserie deve avere volume e spessore reali, non un'immagine piatta incollata sopra la foto: segui esattamente la prospettiva e le linee di fuga della parete originale, fai cadere le ombre delle cornici/modanature/scanalature nella stessa direzione della luce già presente nella stanza, usa una texture di legno naturale con leggere variazioni di tono (mai un colore piatto e uniforme), e lascia che mobili/oggetti già presenti nella foto restino davanti alla boiserie dove la coprirebbero nella realtà. IMPORTANTE: se nella foto sono presenti porte, finestre, prese elettriche, interruttori o altri elementi già esistenti, NON coprirli né trasformarli in pannellatura: devono restare riconoscibili esattamente come nella foto originale, e la boiserie va applicata solo all'area di parete libera intorno a loro. Il risultato finale deve sembrare una vera fotografia di una posa reale, non un rendering 3D né un adesivo digitale."
+    : "";
+
+  // Nicchia incassata: opzione indipendente dalla boiserie, pensata soprattutto per
+  // bagno/doccia (Microcemento, Monolith Spatolato/Marmo). Elemento puntuale, non va
+  // a coprire il resto della superficie, e include di default una striscia LED
+  // (molto richiesta oggi nelle nicchie doccia moderne).
+  const nicchiaNote = addNicchia
+    ? " Aggiungi inoltre, in un punto sensato della superficie inquadrata (tipicamente sulla parete doccia se è un bagno), UN SINGOLO vano rettangolare incassato (nicchia) con profondità reale, bordato da una sottile cornice, con un piccolo ripiano interno e una striscia LED nascosta lungo il bordo superiore o laterale della nicchia che illumina delicatamente l'interno del vano con una luce calda. Applica questo elemento SOLO come dettaglio puntuale: non rivestire né alterare il resto della parete, che deve mantenere la stessa lavorazione/colore già applicati nel resto della foto."
     : "";
 
   const prompt = [
@@ -133,7 +141,8 @@ module.exports = async function handler(req, res) {
       : isFloorOnly
         ? `Mantieni identiche la prospettiva, la luce, le ombre, i mobili, e mantieni assolutamente INVARIATE tutte le pareti/muri della stanza (colore e materiale originali): cambia solo il pavimento, in modo fotorealistico, come se fosse una vera posa professionale.`
         : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`,
-    boiserieRealismNote
+    boiserieRealismNote,
+    nicchiaNote
   ].join(" ");
 
   // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
