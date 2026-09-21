@@ -391,21 +391,38 @@
     var file = e.target.files[0]; if(!file) return;
     var reader = new FileReader();
     reader.onload = function(ev){
-      var dataUrl = ev.target.result;
-      var match = /^data:(.+);base64,(.*)$/.exec(dataUrl);
-      if(match){ state.photoMime = match[1]; state.photoBase64 = match[2]; }
-      var img = new Image();
-      img.onload = function(){
-        photoImg = img; isTemplate = false;
-        Array.prototype.forEach.call(templateRow.children, function(c){ c.classList.remove('selected'); });
-        showHeroLoaded();
-        document.getElementById('aiResult').style.display = 'none';
-        document.getElementById('aiGenerateBtn').disabled = !state.colorA;
-        document.getElementById('aiStatus').classList.remove('error');
-        document.getElementById('aiStatus').textContent = '';
-        updateAllPreviews();
+      var rawDataUrl = ev.target.result;
+      var rawImg = new Image();
+      rawImg.onerror = function(){
+        alert("Non riesco a leggere questa foto. Prova con un'altra immagine (JPG o PNG).");
       };
-      img.src = dataUrl;
+      rawImg.onload = function(){
+        // Le foto scattate da smartphone/tablet possono pesare molti MB: le
+        // ridimensioniamo qui prima di usarle, sia per la resa nel browser
+        // sia per l'invio all'AI (che ha un limite di dimensione della richiesta).
+        var MAX_DIM = 1600;
+        var w = rawImg.width, h = rawImg.height;
+        var scale = Math.min(1, MAX_DIM / Math.max(w, h));
+        var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
+        var rc = document.createElement('canvas'); rc.width = cw; rc.height = ch;
+        rc.getContext('2d').drawImage(rawImg, 0, 0, cw, ch);
+        var resizedDataUrl = rc.toDataURL('image/jpeg', 0.85);
+        var match = /^data:(.+);base64,(.*)$/.exec(resizedDataUrl);
+        if(match){ state.photoMime = match[1]; state.photoBase64 = match[2]; }
+        var img = new Image();
+        img.onload = function(){
+          photoImg = img; isTemplate = false;
+          Array.prototype.forEach.call(templateRow.children, function(c){ c.classList.remove('selected'); });
+          showHeroLoaded();
+          document.getElementById('aiResult').style.display = 'none';
+          document.getElementById('aiGenerateBtn').disabled = !state.colorA;
+          document.getElementById('aiStatus').classList.remove('error');
+          document.getElementById('aiStatus').textContent = '';
+          updateAllPreviews();
+        };
+        img.src = resizedDataUrl;
+      };
+      rawImg.src = rawDataUrl;
     };
     reader.readAsDataURL(file);
   });
@@ -579,9 +596,17 @@
         effetto: state.effetto, finitura: state.finitura
       })
     })
-      .then(function(r){ return r.json().then(function(data){ return { ok:r.ok, data:data }; }); })
+      .then(function(r){
+        return r.text().then(function(text){
+          var data = null;
+          try { data = JSON.parse(text); }
+          catch(e){ data = { error: 'Risposta non valida dal server (status ' + r.status + ')' }; }
+          return { ok:r.ok, data:data };
+        });
+      })
       .then(function(res){
         if(!res.ok) throw new Error((res.data && res.data.error) ? res.data.error : 'Errore sconosciuto');
+        if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
         document.getElementById('aiResultImg').src = 'data:' + res.data.mimeType + ';base64,' + res.data.imageBase64;
         document.getElementById('aiResult').style.display = 'block';
         statusEl.textContent = "Fatto — questa è la versione generata dall'AI.";
