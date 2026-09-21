@@ -220,6 +220,15 @@
     </div>
     <div class="seg-hint" id="contextHint" style="display:none">Colori pensati per pareti e superfici interne.</div>
 
+    <div class="section-label" id="facadeLayoutLabel" style="display:none">Come dividere i colori sulla facciata?</div>
+    <div class="seg-control" id="facadeLayoutControl" style="display:none">
+      <button data-v="monocolore" class="active">Un colore</button>
+      <button data-v="marcapiano">Marcapiano</button>
+      <button data-v="righe_orizzontali">Righe orizz.</button>
+      <button data-v="righe_verticali">Righe vert.</button>
+    </div>
+    <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
+
     <div class="section-label" style="display:none">Effetto</div>
     <div class="seg-control" id="effettoControl" style="display:none">
       <button data-v="liscio" class="active">Liscio uniforme</button>
@@ -974,8 +983,18 @@
   var EFFETTO_HINT = { liscio:"Un unico colore steso in modo uniforme.", nuvolato:"Due colori miscelati con effetto marmorizzato, tipico delle resine decorative." };
   var FINITURA_HINT = { opaco:"Superficie piena, senza riflessi.", satinato:"Via di mezzo tra opaco e lucido, la più richiesta.", lucido:"Massima brillantezza e profondità del colore." };
 
-  var state = { category:null, material:null, effetto:'liscio', context:'interno', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { category:null, material:null, effetto:'liscio', context:'interno', facadeLayout:'monocolore', colorA:null, colorB:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = { interno:"Colori pensati per pareti e superfici interne.", esterno:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni." };
+  // Layout facciata: solo per Imbiancatura Esterno. "Marcapiano" = basamento/piano
+  // terra di un colore e il resto della facciata di un altro, divisi da una fascia
+  // orizzontale (il marcapiano), come nelle classiche palazzine italiane. Le righe
+  // sono un'alternativa più moderna, a bande orizzontali o verticali alternate.
+  var FACADE_LAYOUT_HINT = {
+    monocolore: "L'intera facciata dello stesso colore.",
+    marcapiano: "Basamento/piano terra di un colore, resto della facciata di un altro colore, divisi da una fascia orizzontale (il marcapiano).",
+    righe_orizzontali: "Bande orizzontali alternate tra i due colori scelti.",
+    righe_verticali: "Bande verticali alternate tra i due colori scelti."
+  };
   var pickPhase = 'A';
   var familyFilter = null; // famiglia colore attiva (solo per palette con "family", es. Sikkens), null = tutte
   var colorSearchQuery = '';
@@ -983,9 +1002,15 @@
   var isTemplate = false;
   var aiResultImage = null; // Image() dell'anteprima generata davvero dall'AI, null finché non c'è
 
+  // Vero quando serve un secondo colore: solo Imbiancatura Esterno con un layout
+  // facciata diverso da "un colore" (marcapiano o righe).
+  function needsSecondColor(){
+    return state.material && state.material.id === 'imbiancatura' && state.context === 'esterno' && state.facadeLayout !== 'monocolore';
+  }
+
   function resetSelectionForNewCategory(){
     state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno';
+    state.context = 'interno'; state.facadeLayout = 'monocolore';
     document.getElementById('colorSearch').value='';
   }
 
@@ -997,6 +1022,18 @@
     if(isImb){
       Array.prototype.forEach.call(document.getElementById('contextControl').children, function(b){ b.classList.toggle('active', b.dataset.v==='interno'); });
       document.getElementById('contextHint').textContent = CONTEXT_HINT.interno;
+    }
+    syncFacadeLayoutVisibility();
+  }
+
+  function syncFacadeLayoutVisibility(){
+    var show = state.material && state.material.id === 'imbiancatura' && state.context === 'esterno';
+    document.getElementById('facadeLayoutLabel').style.display = show ? 'block' : 'none';
+    document.getElementById('facadeLayoutControl').style.display = show ? 'flex' : 'none';
+    document.getElementById('facadeLayoutHint').style.display = show ? 'block' : 'none';
+    if(show){
+      Array.prototype.forEach.call(document.getElementById('facadeLayoutControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.facadeLayout); });
+      document.getElementById('facadeLayoutHint').textContent = FACADE_LAYOUT_HINT[state.facadeLayout];
     }
   }
 
@@ -1255,7 +1292,7 @@
       chipA.querySelector('button').addEventListener('click', function(){ state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; renderStep2UI(); });
       row.appendChild(chipA);
     }
-    if(state.effetto==='nuvolato' && state.colorB){
+    if(needsSecondColor() && state.colorB){
       var chipB=document.createElement('span'); chipB.className='chip';
       chipB.innerHTML='<span class="dot" style="background:'+state.colorB.hex+'"></span>'+state.colorB.name+'<button aria-label="rimuovi">×</button>';
       chipB.querySelector('button').addEventListener('click', function(){ state.colorB=null; pickPhase='B'; aiResultImage=null; renderStep2UI(); });
@@ -1297,8 +1334,8 @@
   function renderCluster(){
     var grid=document.getElementById('colorCluster'); grid.innerHTML='';
     var label=document.getElementById('clusterLabel');
-    if(state.effetto==='nuvolato'){
-      label.textContent = pickPhase==='A' ? 'Colore principale' : 'Colore secondario';
+    if(needsSecondColor()){
+      label.textContent = pickPhase==='A' ? 'Primo colore (basamento/bande)' : 'Secondo colore';
     } else { label.textContent = 'Colore'; }
     var paletteKey = state.material.id;
     if(paletteKey === 'imbiancatura' && state.context === 'esterno') paletteKey = 'imbiancatura_esterni';
@@ -1333,7 +1370,7 @@
     list.forEach(function(c){
       var cell=document.createElement('button');
       cell.type='button'; cell.className='swatch';
-      var excluded = state.effetto==='nuvolato' && pickPhase==='B' && state.colorA && c.code===state.colorA.code;
+      var excluded = needsSecondColor() && pickPhase==='B' && state.colorA && c.code===state.colorA.code;
       if(excluded) cell.disabled = true;
       if((pickPhase==='A' && state.colorA && state.colorA.code===c.code) || (pickPhase==='B' && state.colorB && state.colorB.code===c.code)) cell.classList.add('selected');
       cell.innerHTML='<span class="sw-color" style="background:'+c.hex+'"><span class="sw-check"></span></span><span class="sw-name">'+c.name+'</span>';
@@ -1366,7 +1403,7 @@
     var c = cpmCandidate;
     if(pickPhase==='A'){
       state.colorA=c;
-      if(state.effetto==='nuvolato'){ pickPhase='B'; }
+      if(needsSecondColor()){ pickPhase='B'; }
     } else { state.colorB=c; }
     aiResultImage=null;
     cpm.classList.remove('open');
@@ -1390,8 +1427,19 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = CONTEXT_HINT[v];
-    state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
+    state.colorA=null; state.colorB=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
     document.getElementById('colorSearch').value='';
+    syncFacadeLayoutVisibility();
+    renderStep2UI();
+  });
+
+  document.getElementById('facadeLayoutControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    var v = btn.dataset.v; state.facadeLayout = v;
+    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
+    document.getElementById('facadeLayoutHint').textContent = FACADE_LAYOUT_HINT[v];
+    state.colorB = null; pickPhase = (v!=='monocolore' && state.colorA) ? 'B' : 'A';
+    aiResultImage = null;
     renderStep2UI();
   });
 
@@ -1414,6 +1462,7 @@
       body: JSON.stringify({
         imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name, materialId: state.material.id,
         colorA: state.colorA.name, colorB: state.colorB ? state.colorB.name : null,
+        facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
         effetto: state.effetto, finitura: state.finitura
       })
     })
@@ -1474,7 +1523,7 @@
     if(!btn) return;
     var ok = true;
     if(currentPanel==='panelSub') ok = !!state.material;
-    else if(currentPanel==='panelColor') ok = !!(state.colorA && (state.effetto!=='nuvolato' || state.colorB));
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB));
     else if(currentPanel==='panelPhoto') ok = !!photoImg;
     btn.disabled = !ok;
   }
@@ -1527,12 +1576,16 @@
     window.scrollTo(0,0);
   }
 
+  var FACADE_LAYOUT_NAME = { monocolore:'Un colore', marcapiano:'Marcapiano (2 colori)', righe_orizzontali:'Righe orizzontali (2 colori)', righe_verticali:'Righe verticali (2 colori)' };
+
   function renderSummary(){
     var box=document.getElementById('summaryBox');
     var colorLine = state.colorA.name+' ('+state.colorA.code+')' + (state.colorB ? ' + '+state.colorB.name+' ('+state.colorB.code+')' : '');
+    var facadeLine = needsSecondColor() ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>Facciata: '+FACADE_LAYOUT_NAME[state.facadeLayout]+'</span></div>' : '';
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+state.material.name+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
+      facadeLine +
       '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>Finitura '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">modifica selezione</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
@@ -1566,10 +1619,13 @@
     var note=document.getElementById('fNote').value.trim();
     var colorLine = state.colorA.name+' ('+state.colorA.code+')' + (state.colorB ? ' + '+state.colorB.name+' ('+state.colorB.code+')' : '');
     var lines=[
-      "Richiesta preventivo dall'app DGM Resine", "Lavorazione: "+state.material.name, "Colore: "+colorLine,
+      "Richiesta preventivo dall'app DGM Resine", "Lavorazione: "+state.material.name, "Colore: "+colorLine
+    ];
+    if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout]);
+    lines.push(
       "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
       "Nome: "+name, "Telefono: "+phone
-    ];
+    );
     if(mq) lines.push("Mq indicativi: "+mq);
     if(city) lines.push("Città/indirizzo: "+city);
     if(note) lines.push("Note: "+note);
