@@ -53,11 +53,11 @@ module.exports = async function handler(req, res) {
   // di materiali diversi rischiano di venire fuori quasi identiche, cambia solo
   // il colore piatto.
   const MATERIAL_TEXTURE = {
-    monolith_spatolato: "resina spatolata monocomponente (linea Monolith), superficie continua, compatta, perfettamente liscia e uniforme, senza fughe né giunti, leggerissima texture materica data dalla spatolatura a mano",
-    monolith_marmo: "resina spatolata effetto marmo (linea Monolith), superficie liscia con venature marmoree naturali, sfumature di tono e piccole nuvolature che ricordano il marmo lucidato, senza fughe",
-    monolith_pietra: "resina spatolata effetto pietra (linea Monolith), superficie con graniglie minerali colorate ben visibili e distribuite in modo uniforme sulla superficie, texture granulare simile a un terrazzo fine, non liscia e piatta",
-    monolith_terrazzo: "resina effetto terrazzo (linea Monolith), superficie con graniglie/scaglie di dimensioni miste e colori diversi ben visibili incorporate nella resina, tipico effetto terrazzo veneziano, texture chiaramente granulare",
-    scale: "resina spatolata effetto liscio (stessa finitura Monolith Spatolato) applicata su gradini e alzate di una scala, superficie continua e uniforme senza fughe",
+    monolith_spatolato: "resina spatolata monocomponente, superficie continua, compatta, perfettamente liscia e uniforme, senza fughe né giunti, leggerissima texture materica data dalla spatolatura a mano",
+    monolith_marmo: "resina spatolata effetto marmo, superficie liscia con venature marmoree naturali, sfumature di tono e piccole nuvolature che ricordano il marmo lucidato, senza fughe",
+    monolith_pietra: "resina spatolata effetto pietra, superficie con graniglie minerali colorate ben visibili e distribuite in modo uniforme sulla superficie, texture granulare simile a un terrazzo fine, non liscia e piatta",
+    monolith_terrazzo: "resina effetto terrazzo, superficie con graniglie/scaglie di dimensioni miste e colori diversi ben visibili incorporate nella resina, tipico effetto terrazzo veneziano, texture chiaramente granulare",
+    scale: "resina spatolata effetto liscio (stessa finitura Resina Spatolata) applicata su gradini e alzate di una scala, superficie continua e uniforme senza fughe",
     microcemento: "microcemento applicato a spatola, superficie continua ma con texture materica leggera, piccole variazioni di tono naturali tipiche della spatolatura, non perfettamente piatta come la resina",
     imbiancatura: "pittura murale opaca stesa in modo uniforme sulla parete, finitura pittorica classica, nessuna texture materica particolare",
     decorazioni: "boiserie in legno applicata a parete"
