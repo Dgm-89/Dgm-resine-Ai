@@ -468,9 +468,12 @@
     <div class="field"><label for="fName">Nome e cognome</label><input id="fName" type="text" placeholder="Mario Rossi" autocomplete="name"></div>
     <div class="row2">
       <div class="field"><label for="fPhone">Telefono</label><input id="fPhone" type="tel" placeholder="333 1234567" autocomplete="tel"></div>
-      <div class="field"><label for="fMq">Mq indicativi</label><input id="fMq" type="text" inputmode="decimal" placeholder="es. 40"></div>
+      <div class="field"><label for="fEmail">Email</label><input id="fEmail" type="email" placeholder="mario.rossi@email.it" autocomplete="email"></div>
     </div>
-    <div class="field"><label for="fCity">Città / indirizzo</label><input id="fCity" type="text" placeholder="Via, città" autocomplete="street-address"></div>
+    <div class="row2">
+      <div class="field"><label for="fMq">Mq indicativi</label><input id="fMq" type="text" inputmode="decimal" placeholder="es. 40"></div>
+      <div class="field"><label for="fCity">Città / indirizzo</label><input id="fCity" type="text" placeholder="Via, città" autocomplete="street-address"></div>
+    </div>
     <div class="field"><label for="fNote">Note (opzionale)</label><textarea id="fNote" placeholder="Ambiente, tempistiche, dettagli utili"></textarea></div>
   </section>
 
@@ -479,7 +482,7 @@
     <div class="confirm">
       <div class="icon">✅</div>
       <div class="title">Richiesta pronta</div>
-      <p>Si è aperto WhatsApp con il messaggio già compilato: ti basta premere invia. In alternativa scrivici via email qui sotto.</p>
+      <p id="confirmMessage">Si è aperto WhatsApp con il messaggio già compilato: ti basta premere invia. In alternativa scrivici via email qui sotto.</p>
     </div>
   </section>
 
@@ -1217,6 +1220,9 @@
   var photoImg = null;
   var isTemplate = false;
   var aiResultImage = null; // Image() dell'anteprima generata davvero dall'AI, null finché non c'è
+  var aiResultImageBase64 = null; // stesso risultato AI, ma come base64 grezzo (senza prefisso data URI), usato per l'invio email con allegato
+  var aiResultImageMime = null; // mime type dell'immagine AI generata (es. "image/png"), abbinato a aiResultImageBase64
+  var lastSendChannel = null; // 'whatsapp' o 'email': tiene traccia di come è stata inviata l'ultima richiesta, per personalizzare il messaggio di conferma
 
   function facadeColorCount(){
     if(!(state.material && state.material.id === 'imbiancatura' && state.context === 'esterno')) return 1;
@@ -1232,7 +1238,7 @@
   function colorForPhase(p){ return p==='A' ? state.colorA : (p==='C' ? state.colorC : state.colorB); }
 
   function resetSelectionForNewCategory(){
-    state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery='';
+    state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
     state.context = 'interno'; state.facadeLayout = 'monocolore'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.effetto = 'liscio';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
@@ -1268,7 +1274,7 @@
   document.getElementById('nicheToggle').addEventListener('click', function(){
     state.addNicchia = !state.addNicchia;
     this.classList.toggle('active', state.addNicchia);
-    aiResultImage = null;
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
   });
 
   function syncBoiserieStyleVisibility(){
@@ -1409,7 +1415,7 @@
         state.context = opt.v;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
-        state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
+        state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
         syncNextStepEnabled();
@@ -1438,7 +1444,7 @@
         + '<span class="tile-content"><span class="m-name">'+info.name+'</span><span class="m-desc">'+info.desc+'</span></span>';
       card.addEventListener('click', function(){
         state.resinaArea = key;
-        aiResultImage = null;
+        aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
         Array.prototype.forEach.call(resinaAreaGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
         // Se cambia dove si applica la resina, la finitura già scelta potrebbe non
@@ -1463,7 +1469,7 @@
       card.classList.add('selected');
       var img = new Image();
       img.onload = function(){
-        photoImg = img; isTemplate = true; aiResultImage = null;
+        photoImg = img; isTemplate = true; aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
         state.photoBase64 = null; state.photoMime = null;
         showHeroLoaded();
         syncNextStepEnabled();
@@ -1510,7 +1516,7 @@
         if(match){ state.photoMime = match[1]; state.photoBase64 = match[2]; }
         var img = new Image();
         img.onload = function(){
-          photoImg = img; isTemplate = false; aiResultImage = null;
+          photoImg = img; isTemplate = false; aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
           Array.prototype.forEach.call(templateRow.children, function(c){ c.classList.remove('selected'); });
           showHeroLoaded();
           document.getElementById('aiStatus').classList.remove('error');
@@ -1668,7 +1674,7 @@
       if(phase==='A'){ state.colorA=null; state.colorB=null; state.colorC=null; }
       else if(phase==='C'){ state.colorC=null; }
       else { state.colorB=null; }
-      pickPhase=phase; aiResultImage=null; renderStep2UI();
+      pickPhase=phase; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; renderStep2UI();
     });
     row.appendChild(chip);
   }
@@ -1796,7 +1802,7 @@
     } else if(pickPhase==='C'){
       state.colorC=c; pickPhase='B';
     } else { state.colorB=c; }
-    aiResultImage=null;
+    aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
     cpm.classList.remove('open');
     renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled();
   });
@@ -1808,7 +1814,7 @@
     var v = btn.dataset.v; state.effetto = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('effettoHint').textContent = EFFETTO_HINT[v];
-    aiResultImage=null;
+    aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
   });
 
   document.getElementById('contextControl').addEventListener('click', function(e){
@@ -1816,7 +1822,7 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = CONTEXT_HINT[v];
-    state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
+    state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
     document.getElementById('colorSearch').value='';
     syncFacadeLayoutVisibility();
     renderStep2UI();
@@ -1831,7 +1837,7 @@
     // riparte dal primo colore ancora mancante nell'ordine giusto per il nuovo layout
     var order = phaseOrder(); pickPhase = 'A';
     for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
-    aiResultImage = null;
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
     renderStep2UI();
   });
 
@@ -1841,7 +1847,7 @@
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('boiserieStyleHint').textContent = BOISERIE_STYLE_HINT[v];
     syncPannelloHeightVisibility();
-    aiResultImage = null;
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
   });
 
   document.getElementById('pannelloHeightControl').addEventListener('click', function(e){
@@ -1849,7 +1855,7 @@
     var v = btn.dataset.v; state.boiserieHeight = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('pannelloHeightHint').textContent = PANNELLO_HEIGHT_HINT[v];
-    aiResultImage = null;
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
   });
 
   document.getElementById('finituraControl').addEventListener('click', function(e){
@@ -1857,7 +1863,7 @@
     var v = btn.dataset.v; state.finitura = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('finituraHint').textContent = FINITURA_HINT[v];
-    aiResultImage=null;
+    aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
   });
 
   // ---------- AI generation ----------
@@ -1911,13 +1917,15 @@
         if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
         return new Promise(function(resolve, reject){
           var img = new Image();
-          img.onload = function(){ resolve(img); };
+          img.onload = function(){ resolve({ img: img, base64: res.data.imageBase64, mime: res.data.mimeType }); };
           img.onerror = function(){ reject(new Error("L'AI ha risposto ma l'immagine non è leggibile")); };
           img.src = 'data:' + res.data.mimeType + ';base64,' + res.data.imageBase64;
         });
       })
-      .then(function(img){
-        aiResultImage = img;
+      .then(function(result){
+        aiResultImage = result.img;
+        aiResultImageBase64 = result.base64;
+        aiResultImageMime = result.mime;
         renderHeroPreview();
         statusEl.textContent = "Fatto — questa è la vera immagine generata dall'AI. Trascina per confrontare prima e dopo.";
       })
@@ -1983,6 +1991,14 @@
   function goTo(id){
     currentPanel = id;
     var seq = currentSeq();
+    if(id === 'panelConfirm'){
+      var msgEl = document.getElementById('confirmMessage');
+      if(msgEl){
+        msgEl.textContent = lastSendChannel === 'email'
+          ? "La tua richiesta è stata inviata via email, con l'anteprima allegata. Ti ricontatteremo al più presto."
+          : "Si è aperto WhatsApp con il messaggio già compilato: ti basta premere invia. In alternativa scrivici via email qui sotto.";
+      }
+    }
     ALL_PANELS.forEach(function(pid){ document.getElementById(pid).classList.toggle('active', pid===id); });
 
     var showBar1 = id==='panel1';
@@ -2068,11 +2084,12 @@
     var ok=document.getElementById('fName').value.trim() && document.getElementById('fPhone').value.trim();
     document.getElementById('sendWa').disabled = !ok;
   }
-  ['fName','fPhone','fMq','fCity','fNote'].forEach(function(id){ document.getElementById(id).addEventListener('input', checkForm); });
+  ['fName','fPhone','fEmail','fMq','fCity','fNote'].forEach(function(id){ document.getElementById(id).addEventListener('input', checkForm); });
 
   function buildMessage(){
     var name=document.getElementById('fName').value.trim();
     var phone=document.getElementById('fPhone').value.trim();
+    var email=document.getElementById('fEmail').value.trim();
     var mq=document.getElementById('fMq').value.trim();
     var city=document.getElementById('fCity').value.trim();
     var note=document.getElementById('fNote').value.trim();
@@ -2089,6 +2106,7 @@
       "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
       "Nome: "+name, "Telefono: "+phone
     );
+    if(email) lines.push("Email: "+email);
     if(mq) lines.push("Mq indicativi: "+mq);
     if(city) lines.push("Città/indirizzo: "+city);
     if(note) lines.push("Note: "+note);
@@ -2096,13 +2114,48 @@
   }
 
   document.getElementById('sendWa').addEventListener('click', function(){
+    lastSendChannel = 'whatsapp';
     window.open(WHATSAPP_LINK+"?text="+encodeURIComponent(buildMessage()), '_blank');
     goTo('panelConfirm');
   });
   document.getElementById('sendEmail').addEventListener('click', function(e){
     e.preventDefault();
-    var subject="Richiesta preventivo — "+state.material.name;
-    window.location.href="mailto:"+EMAIL_TO+"?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(buildMessage());
+    var linkEl = e.currentTarget;
+    var subject = "Richiesta preventivo — " + state.material.name;
+    var originalText = linkEl.textContent;
+    linkEl.textContent = "Invio in corso…";
+    linkEl.style.pointerEvents = 'none';
+
+    fetch('/api/send-request', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toEmail: EMAIL_TO,
+        subject: subject,
+        textSummary: buildMessage(),
+        replyTo: document.getElementById('fEmail').value.trim() || null,
+        imageBase64: aiResultImageBase64,
+        imageMime: aiResultImageMime,
+        customerPhotoBase64: state.photoBase64 || null,
+        customerPhotoMime: state.photoMime || null
+      })
+    })
+      .then(function(r){ return r.json().then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(result){
+        if(!result.ok) throw new Error((result.data && result.data.error) || 'Invio non riuscito');
+        lastSendChannel = 'email';
+        goTo('panelConfirm');
+      })
+      .catch(function(err){
+        // Fallback: se l'invio automatico non funziona (es. RESEND_API_KEY non
+        // ancora configurata su Vercel), apriamo comunque il client email del
+        // cliente con tutto precompilato, così la richiesta non va mai persa.
+        window.location.href = "mailto:" + EMAIL_TO + "?subject=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(buildMessage());
+      })
+      .finally(function(){
+        linkEl.textContent = originalText;
+        linkEl.style.pointerEvents = '';
+      });
   });
 
   // ---------- share configuration card ----------
