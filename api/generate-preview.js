@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, boiserieStyleRefImage } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, boiserieStyleRefImage, resinaArea } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -61,15 +61,25 @@ module.exports = async function handler(req, res) {
   // di materiali diversi rischiano di venire fuori quasi identiche, cambia solo
   // il colore piatto.
   const MATERIAL_TEXTURE = {
-    monolith_spatolato: "resina spatolata monocomponente, superficie continua, compatta, perfettamente liscia e uniforme, senza fughe né giunti, leggerissima texture materica data dalla spatolatura a mano",
+    monolith_spatolato: "resina spatolata monocomponente color chiaro/avorio, superficie continua, compatta e uniforme, con leggerissime tracce direzionali lasciate dalla spatolatura a mano ancora visibili in controluce, finitura satinata, senza fughe né giunti",
     monolith_marmo: "resina spatolata effetto marmo, superficie liscia con venature marmoree naturali, sfumature di tono e piccole nuvolature che ricordano il marmo lucidato, senza fughe",
     monolith_pietra: "resina spatolata effetto pietra, superficie con graniglie minerali colorate ben visibili e distribuite in modo uniforme sulla superficie, texture granulare simile a un terrazzo fine, non liscia e piatta",
     monolith_terrazzo: "resina effetto terrazzo, superficie con graniglie/scaglie di dimensioni miste e colori diversi ben visibili incorporate nella resina, tipico effetto terrazzo veneziano, texture chiaramente granulare",
-    scale: "resina spatolata effetto liscio (stessa finitura Resina Spatolata) applicata su gradini e alzate di una scala, superficie continua e uniforme senza fughe",
-    microcemento: "microcemento applicato a spatola, superficie continua ma con texture materica leggera, piccole variazioni di tono naturali tipiche della spatolatura, non perfettamente piatta come la resina",
+    scale: "resina spatolata effetto liscio (stessa finitura Resina Spatolata) applicata su gradini e alzate di una scala, superficie continua e uniforme con leggerissime tracce direzionali di spatolatura, finitura satinata, senza fughe",
+    microcemento: "microcemento applicato a spatola/frattazzo, superficie con evidenti segni di lavorazione circolari e radiali lasciati dal frattazzo ancora percepibili, leggere variazioni di tono naturali (non un colore perfettamente piatto), finitura satinata-opaca, non liscia e piatta come la resina",
     imbiancatura: "pittura murale opaca stesa in modo uniforme sulla parete, finitura pittorica classica, nessuna texture materica particolare",
-    decorazioni: "boiserie in legno applicata a parete"
+    decorazioni: "boiserie in legno applicata a parete",
+    resina_haccp: "resina industriale bianca lucida ad alta resistenza chimica e meccanica, superficie liscia, compatta e priva di fughe o giunti, con raccordi a raggio sanitario (curvi, senza spigoli vivi) tra pavimento e pareti dove visibili, tipica dei pavimenti certificati HACCP per cucine professionali e industria alimentare, finitura lucida uniforme"
   };
+
+  // Effetti di superficie aggiuntivi (Materico/Corten): si sommano alla texture
+  // base del materiale (es. Resina Spatolata + Materico), non la sostituiscono.
+  // "Liscio" è il default e non aggiunge nulla (la texture base è già liscia).
+  const EFFETTO_TEXTURE = {
+    materico: " con un effetto materico superficiale sovrapposto: texture ruvida e tattile, rilievo irregolare ben visibile, variazioni di tono chiare e scure che si alternano in modo naturale e non simmetrico sulla superficie, aspetto grezzo e tridimensionale, decisamente non liscio né piatto",
+    corten: " con un effetto Corten sovrapposto: base cromatica ocra/ruggine, con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, pattern asimmetrico e naturale (mai simmetrico, mai ripetitivo o a griglia), superficie opaca"
+  };
+  const EFFETTO_MATERIALS = ["monolith_spatolato", "monolith_marmo", "microcemento", "scale"];
 
   // La boiserie NON è un semplice colore piatto: è una geometria di pannelli/doghe
   // applicata fisicamente sulla parete, quindi il prompt deve descrivere la forma
@@ -88,18 +98,35 @@ module.exports = async function handler(req, res) {
     pannello: "boiserie a pannello semplice: 2-4 pannelli rettangolari LARGHI (proporzione orizzontale, MAI quadrati, MAI una fitta griglia di tanti riquadri piccoli tipo scacchiera) per ogni parete inquadrata, ciascuno largo almeno il doppio della sua altezza, incorniciati da una modanatura sottile e lineare (profilo semplice, NON bugnato, NON scolpito, niente cornici multilivello elaborate), superficie interna liscia, geometria essenziale e minimale, ombre leggere e nette solo lungo il bordo della cornice"
   };
   const boiserieDesc = BOISERIE_STYLE_DESC[boiserieStyle] || BOISERIE_STYLE_DESC.specchiatura;
-  const textureDesc = materialId === "decorazioni"
+  const baseTextureDesc = materialId === "decorazioni"
     ? boiserieDesc
     : (MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`);
+  const effettoAddon = (EFFETTO_MATERIALS.includes(materialId) && EFFETTO_TEXTURE[effetto]) ? EFFETTO_TEXTURE[effetto] : "";
+  const textureDesc = baseTextureDesc + effettoAddon;
 
   // Monolith Pietra e Terrazzo si posano SOLO a pavimento (non a parete): lo
   // diciamo esplicitamente all'AI così non applica la lavorazione anche ai muri
   // inquadrati nella foto.
   const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo"];
   const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId);
+
+  // Per la categoria "Resine" (monolith), l'utente ora sceglie esplicitamente DOVE
+  // applicare la resina: solo pavimento, solo pareti (rivestimento), o entrambi
+  // insieme ("tutto resinato"). Questo si applica SOPRA/oltre al vincolo esistente
+  // isFloorOnly (Pietra/Terrazzo restano comunque solo pavimento anche se qualcuno
+  // forzasse "rivestimento" via API diretta, ma la UI già filtra questo caso).
+  const RESINA_AREA_DESC = {
+    pavimento: "SOLO al pavimento inquadrato (non applicare alle pareti anche se visibili nella foto)",
+    rivestimento: "SOLO alle pareti inquadrate (non applicare al pavimento anche se visibile nella foto)",
+    tutto: "sia al pavimento che alle pareti inquadrate nella foto, in modo uniforme e continuo su entrambe le superfici, come un ambiente completamente resinato dal pavimento alle pareti"
+  };
+  const resinaAreaDesc = (materialId && materialId.indexOf("monolith") === 0 && resinaArea && RESINA_AREA_DESC[resinaArea])
+    ? RESINA_AREA_DESC[resinaArea]
+    : null;
+
   const surfaceDesc = isFloorOnly
     ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
-    : "alla superficie del pavimento/parete inquadrata";
+    : (resinaAreaDesc || "alla superficie del pavimento/parete inquadrata");
 
   // Layout facciata (solo Imbiancatura Esterno): il "marcapiano" è la classica
   // soluzione a TRE fasce delle palazzine italiane — parte alta, la fascia del
@@ -160,7 +187,10 @@ module.exports = async function handler(req, res) {
   // specifico): oltre alle singole note di preservazione già presenti nei rami
   // facciata/pavimento/default qui sotto, questa regola assoluta copre TUTTI i casi
   // e ribadisce che l'unica area modificabile è quella esplicitamente descritta.
-  const globalPreservationNote = " REGOLA ASSOLUTA: non alterare in nessun modo altri elementi della foto oltre a quanto esplicitamente richiesto in queste istruzioni — non spostare, aggiungere, rimuovere o modificare mobili, oggetti, porte, finestre, prese elettriche, interruttori, quadri, piante, pavimenti (a meno che non sia il pavimento l'elemento richiesto), altre pareti non indicate, illuminazione naturale o artificiale, inquadratura o prospettiva. L'unica area che puoi modificare è quella esplicitamente descritta sopra.";
+  const bothSurfacesTargeted = resinaArea === "tutto";
+  const globalPreservationNote = bothSurfacesTargeted
+    ? " REGOLA ASSOLUTA: non alterare in nessun modo altri elementi della foto oltre a quanto esplicitamente richiesto in queste istruzioni — non spostare, aggiungere, rimuovere o modificare mobili, oggetti, porte, finestre, prese elettriche, interruttori, quadri, piante, altre pareti non indicate, illuminazione naturale o artificiale, inquadratura o prospettiva. In questo caso sia il pavimento SIA le pareti inquadrate sono l'area da trattare (resina applicata su entrambi in modo coerente e continuo); resta invariato tutto il resto (mobili, infissi, oggetti, ecc.)."
+    : " REGOLA ASSOLUTA: non alterare in nessun modo altri elementi della foto oltre a quanto esplicitamente richiesto in queste istruzioni — non spostare, aggiungere, rimuovere o modificare mobili, oggetti, porte, finestre, prese elettriche, interruttori, quadri, piante, pavimenti (a meno che non sia il pavimento l'elemento richiesto), altre pareti non indicate, illuminazione naturale o artificiale, inquadratura o prospettiva. L'unica area che puoi modificare è quella esplicitamente descritta sopra.";
 
   // Quando inviamo anche la foto di riferimento dello stile di boiserie (vedi la
   // terza "part" inline_data più sotto), dobbiamo spiegare al modello l'ordine e il
