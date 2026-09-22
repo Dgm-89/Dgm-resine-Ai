@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, boiserieStyleRefImage } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -85,7 +85,7 @@ module.exports = async function handler(req, res) {
     nicchia: "un SINGOLO vano rettangolare incassato nella parete (profondità reale, con ombra interna scura), bordato da una sottile cornice perimetrale in rilievo, eventualmente con una piccola mensola/ripiano visibile all'interno del vano. IMPORTANTE: applica SOLO questo vano/nicchia come elemento puntuale, NON rivestire il resto della parete con pannelli: il resto della parete deve restare invariato (stesso colore/materiale della foto originale)",
     specchio: "boiserie con inserto a specchio: pannello incorniciato con una vera lastra di specchio inserita al centro (superficie riflettente con un lieve riflesso/highlight diagonale), cornice in rilievo intorno allo specchio, stile elegante da ingresso o camera",
     doghe: "boiserie a doghe verticali in legno: listelli verticali stretti e ravvicinati (profilo squadrato tipo listone, non arrotondato), accostati l'uno all'altro dal pavimento al soffitto con una sottile fuga d'ombra tra una doga e l'altra, superficie calda e materica con venatura del legno naturale, stile contemporaneo caldo",
-    pannello: "boiserie a pannello semplice: una specchiatura rettangolare piatta e pulita, incorniciata da una modanatura sottile e lineare (profilo semplice, NON bugnato e NON scolpito, niente cornici multilivello elaborate), superficie interna liscia, geometria essenziale e minimale, disposta in una griglia regolare sulla parete, ombre leggere e nette solo lungo il bordo della cornice"
+    pannello: "boiserie a pannello semplice: 2-4 pannelli rettangolari LARGHI (proporzione orizzontale, MAI quadrati, MAI una fitta griglia di tanti riquadri piccoli tipo scacchiera) per ogni parete inquadrata, ciascuno largo almeno il doppio della sua altezza, incorniciati da una modanatura sottile e lineare (profilo semplice, NON bugnato, NON scolpito, niente cornici multilivello elaborate), superficie interna liscia, geometria essenziale e minimale, ombre leggere e nette solo lungo il bordo della cornice"
   };
   const boiserieDesc = BOISERIE_STYLE_DESC[boiserieStyle] || BOISERIE_STYLE_DESC.specchiatura;
   const textureDesc = materialId === "decorazioni"
@@ -156,6 +156,23 @@ module.exports = async function handler(req, res) {
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
 
+  // Rinforzo generale, sempre incluso (non condizionato a un materiale/contesto
+  // specifico): oltre alle singole note di preservazione già presenti nei rami
+  // facciata/pavimento/default qui sotto, questa regola assoluta copre TUTTI i casi
+  // e ribadisce che l'unica area modificabile è quella esplicitamente descritta.
+  const globalPreservationNote = " REGOLA ASSOLUTA: non alterare in nessun modo altri elementi della foto oltre a quanto esplicitamente richiesto in queste istruzioni — non spostare, aggiungere, rimuovere o modificare mobili, oggetti, porte, finestre, prese elettriche, interruttori, quadri, piante, pavimenti (a meno che non sia il pavimento l'elemento richiesto), altre pareti non indicate, illuminazione naturale o artificiale, inquadratura o prospettiva. L'unica area che puoi modificare è quella esplicitamente descritta sopra.";
+
+  // Quando inviamo anche la foto di riferimento dello stile di boiserie (vedi la
+  // terza "part" inline_data più sotto), dobbiamo spiegare al modello l'ordine e il
+  // ruolo delle due immagini: altrimenti rischia di confondere le due foto o di
+  // copiare anche colore/ambiente dalla seconda immagine invece che solo la geometria.
+  const boiserieStyleRefImageClean = typeof boiserieStyleRefImage === "string"
+    ? boiserieStyleRefImage.replace(/^data:image\/\w+;base64,/, "")
+    : null;
+  const boiserieStyleRefNote = boiserieStyleRefImageClean
+    ? " IMPORTANTE SUL RIFERIMENTO VISIVO: ti sono state fornite DUE immagini. La PRIMA immagine è la foto reale del cliente da modificare. La SECONDA immagine è un riferimento visivo ESATTO della geometria/stile di boiserie da applicare (forma, proporzioni e disposizione dei pannelli, tipo di cornice/modanatura): replica FEDELMENTE quella geometria e quelle proporzioni sulla parete della prima foto. Usa la seconda immagine SOLO come riferimento per la FORMA/GEOMETRIA dei pannelli, non per il colore né per l'ambiente circostante: colore e materiale seguono invece le istruzioni indicate sopra nel testo, non l'immagine di riferimento."
+    : "";
+
   const prompt = [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
@@ -169,7 +186,9 @@ module.exports = async function handler(req, res) {
     boiserieRealismNote,
     pannelloHeightNote,
     nicchiaNote,
-    colorFidelityNote
+    boiserieStyleRefNote,
+    colorFidelityNote,
+    globalPreservationNote
   ].join(" ");
 
   // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
@@ -194,21 +213,36 @@ module.exports = async function handler(req, res) {
   }
 
   try {
+    // Parti della richiesta a Gemini: testo del prompt + foto del cliente, e in più
+    // (solo per boiserie, quando il frontend ce l'ha inviata) la foto di riferimento
+    // dello stile scelto, come TERZA part, DOPO la foto del cliente — l'ordine è
+    // importante perché il prompt sopra spiega esplicitamente "PRIMA immagine" /
+    // "SECONDA immagine" facendo riferimento a questa stessa sequenza.
+    const contentParts = [
+      { text: prompt },
+      {
+        inline_data: {
+          mime_type: mimeType || "image/jpeg",
+          data: imageBase64 // base64 SENZA il prefisso "data:image/...;base64,"
+        }
+      }
+    ];
+    if (boiserieStyleRefImageClean) {
+      contentParts.push({
+        inline_data: {
+          mime_type: "image/jpeg",
+          data: boiserieStyleRefImageClean
+        }
+      });
+    }
+
     const response = await fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         contents: [
           {
-            parts: [
-              { text: prompt },
-              {
-                inline_data: {
-                  mime_type: mimeType || "image/jpeg",
-                  data: imageBase64 // base64 SENZA il prefisso "data:image/...;base64,"
-                }
-              }
-            ]
+            parts: contentParts
           }
         ]
       })
