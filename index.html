@@ -483,6 +483,7 @@
       <div class="icon">✅</div>
       <div class="title">Richiesta pronta</div>
       <p id="confirmMessage">Si è aperto WhatsApp con il messaggio già compilato: ti basta premere invia. In alternativa scrivici via email qui sotto.</p>
+      <button type="button" class="btn btn-primary" id="btnBackToMenu" style="margin-top:24px;">Torna al menu</button>
     </div>
   </section>
 
@@ -2156,6 +2157,10 @@
         linkEl.textContent = originalText;
         linkEl.style.pointerEvents = '';
       });
+  });
+
+  document.getElementById('btnBackToMenu').addEventListener('click', function(){
+    window.location.href = window.location.pathname;
   });
 
   // ---------- share configuration card ----------
