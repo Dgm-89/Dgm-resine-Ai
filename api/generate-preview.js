@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, addNicchia } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -84,7 +84,8 @@ module.exports = async function handler(req, res) {
     liscia: "boiserie liscia con cornice perimetrale: un grande pannello liscio e uniforme, bordato da un'unica cornice sottile ed elegante lungo il perimetro, nessuna ulteriore decorazione interna, stile minimale e pulito",
     nicchia: "un SINGOLO vano rettangolare incassato nella parete (profondità reale, con ombra interna scura), bordato da una sottile cornice perimetrale in rilievo, eventualmente con una piccola mensola/ripiano visibile all'interno del vano. IMPORTANTE: applica SOLO questo vano/nicchia come elemento puntuale, NON rivestire il resto della parete con pannelli: il resto della parete deve restare invariato (stesso colore/materiale della foto originale)",
     specchio: "boiserie con inserto a specchio: pannello incorniciato con una vera lastra di specchio inserita al centro (superficie riflettente con un lieve riflesso/highlight diagonale), cornice in rilievo intorno allo specchio, stile elegante da ingresso o camera",
-    doghe: "boiserie a doghe verticali in legno: listelli verticali stretti e ravvicinati (profilo squadrato tipo listone, non arrotondato), accostati l'uno all'altro dal pavimento al soffitto con una sottile fuga d'ombra tra una doga e l'altra, superficie calda e materica con venatura del legno naturale, stile contemporaneo caldo"
+    doghe: "boiserie a doghe verticali in legno: listelli verticali stretti e ravvicinati (profilo squadrato tipo listone, non arrotondato), accostati l'uno all'altro dal pavimento al soffitto con una sottile fuga d'ombra tra una doga e l'altra, superficie calda e materica con venatura del legno naturale, stile contemporaneo caldo",
+    pannello: "boiserie a pannello semplice: una specchiatura rettangolare piatta e pulita, incorniciata da una modanatura sottile e lineare (profilo semplice, NON bugnato e NON scolpito, niente cornici multilivello elaborate), superficie interna liscia, geometria essenziale e minimale, disposta in una griglia regolare sulla parete, ombre leggere e nette solo lungo il bordo della cornice"
   };
   const boiserieDesc = BOISERIE_STYLE_DESC[boiserieStyle] || BOISERIE_STYLE_DESC.specchiatura;
   const textureDesc = materialId === "decorazioni"
@@ -140,6 +141,14 @@ module.exports = async function handler(req, res) {
     ? " Aggiungi inoltre, in un punto sensato della superficie inquadrata (tipicamente sulla parete doccia se è un bagno), UN SINGOLO vano rettangolare incassato (nicchia) con profondità reale, bordato da una sottile cornice, con un piccolo ripiano interno e una striscia LED nascosta lungo il bordo superiore o laterale della nicchia che illumina delicatamente l'interno del vano con una luce calda. Applica questo elemento SOLO come dettaglio puntuale: non rivestire né alterare il resto della parete, che deve mantenere la stessa lavorazione/colore già applicati nel resto della foto."
     : "";
 
+  // Altezza della boiserie a pannello: prova mirata solo su questo stile, gli
+  // altri stili boiserie non hanno questa scelta e non ricevono questa nota.
+  const pannelloHeightNote = (materialId === "decorazioni" && boiserieStyle === "pannello" && boiserieHeight)
+    ? (boiserieHeight === "alta"
+      ? " La boiserie a pannello deve coprire l'INTERA altezza della parete, dal pavimento fino al soffitto (o fino alla cornice/cornicione superiore se presente nella foto), senza lasciare parte di parete nuda sopra."
+      : " La boiserie a pannello deve coprire SOLO la parte bassa della parete, per un'altezza di circa 90-100cm da terra (tipica altezza a zoccolo/parete bassa), con una cornice/modanatura orizzontale netta che segna la fine della boiserie: sopra questa linea la parete resta identica all'originale (stesso colore/materiale della foto di partenza), NON estendere la boiserie oltre questa altezza.")
+    : "";
+
   // Rinforzo esplicito: quando abbiamo almeno un codice hex, ribadiamo che va
   // rispettato con precisione, non solo usato come vago riferimento.
   const hasAnyHex = Boolean(colorAHex || colorBHex || colorCHex);
@@ -158,6 +167,7 @@ module.exports = async function handler(req, res) {
         ? `Mantieni identiche la prospettiva, la luce, le ombre, i mobili, e mantieni assolutamente INVARIATE tutte le pareti/muri della stanza (colore e materiale originali): cambia solo il pavimento, in modo fotorealistico, come se fosse una vera posa professionale.`
         : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`,
     boiserieRealismNote,
+    pannelloHeightNote,
     nicchiaNote,
     colorFidelityNote
   ].join(" ");
