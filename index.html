@@ -324,9 +324,15 @@
     <div class="material-grid" id="materialGrid"></div>
   </section>
 
+  <!-- 1.5: DOVE APPLICARE LA RESINA (solo categoria Resine) -->
+  <section class="panel" id="panelResinaArea">
+    <h1 class="title">Dove vuoi applicare la resina?</h1>
+    <div class="material-grid" id="resinaAreaGrid"></div>
+  </section>
+
   <!-- 2: SOTTO-MATERIALE (solo Monolith) -->
   <section class="panel" id="panelSub">
-    <h1 class="title" id="subTitle">Quale finitura Resina?</h1>
+    <h1 class="title" id="subTitle">Quale finitura Resine?</h1>
     <div class="material-grid" id="subGrid"></div>
   </section>
 
@@ -522,7 +528,7 @@
   // foto, stile pulito da app moderna (l'imprenditore ha chiesto esplicitamente
   // "pulsanti fighi", non foto dei lavori).
   var CATEGORY_STYLE = {
-    monolith:      { bg:"linear-gradient(135deg,#8B6F47,#6B5238)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 5 11.5 5 15.5C5 19.09 8.13 22 12 22C15.87 22 19 19.09 19 15.5C19 11.5 12 2 12 2Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 15.5C8.5 17.43 10.07 19 12 19" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>' },
+    monolith:      { bg:"linear-gradient(135deg,#4A5A6B,#2C3640)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 2 5 11.5 5 15.5C5 19.09 8.13 22 12 22C15.87 22 19 19.09 19 15.5C19 11.5 12 2 12 2Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 15.5C8.5 17.43 10.07 19 12 19" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>' },
     microcemento:  { bg:"linear-gradient(135deg,#5B6B5E,#3F4B42)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 15L14 5C15.5 3.5 17.5 3.5 19 5C20.5 6.5 20.5 8.5 19 10L9 20L4 21L5 16Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M13 7L17 11" stroke="white" stroke-width="1.6"/></svg>' },
     scale:         { bg:"linear-gradient(135deg,#7A5C3E,#5A4229)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 21V17H7V13H11V9H15V5H21" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
     imbiancatura:  { bg:"linear-gradient(135deg,#C9A227,#A6811A)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="4" width="14" height="6" rx="1.5" stroke="white" stroke-width="1.6"/><path d="M9 10V14" stroke="white" stroke-width="1.6"/><rect x="7" y="14" width="4" height="6" rx="1" stroke="white" stroke-width="1.6"/></svg>' },
@@ -541,11 +547,11 @@
   };
 
   var CATEGORIES = [
-    { id:"monolith", name:"Resina", desc:"Resina spatolata: scegli la finitura (Spatolato, Marmo, Pietra, Terrazzo)", swatch:"#9C9186", subs:[
+    { id:"monolith", name:"Resine", desc:"Resina spatolata: scegli la finitura (Spatolato, Marmo, Pietra, Terrazzo)", swatch:"#9C9186", subs:[
       { id:"monolith_spatolato", name:"Resina Spatolata", desc:"Resina spatolata monocomponente, effetto liscio, per interni", swatch:"#9C9186" },
       { id:"monolith_marmo", name:"Resina Marmo", desc:"Resina spatolata, effetto marmorizzato, per interni", swatch:"#B8B8B0" },
-      { id:"monolith_pietra", name:"Resina Pietra", desc:"Resina con graniglie colorate, effetto pietra — solo per pavimenti interni", swatch:"#C9C7BD" },
-      { id:"monolith_terrazzo", name:"Resina Terrazzo", desc:"Resina con graniglie effetto terrazzo — solo per pavimenti interni", swatch:"#8B8D89" }
+      { id:"monolith_pietra", name:"Resina Pietra", desc:"Resina con graniglie colorate, effetto pietra — solo per pavimenti interni", swatch:"#C9C7BD", floorOnly:true },
+      { id:"monolith_terrazzo", name:"Resina Terrazzo", desc:"Resina con graniglie effetto terrazzo — solo per pavimenti interni", swatch:"#8B8D89", floorOnly:true }
     ]},
     { id:"microcemento", name:"Microcemento", desc:"Superfici continue, effetto materico", swatch:"#8F8B82" },
     { id:"scale", name:"Scale", desc:"Rivestimento di scale interne ed esterne, colori ed effetti Resina Spatolata", swatch:"#9C9186" },
@@ -1169,7 +1175,7 @@
   var EFFETTO_LABEL = { liscio:'Liscio uniforme', materico:'Materico', corten:'Corten' };
   var FINITURA_HINT = { opaco:"Superficie piena, senza riflessi.", satinato:"Via di mezzo tra opaco e lucido, la più richiesta.", lucido:"Massima brillantezza e profondità del colore." };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', facadeLayout:'monocolore', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, colorA:null, colorB:null, colorC:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, colorA:null, colorB:null, colorC:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = { interno:"Colori pensati per pareti e superfici interne.", esterno:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni." };
   // Stile boiserie: la boiserie non è un semplice colore, è una geometria di
   // pannelli applicata sulla parete. Tre stili reali e attuali: pannelli
@@ -1326,12 +1332,14 @@
     card.addEventListener('click', function(){
       state.category = cat;
       state.material = cat.subs ? null : cat;
+      state.resinaArea = null;
       resetSelectionForNewCategory();
       Array.prototype.forEach.call(materialGrid.children, function(c){ c.classList.remove('selected'); });
       card.classList.add('selected');
       document.getElementById('next1').disabled = false;
       if(cat.subs) buildSubGrid(cat);
       else if(cat.id==='imbiancatura') buildContextChoice(cat);
+      if(cat.id==='monolith') buildResinaAreaChoice();
       syncContextVisibility();
     });
     materialGrid.appendChild(card);
@@ -1351,7 +1359,13 @@
   function buildSubGrid(cat){
     subGrid.innerHTML = '';
     document.getElementById('subTitle').textContent = 'Quale finitura ' + cat.name + '?';
-    cat.subs.forEach(function(sub){
+    // Rivestimento (pareti): Pietra e Terrazzo sono lavorazioni solo da pavimento,
+    // non hanno senso applicate a parete, quindi vengono nascoste in questo caso.
+    var subs = cat.subs;
+    if(cat.id === 'monolith' && state.resinaArea === 'rivestimento'){
+      subs = subs.filter(function(s){ return !s.floorOnly; });
+    }
+    subs.forEach(function(sub){
       var card = document.createElement('button');
       card.type='button'; card.className='material-card photo-tile';
       var styleInfo = SUBMATERIAL_STYLE[sub.id];
@@ -1401,6 +1415,40 @@
         syncNextStepEnabled();
       });
       subGrid.appendChild(card);
+    });
+  }
+
+  // ---------- 1.5: DOVE APPLICARE LA RESINA (solo Resine) ----------
+  var RESINA_AREA_STYLE = {
+    pavimento:     { name:"Pavimento", desc:"La resina viene applicata solo al pavimento.", bg:"linear-gradient(135deg,#5B6B5E,#3F4B42)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 20L12 15L21 20" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 16L12 11L21 16" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/><path d="M3 12L12 7L21 12" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.3"/></svg>' },
+    rivestimento:  { name:"Rivestimento", desc:"La resina viene applicata solo alle pareti.", bg:"linear-gradient(135deg,#7A5C3E,#5A4229)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="3" width="16" height="18" rx="1" stroke="white" stroke-width="1.6"/><path d="M4 9H20" stroke="white" stroke-width="1.3" opacity="0.6"/><path d="M4 15H20" stroke="white" stroke-width="1.3" opacity="0.6"/></svg>' },
+    tutto:         { name:"Tutto resinato", desc:"Pavimento e pareti resinati insieme, ambiente continuo.", bg:"linear-gradient(135deg,#4A5A6B,#2C3640)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="1.5" stroke="white" stroke-width="1.6"/><path d="M3 15H21" stroke="white" stroke-width="1.6"/></svg>' }
+  };
+  var resinaAreaGrid = document.getElementById('resinaAreaGrid');
+  function buildResinaAreaChoice(){
+    resinaAreaGrid.innerHTML = '';
+    ['pavimento','rivestimento','tutto'].forEach(function(key){
+      var info = RESINA_AREA_STYLE[key];
+      var card = document.createElement('button');
+      card.type='button'; card.className='material-card photo-tile';
+      card.style.background = info.bg;
+      if(state.resinaArea === key) card.classList.add('selected');
+      card.innerHTML = '<span class="tile-icon">' + info.icon + '</span>'
+        + '<span class="tile-check">✓</span>'
+        + '<span class="tile-content"><span class="m-name">'+info.name+'</span><span class="m-desc">'+info.desc+'</span></span>';
+      card.addEventListener('click', function(){
+        state.resinaArea = key;
+        aiResultImage = null;
+        Array.prototype.forEach.call(resinaAreaGrid.children, function(c){ c.classList.remove('selected'); });
+        card.classList.add('selected');
+        // Se cambia dove si applica la resina, la finitura già scelta potrebbe non
+        // essere più valida (es. Pietra/Terrazzo nascosti su Rivestimento): la
+        // reimpostiamo per evitare stati incoerenti quando si torna sul passo dopo.
+        state.material = null;
+        if(state.category && state.category.subs) buildSubGrid(state.category);
+        syncNextStepEnabled();
+      });
+      resinaAreaGrid.appendChild(card);
     });
   }
 
@@ -1838,6 +1886,7 @@
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
         boiserieStyleRefImage: boiserieStyleRefImage,
+        resinaArea: (state.category && state.category.id === 'monolith') ? state.resinaArea : null,
         addNicchia: state.addNicchia,
         effetto: state.effetto, finitura: state.finitura
       })
@@ -1882,14 +1931,17 @@
   // ---------- navigation a passi ----------
   // Sequenza: 1 Categoria -> (2 Sotto-materiale, solo se la categoria ha "subs") ->
   // 3 Colore -> 4 Finitura -> 5 Carica foto -> 6 Risultato -> 7 Dati -> Confirm.
-  var ALL_PANELS = ['panelLanding','panel1','panelSub','panelColor','panelFinitura','panelPhoto','panelResult','panel3','panelConfirm'];
-  var STEP_LABELS = { panel1:'Lavorazione', panelSub:'Finitura Resina', panelColor:'Colore', panelFinitura:'Finitura', panelPhoto:'Carica foto', panelResult:'Risultato', panel3:'Contatti' };
+  var ALL_PANELS = ['panelLanding','panel1','panelResinaArea','panelSub','panelColor','panelFinitura','panelPhoto','panelResult','panel3','panelConfirm'];
+  var STEP_LABELS = { panel1:'Lavorazione', panelResinaArea:'Dove applicare', panelSub:'Finitura Resina', panelColor:'Colore', panelFinitura:'Finitura', panelPhoto:'Carica foto', panelResult:'Risultato', panel3:'Contatti' };
   var currentPanel = 'panelLanding';
 
   function currentSeq(){
     // panelLanding non è un "passo" del wizard: è la schermata di ingresso, non entra
     // nel calcolo della barra di avanzamento né nella navigazione avanti/indietro.
     var seq = ALL_PANELS.slice().filter(function(id){ return id!=='panelLanding'; });
+    if(!(state.category && state.category.id === 'monolith')){
+      seq = seq.filter(function(id){ return id!=='panelResinaArea'; });
+    }
     if(!(state.category && (state.category.subs || state.category.id === 'imbiancatura'))){
       seq = seq.filter(function(id){ return id!=='panelSub'; });
     }
@@ -1911,7 +1963,8 @@
     var btn = document.getElementById('nextStep');
     if(!btn) return;
     var ok = true;
-    if(currentPanel==='panelSub') ok = !!state.material;
+    if(currentPanel==='panelResinaArea') ok = !!state.resinaArea;
+    else if(currentPanel==='panelSub') ok = !!state.material;
     else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC));
     else if(currentPanel==='panelPhoto') ok = !!photoImg;
     btn.disabled = !ok;
