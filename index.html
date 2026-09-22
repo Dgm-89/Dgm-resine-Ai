@@ -1654,7 +1654,7 @@
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name, materialId: state.material.id,
-        colorA: state.colorA.name, colorB: state.colorB ? state.colorB.name : null, colorC: state.colorC ? state.colorC.name : null,
+        colorA: state.colorA.name, colorAHex: state.colorA.hex, colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? state.colorB.hex : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? state.colorC.hex : null,
         facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         addNicchia: state.addNicchia,
