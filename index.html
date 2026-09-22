@@ -1693,6 +1693,17 @@
     var btn = this; var statusEl = document.getElementById('aiStatus');
     btn.disabled = true; statusEl.classList.remove('error');
     statusEl.textContent = 'Generazione in corso… può richiedere 10-20 secondi.';
+    // Foto di riferimento dello stile di boiserie scelto (una delle 10 miniature già
+    // presenti nella griglia .boiserie-grid): la inviamo al backend, insieme alla foto
+    // del cliente, solo quando la lavorazione è "decorazioni" e uno stile è selezionato,
+    // per non appesantire ogni altra richiesta con dati inutilizzati. Inviamo l'intera
+    // data URI (es. "data:image/jpeg;base64,XXXX"): il backend si occupa di togliere
+    // il prefisso "data:image/...;base64," prima di passarla a Gemini.
+    var boiserieStyleRefImage = null;
+    if(state.material.id === 'decorazioni' && state.boiserieStyle){
+      var refImgEl = document.querySelector('.boiserie-grid button[data-v="' + state.boiserieStyle + '"] img');
+      if(refImgEl && refImgEl.getAttribute('src')) boiserieStyleRefImage = refImgEl.getAttribute('src');
+    }
     fetch(AI_ENDPOINT, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -1701,6 +1712,7 @@
         facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
+        boiserieStyleRefImage: boiserieStyleRefImage,
         addNicchia: state.addNicchia,
         effetto: state.effetto, finitura: state.finitura
       })
