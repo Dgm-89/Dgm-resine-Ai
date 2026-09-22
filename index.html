@@ -141,11 +141,14 @@
 
   .fs-viewer{ position:fixed; inset:0; z-index:999; background:rgba(10,10,12,0.96); display:none; align-items:center; justify-content:center; flex-direction:column; }
   .fs-viewer.open{ display:flex; }
-  .fs-viewer img{ max-width:94vw; max-height:78vh; object-fit:contain; border-radius:8px; }
-  .fs-viewer .fs-tabs{ display:flex; gap:8px; margin-top:18px; }
-  .fs-viewer .fs-tabs button{ border:1.5px solid rgba(255,255,255,0.3); background:transparent; color:#fff; padding:8px 18px; border-radius:20px; font-size:12.5px; font-weight:700; cursor:pointer; font-family:inherit; }
-  .fs-viewer .fs-tabs button.active{ background:#fff; color:#111; border-color:#fff; }
-  .fs-viewer .fs-close{ position:absolute; top:18px; right:18px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.12); color:#fff; font-size:18px; cursor:pointer; }
+  .fs-slides{ width:100%; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+  .fs-slides::-webkit-scrollbar{ display:none; }
+  .fs-slide{ flex:0 0 100%; scroll-snap-align:center; display:flex; align-items:center; justify-content:center; }
+  .fs-slide img{ max-width:94vw; max-height:78vh; object-fit:contain; border-radius:8px; }
+  .fs-viewer .fs-dots{ display:flex; gap:6px; margin-top:18px; }
+  .fs-viewer .fs-dots button{ border:none; padding:0; width:22px; height:5px; border-radius:3px; background:rgba(255,255,255,0.45); cursor:pointer; transition:background .2s, width .2s; }
+  .fs-viewer .fs-dots button.active{ background:#fff; width:30px; }
+  .fs-viewer .fs-close{ position:absolute; top:18px; right:18px; width:40px; height:40px; border-radius:50%; border:none; background:rgba(255,255,255,0.12); color:#fff; font-size:18px; cursor:pointer; z-index:2; }
 
   .template-row{ display:flex; gap:8px; margin-bottom:16px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px; }
   .template-row::-webkit-scrollbar{ display:none; }
@@ -499,10 +502,13 @@
 
   <div class="fs-viewer" id="fsViewer">
     <button class="fs-close" id="fsClose" aria-label="Chiudi">✕</button>
-    <img id="fsImage" alt="Anteprima a schermo intero">
-    <div class="fs-tabs" id="fsTabs">
-      <button type="button" data-i="0" class="active">Prima</button>
-      <button type="button" data-i="1">Dopo</button>
+    <div class="fs-slides" id="fsSlides">
+      <div class="fs-slide"><img id="fsImageBefore" alt="Prima"></div>
+      <div class="fs-slide"><img id="fsImageAfter" alt="Dopo"></div>
+    </div>
+    <div class="fs-dots" id="fsDots">
+      <button type="button" data-i="0" class="active"></button>
+      <button type="button" data-i="1"></button>
     </div>
   </div>
 </main>
@@ -1658,25 +1664,41 @@
 
   window.addEventListener('resize', updateAllPreviews);
 
-  // ---------- visualizzazione a schermo intero ----------
+  // ---------- visualizzazione a schermo intero (Prima/Dopo a scorrimento, come l'anteprima) ----------
   var fsViewer = document.getElementById('fsViewer');
-  var fsImage = document.getElementById('fsImage');
-  var fsTabs = document.getElementById('fsTabs');
+  var fsImageBefore = document.getElementById('fsImageBefore');
+  var fsImageAfter = document.getElementById('fsImageAfter');
+  var fsSlides = document.getElementById('fsSlides');
+  var fsDots = document.getElementById('fsDots');
+
+  function setFsDotActive(i){
+    Array.prototype.forEach.call(fsDots.children, function(d,idx){ d.classList.toggle('active', idx===i); });
+  }
+  function goToFsSlide(i, smooth){
+    fsSlides.scrollTo({ left: i * fsSlides.clientWidth, behavior: smooth===false ? 'auto' : 'smooth' });
+    setFsDotActive(i);
+  }
+  fsSlides.addEventListener('scroll', function(){
+    var i = Math.round(fsSlides.scrollLeft / Math.max(1,fsSlides.clientWidth));
+    setFsDotActive(i);
+  });
+  fsDots.addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    goToFsSlide(parseInt(btn.dataset.i,10));
+  });
 
   function openFullscreen(which){
     if(which==='after' && !aiResultImage) which='before';
-    fsImage.src = which==='after' ? aiResultImage.src : photoImg.src;
-    Array.prototype.forEach.call(fsTabs.children, function(b){ b.classList.toggle('active', b.dataset.i===(which==='after'?'1':'0')); });
-    fsTabs.children[1].style.display = aiResultImage ? 'inline-block' : 'none';
+    fsImageBefore.src = photoImg.src;
+    fsImageAfter.src = aiResultImage ? aiResultImage.src : photoImg.src;
+    fsDots.style.display = aiResultImage ? 'flex' : 'none';
     fsViewer.classList.add('open');
+    // niente animazione al primo apri: mostriamo subito la slide giusta
+    goToFsSlide(which==='after' ? 1 : 0, false);
   }
   heroExpand.addEventListener('click', function(){
     var i = Math.round(heroSlides.scrollLeft / Math.max(1,heroSlides.clientWidth));
     openFullscreen(i===1 ? 'after' : 'before');
-  });
-  fsTabs.addEventListener('click', function(e){
-    var btn = e.target.closest('button'); if(!btn) return;
-    openFullscreen(btn.dataset.i==='1' ? 'after' : 'before');
   });
   document.getElementById('fsClose').addEventListener('click', function(){ fsViewer.classList.remove('open'); });
   fsViewer.addEventListener('click', function(e){ if(e.target===fsViewer) fsViewer.classList.remove('open'); });
