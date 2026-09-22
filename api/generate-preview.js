@@ -69,7 +69,9 @@ module.exports = async function handler(req, res) {
     microcemento: "microcemento applicato a spatola/frattazzo, superficie con evidenti segni di lavorazione circolari e radiali lasciati dal frattazzo ancora percepibili, leggere variazioni di tono naturali (non un colore perfettamente piatto), finitura satinata-opaca, non liscia e piatta come la resina",
     imbiancatura: "pittura murale opaca stesa in modo uniforme sulla parete, finitura pittorica classica, nessuna texture materica particolare",
     decorazioni: "boiserie in legno applicata a parete",
-    resina_haccp: "resina industriale bianca lucida ad alta resistenza chimica e meccanica, superficie liscia, compatta e priva di fughe o giunti, con raccordi a raggio sanitario (curvi, senza spigoli vivi) tra pavimento e pareti dove visibili, tipica dei pavimenti certificati HACCP per cucine professionali e industria alimentare, finitura lucida uniforme"
+    resina_haccp: "resina industriale bianca lucida ad alta resistenza chimica e meccanica, superficie liscia, compatta e priva di fughe o giunti, con raccordi a raggio sanitario (curvi, senza spigoli vivi) tra pavimento e pareti dove visibili, tipica dei pavimenti certificati HACCP per cucine professionali e industria alimentare, finitura lucida uniforme",
+    parquet: "parquet in legno vero posato a pavimento, tavole/doghe rettangolari disposte in modo ordinato (es. posa a correre), con leggera variazione naturale di tono e venatura del legno visibile tra una tavola e l'altra, sottili fughe/giunti lineari ben visibili nella direzione di posa, superficie opaca-satinata calda e materica tipica del legno trattato, non una superficie piatta e uniforme come la resina",
+    piastrelle: "pavimentazione in piastrelle ceramiche/gres porcellanato, moduli quadrati o rettangolari regolari con sottili fughe dritte e uniformi ben visibili tra una piastrella e l'altra secondo una griglia regolare, superficie piana con leggerissima variazione naturale di tono tra i pezzi, texture e fughe chiaramente riconoscibili, non una superficie continua senza giunti come la resina"
   };
 
   // Effetti di superficie aggiuntivi (Materico/Corten): si sommano alla texture
@@ -107,7 +109,7 @@ module.exports = async function handler(req, res) {
   // Monolith Pietra e Terrazzo si posano SOLO a pavimento (non a parete): lo
   // diciamo esplicitamente all'AI così non applica la lavorazione anche ai muri
   // inquadrati nella foto.
-  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo"];
+  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "piastrelle"];
   const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId);
 
   // Per la categoria "Resine" (monolith), l'utente ora sceglie esplicitamente DOVE
