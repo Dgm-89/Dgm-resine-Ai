@@ -35,10 +35,18 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorB, colorC, effetto, finitura, facadeLayout, context, boiserieStyle, addNicchia } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, addNicchia } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
+  }
+
+  // Riferimento colore per il prompt: include il codice esadecimale esatto quando
+  // disponibile, così l'AI ha un target numerico preciso invece di dover indovinare
+  // la tonalità solo dal nome. Fallback graceful al solo nome se l'hex non arriva
+  // (retro-compatibilità con frontend più vecchi durante il rollout).
+  function colorRef(name, hex) {
+    return hex ? `"${name}" (codice esadecimale esatto ${hex})` : `"${name}"`;
   }
 
   const apiKey = (process.env.GEMINI_API_KEY || "").trim();
@@ -75,7 +83,8 @@ module.exports = async function handler(req, res) {
     mezza: "mezza boiserie (wainscoting): solo la parte bassa della parete, fino a circa 100-120cm di altezza da terra, è rivestita con pannelli incorniciati; sopra c'è un cornicione/listello di passaggio orizzontale e poi la parete liscia dipinta o del colore scelto fino al soffitto",
     liscia: "boiserie liscia con cornice perimetrale: un grande pannello liscio e uniforme, bordato da un'unica cornice sottile ed elegante lungo il perimetro, nessuna ulteriore decorazione interna, stile minimale e pulito",
     nicchia: "un SINGOLO vano rettangolare incassato nella parete (profondità reale, con ombra interna scura), bordato da una sottile cornice perimetrale in rilievo, eventualmente con una piccola mensola/ripiano visibile all'interno del vano. IMPORTANTE: applica SOLO questo vano/nicchia come elemento puntuale, NON rivestire il resto della parete con pannelli: il resto della parete deve restare invariato (stesso colore/materiale della foto originale)",
-    specchio: "boiserie con inserto a specchio: pannello incorniciato con una vera lastra di specchio inserita al centro (superficie riflettente con un lieve riflesso/highlight diagonale), cornice in rilievo intorno allo specchio, stile elegante da ingresso o camera"
+    specchio: "boiserie con inserto a specchio: pannello incorniciato con una vera lastra di specchio inserita al centro (superficie riflettente con un lieve riflesso/highlight diagonale), cornice in rilievo intorno allo specchio, stile elegante da ingresso o camera",
+    doghe: "boiserie a doghe verticali in legno: listelli verticali stretti e ravvicinati (profilo squadrato tipo listone, non arrotondato), accostati l'uno all'altro dal pavimento al soffitto con una sottile fuga d'ombra tra una doga e l'altra, superficie calda e materica con venatura del legno naturale, stile contemporaneo caldo"
   };
   const boiserieDesc = BOISERIE_STYLE_DESC[boiserieStyle] || BOISERIE_STYLE_DESC.specchiatura;
   const textureDesc = materialId === "decorazioni"
@@ -96,9 +105,9 @@ module.exports = async function handler(req, res) {
   // marcapiano vero e proprio (spesso a contrasto), e la parte bassa/basamento —
   // mentre le righe sono più semplici, solo 2 colori alternati.
   const FACADE_LAYOUT_DESC = {
-    marcapiano: `Dividi la facciata in tre fasce orizzontali sovrapposte, dall'alto verso il basso: (1) la parte alta della facciata nel colore "${colorA}"; (2) una fascia orizzontale decorativa più stretta, il "marcapiano" vero e proprio, ben visibile e nettamente distinta, nel colore "${colorC}"; (3) la parte bassa/il basamento della facciata (piano terra) nel colore "${colorB}". Le due linee di separazione devono essere orizzontali, nette e ben visibili, come nelle classiche palazzine italiane.`,
-    righe_orizzontali: `Dipingi la facciata a bande orizzontali alternate, alternando il colore "${colorA}" e il colore "${colorB}" su strisce orizzontali di uguale altezza lungo tutta la facciata.`,
-    righe_verticali: `Dipingi la facciata a bande verticali alternate, alternando il colore "${colorA}" e il colore "${colorB}" su strisce verticali di uguale larghezza lungo tutta la facciata.`
+    marcapiano: `Dividi la facciata in tre fasce orizzontali sovrapposte, dall'alto verso il basso: (1) la parte alta della facciata nel colore ${colorRef(colorA, colorAHex)}; (2) una fascia orizzontale decorativa più stretta, il "marcapiano" vero e proprio, ben visibile e nettamente distinta, nel colore ${colorRef(colorC, colorCHex)}; (3) la parte bassa/il basamento della facciata (piano terra) nel colore ${colorRef(colorB, colorBHex)}. Le due linee di separazione devono essere orizzontali, nette e ben visibili, come nelle classiche palazzine italiane.`,
+    righe_orizzontali: `Dipingi la facciata a bande orizzontali alternate, alternando il colore ${colorRef(colorA, colorAHex)} e il colore ${colorRef(colorB, colorBHex)} su strisce orizzontali di uguale altezza lungo tutta la facciata.`,
+    righe_verticali: `Dipingi la facciata a bande verticali alternate, alternando il colore ${colorRef(colorA, colorAHex)} e il colore ${colorRef(colorB, colorBHex)} su strisce verticali di uguale larghezza lungo tutta la facciata.`
   };
   const isFacadeStyled = materialId === "imbiancatura" && context === "esterno" && facadeLayout && FACADE_LAYOUT_DESC[facadeLayout]
     && colorB && (facadeLayout !== "marcapiano" || colorC);
@@ -107,8 +116,8 @@ module.exports = async function handler(req, res) {
   const colorDesc = isFacadeStyled
     ? FACADE_LAYOUT_DESC[facadeLayout]
     : (colorB
-      ? `un effetto nuvolato che miscela il colore "${colorA}" con il colore "${colorB}"`
-      : `il colore uniforme "${colorA}"`);
+      ? `un effetto nuvolato che miscela il colore ${colorRef(colorA, colorAHex)} con il colore ${colorRef(colorB, colorBHex)}`
+      : `il colore uniforme ${colorRef(colorA, colorAHex)}`);
 
   const sceneDesc = (materialId === "imbiancatura" && context === "esterno")
     ? "questa foto reale della facciata esterna di un edificio"
@@ -131,6 +140,13 @@ module.exports = async function handler(req, res) {
     ? " Aggiungi inoltre, in un punto sensato della superficie inquadrata (tipicamente sulla parete doccia se è un bagno), UN SINGOLO vano rettangolare incassato (nicchia) con profondità reale, bordato da una sottile cornice, con un piccolo ripiano interno e una striscia LED nascosta lungo il bordo superiore o laterale della nicchia che illumina delicatamente l'interno del vano con una luce calda. Applica questo elemento SOLO come dettaglio puntuale: non rivestire né alterare il resto della parete, che deve mantenere la stessa lavorazione/colore già applicati nel resto della foto."
     : "";
 
+  // Rinforzo esplicito: quando abbiamo almeno un codice hex, ribadiamo che va
+  // rispettato con precisione, non solo usato come vago riferimento.
+  const hasAnyHex = Boolean(colorAHex || colorBHex || colorCHex);
+  const colorFidelityNote = hasAnyHex
+    ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
+    : "";
+
   const prompt = [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
@@ -142,7 +158,8 @@ module.exports = async function handler(req, res) {
         ? `Mantieni identiche la prospettiva, la luce, le ombre, i mobili, e mantieni assolutamente INVARIATE tutte le pareti/muri della stanza (colore e materiale originali): cambia solo il pavimento, in modo fotorealistico, come se fosse una vera posa professionale.`
         : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`,
     boiserieRealismNote,
-    nicchiaNote
+    nicchiaNote,
+    colorFidelityNote
   ].join(" ");
 
   // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
