@@ -363,13 +363,25 @@
       <button data-v="monocolore" class="active" data-i18n="btnMonocolore">Un colore</button>
       <button data-v="marcapiano" data-i18n="btnMarcapiano">Marcapiano</button>
       <button data-v="righe_orizzontali" data-i18n="btnRigheOriz">Righe orizz.</button>
-      <button data-v="righe_verticali" data-i18n="btnRigheVert">Righe vert.</button>
+      <!-- Righe verticali temporaneamente rimosse su richiesta (23/09/2026) -->
     </div>
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
 
     <button type="button" class="niche-toggle" id="davanzaliToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="55" y="30" width="70" height="60" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/><rect x="55" y="30" width="70" height="60" fill="none" stroke="#7FA3B5" stroke-width="3"/><line x1="90" y1="30" x2="90" y2="90" stroke="#93897A" stroke-width="3"/><rect x="46" y="90" width="88" height="14" fill="#B5652E"/></svg>
       <span class="nt-text"><span class="nt-title" data-i18n="davanzaliTitle">Personalizza il colore dei davanzali</span><span class="nt-desc" data-i18n="davanzaliDesc">Scegli un colore diverso dalla facciata per i davanzali delle finestre</span></span>
+      <span class="nt-check"></span>
+    </button>
+
+    <button type="button" class="niche-toggle" id="sottotettoToggle" style="display:none">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><polygon points="20,55 90,15 160,55" fill="#8A5A34" stroke="#5C3A1E" stroke-width="3"/><rect x="30" y="50" width="120" height="12" fill="#C9A36A" stroke="#8A5A34" stroke-width="2"/><line x1="45" y1="50" x2="45" y2="62" stroke="#8A5A34" stroke-width="2"/><line x1="65" y1="50" x2="65" y2="62" stroke="#8A5A34" stroke-width="2"/><line x1="85" y1="50" x2="85" y2="62" stroke="#8A5A34" stroke-width="2"/><line x1="105" y1="50" x2="105" y2="62" stroke="#8A5A34" stroke-width="2"/><line x1="125" y1="50" x2="125" y2="62" stroke="#8A5A34" stroke-width="2"/><line x1="145" y1="50" x2="145" y2="62" stroke="#8A5A34" stroke-width="2"/><rect x="50" y="62" width="80" height="55" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="sottotettoTitle">Personalizza il colore del sottotetto</span><span class="nt-desc" data-i18n="sottotettoDesc">Scegli un colore diverso dalla facciata per lo sporto di gronda/sottotetto (legno o cemento)</span></span>
+      <span class="nt-check"></span>
+    </button>
+
+    <button type="button" class="niche-toggle" id="balconiToggle" style="display:none">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="30" y="20" width="120" height="70" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/><rect x="20" y="88" width="140" height="10" fill="#93897A"/><rect x="26" y="98" width="4" height="22" fill="#7A7166"/><rect x="150" y="98" width="4" height="22" fill="#7A7166"/><line x1="40" y1="98" x2="40" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="58" y1="98" x2="58" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="76" y1="98" x2="76" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="94" y1="98" x2="94" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="112" y1="98" x2="112" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="130" y1="98" x2="130" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="148" y1="98" x2="148" y2="120" stroke="#7A7166" stroke-width="3"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="balconiTitle">Personalizza il colore dei balconi</span><span class="nt-desc" data-i18n="balconiDesc">Scegli un colore diverso dalla facciata per parapetti/ringhiere dei balconi</span></span>
       <span class="nt-check"></span>
     </button>
 
@@ -576,6 +588,10 @@
     nicheDesc: { it:"Es. nicchia doccia per shampoo/saponi, con cornice, ripiano e illuminazione LED", en:"E.g. a shower niche for shampoo/soap, with trim, shelf and LED lighting" },
     davanzaliTitle: { it:"Personalizza il colore dei davanzali", en:"Customize window sill color" },
     davanzaliDesc: { it:"Scegli un colore diverso dalla facciata per i davanzali delle finestre", en:"Choose a color for the window sills different from the facade" },
+    sottotettoTitle: { it:"Personalizza il colore del sottotetto", en:"Customize eave/soffit color" },
+    sottotettoDesc: { it:"Scegli un colore diverso dalla facciata per lo sporto di gronda/sottotetto (legno o cemento)", en:"Choose a color for the eave overhang (wood or plaster) different from the facade" },
+    balconiTitle: { it:"Personalizza il colore dei balconi", en:"Customize balcony color" },
+    balconiDesc: { it:"Scegli un colore diverso dalla facciata per parapetti/ringhiere dei balconi", en:"Choose a color for the balcony parapets/railings different from the facade" },
     panelFinituraTitle: { it:"Scegli la finitura", en:"Choose the finish" },
     finituraLabel: { it:"Finitura", en:"Finish" },
     btnOpaco: { it:"Opaco", en:"Matte" },
@@ -624,10 +640,14 @@
     clusterLabelFirst: { it:"Primo colore (basamento/bande)", en:"First color (base/stripes)" },
     clusterLabelSecond: { it:"Secondo colore", en:"Second color" },
     clusterLabelDavanzali: { it:"Colore davanzali finestre", en:"Window sill color" },
+    clusterLabelSottotetto: { it:"Colore sottotetto", en:"Eave/soffit color" },
+    clusterLabelBalconi: { it:"Colore balconi", en:"Balcony color" },
     pendingThird: { it:"+ Marcapiano da scegliere", en:"+ String course to choose" },
     pendingSecondOf3: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
     pendingSecondOf2: { it:"+ Secondo colore da scegliere", en:"+ Second color to choose" },
     pendingDavanzali: { it:"+ Colore davanzali da scegliere", en:"+ Window sill color to choose" },
+    pendingSottotetto: { it:"+ Colore sottotetto da scegliere", en:"+ Eave color to choose" },
+    pendingBalconi: { it:"+ Colore balconi da scegliere", en:"+ Balcony color to choose" },
     colorStepHint: { it:"Seleziona tutti i colori richiesti (quelli tratteggiati sono ancora da scegliere)", en:"Choose every required color (dashed chips are still to be picked)" },
     clusterEmptyChooseFamily: { it:"Scegli una famiglia di colore qui sopra (o cerca un codice) per vedere le tonalità disponibili.", en:"Choose a color family above (or search a code) to see the available shades." },
     clusterEmptyNoMatch: { it:"Nessun colore trovato con questo codice.", en:"No color found with this code." },
@@ -654,6 +674,8 @@
     summaryStile: { it:"Stile: ", en:"Style: " },
     summaryNicchia: { it:"+ Nicchia incassata", en:"+ Recessed niche" },
     summaryDavanzali: { it:"Davanzali: ", en:"Window sills: " },
+    summarySottotetto: { it:"Sottotetto: ", en:"Eave/soffit: " },
+    summaryBalconi: { it:"Balconi: ", en:"Balconies: " },
     summaryFinitura: { it:"Finitura", en:"Finish" },
     summaryEdit: { it:"modifica selezione", en:"edit selection" },
     effettoWord: { it:"Effetto", en:"Effect" },
@@ -1385,7 +1407,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, addDavanzali:false, colorA:null, colorB:null, colorC:null, colorDavanzali:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, addDavanzali:false, addSottotetto:false, addBalconi:false, colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni.", en:"Match Point 360 collection: resistant colors designed for facades and exteriors." }
@@ -1451,21 +1473,30 @@
   // Vero quando il cliente ha attivato il toggle "davanzali colore diverso"
   // (solo per Imbiancatura Esterno, come marcapiano/righe).
   function needsDavanzaliColor(){ return !!(state.addDavanzali && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  // Vero quando il cliente ha attivato il toggle "sottotetto in legno colore diverso"
+  // (solo per Imbiancatura Esterno, come davanzali/marcapiano/righe).
+  function needsSottotettoColor(){ return !!(state.addSottotetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  // Vero quando il cliente ha attivato il toggle "balconi colore diverso"
+  // (solo per Imbiancatura Esterno, come davanzali/sottotetto/marcapiano/righe).
+  function needsBalconiColor(){ return !!(state.addBalconi && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   // Ordine in cui si scelgono i colori: per il marcapiano A (parte alta) -> C
   // (fascia marcapiano) -> B (parte bassa/basamento); per le righe solo A -> B.
-  // I davanzali (fase D), quando attivi, si scelgono sempre per ultimi.
+  // Davanzali (fase D), sottotetto in legno (fase E) e balconi (fase F), quando
+  // attivi, si scelgono sempre per ultimi.
   function phaseOrder(){
     var order = ['A'];
     if(needsThirdColor()) order.push('C');
     if(needsSecondColor()) order.push('B');
     if(needsDavanzaliColor()) order.push('D');
+    if(needsSottotettoColor()) order.push('E');
+    if(needsBalconiColor()) order.push('F');
     return order;
   }
-  function colorForPhase(p){ return p==='A' ? state.colorA : (p==='C' ? state.colorC : (p==='D' ? state.colorDavanzali : state.colorB)); }
+  function colorForPhase(p){ return p==='A' ? state.colorA : (p==='C' ? state.colorC : (p==='D' ? state.colorDavanzali : (p==='E' ? state.colorSottotetto : (p==='F' ? state.colorBalconi : state.colorB)))); }
 
   function resetSelectionForNewCategory(){
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.addDavanzali = false; state.effetto = 'liscio';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.addDavanzali = false; state.addSottotetto = false; state.addBalconi = false; state.effetto = 'liscio';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncNicheToggleVisibility();
@@ -1508,6 +1539,28 @@
     this.classList.toggle('active', state.addDavanzali);
     if(!state.addDavanzali) state.colorDavanzali = null;
     // riparte dal primo colore ancora mancante nell'ordine giusto (di solito 'D')
+    var order = phaseOrder(); pickPhase = order[0];
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    renderStep2UI();
+  });
+
+  document.getElementById('sottotettoToggle').addEventListener('click', function(){
+    state.addSottotetto = !state.addSottotetto;
+    this.classList.toggle('active', state.addSottotetto);
+    if(!state.addSottotetto) state.colorSottotetto = null;
+    // riparte dal primo colore ancora mancante nell'ordine giusto (di solito 'E')
+    var order = phaseOrder(); pickPhase = order[0];
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    renderStep2UI();
+  });
+
+  document.getElementById('balconiToggle').addEventListener('click', function(){
+    state.addBalconi = !state.addBalconi;
+    this.classList.toggle('active', state.addBalconi);
+    if(!state.addBalconi) state.colorBalconi = null;
+    // riparte dal primo colore ancora mancante nell'ordine giusto (di solito 'F')
     var order = phaseOrder(); pickPhase = order[0];
     for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
     aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
@@ -1563,6 +1616,14 @@
     davEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addDavanzali = false; state.colorDavanzali = null; }
     davEl.classList.toggle('active', state.addDavanzali);
+    var sotEl = document.getElementById('sottotettoToggle');
+    sotEl.style.display = show ? 'flex' : 'none';
+    if(!show){ state.addSottotetto = false; state.colorSottotetto = null; }
+    sotEl.classList.toggle('active', state.addSottotetto);
+    var balEl = document.getElementById('balconiToggle');
+    balEl.style.display = show ? 'flex' : 'none';
+    if(!show){ state.addBalconi = false; state.colorBalconi = null; }
+    balEl.classList.toggle('active', state.addBalconi);
   }
 
   // ---------- 1: CATEGORIA ----------
@@ -1663,7 +1724,7 @@
         state.context = opt.v;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
-        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.addDavanzali=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
+        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
         syncNextStepEnabled();
@@ -1986,16 +2047,20 @@
     A: { it:'Parte alta: ', en:'Upper part: ' },
     C: { it:'Marcapiano: ', en:'String course: ' },
     B: { it:'Parte bassa: ', en:'Lower part: ' },
-    D: { it:'Davanzali: ', en:'Window sills: ' }
+    D: { it:'Davanzali: ', en:'Window sills: ' },
+    E: { it:'Sottotetto: ', en:'Eave: ' },
+    F: { it:'Balconi: ', en:'Balconies: ' }
   };
   function addColorChip(row, phase, color){
-    var showLabel = needsThirdColor() || phase==='D'; // marcapiano (3 zone) e davanzali distinguono sempre l'etichetta
+    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='F'; // marcapiano (3 zone), davanzali, sottotetto e balconi distinguono sempre l'etichetta
     var chip=document.createElement('span'); chip.className='chip';
     chip.innerHTML='<span class="dot" style="background:'+color.hex+'"></span>'+(showLabel?tr(PHASE_CHIP_LABEL[phase]):'')+color.name+'<button aria-label="'+ts('removeAria')+'">×</button>';
     chip.querySelector('button').addEventListener('click', function(){
       if(phase==='A'){ state.colorA=null; state.colorB=null; state.colorC=null; }
       else if(phase==='C'){ state.colorC=null; }
       else if(phase==='D'){ state.colorDavanzali=null; }
+      else if(phase==='E'){ state.colorSottotetto=null; }
+      else if(phase==='F'){ state.colorBalconi=null; }
       else { state.colorB=null; }
       pickPhase=phase; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; renderStep2UI();
     });
@@ -2017,6 +2082,12 @@
     }
     if(needsDavanzaliColor()){
       if(state.colorDavanzali) addColorChip(row, 'D', state.colorDavanzali); else addPendingChip(row, 'pendingDavanzali');
+    }
+    if(needsSottotettoColor()){
+      if(state.colorSottotetto) addColorChip(row, 'E', state.colorSottotetto); else addPendingChip(row, 'pendingSottotetto');
+    }
+    if(needsBalconiColor()){
+      if(state.colorBalconi) addColorChip(row, 'F', state.colorBalconi); else addPendingChip(row, 'pendingBalconi');
     }
   }
 
@@ -2061,15 +2132,19 @@
     };
     if(pickPhase==='D'){
       label.textContent = ts('clusterLabelDavanzali');
+    } else if(pickPhase==='E'){
+      label.textContent = ts('clusterLabelSottotetto');
+    } else if(pickPhase==='F'){
+      label.textContent = ts('clusterLabelBalconi');
     } else if(needsThirdColor()){
       label.textContent = tr(PHASE_LABEL_3[pickPhase]);
     } else if(needsSecondColor()){
       label.textContent = pickPhase==='A' ? ts('clusterLabelFirst') : ts('clusterLabelSecond');
     } else { label.textContent = ts('clusterLabelDefault'); }
     // Contatore "1 di 2/3" per rendere evidente al cliente quanti colori
-    // deve ancora scegliere in totale (non conta i davanzali, opzionali).
-    var coreOrder = phaseOrder().filter(function(p){ return p!=='D'; });
-    if(coreOrder.length > 1 && pickPhase !== 'D'){
+    // deve ancora scegliere in totale (non conta davanzali/sottotetto/balconi, opzionali).
+    var coreOrder = phaseOrder().filter(function(p){ return p!=='D' && p!=='E' && p!=='F'; });
+    if(coreOrder.length > 1 && pickPhase !== 'D' && pickPhase !== 'E' && pickPhase !== 'F'){
       var stepIdx = coreOrder.indexOf(pickPhase) + 1;
       if(stepIdx > 0) label.textContent += ' (' + stepIdx + ' ' + (LANG==='en' ? 'of' : 'di') + ' ' + coreOrder.length + ')';
     }
@@ -2143,19 +2218,17 @@
   document.getElementById('cpmSelect').addEventListener('click', function(){
     if(!cpmCandidate) return;
     var c = cpmCandidate;
-    if(pickPhase==='A'){
-      state.colorA=c;
-      if(needsThirdColor()) pickPhase='C';
-      else if(needsSecondColor()) pickPhase='B';
-      else if(needsDavanzaliColor() && !state.colorDavanzali) pickPhase='D';
-    } else if(pickPhase==='C'){
-      state.colorC=c; pickPhase='B';
-    } else if(pickPhase==='B'){
-      state.colorB=c;
-      if(needsDavanzaliColor() && !state.colorDavanzali) pickPhase='D';
-    } else if(pickPhase==='D'){
-      state.colorDavanzali=c;
-    } else { state.colorB=c; }
+    if(pickPhase==='A'){ state.colorA=c; }
+    else if(pickPhase==='C'){ state.colorC=c; }
+    else if(pickPhase==='D'){ state.colorDavanzali=c; }
+    else if(pickPhase==='E'){ state.colorSottotetto=c; }
+    else if(pickPhase==='F'){ state.colorBalconi=c; }
+    else { state.colorB=c; }
+    // avanza alla prossima fase richiesta ma non ancora scelta, nell'ordine giusto
+    var order = phaseOrder();
+    var nextPhase = null;
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ nextPhase = order[i]; break; } }
+    if(nextPhase) pickPhase = nextPhase;
     aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
     cpm.classList.remove('open');
     renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled();
@@ -2176,7 +2249,7 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = tr(CONTEXT_HINT[v]);
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.addDavanzali=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
     document.getElementById('colorSearch').value='';
     syncFacadeLayoutVisibility();
     renderStep2UI();
@@ -2243,6 +2316,8 @@
         imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name, materialId: state.material.id,
         colorA: state.colorA.name, colorAHex: state.colorA.hex, colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? state.colorB.hex : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? state.colorC.hex : null,
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.hex : null,
+        colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.hex : null,
+        colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.hex : null,
         facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
@@ -2251,6 +2326,8 @@
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
         addNicchia: state.addNicchia,
         addDavanzali: needsDavanzaliColor(),
+        addSottotetto: needsSottotettoColor(),
+        addBalconi: needsBalconiColor(),
         effetto: state.effetto, finitura: state.finitura
       })
     })
@@ -2339,7 +2416,7 @@
     var ok = true;
     if(currentPanel==='panelResinaArea') ok = !!state.resinaArea;
     else if(currentPanel==='panelSub') ok = !!state.material;
-    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali));
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsBalconiColor() || state.colorBalconi));
     else if(currentPanel==='panelPhoto') ok = !!photoImg;
     btn.disabled = !ok;
   }
@@ -2448,10 +2525,12 @@
     var boiserieLine = (state.material.id === 'decorazioni') ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryStile')+tr(BOISERIE_STYLE_NAME[state.boiserieStyle])+'</span></div>' : '';
     var nicchiaLine = state.addNicchia ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryNicchia')+'</span></div>' : '';
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
+    var sottotettoLine = (needsSottotettoColor() && state.colorSottotetto) ? '<div class="line"><span class="sw" style="background:'+state.colorSottotetto.hex+'"></span><span>'+ts('summarySottotetto')+state.colorSottotetto.name+' ('+state.colorSottotetto.code+')</span></div>' : '';
+    var balconiLine = (needsBalconiColor() && state.colorBalconi) ? '<div class="line"><span class="sw" style="background:'+state.colorBalconi.hex+'"></span><span>'+ts('summaryBalconi')+state.colorBalconi.name+' ('+state.colorBalconi.code+')</span></div>' : '';
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+LF(state.material,'name')+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      facadeLine + boiserieLine + nicchiaLine + davanzaliLine +
+      facadeLine + boiserieLine + nicchiaLine + davanzaliLine + sottotettoLine + balconiLine +
       '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
@@ -2496,6 +2575,8 @@
     if(state.material.id === 'decorazioni') lines.push("Stile boiserie: "+BOISERIE_STYLE_NAME[state.boiserieStyle].it);
     if(state.addNicchia) lines.push("Extra: nicchia incassata");
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+state.colorDavanzali.name+" ("+state.colorDavanzali.code+")");
+    if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+state.colorSottotetto.name+" ("+state.colorSottotetto.code+")");
+    if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+state.colorBalconi.name+" ("+state.colorBalconi.code+")");
     lines.push(
       "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
       "Nome: "+name, "Telefono: "+phone
