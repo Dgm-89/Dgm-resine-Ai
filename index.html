@@ -637,6 +637,7 @@
     cpmSelectAlready: { it:"✓ Colore già selezionato", en:"✓ Color already selected" },
     familyAllBtn: { it:"Tutti", en:"All" },
     clusterLabelDefault: { it:"Colore", en:"Color" },
+    clusterLabelFacciata: { it:"Colore facciata principale", en:"Main facade color" },
     clusterLabelFirst: { it:"Primo colore (basamento/bande)", en:"First color (base/stripes)" },
     clusterLabelSecond: { it:"Secondo colore", en:"Second color" },
     clusterLabelDavanzali: { it:"Colore davanzali finestre", en:"Window sill color" },
@@ -2052,9 +2053,13 @@
     F: { it:'Balconi: ', en:'Balconies: ' }
   };
   function addColorChip(row, phase, color){
-    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='F'; // marcapiano (3 zone), davanzali, sottotetto e balconi distinguono sempre l'etichetta
+    // Monocolore ma con davanzali/sottotetto/balconi attivi: anche il chip del
+    // colore facciata deve avere un'etichetta, altrimenti si confonde con gli extra.
+    var isFacciataMono = phase==='A' && !needsSecondColor() && (needsDavanzaliColor() || needsSottotettoColor() || needsBalconiColor());
+    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='F' || isFacciataMono; // marcapiano (3 zone), davanzali, sottotetto e balconi distinguono sempre l'etichetta
+    var labelText = isFacciataMono ? tr({it:'Facciata: ', en:'Facade: '}) : (showLabel ? tr(PHASE_CHIP_LABEL[phase]) : '');
     var chip=document.createElement('span'); chip.className='chip';
-    chip.innerHTML='<span class="dot" style="background:'+color.hex+'"></span>'+(showLabel?tr(PHASE_CHIP_LABEL[phase]):'')+color.name+'<button aria-label="'+ts('removeAria')+'">×</button>';
+    chip.innerHTML='<span class="dot" style="background:'+color.hex+'"></span>'+labelText+color.name+'<button aria-label="'+ts('removeAria')+'">×</button>';
     chip.querySelector('button').addEventListener('click', function(){
       if(phase==='A'){ state.colorA=null; state.colorB=null; state.colorC=null; }
       else if(phase==='C'){ state.colorC=null; }
@@ -2140,6 +2145,10 @@
       label.textContent = tr(PHASE_LABEL_3[pickPhase]);
     } else if(needsSecondColor()){
       label.textContent = pickPhase==='A' ? ts('clusterLabelFirst') : ts('clusterLabelSecond');
+    } else if(pickPhase==='A' && (needsDavanzaliColor() || needsSottotettoColor() || needsBalconiColor())){
+      // Monocolore ma con davanzali/sottotetto/balconi attivi: va chiarito che
+      // questo è il colore della facciata principale, distinto dagli extra.
+      label.textContent = ts('clusterLabelFacciata');
     } else { label.textContent = ts('clusterLabelDefault'); }
     // Contatore "1 di 2/3" per rendere evidente al cliente quanti colori
     // deve ancora scegliere in totale (non conta davanzali/sottotetto/balconi, opzionali).
