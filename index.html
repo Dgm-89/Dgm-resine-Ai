@@ -545,7 +545,8 @@
     decorazioni:   { bg:"linear-gradient(135deg,#B5652E,#8F4D22)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="8" height="18" rx="1" stroke="white" stroke-width="1.6"/><rect x="13" y="3" width="8" height="18" rx="1" stroke="white" stroke-width="1.6"/></svg>' },
     resina_haccp:  { bg:"linear-gradient(135deg,#3A6B6B,#274949)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2L20 5V11C20 16 16.5 20.5 12 22C7.5 20.5 4 16 4 11V5L12 2Z" stroke="white" stroke-width="1.6" stroke-linejoin="round"/><path d="M8.5 12L11 14.5L16 9" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>' },
     parquet:       { bg:"linear-gradient(135deg,#B08552,#7E5C34)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="4" width="20" height="4" stroke="white" stroke-width="1.4"/><rect x="2" y="10" width="20" height="4" stroke="white" stroke-width="1.4"/><rect x="2" y="16" width="20" height="4" stroke="white" stroke-width="1.4"/></svg>' },
-    piastrelle:    { bg:"linear-gradient(135deg,#8E9299,#5F6369)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="8" height="8" stroke="white" stroke-width="1.5"/><rect x="13" y="3" width="8" height="8" stroke="white" stroke-width="1.5"/><rect x="3" y="13" width="8" height="8" stroke="white" stroke-width="1.5"/><rect x="13" y="13" width="8" height="8" stroke="white" stroke-width="1.5"/></svg>' }
+    piastrelle:    { bg:"linear-gradient(135deg,#8E9299,#5F6369)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="8" height="8" stroke="white" stroke-width="1.5"/><rect x="13" y="3" width="8" height="8" stroke="white" stroke-width="1.5"/><rect x="3" y="13" width="8" height="8" stroke="white" stroke-width="1.5"/><rect x="13" y="13" width="8" height="8" stroke="white" stroke-width="1.5"/></svg>' },
+    graniglia_esterni: { bg:"linear-gradient(135deg,#A9967A,#7C6B52)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 9c1-1.5 2.5-1 3-2.5 1-1 2.5-1 3 0 .5-1.5 2.5-1.5 3 0 1-1 2.5-.5 2.5 1" stroke="white" stroke-width="1.3" stroke-linejoin="round"/><circle cx="6" cy="15" r="1.6" fill="white"/><circle cx="11" cy="17" r="1.9" fill="white"/><circle cx="16" cy="14.5" r="1.4" fill="white"/><circle cx="18.5" cy="18" r="1.3" fill="white"/><circle cx="8.5" cy="19.5" r="1.1" fill="white"/></svg>' }
   };
   var SUBMATERIAL_STYLE = {
     monolith_spatolato: { bg:"linear-gradient(135deg,#9C9186,#79705F)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 12C6 8 9 16 12 12C15 8 18 16 21 12" stroke="white" stroke-width="1.6" stroke-linecap="round"/></svg>' },
@@ -571,7 +572,8 @@
     { id:"decorazioni", name:"Decorazioni", desc:"Finiture e boiserie su misura", swatch:"#B5652E" },
     { id:"resina_haccp", name:"Resina Industriale HACCP", desc:"Pavimenti resistenti e certificati per cucine professionali e industria alimentare", swatch:"#E9E7DE", professionistiOnly:true },
     { id:"parquet", name:"Parquet", desc:"Pavimenti in legno, tavole e doghe — solo pavimenti interni", swatch:"#B08552" },
-    { id:"piastrelle", name:"Piastrelle", desc:"Pavimenti in ceramica e gres porcellanato — solo pavimenti interni", swatch:"#8E9299" }
+    { id:"piastrelle", name:"Piastrelle", desc:"Pavimenti in ceramica e gres porcellanato — solo pavimenti interni", swatch:"#8E9299" },
+    { id:"graniglia_esterni", name:"Graniglia per Esterni", desc:"Resina con graniglie di sasso decorative per terrazzi, giardini, vialetti, bordo piscina e rampe garage", swatch:"#A9967A" }
   ];
 
   // Cartella colori generale Monolith (Loggia Industria Vernici, catalogo "Flooring
@@ -630,6 +632,18 @@
       {name:"Grigio Cemento", hex:"#9C9B95", code:"PI-03"}, {name:"Nero Opaco", hex:"#2B2B2B", code:"PI-04"},
       {name:"Beige Travertino", hex:"#D8CBB0", code:"PI-05"}, {name:"Marmo Bianco Venato", hex:"#E7E4DC", code:"PI-06"},
       {name:"Effetto Legno Chiaro", hex:"#C7A876", code:"PI-07"}, {name:"Terracotta", hex:"#B36A3E", code:"PI-08"}
+    ],
+    // Graniglia per Esterni: colori reali della cartella campioni fisica DGM (sassi/graniglie
+    // in resina), fotografata su mazzetta nera. Gli hex sono stimati dalle foto dei campioni
+    // reali e restano indicativi: il colore esatto va confermato sulla mazzetta fisica, come
+    // già indicato per la cartella Monolith.
+    graniglia_esterni: [
+      {name:"Bianco Thassos", hex:"#E8E3D6", code:"GE-01"}, {name:"Bianco Zandobbio", hex:"#D6C7AE", code:"GE-02"},
+      {name:"Rosa Corallo", hex:"#C9A461", code:"GE-03"}, {name:"Ice Blue", hex:"#A9ADB0", code:"GE-04"},
+      {name:"Grigio Bardiglio", hex:"#6B6D6E", code:"GE-05"}, {name:"Grigio Carnico", hex:"#3C3D3F", code:"GE-06"},
+      {name:"Millefiori", hex:"#B4A78E", code:"GE-07"}, {name:"Arabescato Rosso", hex:"#A38F72", code:"GE-08"},
+      {name:"Rosso Verona", hex:"#B97A45", code:"GE-09"}, {name:"Glow", hex:"#C4C6C2", code:"GE-10"},
+      {name:"Verde Alpi", hex:"#4A5850", code:"GE-11"}, {name:"Nero Ebano", hex:"#1B1B1D", code:"GE-12"}
     ],
     imbiancatura: [
       { name:"UN.00.87", code:"UN.00.87", hex:"#E1DBDD", family:"Rossi" },
@@ -1201,7 +1215,7 @@
   var EFFETTO_LABEL = { liscio:'Liscio uniforme', materico:'Materico', corten:'Corten' };
   var FINITURA_HINT = { opaco:"Superficie piena, senza riflessi.", satinato:"Via di mezzo tra opaco e lucido, la più richiesta.", lucido:"Massima brillantezza e profondità del colore." };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, colorA:null, colorB:null, colorC:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, colorA:null, colorB:null, colorC:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = { interno:"Colori pensati per pareti e superfici interne.", esterno:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni." };
   // Stile boiserie: la boiserie non è un semplice colore, è una geometria di
   // pannelli applicata sulla parete. Tre stili reali e attuali: pannelli
@@ -1237,6 +1251,7 @@
   };
   // Quanti colori servono per ogni layout facciata (oltre al caso "monocolore" = 1).
   var FACADE_COLOR_COUNT = { monocolore:1, marcapiano:3, righe_orizzontali:2, righe_verticali:2 };
+  var GRANIGLIA_COLOR_COUNT = { unico:1, bordo:2 };
   var pickPhase = 'A';
   var familyFilter = null; // famiglia colore attiva (solo per palette con "family", es. Sikkens), null = tutte
   var colorSearchQuery = '';
@@ -1248,8 +1263,13 @@
   var lastSendChannel = null; // 'whatsapp' o 'email': tiene traccia di come è stata inviata l'ultima richiesta, per personalizzare il messaggio di conferma
 
   function facadeColorCount(){
-    if(!(state.material && state.material.id === 'imbiancatura' && state.context === 'esterno')) return 1;
-    return FACADE_COLOR_COUNT[state.facadeLayout] || 1;
+    if(state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'){
+      return FACADE_COLOR_COUNT[state.facadeLayout] || 1;
+    }
+    if(state.material && state.material.id === 'graniglia_esterni'){
+      return GRANIGLIA_COLOR_COUNT[state.granigliaLayout] || 1;
+    }
+    return 1;
   }
   // Vero quando serve un secondo colore (marcapiano o righe).
   function needsSecondColor(){ return facadeColorCount() >= 2; }
@@ -1262,7 +1282,7 @@
 
   function resetSelectionForNewCategory(){
     state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.effetto = 'liscio';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.effetto = 'liscio';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncNicheToggleVisibility();
@@ -1368,7 +1388,9 @@
       document.getElementById('next1').disabled = false;
       if(cat.subs) buildSubGrid(cat);
       else if(cat.id==='imbiancatura') buildContextChoice(cat);
+      else if(cat.id==='graniglia_esterni') buildGranigliaLayoutChoice(cat);
       if(cat.id==='monolith') buildResinaAreaChoice();
+      if(cat.id==='graniglia_esterni') state.context = 'esterno';
       syncContextVisibility();
     });
     materialGrid.appendChild(card);
@@ -1441,6 +1463,44 @@
         state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
+        syncNextStepEnabled();
+      });
+      subGrid.appendChild(card);
+    });
+  }
+
+  // ---------- 2c: COLORE UNICO O CON BORDO (solo Graniglia per Esterni) ----------
+  // Stesso pattern di buildContextChoice: un passo dedicato prima del colore, per
+  // decidere se il campo principale ha un secondo colore per il bordo/fascia
+  // perimetrale (come nelle foto reali: campo chiaro + bordo scuro, o vialetto
+  // con bordo laterale). facadeColorCount() legge state.granigliaLayout e fa sì
+  // che il passo "colore" chieda automaticamente 1 o 2 colori di conseguenza.
+  var GRANIGLIA_LAYOUT_STYLE = {
+    unico: { name:"Colore unico", desc:"Tutta la superficie in un unico colore di graniglia.", bg:"linear-gradient(135deg,#A9967A,#7C6B52)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="1.5" stroke="white" stroke-width="1.6"/></svg>' },
+    bordo: { name:"Con bordo bicolore", desc:"Campo principale in un colore, con una fascia/bordo perimetrale in un colore diverso.", bg:"linear-gradient(135deg,#6E7275,#3A3D40)", icon:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="1.5" stroke="white" stroke-width="1.6"/><rect x="7" y="7" width="10" height="10" rx="0.8" stroke="white" stroke-width="1.4"/></svg>' }
+  };
+  function buildGranigliaLayoutChoice(cat){
+    subGrid.innerHTML = '';
+    document.getElementById('subTitle').textContent = 'Colore unico o con bordo?';
+    var options = [
+      { v:'unico', name:GRANIGLIA_LAYOUT_STYLE.unico.name, desc:GRANIGLIA_LAYOUT_STYLE.unico.desc },
+      { v:'bordo', name:GRANIGLIA_LAYOUT_STYLE.bordo.name, desc:GRANIGLIA_LAYOUT_STYLE.bordo.desc }
+    ];
+    options.forEach(function(opt){
+      var card = document.createElement('button');
+      card.type='button'; card.className='material-card photo-tile';
+      var styleInfo = GRANIGLIA_LAYOUT_STYLE[opt.v];
+      card.style.background = styleInfo ? styleInfo.bg : 'linear-gradient(135deg,#9C9186,#79705F)';
+      if(state.granigliaLayout === opt.v) card.classList.add('selected');
+      card.innerHTML = '<span class="tile-icon">' + (styleInfo ? styleInfo.icon : '') + '</span>'
+        + '<span class="tile-check">✓</span>'
+        + '<span class="tile-content"><span class="m-name">'+opt.name+'</span><span class="m-desc">'+opt.desc+'</span></span>';
+      card.addEventListener('click', function(){
+        state.granigliaLayout = opt.v;
+        Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
+        card.classList.add('selected');
+        state.colorA=null; state.colorB=null; state.colorC=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
+        var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncNextStepEnabled();
       });
       subGrid.appendChild(card);
@@ -1932,6 +1992,7 @@
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
         boiserieStyleRefImage: boiserieStyleRefImage,
         resinaArea: (state.category && state.category.id === 'monolith') ? state.resinaArea : null,
+        granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
         addNicchia: state.addNicchia,
         effetto: state.effetto, finitura: state.finitura
       })
@@ -1989,7 +2050,7 @@
     if(!(state.category && state.category.id === 'monolith')){
       seq = seq.filter(function(id){ return id!=='panelResinaArea'; });
     }
-    if(!(state.category && (state.category.subs || state.category.id === 'imbiancatura'))){
+    if(!(state.category && (state.category.subs || state.category.id === 'imbiancatura' || state.category.id === 'graniglia_esterni'))){
       seq = seq.filter(function(id){ return id!=='panelSub'; });
     }
     return seq;
@@ -2023,7 +2084,9 @@
     var stepNum = Math.min(idx+1, totalSteps);
     var pct = totalSteps>0 ? Math.round((idx/totalSteps)*100) : 0;
     document.getElementById('progressFill').style.width = pct+'%';
-    var label = (id==='panelSub' && state.category && state.category.id==='imbiancatura') ? 'Interno o esterno?' : (STEP_LABELS[id] || '');
+    var label = (id==='panelSub' && state.category && state.category.id==='imbiancatura') ? 'Interno o esterno?'
+      : (id==='panelSub' && state.category && state.category.id==='graniglia_esterni') ? 'Colore unico o con bordo?'
+      : (STEP_LABELS[id] || '');
     document.getElementById('progressLabel').textContent = id==='panelConfirm' ? 'Richiesta inviata' : ('Passo '+stepNum+' di '+totalSteps+(label?' · '+label:''));
   }
 
@@ -2057,9 +2120,12 @@
     if(id==='panelPhoto'){
       syncNextStepEnabled();
       var floorOnly = state.material && ['monolith_pietra','monolith_terrazzo','parquet','piastrelle'].indexOf(state.material.id) !== -1;
-      document.getElementById('photoHint').textContent = floorOnly
-        ? 'Questa finitura si applica solo al pavimento: carica una foto che inquadri bene il pavimento dell\'ambiente (non le pareti).'
-        : 'Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l\'anteprima AI fotorealistica';
+      var isOutdoorGraniglia = state.material && state.material.id === 'graniglia_esterni';
+      document.getElementById('photoHint').textContent = isOutdoorGraniglia
+        ? 'Carica una foto dello spazio esterno (terrazzo, vialetto, giardino, bordo piscina o rampa garage) inquadrando bene la superficie calpestabile.'
+        : (floorOnly
+          ? 'Questa finitura si applica solo al pavimento: carica una foto che inquadri bene il pavimento dell\'ambiente (non le pareti).'
+          : 'Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l\'anteprima AI fotorealistica');
     }
     if(id==='panelResult'){
       updateAllPreviews();
@@ -2086,6 +2152,9 @@
   function facadeColorLine(){
     if(needsThirdColor()){
       return 'Alto: '+state.colorA.name+' ('+state.colorA.code+') · Marcapiano: '+state.colorC.name+' ('+state.colorC.code+') · Basso: '+state.colorB.name+' ('+state.colorB.code+')';
+    }
+    if(state.material && state.material.id === 'graniglia_esterni' && state.colorB){
+      return 'Campo: '+state.colorA.name+' ('+state.colorA.code+') · Bordo: '+state.colorB.name+' ('+state.colorB.code+')';
     }
     return state.colorA.name+' ('+state.colorA.code+')' + (state.colorB ? ' + '+state.colorB.name+' ('+state.colorB.code+')' : '');
   }
