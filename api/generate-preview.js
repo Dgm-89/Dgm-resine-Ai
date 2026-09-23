@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, boiserieStyleRefImage, resinaArea } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -71,7 +71,8 @@ module.exports = async function handler(req, res) {
     decorazioni: "boiserie in legno applicata a parete",
     resina_haccp: "resina industriale bianca lucida ad alta resistenza chimica e meccanica, superficie liscia, compatta e priva di fughe o giunti, con raccordi a raggio sanitario (curvi, senza spigoli vivi) tra pavimento e pareti dove visibili, tipica dei pavimenti certificati HACCP per cucine professionali e industria alimentare, finitura lucida uniforme",
     parquet: "parquet in legno vero posato a pavimento, tavole/doghe rettangolari disposte in modo ordinato (es. posa a correre), con leggera variazione naturale di tono e venatura del legno visibile tra una tavola e l'altra, sottili fughe/giunti lineari ben visibili nella direzione di posa, superficie opaca-satinata calda e materica tipica del legno trattato, non una superficie piatta e uniforme come la resina",
-    piastrelle: "pavimentazione in piastrelle ceramiche/gres porcellanato, moduli quadrati o rettangolari regolari con sottili fughe dritte e uniformi ben visibili tra una piastrella e l'altra secondo una griglia regolare, superficie piana con leggerissima variazione naturale di tono tra i pezzi, texture e fughe chiaramente riconoscibili, non una superficie continua senza giunti come la resina"
+    piastrelle: "pavimentazione in piastrelle ceramiche/gres porcellanato, moduli quadrati o rettangolari regolari con sottili fughe dritte e uniformi ben visibili tra una piastrella e l'altra secondo una griglia regolare, superficie piana con leggerissima variazione naturale di tono tra i pezzi, texture e fughe chiaramente riconoscibili, non una superficie continua senza giunti come la resina",
+    graniglia_esterni: "pavimentazione decorativa da esterno in resina drenante con graniglie/sassolini naturali di piccola pezzatura ben visibili e distribuiti in modo uniforme e denso su tutta la superficie, texture granulare e materica (non liscia né piatta), tipica dei rivestimenti decorativi per terrazzi, vialetti, bordi piscina e rampe carrabili, superficie compatta ma con i singoli sassolini chiaramente riconoscibili, finitura leggermente lucida come resina trasparente che lega la graniglia"
   };
 
   // Effetti di superficie aggiuntivi (Materico/Corten): si sommano alla texture
@@ -109,7 +110,7 @@ module.exports = async function handler(req, res) {
   // Monolith Pietra e Terrazzo si posano SOLO a pavimento (non a parete): lo
   // diciamo esplicitamente all'AI così non applica la lavorazione anche ai muri
   // inquadrati nella foto.
-  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "piastrelle"];
+  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "piastrelle", "graniglia_esterni"];
   const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId);
 
   // Per la categoria "Resine" (monolith), l'utente ora sceglie esplicitamente DOVE
@@ -142,16 +143,29 @@ module.exports = async function handler(req, res) {
   const isFacadeStyled = materialId === "imbiancatura" && context === "esterno" && facadeLayout && FACADE_LAYOUT_DESC[facadeLayout]
     && colorB && (facadeLayout !== "marcapiano" || colorC);
 
+  // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
+  // fascia/bordo perimetrale in un colore diverso, che segue il perimetro della
+  // superficie (contro i muri/bordi) come nelle pose reali fotografate dal cliente
+  // (terrazzi con bordo scuro, vialetti con bordo chiaro laterale).
+  const isGranigliaBordo = materialId === "graniglia_esterni" && granigliaLayout === "bordo" && colorB;
+  const granigliaBordoDesc = isGranigliaBordo
+    ? `Applica il colore ${colorRef(colorA, colorAHex)} al campo principale della superficie (la parte centrale), e il colore ${colorRef(colorB, colorBHex)} a una fascia/bordo perimetrale ben distinta che segue il contorno della superficie (lungo i muri, i bordi della piscina o i lati del vialetto), larga circa 20-30cm, con una linea di separazione netta e regolare tra campo e bordo, esattamente come nelle pose professionali reali di pavimentazioni decorative in graniglia.`
+    : null;
+
   // Costruzione del prompt descrittivo per il modello di editing immagine.
   const colorDesc = isFacadeStyled
     ? FACADE_LAYOUT_DESC[facadeLayout]
-    : (colorB
-      ? `un effetto nuvolato che miscela il colore ${colorRef(colorA, colorAHex)} con il colore ${colorRef(colorB, colorBHex)}`
-      : `il colore uniforme ${colorRef(colorA, colorAHex)}`);
+    : isGranigliaBordo
+      ? granigliaBordoDesc
+      : (colorB
+        ? `un effetto nuvolato che miscela il colore ${colorRef(colorA, colorAHex)} con il colore ${colorRef(colorB, colorBHex)}`
+        : `il colore uniforme ${colorRef(colorA, colorAHex)}`);
 
   const sceneDesc = (materialId === "imbiancatura" && context === "esterno")
     ? "questa foto reale della facciata esterna di un edificio"
-    : "questa foto reale di un ambiente domestico";
+    : (materialId === "graniglia_esterni")
+      ? "questa foto reale di uno spazio esterno (terrazzo, vialetto, giardino, bordo piscina o rampa garage)"
+      : "questa foto reale di un ambiente domestico";
 
   // La boiserie, più di un semplice colore/texture piatta, è un elemento architettonico
   // con vero spessore fisico: senza istruzioni extra l'AI tende a "incollarla" sopra la
