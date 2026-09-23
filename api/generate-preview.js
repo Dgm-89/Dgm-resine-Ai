@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, addDavanzali, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -143,6 +143,15 @@ module.exports = async function handler(req, res) {
   const isFacadeStyled = materialId === "imbiancatura" && context === "esterno" && facadeLayout && FACADE_LAYOUT_DESC[facadeLayout]
     && colorB && (facadeLayout !== "marcapiano" || colorC);
 
+  // Davanzali finestre in un colore diverso dalla facciata: opzione indipendente
+  // dal layout scelto (monocolore/marcapiano/righe), disponibile solo per
+  // Imbiancatura Esterno. Nota descrittiva separata, aggiunta al prompt solo
+  // quando il cliente ha attivato il toggle e scelto davvero un colore.
+  const isDavanzaliStyled = materialId === "imbiancatura" && context === "esterno" && addDavanzali && colorDavanzali;
+  const davanzaliNote = isDavanzaliStyled
+    ? ` Inoltre, dipingi TUTTI i davanzali delle finestre visibili nella foto nel colore ${colorRef(colorDavanzali, colorDavanzaliHex)}, ben distinto dal colore della facciata: il davanzale è la sporgenza orizzontale sotto ogni finestra. Applica questo colore SOLO ai davanzali, non al resto dell'infisso/telaio della finestra né ai vetri, che restano invariati.`
+    : "";
+
   // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
   // fascia/bordo perimetrale in un colore diverso, che segue il perimetro della
   // superficie (contro i muri/bordi) come nelle pose reali fotografate dal cliente
@@ -194,7 +203,7 @@ module.exports = async function handler(req, res) {
 
   // Rinforzo esplicito: quando abbiamo almeno un codice hex, ribadiamo che va
   // rispettato con precisione, non solo usato come vago riferimento.
-  const hasAnyHex = Boolean(colorAHex || colorBHex || colorCHex);
+  const hasAnyHex = Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex);
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
@@ -232,6 +241,7 @@ module.exports = async function handler(req, res) {
     boiserieRealismNote,
     pannelloHeightNote,
     nicchiaNote,
+    davanzaliNote,
     boiserieStyleRefNote,
     colorFidelityNote,
     globalPreservationNote
