@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, addDavanzali, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, effetto, finitura, facadeLayout, context, boiserieStyle, boiserieHeight, addNicchia, addDavanzali, addSottotetto, addBalconi, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -152,6 +152,25 @@ module.exports = async function handler(req, res) {
     ? ` Inoltre, dipingi TUTTI i davanzali delle finestre visibili nella foto nel colore ${colorRef(colorDavanzali, colorDavanzaliHex)}, ben distinto dal colore della facciata: il davanzale è la sporgenza orizzontale sotto ogni finestra. Applica questo colore SOLO ai davanzali, non al resto dell'infisso/telaio della finestra né ai vetri, che restano invariati.`
     : "";
 
+  // Sottotetto/sporto di gronda (in legno o intonacato/cemento) in un colore
+  // diverso dalla facciata: opzione indipendente, disponibile solo per
+  // Imbiancatura Esterno, come i davanzali. Applica il colore SOLO alla parte
+  // sotto la falda del tetto (che sia legno a vista o intonaco/cemento), non
+  // al manto di copertura (tegole) né al resto della facciata.
+  const isSottotettoStyled = materialId === "imbiancatura" && context === "esterno" && addSottotetto && colorSottotetto;
+  const sottotettoNote = isSottotettoStyled
+    ? ` Inoltre, dipingi TUTTO il sottotetto/sporto di gronda visibile nella foto (la parte sotto la falda del tetto, sia essa in legno a vista con travetti/assito, sia intonacata/cementizia) nel colore ${colorRef(colorSottotetto, colorSottotettoHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO al sottotetto/gronda, non al manto di copertura del tetto (tegole/coppi) né al resto della facciata.`
+    : "";
+
+  // Balconi (parapetti/ringhiere) in un colore diverso dalla facciata: opzione
+  // indipendente, disponibile solo per Imbiancatura Esterno, come davanzali e
+  // sottotetto. Applica il colore SOLO ai parapetti/ringhiere dei balconi, non
+  // al resto della facciata né ai pavimenti dei balconi stessi.
+  const isBalconiStyled = materialId === "imbiancatura" && context === "esterno" && addBalconi && colorBalconi;
+  const balconiNote = isBalconiStyled
+    ? ` Inoltre, dipingi TUTTI i parapetti/ringhiere dei balconi visibili nella foto nel colore ${colorRef(colorBalconi, colorBalconiHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO ai parapetti/ringhiere dei balconi, non al resto della facciata né al pavimento dei balconi.`
+    : "";
+
   // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
   // fascia/bordo perimetrale in un colore diverso, che segue il perimetro della
   // superficie (contro i muri/bordi) come nelle pose reali fotografate dal cliente
@@ -203,7 +222,7 @@ module.exports = async function handler(req, res) {
 
   // Rinforzo esplicito: quando abbiamo almeno un codice hex, ribadiamo che va
   // rispettato con precisione, non solo usato come vago riferimento.
-  const hasAnyHex = Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex);
+  const hasAnyHex = Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex);
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
@@ -242,6 +261,8 @@ module.exports = async function handler(req, res) {
     pannelloHeightNote,
     nicchiaNote,
     davanzaliNote,
+    sottotettoNote,
+    balconiNote,
     boiserieStyleRefNote,
     colorFidelityNote,
     globalPreservationNote
