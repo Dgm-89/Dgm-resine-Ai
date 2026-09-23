@@ -208,6 +208,8 @@
   .chip{ display:flex; align-items:center; gap:6px; border:1px solid var(--line); border-radius:20px; padding:5px 10px 5px 6px; font-size:11.5px; background:var(--surface); }
   .chip .dot{ width:14px; height:14px; border-radius:4px; flex:none; }
   .chip button{ border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:13px; padding:0 0 0 2px; }
+  .chip.pending{ border:1.5px dashed var(--accent); background:var(--accent-soft); color:var(--accent-ink); font-weight:600; }
+  .chip.pending .dot{ border:1.5px dashed var(--accent-ink); background:none; }
 
   .swatch-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px 12px; margin-bottom:6px; }
   .swatch{ background:none; border:none; cursor:pointer; padding:0; text-align:center; }
@@ -622,6 +624,11 @@
     clusterLabelFirst: { it:"Primo colore (basamento/bande)", en:"First color (base/stripes)" },
     clusterLabelSecond: { it:"Secondo colore", en:"Second color" },
     clusterLabelDavanzali: { it:"Colore davanzali finestre", en:"Window sill color" },
+    pendingThird: { it:"+ Marcapiano da scegliere", en:"+ String course to choose" },
+    pendingSecondOf3: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
+    pendingSecondOf2: { it:"+ Secondo colore da scegliere", en:"+ Second color to choose" },
+    pendingDavanzali: { it:"+ Colore davanzali da scegliere", en:"+ Window sill color to choose" },
+    colorStepHint: { it:"Seleziona tutti i colori richiesti (quelli tratteggiati sono ancora da scegliere)", en:"Choose every required color (dashed chips are still to be picked)" },
     clusterEmptyChooseFamily: { it:"Scegli una famiglia di colore qui sopra (o cerca un codice) per vedere le tonalità disponibili.", en:"Choose a color family above (or search a code) to see the available shades." },
     clusterEmptyNoMatch: { it:"Nessun colore trovato con questo codice.", en:"No color found with this code." },
     photoHintFloorOnly: { it:"Questa finitura si applica solo al pavimento: carica una foto che inquadri bene il pavimento dell'ambiente (non le pareti).", en:"This finish only applies to the floor: upload a photo that clearly shows the floor of the space (not the walls)." },
@@ -1994,12 +2001,23 @@
     });
     row.appendChild(chip);
   }
+  function addPendingChip(row, key){
+    var chip=document.createElement('span'); chip.className='chip pending';
+    chip.innerHTML='<span class="dot"></span>'+ts(key);
+    row.appendChild(chip);
+  }
   function renderChips(){
     var row=document.getElementById('colorChips'); row.innerHTML='';
     if(state.colorA) addColorChip(row, 'A', state.colorA);
-    if(needsThirdColor() && state.colorC) addColorChip(row, 'C', state.colorC);
-    if(needsSecondColor() && state.colorB) addColorChip(row, 'B', state.colorB);
-    if(needsDavanzaliColor() && state.colorDavanzali) addColorChip(row, 'D', state.colorDavanzali);
+    if(needsThirdColor()){
+      if(state.colorC) addColorChip(row, 'C', state.colorC); else if(state.colorA) addPendingChip(row, 'pendingThird');
+    }
+    if(needsSecondColor()){
+      if(state.colorB) addColorChip(row, 'B', state.colorB); else if(state.colorA && (!needsThirdColor() || state.colorC)) addPendingChip(row, needsThirdColor() ? 'pendingSecondOf3' : 'pendingSecondOf2');
+    }
+    if(needsDavanzaliColor()){
+      if(state.colorDavanzali) addColorChip(row, 'D', state.colorDavanzali); else addPendingChip(row, 'pendingDavanzali');
+    }
   }
 
   function familyRepColor(list, fam){
@@ -2048,6 +2066,13 @@
     } else if(needsSecondColor()){
       label.textContent = pickPhase==='A' ? ts('clusterLabelFirst') : ts('clusterLabelSecond');
     } else { label.textContent = ts('clusterLabelDefault'); }
+    // Contatore "1 di 2/3" per rendere evidente al cliente quanti colori
+    // deve ancora scegliere in totale (non conta i davanzali, opzionali).
+    var coreOrder = phaseOrder().filter(function(p){ return p!=='D'; });
+    if(coreOrder.length > 1 && pickPhase !== 'D'){
+      var stepIdx = coreOrder.indexOf(pickPhase) + 1;
+      if(stepIdx > 0) label.textContent += ' (' + stepIdx + ' ' + (LANG==='en' ? 'of' : 'di') + ' ' + coreOrder.length + ')';
+    }
     var paletteKey = state.material.id;
     if(paletteKey === 'imbiancatura' && state.context === 'esterno') paletteKey = 'imbiancatura_esterni';
     var fullList = PALETTES[paletteKey] || [];
