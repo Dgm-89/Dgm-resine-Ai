@@ -963,6 +963,8 @@
     photoHintFloorOnly: { it:"Questa finitura si applica solo al pavimento: carica una foto che inquadri bene il pavimento dell'ambiente (non le pareti).", en:"This finish only applies to the floor: upload a photo that clearly shows the floor of the space (not the walls)." },
     photoHintGraniglia: { it:"Carica una foto dello spazio esterno (terrazzo, vialetto, giardino, bordo piscina o rampa garage) inquadrando bene la superficie calpestabile.", en:"Upload a photo of the outdoor space (terrace, driveway, garden, pool edge or garage ramp), framing the walkable surface clearly." },
     photoHintDefault: { it:"Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica", en:"Upload a real photo of your space: we'll use it in the next step to generate the photorealistic AI preview" },
+    aiStatusStep1: { it:"Passo 1 di 2: coloro la facciata… (20-50 secondi)", en:"Step 1 of 2: painting the facade… (20-50 seconds)" },
+    aiStatusStep2: { it:"Passo 2 di 2: aggiungo le righe… (20-50 secondi)", en:"Step 2 of 2: adding the stripes… (20-50 seconds)" },
     aiStatusGenerating: { it:"Generazione in corso… può richiedere 20-50 secondi.", en:"Generating… this can take 20-50 seconds." },
     aiStatusDone: { it:"Fatto — questa è la vera immagine generata dall'AI. Trascina per confrontare prima e dopo.", en:"Done — this is the real AI-generated image. Swipe to compare before and after." },
     aiStatusErrorPrefix: { it:"Non sono riuscito a generare l'anteprima AI (", en:"I couldn't generate the AI preview (" },
@@ -4658,9 +4660,7 @@
       var refImgEl = document.querySelector('.boiserie-grid button[data-v="' + state.boiserieStyle + '"] img');
       if(refImgEl && refImgEl.getAttribute('src')) boiserieStyleRefImage = refImgEl.getAttribute('src');
     }
-    fetch(AI_ENDPOINT, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
+    var payload = {
         imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name, materialId: state.material.id,
         colorA: state.colorA.name, colorAHex: apiHex(state.colorA), colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? apiHex(state.colorB) : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? apiHex(state.colorC) : null,
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? apiHex(state.colorDavanzali) : null,
@@ -4686,8 +4686,9 @@
         righeZona: (needsRigheColor() && state.righeOrientamento === 'verticali') ? state.righeZona : null,
         righeExtent: (needsRigheColor() && state.righeOrientamento === 'orizzontali') ? state.righeExtent : null,
         effetto: state.effetto, finitura: state.finitura, grana: granaActive() ? state.grana : null
-      })
-    })
+    };
+    function callAI(body){
+      return fetch(AI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
       .then(function(r){
         return r.text().then(function(text){
           var data = null;
@@ -4712,7 +4713,26 @@
           img.onerror = function(){ reject(new Error("L'AI ha risposto ma l'immagine non è leggibile")); };
           img.src = 'data:' + res.data.mimeType + ';base64,' + res.data.imageBase64;
         });
-      })
+      });
+    }
+    // Con le righe: due passaggi. 1) la casa colorata senza righe; 2) sulla
+    // foto già colorata l'AI aggiunge SOLO le righe.
+    var withRighe = needsRigheColor() && state.material.id === 'imbiancatura' && state.context === 'esterno';
+    var job;
+    if(withRighe){
+      cardSkipRighe = true;
+      var step1 = Object.assign({}, payload, { addRighe:false, colorRighe:null, colorRigheHex:null, righeOrientamento:null, righeZona:null, righeExtent:null, righeSpessore:null, colorCardImage: buildColorCardDataUrl() });
+      cardSkipRighe = false;
+      statusEl.textContent = ts('aiStatusStep1');
+      job = callAI(step1).then(function(first){
+        statusEl.textContent = ts('aiStatusStep2');
+        var step2 = Object.assign({}, payload, { step:'righe', imageBase64: first.base64, mimeType: first.mime });
+        return callAI(step2);
+      });
+    } else {
+      job = callAI(payload);
+    }
+    job
       .then(function(result){
         aiResultImage = result.img;
         aiResultImageBase64 = result.base64;
@@ -4851,13 +4871,14 @@
   // Cartella colori inviata all'AI insieme alla foto: un riquadro pieno per
   // ogni zona, con etichetta zona + codice. Vedere il colore vero funziona
   // molto meglio che leggere solo il codice esadecimale nel testo.
+  var cardSkipRighe = false;
   function colorCardZones(){
     var z = [];
     function add(label, c){ if(c) z.push({ label:label, c:c }); }
     if(needsSecondColor()){ add('PARTE ALTA FACCIATA', state.colorA); add('PARTE BASSA FACCIATA', state.colorB); }
     else add('FACCIATA', state.colorA);
     if(needsMarcapianoColor()) add('MARCAPIANO', state.colorC);
-    if(needsRigheColor()) add('RIGHE', state.colorRighe);
+    if(needsRigheColor() && !cardSkipRighe) add('RIGHE', state.colorRighe);
     if(needsDavanzaliColor()) add('DAVANZALI', state.colorDavanzali);
     if(needsSottotettoColor()) add('SOTTOTETTO', state.colorSottotetto);
     if(needsSerramentiColor()) add('SERRAMENTI E PERSIANE', state.colorSerramenti);
@@ -4866,20 +4887,89 @@
   }
   function buildColorCardDataUrl(){
     var zones = colorCardZones(); if(!zones.length) return null;
-    var W = 900, rowH = 130, pad = 20;
-    var cv = document.createElement('canvas'); cv.width = W; cv.height = pad + zones.length * rowH;
+    var rowH = 130, pad = 20, SW = 560; // SW = larghezza colonna campioni
+    var schemaW = 460, schemaH = 620;
+    var W = SW + schemaW + 60;
+    var H = Math.max(pad + zones.length * rowH, schemaH + 80);
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     var x = cv.getContext('2d');
-    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, cv.width, cv.height);
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, W, H);
     zones.forEach(function(zn, i){
       var y = pad + i * rowH;
-      x.fillStyle = zn.c.hex || '#BDB6AA'; x.fillRect(pad, y, 300, rowH - pad);
-      x.strokeStyle = '#000000'; x.lineWidth = 2; x.strokeRect(pad, y, 300, rowH - pad);
-      x.fillStyle = '#000000'; x.font = 'bold 34px Arial, sans-serif';
-      x.fillText(zn.label, 350, y + 45);
-      x.font = '30px Arial, sans-serif';
-      x.fillText(zn.c.code + (zn.c.hexApprox ? ' (indicativo)' : (zn.c.hex ? '  ' + zn.c.hex : '')), 350, y + 90);
+      x.fillStyle = zn.c.hex || '#BDB6AA'; x.fillRect(pad, y, 200, rowH - pad);
+      x.strokeStyle = '#000000'; x.lineWidth = 2; x.strokeRect(pad, y, 200, rowH - pad);
+      x.fillStyle = '#000000'; x.font = 'bold 26px Arial, sans-serif';
+      x.fillText(zn.label, 240, y + 42);
+      x.font = '24px Arial, sans-serif';
+      x.fillText(zn.c.code + (zn.c.hexApprox ? ' (indicativo)' : (zn.c.hex ? '  ' + zn.c.hex : '')), 240, y + 82);
     });
+    drawFacadeSchema(x, SW + 30, 20, schemaW, schemaH);
     return cv.toDataURL('image/png');
+  }
+  // Schema semplificato della facciata: mostra all'AI dove va ogni colore e
+  // con che proporzioni (divisione a metà altezza, fondo + strisce, ecc.).
+  function drawFacadeSchema(x, X, Y, W, Htot){
+    function hex(c, d){ return (c && c.hex) || d; }
+    x.fillStyle = '#000000'; x.font = 'bold 24px Arial, sans-serif';
+    x.fillText('SCHEMA DELLA FACCIATA', X, Y + 22);
+    var roofH = 110, top = Y + 50 + roofH, fx = X + 20, fw = W - 40, fh = Htot - roofH - 60;
+    // tetto e sottotetto
+    x.fillStyle = '#6E5A4E'; x.beginPath(); x.moveTo(X, top); x.lineTo(X + W/2, top - roofH); x.lineTo(X + W, top); x.closePath(); x.fill();
+    x.fillStyle = needsSottotettoColor() ? hex(state.colorSottotetto,'#D8CDB8') : '#D8CDB8';
+    x.fillRect(X, top, W, 16);
+    // facciata
+    var two = needsSecondColor();
+    var midY = top + 16 + fh / 2;
+    x.fillStyle = hex(state.colorA, '#DDDDDD'); x.fillRect(fx, top + 16, fw, fh);
+    if(two){ x.fillStyle = hex(state.colorB, '#888888'); x.fillRect(fx, midY, fw, fh / 2); }
+    // strisce
+    function stripes(zx, zy, zw, zh, vertical){
+      if(!needsRigheColor() || cardSkipRighe) return;
+      x.fillStyle = hex(state.colorRighe, '#FFFFFF');
+      var cm = zh / 300; // la zona è metà facciata = un piano ≈ 3,00 m
+      if(state.righeSpessore !== 'larghe'){
+        // righe sottili: 6 cm di riga ogni 50 cm circa
+        for(var q = 50; q + 6 <= 280; q += 56){
+          if(vertical) x.fillRect(zx + q*cm, zy, 6*cm, zh); else x.fillRect(zx, zy + zh - (q+6)*cm, zw, 6*cm);
+        }
+        return;
+      }
+      // bande larghe: dalla linea di metà casa (o dallo spigolo) 50 cm di fondo, 50 cm di striscia, e così via
+      var len = vertical ? zw/cm : 300;
+      for(var p = 50; p + 50 <= len; p += 100){
+        if(vertical) x.fillRect(zx + p*cm, zy, 50*cm, zh); else x.fillRect(zx, zy + p*cm, zw, 50*cm); // dall'alto: 50 fondo, 50 striscia…
+      }
+    }
+    if(needsRigheColor()){
+      if(state.righeOrientamento === 'verticali'){
+        if(state.righeZona === 'alta') stripes(fx, top + 16, fw, fh / 2, true); else stripes(fx, midY, fw, fh / 2, true);
+      } else {
+        stripes(fx, midY, fw, fh / 2, false);
+        if(state.righeExtent === 'tutta') stripes(fx, top + 16, fw, fh / 2, false);
+      }
+    }
+    // marcapiano
+    if(needsMarcapianoColor() && state.colorC){ x.fillStyle = hex(state.colorC, '#FFFFFF'); x.fillRect(fx, midY - 4, fw, 8); }
+    // finestre e porta
+    var frame = needsSerramentiColor() ? hex(state.colorSerramenti, '#5C3A21') : '#5C3A21';
+    function win(wx, wy, ww, wh){
+      x.fillStyle = frame; x.fillRect(wx - 12, wy, 12, wh); x.fillRect(wx + ww, wy, 12, wh); // persiane
+      x.fillRect(wx, wy, ww, wh); x.fillStyle = '#BFDCEE'; x.fillRect(wx + 5, wy + 5, ww - 10, wh - 10);
+      if(needsDavanzaliColor() && state.colorDavanzali){ x.fillStyle = hex(state.colorDavanzali, '#FFFFFF'); x.fillRect(wx - 16, wy + wh, ww + 32, 7); }
+    }
+    win(fx + 60, top + 60, 60, 80); win(fx + fw - 120, top + 60, 60, 80);
+    win(fx + 60, midY + 50, 60, 80);
+    x.fillStyle = frame; x.fillRect(fx + fw - 130, midY + fh / 2 - 150, 80, 150);
+    if(needsRigheColor() && !cardSkipRighe && state.righeSpessore === 'larghe' && state.righeOrientamento !== 'verticali'){
+      var cmS = (fh / 2) / 300, gy = midY + fh / 2;
+      x.fillStyle = '#000000'; x.font = '15px Arial, sans-serif';
+      ['50','50','50','50','50','50'].forEach(function(t, i){ x.fillText(t, fx - 22, gy - (i*50 + 25)*cmS + 5); });
+      x.fillText('cm', fx - 24, gy + 18);
+    }
+    x.strokeStyle = '#000000'; x.lineWidth = 2; x.strokeRect(fx, top + 16, fw, fh);
+    // quote: metà altezza
+    x.fillStyle = '#000000'; x.font = '18px Arial, sans-serif';
+    if(two){ x.fillText('50%', X + W - 18, midY - fh/4 + 6); x.fillText('50%', X + W - 18, midY + fh/4 + 6); }
   }
   function righeDescriptionText(langOverride){
     var L = langOverride || LANG;
