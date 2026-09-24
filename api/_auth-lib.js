@@ -1,6 +1,9 @@
 // api/_auth-lib.js
-// Funzioni condivise dai 4 endpoint di login/registrazione professionisti
+// Funzioni condivise dai 4 endpoint di login/registrazione account
 // (auth-register.js, auth-login.js, auth-logout.js, auth-me.js).
+// Gli account possono essere di due tipi — "professionista" o "privato" —
+// ma condividono la stessa tabella, lo stesso login e gli stessi 3 piani
+// a pagamento (Basic/Medium/Pro): è il campo account_type a distinguerli.
 //
 // NOTA IMPORTANTE SU VERCEL: i file dentro "api/" diventano automaticamente
 // degli indirizzi web (es. api/auth-login.js → /api/auth-login). Questo file
@@ -10,20 +13,38 @@
 // COSA SERVE PER FAR FUNZIONARE IL LOGIN (da fare una volta sola)
 // 1. Crea un account gratuito su https://supabase.com e crea un nuovo progetto.
 // 2. Nel progetto, vai su "SQL Editor" e incolla/esegui questo comando per
-//    creare la tabella che contiene gli account dei professionisti:
+//    creare la tabella che contiene TUTTI gli account (professionisti E
+//    privati — sono nella stessa tabella, distinti dal campo account_type):
 //
 //      create table pro_accounts (
 //        id uuid primary key default gen_random_uuid(),
 //        email text unique not null,
 //        password_hash text not null,
 //        password_salt text not null,
-//        company_name text not null,
+//        account_type text not null default 'professionista'
+//          check (account_type in ('professionista','privato')),
+//        company_name text,
 //        piva text,
 //        phone text,
 //        tier text not null default 'basic' check (tier in ('basic','medium','pro')),
 //        logo_url text,
 //        created_at timestamptz not null default now()
 //      );
+//
+//    Nota su "company_name": per i professionisti contiene la ragione
+//    sociale; per i privati contiene semplicemente nome e cognome. Il campo
+//    non è più obbligatorio a livello di database (NOT NULL rimosso) perché
+//    entrambi i tipi di account lo valorizzano comunque dal form, ma così il
+//    database non blocca nulla se in futuro cambia la logica.
+//
+//    SE LA TABELLA "pro_accounts" ESISTE GIA' (creata prima che i privati
+//    potessero registrarsi), esegui invece questi due comandi per aggiornarla
+//    senza perdere gli account già creati:
+//
+//      alter table pro_accounts add column if not exists account_type text
+//        not null default 'professionista'
+//        check (account_type in ('professionista','privato'));
+//      alter table pro_accounts alter column company_name drop not null;
 //
 // 3. Vai su "Project Settings" → "API": copia l'indirizzo "Project URL" e la
 //    chiave segreta "service_role" (NON la "anon public", quella è diversa).
@@ -150,6 +171,7 @@ function publicUser(row) {
   return {
     id: row.id,
     email: row.email,
+    accountType: row.account_type || "professionista",
     companyName: row.company_name,
     piva: row.piva,
     phone: row.phone,
