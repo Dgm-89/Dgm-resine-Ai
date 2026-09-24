@@ -248,7 +248,7 @@
   /* ---- Area professionisti: bottone header, badge account, modale login/registrazione ---- */
   .header-actions{ display:flex; align-items:center; gap:8px; flex:none; }
   .pro-account-badge{ display:flex; align-items:center; gap:6px; max-width:150px; }
-  .pro-account-badge-info{ display:flex; flex-direction:column; line-height:1.2; }
+  .pro-account-badge-info{ display:flex; flex-direction:column; line-height:1.2; border:none; background:none; padding:0; margin:0; cursor:pointer; text-align:left; font-family:inherit; }
   .pro-account-badge-name{ font-size:10.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100px; }
   .pro-account-badge-tier{ font-size:9.5px; color:var(--ink-soft); text-transform:capitalize; }
   .pro-account-badge-logout{ border:none; background:none; color:var(--ink-soft); font-size:10px; text-decoration:underline; cursor:pointer; font-family:inherit; padding:0; }
@@ -272,6 +272,32 @@
   .pro-auth-error{ font-size:12px; color:#C0392B; margin-top:-6px; margin-bottom:14px; min-height:14px; }
   .pro-auth-submit{ width:100%; border:none; border-radius:10px; padding:13px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; margin-top:2px; }
   .pro-auth-submit:disabled{ opacity:0.5; cursor:wait; }
+  /* ---- Cartella progetti professionista ---- */
+  .pro-projects-modal{ position:fixed; inset:0; z-index:998; background:rgba(10,10,12,0.6); display:none; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+  .pro-projects-modal.open{ display:flex; }
+  .pro-projects-card{ position:relative; background:var(--surface); border-radius:16px; padding:26px 24px 22px; width:100%; max-width:420px; box-shadow:0 20px 50px rgba(0,0,0,0.35); max-height:90vh; overflow-y:auto; }
+  .pro-projects-close{ position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--ink); font-size:14px; cursor:pointer; }
+  .pro-projects-title{ font-size:18px; font-weight:800; color:var(--ink); margin-bottom:4px; padding-right:26px; }
+  .pro-projects-sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:16px; line-height:1.4; }
+  .pro-projects-view{ display:none; }
+  .pro-projects-view.active{ display:block; }
+  .pp-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+  .pp-card{ display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:10px; padding:10px; cursor:pointer; background:var(--surface); text-align:left; width:100%; font-family:inherit; }
+  .pp-card-photos{ display:flex; flex:none; }
+  .pp-card-photos img{ width:36px; height:36px; object-fit:cover; border-radius:6px; border:1.5px solid var(--bg); }
+  .pp-card-photos img:first-child{ margin-right:-14px; z-index:1; }
+  .pp-card-info{ flex:1; min-width:0; }
+  .pp-card-name{ font-size:13.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pp-card-meta{ font-size:11px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pp-empty{ font-size:13px; color:var(--ink-soft); text-align:center; padding:24px 10px; }
+  .pp-new-btn{ width:100%; border:none; border-radius:10px; padding:13px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; margin-top:14px; }
+  .pp-form-photos{ display:flex; gap:10px; margin-bottom:16px; }
+  .pp-form-photos .pp-photo-box{ flex:1; text-align:center; }
+  .pp-form-photos img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; border:1px solid var(--line); }
+  .pp-form-photos .pp-photo-label{ font-size:10px; color:var(--ink-soft); margin-top:4px; font-weight:600; }
+  .pp-back-link{ border:none; background:none; color:var(--ink-soft); font-size:12px; cursor:pointer; font-family:inherit; padding:0; margin-bottom:14px; text-decoration:underline; }
+  .pp-error{ font-size:12px; color:#C0392B; margin-top:-6px; margin-bottom:14px; min-height:14px; }
+  .pp-delete-btn{ width:100%; border:1.5px solid #C0392B; background:none; color:#C0392B; border-radius:10px; padding:11px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-top:10px; }
 
   .ai-btn{ display:block; width:100%; margin-top:4px; border:none; border-radius:8px; padding:14px 16px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent-gradient); color:var(--accent-ink); }
   .ai-btn:disabled{ background:var(--accent-soft); color:var(--ink-soft); }
@@ -327,10 +353,10 @@
   <div class="header-actions">
     <button type="button" class="theme-btn" id="proAuthOpen" data-i18n="proAuthOpenBtn">Accedi</button>
     <div class="pro-account-badge" id="proBadge" style="display:none">
-      <div class="pro-account-badge-info">
+      <button type="button" class="pro-account-badge-info" id="proProjectsOpenBtn" aria-label="I miei progetti" data-i18n-aria="proProjectsLinkAria">
         <span class="pro-account-badge-name" id="proBadgeName"></span>
         <span class="pro-account-badge-tier" id="proBadgeTier"></span>
-      </div>
+      </button>
       <button type="button" class="pro-account-badge-logout" id="proLogoutBtn" data-i18n="proLogoutBtn">Esci</button>
     </div>
     <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
@@ -373,6 +399,47 @@
       </div>
       <div class="pro-auth-error" id="paRegError"></div>
       <button type="button" class="pro-auth-submit" id="paRegSubmit" data-i18n="proRegSubmit">Crea account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cartella progetti: elenco progetti salvati + form crea/modifica -->
+<div class="pro-projects-modal" id="proProjectsModal">
+  <div class="pro-projects-card">
+    <button type="button" class="pro-projects-close" id="proProjectsClose" aria-label="Chiudi">✕</button>
+
+    <!-- Vista elenco -->
+    <div class="pro-projects-view active" id="ppViewList">
+      <div class="pro-projects-title" data-i18n="proProjectsTitle">I miei progetti</div>
+      <div class="pro-projects-sub" data-i18n="proProjectsSub">I progetti salvati per i tuoi clienti, con foto prima/dopo — non serve più tenerle sul telefono.</div>
+      <div class="pp-list" id="ppList"></div>
+      <div class="pp-empty" id="ppEmpty" style="display:none" data-i18n="proProjectsEmpty">Non hai ancora salvato nessun progetto.</div>
+      <button type="button" class="pp-new-btn" id="ppNewBtn" data-i18n="proProjectsNewBtn">+ Nuovo progetto</button>
+    </div>
+
+    <!-- Vista form (crea o modifica) -->
+    <div class="pro-projects-view" id="ppViewForm">
+      <button type="button" class="pp-back-link" id="ppBackBtn" data-i18n="proProjectsBack">← Torna all'elenco</button>
+      <div class="pro-projects-title" id="ppFormTitle" data-i18n="proProjectsFormTitleNew">Nuovo progetto</div>
+      <div class="pp-form-photos" id="ppFormPhotos" style="display:none">
+        <div class="pp-photo-box"><img id="ppPhotoBeforeImg" alt=""><div class="pp-photo-label" data-i18n="ppPhotoBefore">Prima</div></div>
+        <div class="pp-photo-box"><img id="ppPhotoAfterImg" alt=""><div class="pp-photo-label" data-i18n="ppPhotoAfter">Dopo</div></div>
+      </div>
+      <div class="field"><label for="ppClientName" data-i18n="ppClientNameLabel">Nome cliente</label><input id="ppClientName" type="text" placeholder="Mario Rossi"></div>
+      <div class="field"><label for="ppClientContact" data-i18n="ppClientContactLabel">Contatto (telefono/email)</label><input id="ppClientContact" type="text"></div>
+      <div class="field"><label for="ppSiteAddress" data-i18n="ppSiteAddressLabel">Indirizzo cantiere (facoltativo)</label><input id="ppSiteAddress" type="text"></div>
+      <div class="row2">
+        <div class="field"><label for="ppMaterial" data-i18n="ppMaterialLabel">Materiale</label><input id="ppMaterial" type="text"></div>
+        <div class="field"><label for="ppFinish" data-i18n="ppFinishLabel">Finitura</label><input id="ppFinish" type="text"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="ppColorName" data-i18n="ppColorNameLabel">Nome colore</label><input id="ppColorName" type="text"></div>
+        <div class="field"><label for="ppColorCode" data-i18n="ppColorCodeLabel">Codice colore</label><input id="ppColorCode" type="text"></div>
+      </div>
+      <div class="field"><label for="ppNotes" data-i18n="ppNotesLabel">Note</label><textarea id="ppNotes"></textarea></div>
+      <div class="pp-error" id="ppFormError"></div>
+      <button type="button" class="pro-auth-submit" id="ppSaveBtn" data-i18n="ppSaveBtn">Salva progetto</button>
+      <button type="button" class="pp-delete-btn" id="ppDeleteBtn" style="display:none" data-i18n="ppDeleteBtn">Elimina progetto</button>
     </div>
   </div>
 </div>
@@ -592,6 +659,7 @@
     <h1 class="title" data-i18n="panel3Title">I tuoi dati</h1>
     <div class="summary" id="summaryBox"></div>
     <button class="share-btn" id="shareConfigBtn" data-i18n="shareConfigBtn">📤 Salva o condividi questa selezione</button>
+    <button class="share-btn" id="panel3SaveProjectBtn" style="display:none" data-i18n="panel3SaveProjectBtn">📁 Salva questo progetto nella tua cartella</button>
     <canvas id="shareCardCanvas" width="800" height="1000" style="display:none"></canvas>
 
     <div class="field"><label for="fName" data-i18n="fNameLabel">Nome e cognome</label><input id="fName" type="text" placeholder="Mario Rossi" autocomplete="name"></div>
@@ -715,6 +783,30 @@
     proErrFieldsReg: { it:"Compila ragione sociale, email e password (almeno 6 caratteri).", en:"Fill in company name, email and password (at least 6 characters)." },
     proErrEmailExists: { it:"Esiste già un account con questa email.", en:"An account with this email already exists." },
     proErrLogin: { it:"Email o password non corretti.", en:"Incorrect email or password." },
+    proProjectsLinkAria: { it:"I miei progetti", en:"My projects" },
+    proProjectsTitle: { it:"I miei progetti", en:"My projects" },
+    proProjectsSub: { it:"I progetti salvati per i tuoi clienti, con foto prima/dopo — non serve più tenerle sul telefono.", en:"Your saved client projects, with before/after photos — no need to keep them on your phone." },
+    proProjectsEmpty: { it:"Non hai ancora salvato nessun progetto.", en:"You haven't saved any projects yet." },
+    proProjectsNewBtn: { it:"+ Nuovo progetto", en:"+ New project" },
+    proProjectsBack: { it:"← Torna all'elenco", en:"← Back to list" },
+    proProjectsFormTitleNew: { it:"Nuovo progetto", en:"New project" },
+    proProjectsFormTitleEdit: { it:"Modifica progetto", en:"Edit project" },
+    ppClientNameLabel: { it:"Nome cliente", en:"Client name" },
+    ppClientContactLabel: { it:"Contatto (telefono/email)", en:"Contact (phone/email)" },
+    ppSiteAddressLabel: { it:"Indirizzo cantiere (facoltativo)", en:"Site address (optional)" },
+    ppMaterialLabel: { it:"Materiale", en:"Material" },
+    ppColorNameLabel: { it:"Nome colore", en:"Color name" },
+    ppColorCodeLabel: { it:"Codice colore", en:"Color code" },
+    ppFinishLabel: { it:"Finitura", en:"Finish" },
+    ppNotesLabel: { it:"Note", en:"Notes" },
+    ppPhotoBefore: { it:"Prima", en:"Before" },
+    ppPhotoAfter: { it:"Dopo", en:"After" },
+    ppSaveBtn: { it:"Salva progetto", en:"Save project" },
+    ppDeleteBtn: { it:"Elimina progetto", en:"Delete project" },
+    ppDeleteConfirm: { it:"Eliminare questo progetto? L'operazione non si può annullare.", en:"Delete this project? This cannot be undone." },
+    ppErrClientName: { it:"Il nome del cliente è obbligatorio.", en:"Client name is required." },
+    ppErrGeneric: { it:"Si è verificato un errore. Riprova.", en:"Something went wrong. Please try again." },
+    panel3SaveProjectBtn: { it:"📁 Salva questo progetto nella tua cartella", en:"📁 Save this project to your folder" },
     davanzaliTitle: { it:"Personalizza il colore dei davanzali", en:"Customize window sill color" },
     davanzaliDesc: { it:"Scegli un colore diverso dalla facciata per i davanzali delle finestre", en:"Choose a color for the window sills different from the facade" },
     sottotettoTitle: { it:"Personalizza il colore del sottotetto", en:"Customize eave/soffit color" },
@@ -4588,6 +4680,10 @@
       '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
+    // Il salvataggio nella cartella progetti ha senso solo per un professionista
+    // loggato: per un privato il bottone resta nascosto.
+    var saveProjectBtn = document.getElementById('panel3SaveProjectBtn');
+    if(saveProjectBtn) saveProjectBtn.style.display = proAccount ? 'block' : 'none';
   }
 
   document.getElementById('next1').addEventListener('click', function(){
@@ -4902,6 +4998,158 @@
       .catch(function(){});
   }
   proCheckSession();
+
+  // ---------- Cartella progetti professionista ----------
+  var ppProjects = [];
+  var ppEditingId = null; // null = nuovo progetto, altrimenti id del progetto in modifica
+
+  function ppEscapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function ppShowView(view){
+    document.getElementById('ppViewList').classList.toggle('active', view === 'list');
+    document.getElementById('ppViewForm').classList.toggle('active', view === 'form');
+  }
+
+  function ppOpen(){
+    document.getElementById('proProjectsModal').classList.add('open');
+    ppShowView('list');
+    ppLoadProjects();
+  }
+  function ppClose(){ document.getElementById('proProjectsModal').classList.remove('open'); }
+
+  function ppLoadProjects(){
+    var listEl = document.getElementById('ppList');
+    listEl.innerHTML = '<div class="pp-empty">' + (LANG==='en' ? 'Loading…' : 'Caricamento…') + '</div>';
+    fetch('/api/projects-list')
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(data){ ppProjects = (data && data.projects) || []; ppRenderList(); })
+      .catch(function(){ ppProjects = []; ppRenderList(); });
+  }
+
+  function ppRenderList(){
+    var listEl = document.getElementById('ppList');
+    var emptyEl = document.getElementById('ppEmpty');
+    listEl.innerHTML = '';
+    if(!ppProjects.length){
+      emptyEl.style.display = 'block';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    ppProjects.forEach(function(p){
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'pp-card';
+      var photosHtml = '<div class="pp-card-photos">'
+        + (p.photoBeforeUrl ? '<img src="'+p.photoBeforeUrl+'" alt="">' : '')
+        + (p.photoAfterUrl ? '<img src="'+p.photoAfterUrl+'" alt="">' : '')
+        + '</div>';
+      var metaParts = [];
+      if(p.material) metaParts.push(p.material);
+      if(p.colorName) metaParts.push(p.colorName);
+      var meta = metaParts.length ? metaParts.join(' · ') : (p.createdAt ? new Date(p.createdAt).toLocaleDateString(LANG==='en' ? 'en-GB' : 'it-IT') : '');
+      card.innerHTML = photosHtml
+        + '<div class="pp-card-info"><div class="pp-card-name">'+ppEscapeHtml(p.clientName)+'</div><div class="pp-card-meta">'+ppEscapeHtml(meta)+'</div></div>';
+      card.addEventListener('click', function(){ ppOpenForm(p); });
+      listEl.appendChild(card);
+    });
+  }
+
+  // Apre il form: senza argomento = nuovo progetto (precompilato con la
+  // configurazione corrente), con un progetto = modifica di quello esistente.
+  function ppOpenForm(project){
+    ppEditingId = project ? project.id : null;
+    document.getElementById('ppFormError').textContent = '';
+    document.getElementById('ppFormTitle').textContent = project ? ts('proProjectsFormTitleEdit') : ts('proProjectsFormTitleNew');
+    document.getElementById('ppDeleteBtn').style.display = project ? 'block' : 'none';
+
+    var photosBox = document.getElementById('ppFormPhotos');
+    var beforeImg = document.getElementById('ppPhotoBeforeImg');
+    var afterImg = document.getElementById('ppPhotoAfterImg');
+    var photoBeforeSrc = project ? project.photoBeforeUrl : (state.photoBase64 ? ('data:'+(state.photoMime||'image/jpeg')+';base64,'+state.photoBase64) : null);
+    var photoAfterSrc = project ? project.photoAfterUrl : (aiResultImageBase64 ? ('data:'+(aiResultImageMime||'image/png')+';base64,'+aiResultImageBase64) : null);
+    if(photoBeforeSrc || photoAfterSrc){
+      photosBox.style.display = 'flex';
+      document.getElementById('ppPhotoBeforeImg').closest('.pp-photo-box').style.display = photoBeforeSrc ? '' : 'none';
+      document.getElementById('ppPhotoAfterImg').closest('.pp-photo-box').style.display = photoAfterSrc ? '' : 'none';
+      if(photoBeforeSrc) beforeImg.src = photoBeforeSrc;
+      if(photoAfterSrc) afterImg.src = photoAfterSrc;
+    } else {
+      photosBox.style.display = 'none';
+    }
+
+    document.getElementById('ppClientName').value = project ? (project.clientName || '') : (document.getElementById('fName') ? document.getElementById('fName').value : '');
+    document.getElementById('ppClientContact').value = project ? (project.clientContact || '') : [document.getElementById('fPhone') ? document.getElementById('fPhone').value : '', document.getElementById('fEmail') ? document.getElementById('fEmail').value : ''].filter(Boolean).join(' · ');
+    document.getElementById('ppSiteAddress').value = project ? (project.siteAddress || '') : (document.getElementById('fCity') ? document.getElementById('fCity').value : '');
+    document.getElementById('ppMaterial').value = project ? (project.material || '') : (state.material ? LF(state.material,'name') : '');
+    document.getElementById('ppFinish').value = project ? (project.finish || '') : (state.finitura || '');
+    document.getElementById('ppColorName').value = project ? (project.colorName || '') : (state.colorA ? state.colorA.name : '');
+    document.getElementById('ppColorCode').value = project ? (project.colorCode || '') : (state.colorA ? state.colorA.code : '');
+    document.getElementById('ppNotes').value = project ? (project.notes || '') : '';
+
+    ppShowView('form');
+  }
+
+  document.getElementById('proProjectsOpenBtn').addEventListener('click', ppOpen);
+  document.getElementById('panel3SaveProjectBtn').addEventListener('click', function(){ ppOpen(); ppOpenForm(null); });
+  document.getElementById('proProjectsClose').addEventListener('click', ppClose);
+  document.getElementById('proProjectsModal').addEventListener('click', function(e){ if(e.target.id === 'proProjectsModal') ppClose(); });
+  document.getElementById('ppNewBtn').addEventListener('click', function(){ ppOpenForm(null); });
+  document.getElementById('ppBackBtn').addEventListener('click', function(){ ppShowView('list'); ppLoadProjects(); });
+
+  document.getElementById('ppSaveBtn').addEventListener('click', function(){
+    var clientName = document.getElementById('ppClientName').value.trim();
+    var errEl = document.getElementById('ppFormError');
+    errEl.textContent = '';
+    if(!clientName){ errEl.textContent = ts('ppErrClientName'); return; }
+
+    var payload = {
+      clientName: clientName,
+      clientContact: document.getElementById('ppClientContact').value.trim(),
+      siteAddress: document.getElementById('ppSiteAddress').value.trim(),
+      material: document.getElementById('ppMaterial').value.trim(),
+      finish: document.getElementById('ppFinish').value.trim(),
+      colorName: document.getElementById('ppColorName').value.trim(),
+      colorCode: document.getElementById('ppColorCode').value.trim(),
+      notes: document.getElementById('ppNotes').value.trim()
+    };
+
+    var url, method;
+    if(ppEditingId){
+      payload.id = ppEditingId;
+      url = '/api/projects-update';
+    } else {
+      // Solo per un progetto nuovo alleghiamo le foto correnti (prima/dopo);
+      // in modifica le foto già salvate restano quelle, non le ricarichiamo.
+      if(state.photoBase64) payload.photoBeforeDataUrl = 'data:'+(state.photoMime||'image/jpeg')+';base64,'+state.photoBase64;
+      if(aiResultImageBase64) payload.photoAfterDataUrl = 'data:'+(aiResultImageMime||'image/png')+';base64,'+aiResultImageBase64;
+      url = '/api/projects-create';
+    }
+
+    var btn = this; btn.disabled = true;
+    fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        btn.disabled = false;
+        if(!res.ok){ errEl.textContent = (res.data && res.data.error) ? res.data.error : ts('ppErrGeneric'); return; }
+        ppShowView('list');
+        ppLoadProjects();
+      })
+      .catch(function(){ btn.disabled = false; errEl.textContent = ts('ppErrGeneric'); });
+  });
+
+  document.getElementById('ppDeleteBtn').addEventListener('click', function(){
+    if(!ppEditingId) return;
+    if(!window.confirm(ts('ppDeleteConfirm'))) return;
+    var btn = this; btn.disabled = true;
+    fetch('/api/projects-delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: ppEditingId }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(){ btn.disabled = false; ppShowView('list'); ppLoadProjects(); })
+      .catch(function(){ btn.disabled = false; });
+  });
 
   initDownloads();
   setTimeout(function(){
