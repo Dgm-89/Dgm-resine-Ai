@@ -235,6 +235,10 @@
   .color-search{ width:100%; box-sizing:border-box; padding:11px 14px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font-family:inherit; font-size:14px; margin-bottom:14px; }
   .color-search:focus{ outline:none; border-color:var(--accent); }
   .cluster-empty{ font-size:13px; color:var(--ink-soft); padding:20px 0; text-align:center; }
+  .free-code-btn{ display:flex; align-items:center; gap:12px; width:100%; box-sizing:border-box; padding:12px 14px; margin:0 0 14px; border-radius:10px; border:1.5px dashed var(--accent); background:var(--surface); color:var(--ink); font-family:inherit; font-size:14px; font-weight:600; text-align:left; cursor:pointer; }
+  .free-code-btn .fc-dot{ flex:0 0 28px; width:28px; height:28px; border-radius:50%; border:1px solid var(--line); }
+  .free-code-btn .fc-sub{ display:block; font-weight:400; font-size:12px; color:var(--ink-soft); margin-top:2px; }
+  .cpm-note{ font-size:12px; color:var(--ink-soft); margin:6px 0 0; text-align:center; }
 
   .swatch{ position:relative; }
   .sw-check{ position:absolute; top:4px; right:4px; width:18px; height:18px; border-radius:5px; border:1.5px solid rgba(255,255,255,0.85); background:rgba(255,255,255,0.15); box-shadow:0 1px 3px rgba(0,0,0,0.25); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:800; color:transparent; }
@@ -628,8 +632,9 @@
     </div>
 
     <div class="chip-row" id="colorChips"></div>
+    <input type="text" id="colorSearch" class="color-search" placeholder="Scrivi il codice colore (es. S 2030-Y90R, RAL 7016, B6.38.18)" data-i18n-ph="colorSearchPh" autocomplete="off" autocapitalize="characters" enterkeyhint="done" style="display:none">
+    <button type="button" class="free-code-btn" id="freeCodeBtn" style="display:none"></button>
     <div class="family-row" id="familyRow" style="display:none"></div>
-    <input type="text" id="colorSearch" class="color-search" placeholder="Cerca per codice (es. B6.38.18)" data-i18n-ph="colorSearchPh" style="display:none">
     <div class="section-label" id="clusterLabel">Colore</div>
     <div class="swatch-grid" id="colorCluster"></div>
     <div class="cluster-empty" id="clusterEmpty" style="display:none">Nessun colore trovato con questo codice.</div>
@@ -728,6 +733,7 @@
       <div class="cpm-swatch" id="cpmSwatch"></div>
       <div class="cpm-name" id="cpmName"></div>
       <div class="cpm-code" id="cpmCode"></div>
+      <div class="cpm-note" id="cpmNote" style="display:none"></div>
       <button type="button" class="cpm-select" id="cpmSelect">✓ Seleziona questo colore</button>
     </div>
   </div>
@@ -803,7 +809,10 @@
     btnEffettiParticolari: { it:"Effetti particolari", en:"Special effects" },
     cortenNoColorTitle: { it:"Il Corten ha già il suo colore", en:"Corten already has its own color" },
     cortenNoColorDesc: { it:"Base ocra/ruggine naturale, non serve scegliere un colore per questa finitura", en:"Natural ochre/rust base, no need to choose a color for this finish" },
-    colorSearchPh: { it:"Cerca per codice (es. B6.38.18)", en:"Search by code (e.g. B6.38.18)" },
+    colorSearchPh: { it:"Scrivi il codice colore (es. S 2030-Y90R, RAL 7016, B6.38.18)", en:"Type the color code (e.g. S 2030-Y90R, RAL 7016, B6.38.18)" },
+    freeCodeUse: { it:"Usa il codice ", en:"Use code " },
+    freeCodeSub: { it:"Il codice viene accettato anche se non è in questo campionario", en:"The code is accepted even if it isn't in this catalog" },
+    freeCodeNote: { it:"Anteprima del colore indicativa: in preventivo e in lavorazione vale il codice inserito.", en:"Color preview is approximate: the quote and the work use the code you entered." },
     colorCatalogLabel: { it:"Da quale campionario scegliere il colore?", en:"Which color catalog to choose from?" },
     btnCatalogoBase: { it:"Colori base", en:"Base colors" },
     btnCatalogoNcs: { it:"Catalogo NCS", en:"NCS catalog" },
@@ -927,8 +936,8 @@
     pendingSerramenti: { it:"+ Colore serramenti da scegliere", en:"+ Window frame color to choose" },
     pendingRighe: { it:"+ Colore righe da scegliere", en:"+ Stripe color to choose" },
     colorStepHint: { it:"Seleziona tutti i colori richiesti (quelli tratteggiati sono ancora da scegliere)", en:"Choose every required color (dashed chips are still to be picked)" },
-    clusterEmptyChooseFamily: { it:"Scegli una famiglia di colore qui sopra (o cerca un codice) per vedere le tonalità disponibili.", en:"Choose a color family above (or search a code) to see the available shades." },
-    clusterEmptyNoMatch: { it:"Nessun colore trovato con questo codice.", en:"No color found with this code." },
+    clusterEmptyChooseFamily: { it:"Scegli una famiglia di colore qui sopra oppure scrivi direttamente il codice.", en:"Choose a color family above or type the code directly." },
+    clusterEmptyNoMatch: { it:"Nessun colore del campionario corrisponde: usa il pulsante qui sopra per inserire il codice.", en:"No catalog color matches: use the button above to enter the code." },
     photoHintFloorOnly: { it:"Questa finitura si applica solo al pavimento: carica una foto che inquadri bene il pavimento dell'ambiente (non le pareti).", en:"This finish only applies to the floor: upload a photo that clearly shows the floor of the space (not the walls)." },
     photoHintGraniglia: { it:"Carica una foto dello spazio esterno (terrazzo, vialetto, giardino, bordo piscina o rampa garage) inquadrando bene la superficie calpestabile.", en:"Upload a photo of the outdoor space (terrace, driveway, garden, pool edge or garage ramp), framing the walkable surface clearly." },
     photoHintDefault: { it:"Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica", en:"Upload a real photo of your space: we'll use it in the next step to generate the photorealistic AI preview" },
@@ -4225,6 +4234,68 @@
     });
   }
 
+  // ---------- codice colore libero ----------
+  // Chiunque (privato o professionista, con qualsiasi materiale e fase) può
+  // scrivere un codice colore: se esiste in uno dei campionari lo usiamo,
+  // altrimenti lo accettiamo così com'è senza obbligare a cliccare i campioni.
+  function normCode(s){ return String(s||'').toUpperCase().replace(/[\s.\-_\/]/g,''); }
+  var _allKnownColors = null;
+  function allKnownColors(){
+    if(_allKnownColors) return _allKnownColors;
+    var out = [];
+    try{ Object.keys(PALETTES).forEach(function(k){ if(Array.isArray(PALETTES[k])) out = out.concat(PALETTES[k]); }); }catch(e){}
+    try{ out = out.concat(NCS_PALETTE); }catch(e){}
+    _allKnownColors = out;
+    return out;
+  }
+  function findColorByCode(q){
+    var n = normCode(q); if(!n) return null;
+    var all = allKnownColors();
+    for(var i=0;i<all.length;i++){
+      var c = all[i];
+      if((c.code && normCode(c.code)===n) || (c.name && normCode(c.name)===n)) return c;
+    }
+    return null;
+  }
+  // Conversione NCS -> RGB approssimata, solo per mostrare un'anteprima.
+  function ncsToHex(raw){
+    var m = String(raw||'').toUpperCase().replace(/\s+/g,' ').match(/^(?:NCS\s*)?(?:S\s*)?(\d{2})(\d{2})\s*-\s*(N|[YRBG](?:\d{2}[YRBG])?)$/);
+    if(!m) return null;
+    var s = +m[1]/100, c = +m[2]/100, hue = m[3];
+    if(s + c > 1) return null;
+    var H = { Y:[255,211,0], R:[196,2,51], B:[0,135,189], G:[0,159,107] };
+    var h;
+    if(hue==='N'){ h=[128,128,128]; c=0; }
+    else if(hue.length===1){ h=H[hue]; }
+    else { var t=+hue.substr(1,2)/100, a=H[hue[0]], b=H[hue[3]]; h=[0,1,2].map(function(i){ return a[i]*(1-t)+b[i]*t; }); }
+    var w = 1 - s - c;
+    var rgb = [0,1,2].map(function(i){ return Math.round(Math.max(0,Math.min(255, w*245 + c*h[i] + s*22))); });
+    return '#' + rgb.map(function(v){ return ('0'+v.toString(16)).slice(-2); }).join('').toUpperCase();
+  }
+  function makeFreeColor(raw){
+    var code = String(raw||'').trim().replace(/\s+/g,' ');
+    var known = findColorByCode(code);
+    if(known) return known;
+    var approx = ncsToHex(code);
+    return { name: code, code: code, hex: approx || '#BDB6AA', freeCode: true, hexApprox: true };
+  }
+  // Hex da mandare all'AI: per i codici liberi l'hex è solo indicativo,
+  // quindi non lo spacciamo per "esatto" e l'AI si basa sul codice.
+  function apiHex(c){ return c ? (c.hexApprox ? null : c.hex) : null; }
+
+  function renderFreeCodeBtn(list){
+    var btn = document.getElementById('freeCodeBtn');
+    var q = (colorSearchQuery||'').trim();
+    if(!q || isCortenActive()){ btn.style.display='none'; return; }
+    var n = normCode(q);
+    var exactInList = list.some(function(c){ return normCode(c.code)===n || normCode(c.name)===n; });
+    if(exactInList){ btn.style.display='none'; return; }
+    var fc = makeFreeColor(q);
+    btn.innerHTML = '<span class="fc-dot" style="'+swatchBgStyle(fc)+'"></span><span>'+ts('freeCodeUse')+'«'+escapeFree(fc.code)+'»<span class="fc-sub">'+ts('freeCodeSub')+'</span></span>';
+    btn.style.display = 'flex';
+  }
+  function escapeFree(t){ return String(t).replace(/[&<>"']/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); }
+
   function renderCluster(){
     var grid=document.getElementById('colorCluster'); grid.innerHTML='';
     var label=document.getElementById('clusterLabel');
@@ -4235,6 +4306,7 @@
       grid.style.display = 'none';
       document.getElementById('familyRow').style.display = 'none';
       document.getElementById('colorSearch').style.display = 'none';
+      document.getElementById('freeCodeBtn').style.display = 'none';
       var emptyElCorten = document.getElementById('clusterEmpty');
       if(emptyElCorten) emptyElCorten.style.display = 'none';
       return;
@@ -4285,7 +4357,7 @@
 
     renderFamilyRow(fullList);
     var searchBox = document.getElementById('colorSearch');
-    searchBox.style.display = hasFamilies ? 'block' : 'none';
+    searchBox.style.display = 'block';
 
     var list = fullList;
     var emptyEl = document.getElementById('clusterEmpty');
@@ -4293,6 +4365,7 @@
     // Con palette grandi (tipo Sikkens) non mostriamo tutti i colori insieme:
     // serve prima scegliere una famiglia o cercare un codice, altrimenti la
     // pagina diventa lunghissima e ingestibile per il cliente.
+    renderFreeCodeBtn(fullList);
     if(hasFamilies && !familyFilter && !colorSearchQuery){
       emptyEl.textContent = ts('clusterEmptyChooseFamily');
       emptyEl.style.display = 'block';
@@ -4303,10 +4376,14 @@
     // per una palette fissa senza famiglie (es. i 4 colori serramenti) un
     // familyFilter/colorSearchQuery rimasto attivo da una scelta precedente
     // svuoterebbe la lista senza motivo.
-    if(hasFamilies && familyFilter) list = list.filter(function(c){ return c.family===familyFilter; });
-    if(hasFamilies && colorSearchQuery){
-      var q = colorSearchQuery.toLowerCase();
-      list = list.filter(function(c){ return c.code.toLowerCase().indexOf(q)>-1 || c.name.toLowerCase().indexOf(q)>-1; });
+    // La ricerca per codice vale per tutte le palette; con un codice scritto
+    // cerchiamo in tutta la palette, senza obbligare a scegliere la famiglia.
+    if(hasFamilies && familyFilter && !colorSearchQuery) list = list.filter(function(c){ return c.family===familyFilter; });
+    if(colorSearchQuery){
+      var q = colorSearchQuery.toLowerCase(), qn = normCode(colorSearchQuery);
+      list = list.filter(function(c){
+        return String(c.code||'').toLowerCase().indexOf(q)>-1 || String(c.name||'').toLowerCase().indexOf(q)>-1 || (qn && normCode(c.code).indexOf(qn)>-1);
+      });
     }
 
     emptyEl.textContent = ts('clusterEmptyNoMatch');
@@ -4333,6 +4410,19 @@
     colorSearchQuery = this.value.trim();
     renderCluster();
   });
+  document.getElementById('colorSearch').addEventListener('keydown', function(e){
+    if(e.key!=='Enter') return;
+    e.preventDefault();
+    var q = this.value.trim(); if(!q) return;
+    var cells = document.querySelectorAll('#colorCluster .swatch:not([disabled])');
+    var fb = document.getElementById('freeCodeBtn');
+    if(fb.style.display!=='none') fb.click();
+    else if(cells.length===1) cells[0].click();
+  });
+  document.getElementById('freeCodeBtn').addEventListener('click', function(){
+    var q = (colorSearchQuery||'').trim(); if(!q) return;
+    openColorPreview(makeFreeColor(q));
+  });
 
   // ---------- anteprima colore a schermo intero prima di selezionarlo ----------
   var cpm = document.getElementById('colorPreviewModal');
@@ -4342,6 +4432,9 @@
     document.getElementById('cpmSwatch').setAttribute('style', swatchBgStyle(c));
     document.getElementById('cpmName').textContent = c.name;
     document.getElementById('cpmCode').textContent = c.code && c.code!==c.name ? ts('codiceLabel')+c.code : '';
+    var cpmNote = document.getElementById('cpmNote');
+    cpmNote.textContent = c.hexApprox ? ts('freeCodeNote') : '';
+    cpmNote.style.display = c.hexApprox ? 'block' : 'none';
     var curr = colorForPhase(pickPhase);
     var already = curr && curr.code===c.code;
     document.getElementById('cpmSelect').textContent = already ? ts('cpmSelectAlready') : ts('cpmSelectDefault');
@@ -4367,6 +4460,7 @@
     if(nextPhase) pickPhase = nextPhase;
     aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
     cpm.classList.remove('open');
+    if(colorSearchQuery){ colorSearchQuery=''; document.getElementById('colorSearch').value=''; }
     renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled();
   });
 
@@ -4471,12 +4565,12 @@
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         imageBase64: state.photoBase64, mimeType: state.photoMime, material: state.material.name, materialId: state.material.id,
-        colorA: state.colorA.name, colorAHex: state.colorA.hex, colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? state.colorB.hex : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? state.colorC.hex : null,
-        colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.hex : null,
-        colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.hex : null,
-        colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.hex : null,
-        colorSerramenti: (needsSerramentiColor() && state.colorSerramenti) ? state.colorSerramenti.name : null, colorSerramentiHex: (needsSerramentiColor() && state.colorSerramenti) ? state.colorSerramenti.hex : null,
-        colorRighe: (needsRigheColor() && state.colorRighe) ? state.colorRighe.name : null, colorRigheHex: (needsRigheColor() && state.colorRighe) ? state.colorRighe.hex : null,
+        colorA: state.colorA.name, colorAHex: apiHex(state.colorA), colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? apiHex(state.colorB) : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? apiHex(state.colorC) : null,
+        colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? apiHex(state.colorDavanzali) : null,
+        colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? apiHex(state.colorSottotetto) : null,
+        colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? apiHex(state.colorBalconi) : null,
+        colorSerramenti: (needsSerramentiColor() && state.colorSerramenti) ? state.colorSerramenti.name : null, colorSerramentiHex: (needsSerramentiColor() && state.colorSerramenti) ? apiHex(state.colorSerramenti) : null,
+        colorRighe: (needsRigheColor() && state.colorRighe) ? state.colorRighe.name : null, colorRigheHex: (needsRigheColor() && state.colorRighe) ? apiHex(state.colorRighe) : null,
         facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
