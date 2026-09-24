@@ -372,8 +372,8 @@
 <div class="pro-auth-modal" id="proAuthModal">
   <div class="pro-auth-card">
     <button type="button" class="pro-auth-close" id="proAuthClose" aria-label="Chiudi">✕</button>
-    <div class="pro-auth-title" data-i18n="proAuthTitle">Area professionisti</div>
-    <div class="pro-auth-sub" data-i18n="proAuthSub">Accedi o registrati per salvare i dati della tua azienda e scegliere il tuo piano.</div>
+    <div class="pro-auth-title" data-i18n="proAuthTitle">Accedi o registrati</div>
+    <div class="pro-auth-sub" data-i18n="proAuthSub">Accedi o registrati per salvare i tuoi dati e scegliere il tuo piano.</div>
     <div class="pro-auth-tabs">
       <button type="button" class="pro-auth-tab active" id="proTabLogin" data-i18n="proTabLogin">Accedi</button>
       <button type="button" class="pro-auth-tab" id="proTabRegister" data-i18n="proTabRegister">Registrati</button>
@@ -389,9 +389,14 @@
 
     <!-- REGISTRAZIONE -->
     <div class="pro-auth-section" id="proSectionRegister">
-      <div class="field"><label for="paRegCompany" data-i18n="proCompanyLabel">Ragione sociale</label><input id="paRegCompany" type="text" autocomplete="organization" placeholder="Rossi Costruzioni Srl"></div>
-      <div class="row2">
-        <div class="field"><label for="paRegPiva" data-i18n="proPivaLabel">P.IVA (facoltativa)</label><input id="paRegPiva" type="text" autocomplete="off"></div>
+      <div class="pro-auth-tier-label" data-i18n="proAccountTypeLabel">Che tipo di account?</div>
+      <div class="pro-auth-tier-row" id="proAccountTypeRow">
+        <button type="button" class="pro-auth-tier" data-account-type="privato"><span class="t-name" data-i18n="proAccountTypePrivato">Privato</span></button>
+        <button type="button" class="pro-auth-tier active" data-account-type="professionista"><span class="t-name" data-i18n="proAccountTypePro">Professionista</span></button>
+      </div>
+      <div class="field"><label for="paRegCompany" id="paRegCompanyLabel" data-i18n="proCompanyLabel">Ragione sociale</label><input id="paRegCompany" type="text" autocomplete="organization" placeholder="Rossi Costruzioni Srl"></div>
+      <div class="row2" id="paRegPivaRow">
+        <div class="field" id="paRegPivaField"><label for="paRegPiva" data-i18n="proPivaLabel">P.IVA (facoltativa)</label><input id="paRegPiva" type="text" autocomplete="off"></div>
         <div class="field"><label for="paRegPhone" data-i18n="proPhoneLabel">Telefono</label><input id="paRegPhone" type="tel" autocomplete="tel"></div>
       </div>
       <div class="field"><label for="paRegEmail" data-i18n="proEmailLabel">Email</label><input id="paRegEmail" type="email" autocomplete="email" placeholder="nome@azienda.it"></div>
@@ -774,14 +779,18 @@
     btnCatalogoNcs: { it:"Catalogo NCS", en:"NCS catalog" },
     proAuthOpenBtn: { it:"Accedi", en:"Sign in" },
     proLogoutBtn: { it:"Esci", en:"Sign out" },
-    proAuthTitle: { it:"Area professionisti", en:"Professional area" },
-    proAuthSub: { it:"Accedi o registrati per salvare i dati della tua azienda e scegliere il tuo piano.", en:"Sign in or register to save your company details and choose your plan." },
+    proAuthTitle: { it:"Accedi o registrati", en:"Sign in or register" },
+    proAuthSub: { it:"Accedi o registrati per salvare i tuoi dati e scegliere il tuo piano.", en:"Sign in or register to save your details and choose your plan." },
     proTabLogin: { it:"Accedi", en:"Sign in" },
     proTabRegister: { it:"Registrati", en:"Register" },
+    proAccountTypeLabel: { it:"Che tipo di account?", en:"What type of account?" },
+    proAccountTypePrivato: { it:"Privato", en:"Individual" },
+    proAccountTypePro: { it:"Professionista", en:"Professional" },
     proEmailLabel: { it:"Email", en:"Email" },
     proPasswordLabel: { it:"Password", en:"Password" },
     proLoginSubmit: { it:"Accedi", en:"Sign in" },
     proCompanyLabel: { it:"Ragione sociale", en:"Company name" },
+    proNameLabel: { it:"Nome e cognome", en:"Full name" },
     proPivaLabel: { it:"P.IVA (facoltativa)", en:"VAT number (optional)" },
     proPhoneLabel: { it:"Telefono", en:"Phone" },
     proTierLabel: { it:"Scegli il piano", en:"Choose your plan" },
@@ -791,7 +800,7 @@
     proRegSubmit: { it:"Crea account", en:"Create account" },
     proErrGeneric: { it:"Si è verificato un errore. Riprova.", en:"Something went wrong. Please try again." },
     proErrFields: { it:"Compila email e password (almeno 6 caratteri).", en:"Fill in email and password (at least 6 characters)." },
-    proErrFieldsReg: { it:"Compila ragione sociale, email e password (almeno 6 caratteri).", en:"Fill in company name, email and password (at least 6 characters)." },
+    proErrFieldsReg: { it:"Compila nome, email e password (almeno 6 caratteri).", en:"Fill in name, email and password (at least 6 characters)." },
     proErrEmailExists: { it:"Esiste già un account con questa email.", en:"An account with this email already exists." },
     proErrLogin: { it:"Email o password non corretti.", en:"Incorrect email or password." },
     proProjectsLinkAria: { it:"I miei progetti", en:"My projects" },
@@ -4766,14 +4775,30 @@
   // su Vercel — vedi i commenti in cima ai file api/auth-*.js per come attivarlo.
   // Finché non è configurato, il modulo di login funziona lato interfaccia ma
   // le chiamate a /api/auth-* falliranno con un messaggio d'errore generico.
-  var proAccount = null; // { id, email, companyName, piva, phone, tier }
+  var proAccount = null; // { id, email, accountType, companyName, piva, phone, tier }
   var proSelectedTier = 'basic';
+  var proSelectedAccountType = 'professionista';
+
+  function proApplyAccountType(){
+    var isPrivato = proSelectedAccountType === 'privato';
+    document.getElementById('paRegCompanyLabel').setAttribute('data-i18n', isPrivato ? 'proNameLabel' : 'proCompanyLabel');
+    document.getElementById('paRegCompanyLabel').textContent = ts(isPrivato ? 'proNameLabel' : 'proCompanyLabel');
+    document.getElementById('paRegCompany').placeholder = isPrivato ? (LANG==='en' ? 'Jane Smith' : 'Mario Rossi') : 'Rossi Costruzioni Srl';
+    document.getElementById('paRegPivaField').style.display = isPrivato ? 'none' : '';
+    Array.prototype.forEach.call(document.getElementById('proAccountTypeRow').children, function(b){
+      b.classList.toggle('active', b.dataset.accountType === proSelectedAccountType);
+    });
+  }
 
   function proAuthOpen(){
     // Riparte sempre dalla scheda "Accedi": se l'ultima volta l'utente era
     // arrivato su "Registrati" (es. dopo essere uscito), non deve ritrovarsela
     // ancora aperta la volta dopo.
     if(!proAccount) proSwitchTab('login');
+    // Pre-seleziona Privato/Professionista in base alla scelta già fatta
+    // dall'utente nel configuratore, così non deve sceglierlo due volte.
+    proSelectedAccountType = state.userType === 'privato' ? 'privato' : 'professionista';
+    proApplyAccountType();
     document.getElementById('proAuthModal').classList.add('open');
   }
   function proAuthClose(){ document.getElementById('proAuthModal').classList.remove('open'); }
@@ -4808,6 +4833,11 @@
     var btn = e.target.closest('.pro-auth-tier'); if(!btn) return;
     proSelectedTier = btn.dataset.tier;
     Array.prototype.forEach.call(document.getElementById('proTierRow').children, function(b){ b.classList.toggle('active', b===btn); });
+  });
+  document.getElementById('proAccountTypeRow').addEventListener('click', function(e){
+    var btn = e.target.closest('.pro-auth-tier'); if(!btn) return;
+    proSelectedAccountType = btn.dataset.accountType;
+    proApplyAccountType();
   });
 
   document.getElementById('paLoginSubmit').addEventListener('click', function(){
@@ -4844,7 +4874,7 @@
     var btn = this; btn.disabled = true;
     fetch('/api/auth-register', {
       method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ companyName: company, piva: piva, phone: phone, email: email, password: password, tier: proSelectedTier })
+      body: JSON.stringify({ accountType: proSelectedAccountType, companyName: company, piva: piva, phone: phone, email: email, password: password, tier: proSelectedTier })
     })
       .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(data){ return { ok: r.ok, status: r.status, data: data }; }); })
       .then(function(res){
