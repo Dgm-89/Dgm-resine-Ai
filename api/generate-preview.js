@@ -148,13 +148,17 @@ module.exports = async function handler(req, res) {
     ? ` Inoltre, dipingi TUTTI i davanzali delle finestre visibili nella foto nel colore ${colorRef(colorDavanzali, colorDavanzaliHex)}, ben distinto dal colore della facciata: il davanzale è la sporgenza orizzontale sotto ogni finestra. Applica questo colore SOLO ai davanzali, non al resto dell'infisso/telaio della finestra né ai vetri, che restano invariati.`
     : "";
 
-  // Marcapiano: striscia orizzontale sottile (5-10cm) di un colore diverso,
-  // esattamente sulla linea dove la facciata cambia colore (layout "due
-  // colori"). Opzione indipendente, disponibile solo quando il layout a due
-  // colori è attivo e il cliente ha scelto un colore per la striscia.
-  const isMarcapianoStyled = materialId === "imbiancatura" && context === "esterno" && addMarcapiano && facadeLayout === "due_colori" && colorB && colorC;
+  // Marcapiano: striscia orizzontale sottile (5-10cm) di un colore diverso.
+  // Opzione indipendente, disponibile sia con la facciata a "due colori"
+  // (la striscia va sulla linea dove la facciata cambia colore) sia con "un
+  // colore" (la striscia va a un'altezza naturale della facciata, es. tra
+  // piano terra e primo piano, con la facciata dello stesso colore sopra e
+  // sotto di essa).
+  const isMarcapianoStyled = materialId === "imbiancatura" && context === "esterno" && addMarcapiano && colorC;
   const marcapianoNote = isMarcapianoStyled
-    ? ` Inoltre, disegna una striscia orizzontale sottile (alta circa 5-10cm), il "marcapiano", nel colore ${colorRef(colorC, colorCHex)}, esattamente sulla linea dove la facciata passa dal colore della parte alta al colore della parte bassa: la striscia deve essere ben visibile e nettamente distinta dai colori della facciata sopra e sotto di essa, come nelle classiche palazzine italiane.`
+    ? (facadeLayout === "due_colori" && colorB
+      ? ` Inoltre, disegna una striscia orizzontale sottile (alta circa 5-10cm), il "marcapiano", nel colore ${colorRef(colorC, colorCHex)}, esattamente sulla linea dove la facciata passa dal colore della parte alta al colore della parte bassa: la striscia deve essere ben visibile e nettamente distinta dai colori della facciata sopra e sotto di essa, come nelle classiche palazzine italiane.`
+      : ` Inoltre, disegna una striscia orizzontale sottile (alta circa 5-10cm), il "marcapiano", nel colore ${colorRef(colorC, colorCHex)}, a un'altezza naturale della facciata (tipicamente all'altezza del solaio tra piano terra e primo piano, se riconoscibile nella foto): sopra e sotto la striscia la facciata resta dello stesso colore ${colorRef(colorA, colorAHex)}. La striscia deve essere ben visibile e nettamente distinta dal resto della facciata, come nelle classiche palazzine italiane.`)
     : "";
 
   // Sottotetto/sporto di gronda (in legno o intonacato/cemento) in un colore
