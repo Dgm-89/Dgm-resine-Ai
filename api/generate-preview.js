@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, effetto, finitura, facadeLayout, righeExtent, context, boiserieStyle, boiserieHeight, addDavanzali, addSottotetto, addBalconi, addSerramenti, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -130,27 +130,31 @@ module.exports = async function handler(req, res) {
     ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
     : (resinaAreaDesc || "alla superficie del pavimento/parete inquadrata");
 
-  // Layout facciata (solo Imbiancatura Esterno): il "marcapiano" è la classica
-  // soluzione a TRE fasce delle palazzine italiane — parte alta, la fascia del
-  // marcapiano vero e proprio (spesso a contrasto), e la parte bassa/basamento —
-  // mentre le righe sono più semplici, solo 2 colori alternati.
+  // Layout principale facciata (solo Imbiancatura Esterno): "due_colori" divide
+  // semplicemente la facciata in parte alta e parte bassa. Il marcapiano
+  // (striscia sottile che separa le due zone) e le righe decorative sono note
+  // aggiuntive indipendenti, definite più sotto come i davanzali/balconi/ecc.
   const FACADE_LAYOUT_DESC = {
-    marcapiano: `Dividi la facciata in tre fasce orizzontali sovrapposte, dall'alto verso il basso: (1) la parte alta della facciata nel colore ${colorRef(colorA, colorAHex)}, dalla linea di gronda/tetto fino alla fascia del marcapiano; (2) una fascia orizzontale decorativa più stretta, il "marcapiano" vero e proprio (alta circa 15-20cm), ben visibile e nettamente distinta, nel colore ${colorRef(colorC, colorCHex)}, tipicamente all'altezza del solaio tra piano terra e primo piano; (3) SUBITO SOTTO la fascia del marcapiano, la parte bassa della facciata (il piano terra) nel colore ${colorRef(colorB, colorBHex)}. ATTENZIONE: il colore ${colorRef(colorB, colorBHex)} deve riempire TUTTA l'altezza della parte bassa, dalla fascia del marcapiano fino a terra (tutto il piano terra, comprese le zone intorno a porte e finestre del piano terra) — NON deve essere una sottile striscia/zoccolatura solo rasoterra, ma l'intera porzione di facciata del piano terra. Le due linee di separazione (sotto la parte alta e sotto il marcapiano) devono essere orizzontali, nette e ben visibili, come nelle classiche palazzine italiane.`,
-    righe_orizzontali: (righeExtent === "meta")
-      ? `Dividi la facciata in due parti orizzontali sovrapposte, dall'alto verso il basso: (1) la metà superiore della facciata in un UNICO colore uniforme ${colorRef(colorA, colorAHex)}, senza righe; (2) SUBITO SOTTO, a partire da circa metà altezza della facciata fino a terra, dipingi delle bande orizzontali alternate, alternando il colore ${colorRef(colorA, colorAHex)} e il colore ${colorRef(colorB, colorBHex)} su strisce orizzontali di uguale altezza, fino al livello del terreno. La linea di separazione tra la parte alta a tinta unita e la parte bassa a righe deve essere orizzontale, netta e ben visibile, circa a metà dell'altezza totale della facciata.`
-      : `Dipingi la facciata a bande orizzontali alternate, alternando il colore ${colorRef(colorA, colorAHex)} e il colore ${colorRef(colorB, colorBHex)} su strisce orizzontali di uguale altezza lungo TUTTA l'altezza della facciata, dalla linea di gronda/tetto fino a terra.`,
-    righe_verticali: `Dipingi la facciata a bande verticali alternate, alternando il colore ${colorRef(colorA, colorAHex)} e il colore ${colorRef(colorB, colorBHex)} su strisce verticali di uguale larghezza lungo tutta la facciata.`
+    due_colori: `Dividi la facciata in due parti orizzontali sovrapposte: (1) la parte alta della facciata, dalla linea di gronda/tetto fino a circa metà altezza (o fino al piano di divisione naturale dell'edificio, es. tra primo piano e piano terra, se visibile), nel colore ${colorRef(colorA, colorAHex)}; (2) la parte bassa della facciata, da quella linea fino a terra, nel colore ${colorRef(colorB, colorBHex)}. ATTENZIONE: il colore della parte bassa deve riempire TUTTA quella porzione di facciata (comprese le zone intorno a porte e finestre del piano terra), non solo una sottile striscia rasoterra. La linea di separazione tra le due parti deve essere orizzontale, netta e ben visibile.`
   };
-  const isFacadeStyled = materialId === "imbiancatura" && context === "esterno" && facadeLayout && FACADE_LAYOUT_DESC[facadeLayout]
-    && colorB && (facadeLayout !== "marcapiano" || colorC);
+  const isFacadeStyled = materialId === "imbiancatura" && context === "esterno" && facadeLayout === "due_colori" && colorB;
 
   // Davanzali finestre in un colore diverso dalla facciata: opzione indipendente
-  // dal layout scelto (monocolore/marcapiano/righe), disponibile solo per
-  // Imbiancatura Esterno. Nota descrittiva separata, aggiunta al prompt solo
-  // quando il cliente ha attivato il toggle e scelto davvero un colore.
+  // dal layout scelto (un colore/due colori), disponibile solo per Imbiancatura
+  // Esterno. Nota descrittiva separata, aggiunta al prompt solo quando il
+  // cliente ha attivato il toggle e scelto davvero un colore.
   const isDavanzaliStyled = materialId === "imbiancatura" && context === "esterno" && addDavanzali && colorDavanzali;
   const davanzaliNote = isDavanzaliStyled
     ? ` Inoltre, dipingi TUTTI i davanzali delle finestre visibili nella foto nel colore ${colorRef(colorDavanzali, colorDavanzaliHex)}, ben distinto dal colore della facciata: il davanzale è la sporgenza orizzontale sotto ogni finestra. Applica questo colore SOLO ai davanzali, non al resto dell'infisso/telaio della finestra né ai vetri, che restano invariati.`
+    : "";
+
+  // Marcapiano: striscia orizzontale sottile (5-10cm) di un colore diverso,
+  // esattamente sulla linea dove la facciata cambia colore (layout "due
+  // colori"). Opzione indipendente, disponibile solo quando il layout a due
+  // colori è attivo e il cliente ha scelto un colore per la striscia.
+  const isMarcapianoStyled = materialId === "imbiancatura" && context === "esterno" && addMarcapiano && facadeLayout === "due_colori" && colorB && colorC;
+  const marcapianoNote = isMarcapianoStyled
+    ? ` Inoltre, disegna una striscia orizzontale sottile (alta circa 5-10cm), il "marcapiano", nel colore ${colorRef(colorC, colorCHex)}, esattamente sulla linea dove la facciata passa dal colore della parte alta al colore della parte bassa: la striscia deve essere ben visibile e nettamente distinta dai colori della facciata sopra e sotto di essa, come nelle classiche palazzine italiane.`
     : "";
 
   // Sottotetto/sporto di gronda (in legno o intonacato/cemento) in un colore
@@ -180,6 +184,19 @@ module.exports = async function handler(req, res) {
   const isSerramentiStyled = materialId === "imbiancatura" && context === "esterno" && addSerramenti && colorSerramenti;
   const serramentiNote = isSerramentiStyled
     ? ` Inoltre, dipingi TUTTI i serramenti (i telai/ante in legno di finestre e porte esterne visibili nella foto) nel colore ${colorRef(colorSerramenti, colorSerramentiHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO al telaio/anta dell'infisso in legno, non ai davanzali, non ai vetri e non al resto della facciata.`
+    : "";
+
+  // Righe decorative: bande alternate (verticali o orizzontali) applicate solo
+  // a una parte della facciata (l'altra resta a tinta unita col colore già
+  // assegnato a quella zona). Opzione indipendente dal layout principale,
+  // disponibile solo per Imbiancatura Esterno.
+  const isRigheStyled = materialId === "imbiancatura" && context === "esterno" && addRighe && colorRighe;
+  const righeNote = isRigheStyled
+    ? (righeOrientamento === "verticali"
+      ? ` Inoltre, nella ${righeZona === "alta" ? "parte alta" : "parte bassa"} della facciata, disegna delle bande verticali alternate tra il colore già presente in quella zona e il colore ${colorRef(colorRighe, colorRigheHex)}, di uguale larghezza, lungo tutta l'altezza di quella zona. Il resto della facciata (l'altra parte) resta invariato, a tinta unita nel suo colore.`
+      : (righeExtent === "tutta"
+        ? ` Inoltre, dipingi l'intera facciata a bande orizzontali alternate tra il colore già presente in ciascuna zona e il colore ${colorRef(colorRighe, colorRigheHex)}, di uguale altezza, dalla linea di gronda/tetto fino a terra.`
+        : ` Inoltre, nella parte bassa della facciata (dal terreno fino a circa metà altezza, o fino alla linea di divisione se il layout è a due colori), disegna delle bande orizzontali alternate tra il colore già presente in quella zona e il colore ${colorRef(colorRighe, colorRigheHex)}, di uguale altezza. La parte alta della facciata resta invariata, a tinta unita nel suo colore.`))
     : "";
 
   // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
@@ -236,7 +253,7 @@ module.exports = async function handler(req, res) {
   // Per il Corten il colore non è scelto dal cliente (vedi isCortenStyled sopra),
   // quindi anche se arrivasse un colorAHex residuo non lo trattiamo come vincolo
   // esatto da rispettare: il Corten segue solo la sua texture/pattern.
-  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex || colorSerramentiHex);
+  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex || colorSerramentiHex || colorRigheHex);
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
@@ -274,9 +291,11 @@ module.exports = async function handler(req, res) {
     boiserieRealismNote,
     pannelloHeightNote,
     davanzaliNote,
+    marcapianoNote,
     sottotettoNote,
-    balconiNote,
     serramentiNote,
+    balconiNote,
+    righeNote,
     boiserieStyleRefNote,
     colorFidelityNote,
     globalPreservationNote
