@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -100,9 +100,17 @@ module.exports = async function handler(req, res) {
     pannello: "boiserie a pannello semplice: 2-4 pannelli rettangolari LARGHI (proporzione orizzontale, MAI quadrati, MAI una fitta griglia di tanti riquadri piccoli tipo scacchiera) per ogni parete inquadrata, ciascuno largo almeno il doppio della sua altezza, incorniciati da una modanatura sottile e lineare (profilo semplice, NON bugnato, NON scolpito, niente cornici multilivello elaborate), superficie interna liscia, geometria essenziale e minimale, ombre leggere e nette solo lungo il bordo della cornice"
   };
   const boiserieDesc = BOISERIE_STYLE_DESC[boiserieStyle] || BOISERIE_STYLE_DESC.specchiatura;
+  // Esterni Imbiancatura: il cliente sceglie la granulometria del prodotto.
+  const GRANA_TEXTURE = {
+    fine: "tinteggiatura per esterni a grana fine: superficie opaca leggermente ruvida, con granelli minerali piccoli (circa 0,5-1 mm) fitti e distribuiti in modo irregolare su tutta la facciata, micro-rilievo tattile visibile da vicino con piccole ombre tra i granelli, aspetto di pittura al quarzo; NON liscia e NON lucida",
+    grossa: "rasatura/rivestimento a spessore per esterni a grana grossa: superficie opaca e marcatamente ruvida, granelli minerali grandi (circa 1,5-2 mm) fitti e irregolari con piccoli pori tra loro, rilievo tridimensionale ben visibile con ombre nette tra i granelli, aspetto di intonachino/rivestimento rustico reale; NON liscia"
+  };
+  const isGranaStyled = materialId === "imbiancatura" && context === "esterno" && GRANA_TEXTURE[grana];
   const baseTextureDesc = materialId === "decorazioni"
     ? boiserieDesc
-    : (MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`);
+    : isGranaStyled
+      ? GRANA_TEXTURE[grana]
+      : (MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`);
   const effettoAddon = (EFFETTO_MATERIALS.includes(materialId) && EFFETTO_TEXTURE[effetto]) ? EFFETTO_TEXTURE[effetto] : "";
   const textureDesc = baseTextureDesc + effettoAddon;
 
