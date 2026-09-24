@@ -136,7 +136,7 @@ module.exports = async function handler(req, res) {
 
   const surfaceDesc = isFloorOnly
     ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
-    : (resinaAreaDesc || "alla superficie del pavimento/parete inquadrata");
+    : (resinaAreaDesc || ((materialId === "imbiancatura" && context === "esterno") ? "a tutte le pareti esterne della facciata visibili nella foto" : "alla superficie del pavimento/parete inquadrata"));
 
   // Layout principale facciata (solo Imbiancatura Esterno): "due_colori" divide
   // semplicemente la facciata in parte alta e parte bassa. Il marcapiano
@@ -153,7 +153,7 @@ module.exports = async function handler(req, res) {
   // cliente ha attivato il toggle e scelto davvero un colore.
   const isDavanzaliStyled = materialId === "imbiancatura" && context === "esterno" && addDavanzali && colorDavanzali;
   const davanzaliNote = isDavanzaliStyled
-    ? ` Inoltre, dipingi TUTTI i davanzali delle finestre visibili nella foto nel colore ${colorRef(colorDavanzali, colorDavanzaliHex)}, ben distinto dal colore della facciata: il davanzale è la sporgenza orizzontale sotto ogni finestra. Applica questo colore SOLO ai davanzali, non al resto dell'infisso/telaio della finestra né ai vetri, che restano invariati.`
+    ? ` Inoltre, dipingi TUTTI i davanzali delle finestre visibili nella foto nel colore ${colorRef(colorDavanzali, colorDavanzaliHex)}: il davanzale è la sporgenza orizzontale sotto ogni finestra. Applica questo colore SOLO ai davanzali, non al resto dell'infisso/telaio della finestra né ai vetri, che restano invariati.`
     : "";
 
   // Marcapiano: striscia orizzontale sottile (5-10cm) di un colore diverso.
@@ -176,7 +176,7 @@ module.exports = async function handler(req, res) {
   // al manto di copertura (tegole) né al resto della facciata.
   const isSottotettoStyled = materialId === "imbiancatura" && context === "esterno" && addSottotetto && colorSottotetto;
   const sottotettoNote = isSottotettoStyled
-    ? ` Inoltre, dipingi TUTTO il sottotetto/sporto di gronda visibile nella foto (la parte sotto la falda del tetto, sia essa in legno a vista con travetti/assito, sia intonacata/cementizia) nel colore ${colorRef(colorSottotetto, colorSottotettoHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO al sottotetto/gronda, non al manto di copertura del tetto (tegole/coppi) né al resto della facciata.`
+    ? ` Inoltre, dipingi TUTTO il sottotetto/sporto di gronda visibile nella foto (la parte sotto la falda del tetto, sia essa in legno a vista con travetti/assito, sia intonacata/cementizia) nel colore ${colorRef(colorSottotetto, colorSottotettoHex)}. Applica questo colore SOLO al sottotetto/gronda, non al manto di copertura del tetto (tegole/coppi) né al resto della facciata.`
     : "";
 
   // Balconi (parapetti/ringhiere) in un colore diverso dalla facciata: opzione
@@ -185,7 +185,7 @@ module.exports = async function handler(req, res) {
   // al resto della facciata né ai pavimenti dei balconi stessi.
   const isBalconiStyled = materialId === "imbiancatura" && context === "esterno" && addBalconi && colorBalconi;
   const balconiNote = isBalconiStyled
-    ? ` Inoltre, dipingi TUTTI i parapetti/ringhiere dei balconi visibili nella foto nel colore ${colorRef(colorBalconi, colorBalconiHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO ai parapetti/ringhiere dei balconi, non al resto della facciata né al pavimento dei balconi.`
+    ? ` Inoltre, dipingi TUTTI i parapetti/ringhiere dei balconi visibili nella foto nel colore ${colorRef(colorBalconi, colorBalconiHex)}. Applica questo colore SOLO ai parapetti/ringhiere dei balconi, non al resto della facciata né al pavimento dei balconi.`
     : "";
 
   // Serramenti (finestre/porte esterne in legno) in un colore diverso dalla
@@ -195,7 +195,7 @@ module.exports = async function handler(req, res) {
   // resto della facciata.
   const isSerramentiStyled = materialId === "imbiancatura" && context === "esterno" && addSerramenti && colorSerramenti;
   const serramentiNote = isSerramentiStyled
-    ? ` Inoltre, dipingi TUTTI i serramenti (i telai/ante in legno di finestre e porte esterne visibili nella foto) nel colore ${colorRef(colorSerramenti, colorSerramentiHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO al telaio/anta dell'infisso in legno, non ai davanzali, non ai vetri e non al resto della facciata.`
+    ? ` Inoltre, dipingi OBBLIGATORIAMENTE TUTTI i serramenti visibili nella foto nel colore ${colorRef(colorSerramenti, colorSerramentiHex)}: telai delle finestre, persiane, scuri, ante a battente, tapparelle e porte/portefinestre esterne. Il loro colore originale (es. marrone/legno) NON deve restare da nessuna parte: nel risultato devono essere tutti di questo colore. Non colorare i vetri, i davanzali e il resto della facciata.`
     : "";
 
   // Righe decorative: bande alternate (verticali o orizzontali) applicate solo
@@ -203,12 +203,21 @@ module.exports = async function handler(req, res) {
   // assegnato a quella zona). Opzione indipendente dal layout principale,
   // disponibile solo per Imbiancatura Esterno.
   const isRigheStyled = materialId === "imbiancatura" && context === "esterno" && addRighe && colorRighe;
+  const twoColorFacade = facadeLayout === "due_colori" && colorB;
+  // Colore di base della zona in cui vanno le righe: le bande alternano
+  // SEMPRE questi due colori espliciti, mai "il colore già presente".
+  const righeZonaEff = righeOrientamento === "verticali" ? (righeZona === "alta" ? "alta" : "bassa") : (righeExtent === "tutta" ? "tutta" : "bassa");
+  const zoneBase = (z) => (z === "bassa" && twoColorFacade) ? [colorB, colorBHex] : [colorA, colorAHex];
+  const bandPair = (base) => `una banda nel colore ${colorRef(base[0], base[1])} e una banda nel colore ${colorRef(colorRighe, colorRigheHex)}, poi di nuovo ${colorRef(base[0], base[1])}, poi ${colorRef(colorRighe, colorRigheHex)}, e così via`;
+  const sameAsUpper = twoColorFacade && righeZonaEff === "bassa" && String(colorA).trim().toUpperCase() === String(colorRighe).trim().toUpperCase()
+    ? ` Le bande ${colorRighe} sono la STESSA IDENTICA tinta della parte alta della facciata: devono risultare esattamente dello stesso grigio/colore della parte alta, non un'altra tonalità.`
+    : "";
   const righeNote = isRigheStyled
     ? (righeOrientamento === "verticali"
-      ? ` Inoltre, nella ${righeZona === "alta" ? "parte alta" : "parte bassa"} della facciata, disegna delle bande verticali alternate tra il colore già presente in quella zona e il colore ${colorRef(colorRighe, colorRigheHex)}, di uguale larghezza, lungo tutta l'altezza di quella zona. Il resto della facciata (l'altra parte) resta invariato, a tinta unita nel suo colore.`
-      : (righeExtent === "tutta"
-        ? ` Inoltre, dipingi l'intera facciata a bande orizzontali alternate tra il colore già presente in ciascuna zona e il colore ${colorRef(colorRighe, colorRigheHex)}, di uguale altezza, dalla linea di gronda/tetto fino a terra.`
-        : ` Inoltre, nella parte bassa della facciata (dal terreno fino a circa metà altezza, o fino alla linea di divisione se il layout è a due colori), disegna delle bande orizzontali alternate tra il colore già presente in quella zona e il colore ${colorRef(colorRighe, colorRigheHex)}, di uguale altezza. La parte alta della facciata resta invariata, a tinta unita nel suo colore.`))
+      ? ` Inoltre, nella ${righeZonaEff === "alta" ? "parte alta" : "parte bassa"} della facciata, disegna bande VERTICALI di uguale larghezza alternando esattamente due colori: ${bandPair(zoneBase(righeZonaEff))}, lungo tutta l'altezza di quella zona. Non usare nessun terzo colore per le bande.${sameAsUpper} L'altra parte della facciata resta a tinta unita nel suo colore.`
+      : (righeZonaEff === "tutta"
+        ? ` Inoltre, dipingi l'intera facciata a bande ORIZZONTALI di uguale altezza, dalla linea di gronda fino a terra: nella parte alta alterna ${bandPair(zoneBase("alta"))}${twoColorFacade ? `; nella parte bassa alterna ${bandPair(zoneBase("bassa"))}` : ""}. Non usare nessun altro colore per le bande.`
+        : ` Inoltre, nella parte bassa della facciata (dal terreno fino alla linea di divisione con la parte alta), disegna bande ORIZZONTALI di uguale altezza alternando esattamente due colori: ${bandPair(zoneBase("bassa"))}. Non usare nessun terzo colore e nessuna tonalità intermedia per le bande.${sameAsUpper} La parte alta della facciata resta a tinta unita nel suo colore.`))
     : "";
 
   // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
@@ -290,13 +299,52 @@ module.exports = async function handler(req, res) {
     ? " IMPORTANTE SUL RIFERIMENTO VISIVO: ti sono state fornite DUE immagini. La PRIMA immagine è la foto reale del cliente da modificare. La SECONDA immagine è un riferimento visivo ESATTO della geometria/stile di boiserie da applicare (forma, proporzioni e disposizione dei pannelli, tipo di cornice/modanatura): replica FEDELMENTE quella geometria e quelle proporzioni sulla parete della prima foto. Usa la seconda immagine SOLO come riferimento per la FORMA/GEOMETRIA dei pannelli, non per il colore né per l'ambiente circostante: colore e materiale seguono invece le istruzioni indicate sopra nel testo, non l'immagine di riferimento."
     : "";
 
+  const isExteriorFacade = materialId === "imbiancatura" && context === "esterno";
+  const keepList = ["la prospettiva", "la luce", "le ombre", "il manto di copertura del tetto (tegole/coppi)", "il terreno, il giardino, gli oggetti e l'ambiente circostante"];
+  if (!(isSerramentiStyled)) keepList.push("gli infissi, le persiane e le porte");
+  if (!(isSottotettoStyled)) keepList.push("il sottotetto/sporto di gronda");
+  if (!(isDavanzaliStyled)) keepList.push("i davanzali");
+  if (!(isBalconiStyled)) keepList.push("i balconi/parapetti");
+  const changeList = ["il colore/texture della facciata"];
+  if (isRigheStyled) changeList.push("le bande decorative");
+  if (isMarcapianoStyled) changeList.push("il marcapiano");
+  if (isDavanzaliStyled) changeList.push("i davanzali");
+  if (isSottotettoStyled) changeList.push("il sottotetto/sporto di gronda");
+  if (isSerramentiStyled) changeList.push("TUTTI i serramenti, persiane e porte esterne");
+  if (isBalconiStyled) changeList.push("i balconi/parapetti");
+  const facadeKeepSentence = `Mantieni identici ${keepList.join(", ")}. Devi invece modificare, in modo fotorealistico come una vera lavorazione professionale: ${changeList.join(", ")}.`;
+
+  // Riepilogo finale: una riga per zona, così l'AI non deve ricostruire i
+  // colori da istruzioni sparse (ed eventuali colori uguali su più zone sono
+  // espliciti, non un errore da "correggere").
+  const zones = [];
+  if (isExteriorFacade) {
+    if (twoColorFacade) {
+      zones.push(`parte alta della facciata = ${colorRef(colorA, colorAHex)}`);
+      zones.push(`parte bassa della facciata = ${colorRef(colorB, colorBHex)}${isRigheStyled && righeZonaEff !== "alta" ? ` con bande ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} alternate ${colorB} / ${colorRighe}` : ""}`);
+      if (isRigheStyled && righeZonaEff !== "bassa") zones[0] += ` con bande ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} alternate ${colorA} / ${colorRighe}`;
+    } else {
+      zones.push(`facciata = ${colorRef(colorA, colorAHex)}${isRigheStyled ? ` con bande alternate ${colorA} / ${colorRighe}` : ""}`);
+    }
+    if (isMarcapianoStyled) zones.push(`marcapiano = ${colorRef(colorC, colorCHex)}`);
+    else if (twoColorFacade) zones.push("tra parte alta e parte bassa NESSUNA fascia o cornice di un terzo colore: solo il cambio netto di colore");
+    if (isDavanzaliStyled) zones.push(`davanzali = ${colorRef(colorDavanzali, colorDavanzaliHex)}`);
+    if (isSottotettoStyled) zones.push(`sottotetto/sporto di gronda (travetti e assito compresi) = ${colorRef(colorSottotetto, colorSottotettoHex)}`);
+    if (isSerramentiStyled) zones.push(`serramenti, persiane, scuri e porte esterne = ${colorRef(colorSerramenti, colorSerramentiHex)}`);
+    if (isBalconiStyled) zones.push(`balconi/parapetti = ${colorRef(colorBalconi, colorBalconiHex)}`);
+  }
+  const zonesSummary = zones.length > 1
+    ? ` RIEPILOGO VINCOLANTE, ZONA PER ZONA (ogni riga va rispettata; se lo stesso colore compare in più zone è voluto, non cambiarlo): ${zones.map((z, i) => `(${i + 1}) ${z}`).join("; ")}. Prima di restituire l'immagine controlla che ognuna di queste zone abbia esattamente il colore indicato.`
+    : "";
+  const exteriorPreservationNote = " REGOLA ASSOLUTA: non spostare, aggiungere o rimuovere nessun elemento della foto e non cambiare inquadratura o prospettiva. Tutto ciò che non è elencato nelle istruzioni resta identico all'originale; tutto ciò che è elencato (vedi riepilogo) va modificato OBBLIGATORIAMENTE, anche se si tratta di serramenti, persiane, porte o sottotetto.";
+
   const prompt = [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
     isFacadeStyled ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
     `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).`,
-    isFacadeStyled
-      ? `Mantieni identica la prospettiva, la luce, le ombre, gli infissi, il tetto e tutto il resto dell'edificio e dell'ambiente circostante: cambia solo il colore/texture della facciata indicata, in modo fotorealistico, come se fosse una vera tinteggiatura professionale.`
+    isExteriorFacade
+      ? facadeKeepSentence
       : isFloorOnly
         ? `Mantieni identiche la prospettiva, la luce, le ombre, i mobili, e mantieni assolutamente INVARIATE tutte le pareti/muri della stanza (colore e materiale originali): cambia solo il pavimento, in modo fotorealistico, come se fosse una vera posa professionale.`
         : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`,
@@ -309,8 +357,9 @@ module.exports = async function handler(req, res) {
     balconiNote,
     righeNote,
     boiserieStyleRefNote,
+    zonesSummary,
     colorFidelityNote,
-    globalPreservationNote
+    isExteriorFacade ? exteriorPreservationNote : globalPreservationNote
   ].join(" ");
 
   // L'immagine base64 arriva dal frontend già ridimensionata, ma per sicurezza
