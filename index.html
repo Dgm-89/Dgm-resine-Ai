@@ -588,6 +588,13 @@
     </div>
     <div class="seg-hint" id="righeExtentHint" style="display:none">Le righe orizzontali alternate coprono solo la parte bassa della facciata, verso terra.</div>
 
+    <div class="section-label" id="righeSpessoreLabel" style="display:none" data-i18n="righeSpessoreLabel">Che tipo di righe?</div>
+    <div class="seg-control" id="righeSpessoreControl" style="display:none">
+      <button data-v="sottili" class="active" data-i18n="btnRigheSottili">Righe sottili</button>
+      <button data-v="larghe" data-i18n="btnRigheLarghe">Bande larghe</button>
+    </div>
+    <div class="seg-hint" id="righeSpessoreHint" style="display:none"></div>
+
     <div class="section-label" id="boiserieStyleLabel" style="display:none" data-i18n="boiserieStyleLabel">Scegli lo stile di boiserie</div>
     <!-- TODO PLACEHOLDER: foto Orac usate temporaneamente per costruire l'app — sostituire con foto proprie o foto autorizzate da Orac prima di pubblicare pubblicamente. La foto "Liscia con cornice" (data-v="liscia") è già stata sostituita con una foto reale DGM, non è più un placeholder. -->
     <div class="boiserie-grid" id="boiserieStyleControl" style="display:none">
@@ -801,6 +808,9 @@
     righeOrientLabel: { it:"Righe verticali o orizzontali?", en:"Vertical or horizontal stripes?" },
     btnRigheVerticali: { it:"Verticali", en:"Vertical" },
     btnRigheOrizzontali: { it:"Orizzontali", en:"Horizontal" },
+    righeSpessoreLabel: { it:"Che tipo di righe?", en:"What kind of stripes?" },
+    btnRigheSottili: { it:"Righe sottili", en:"Thin lines" },
+    btnRigheLarghe: { it:"Bande larghe", en:"Wide bands" },
     righeZonaLabel: { it:"Su quale parte della facciata?", en:"On which part of the facade?" },
     btnRigheZonaBassa: { it:"Parte bassa", en:"Lower part" },
     btnRigheZonaAlta: { it:"Parte alta", en:"Upper part" },
@@ -953,7 +963,7 @@
     photoHintFloorOnly: { it:"Questa finitura si applica solo al pavimento: carica una foto che inquadri bene il pavimento dell'ambiente (non le pareti).", en:"This finish only applies to the floor: upload a photo that clearly shows the floor of the space (not the walls)." },
     photoHintGraniglia: { it:"Carica una foto dello spazio esterno (terrazzo, vialetto, giardino, bordo piscina o rampa garage) inquadrando bene la superficie calpestabile.", en:"Upload a photo of the outdoor space (terrace, driveway, garden, pool edge or garage ramp), framing the walkable surface clearly." },
     photoHintDefault: { it:"Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica", en:"Upload a real photo of your space: we'll use it in the next step to generate the photorealistic AI preview" },
-    aiStatusGenerating: { it:"Generazione in corso… può richiedere 10-20 secondi.", en:"Generating… this can take 10-20 seconds." },
+    aiStatusGenerating: { it:"Generazione in corso… può richiedere 20-50 secondi.", en:"Generating… this can take 20-50 seconds." },
     aiStatusDone: { it:"Fatto — questa è la vera immagine generata dall'AI. Trascina per confrontare prima e dopo.", en:"Done — this is the real AI-generated image. Swipe to compare before and after." },
     aiStatusErrorPrefix: { it:"Non sono riuscito a generare l'anteprima AI (", en:"I couldn't generate the AI preview (" },
     aiStatusErrorSuffix: { it:"). Il confronto prima/dopo resta comunque valido.", en:"). The before/after comparison is still valid." },
@@ -3342,7 +3352,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -3467,7 +3477,7 @@
 
   function resetSelectionForNewCategory(){
     state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncEffettoVisibility();
@@ -3726,7 +3736,17 @@
       Array.prototype.forEach.call(document.getElementById('righeExtentControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.righeExtent); });
       document.getElementById('righeExtentHint').textContent = tr(RIGHE_EXTENT_HINT[state.righeExtent]);
     }
+    ['righeSpessoreLabel','righeSpessoreHint'].forEach(function(id){ document.getElementById(id).style.display = show ? 'block' : 'none'; });
+    document.getElementById('righeSpessoreControl').style.display = show ? 'flex' : 'none';
+    if(show){
+      Array.prototype.forEach.call(document.getElementById('righeSpessoreControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.righeSpessore); });
+      document.getElementById('righeSpessoreHint').textContent = tr(RIGHE_SPESSORE_HINT[state.righeSpessore]);
+    }
   }
+  var RIGHE_SPESSORE_HINT = {
+    sottili: { it:"Linee sottili (circa 5-8 cm) distanziate, sul colore di fondo della zona.", en:"Thin, spaced lines (about 5-8 cm) over the zone's base color." },
+    larghe:  { it:"Fasce alte uguali, alternate tra il colore di fondo e il colore righe.", en:"Equal-height bands alternating between the base color and the stripe color." }
+  };
 
   // ---------- 1: CATEGORIA ----------
   var materialGrid = document.getElementById('materialGrid');
@@ -3831,7 +3851,7 @@
         state.context = opt.v;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
-        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa';
+        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
         syncNextStepEnabled();
@@ -4560,7 +4580,7 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = tr(CONTEXT_HINT[v]);
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
     document.getElementById('colorSearch').value='';
     syncFacadeLayoutVisibility();
     renderStep2UI();
@@ -4581,6 +4601,12 @@
     renderStep2UI();
   });
 
+  document.getElementById('righeSpessoreControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    state.righeSpessore = btn.dataset.v;
+    syncRigheSubVisibility();
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+  });
   document.getElementById('righeExtentControl').addEventListener('click', function(e){
     var btn = e.target.closest('button'); if(!btn) return;
     var v = btn.dataset.v; state.righeExtent = v;
@@ -4626,6 +4652,7 @@
     // per non appesantire ogni altra richiesta con dati inutilizzati. Inviamo l'intera
     // data URI (es. "data:image/jpeg;base64,XXXX"): il backend si occupa di togliere
     // il prefisso "data:image/...;base64," prima di passarla a Gemini.
+    var colorCardImage = (state.material.id === 'imbiancatura' && state.context === 'esterno') ? buildColorCardDataUrl() : null;
     var boiserieStyleRefImage = null;
     if(state.material.id === 'decorazioni' && state.boiserieStyle){
       var refImgEl = document.querySelector('.boiserie-grid button[data-v="' + state.boiserieStyle + '"] img');
@@ -4645,6 +4672,8 @@
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
         boiserieStyleRefImage: boiserieStyleRefImage,
+        colorCardImage: colorCardImage,
+        righeSpessore: needsRigheColor() ? state.righeSpessore : null,
         resinaArea: (state.category && state.category.id === 'monolith') ? state.resinaArea : null,
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
         addDavanzali: needsDavanzaliColor(),
@@ -4819,13 +4848,47 @@
   };
   // Descrizione leggibile della scelta righe (orientamento + zona/estensione),
   // usata sia nel riepilogo che nel messaggio di richiesta preventivo.
+  // Cartella colori inviata all'AI insieme alla foto: un riquadro pieno per
+  // ogni zona, con etichetta zona + codice. Vedere il colore vero funziona
+  // molto meglio che leggere solo il codice esadecimale nel testo.
+  function colorCardZones(){
+    var z = [];
+    function add(label, c){ if(c) z.push({ label:label, c:c }); }
+    if(needsSecondColor()){ add('PARTE ALTA FACCIATA', state.colorA); add('PARTE BASSA FACCIATA', state.colorB); }
+    else add('FACCIATA', state.colorA);
+    if(needsMarcapianoColor()) add('MARCAPIANO', state.colorC);
+    if(needsRigheColor()) add('RIGHE', state.colorRighe);
+    if(needsDavanzaliColor()) add('DAVANZALI', state.colorDavanzali);
+    if(needsSottotettoColor()) add('SOTTOTETTO', state.colorSottotetto);
+    if(needsSerramentiColor()) add('SERRAMENTI E PERSIANE', state.colorSerramenti);
+    if(needsBalconiColor()) add('BALCONI', state.colorBalconi);
+    return z;
+  }
+  function buildColorCardDataUrl(){
+    var zones = colorCardZones(); if(!zones.length) return null;
+    var W = 900, rowH = 130, pad = 20;
+    var cv = document.createElement('canvas'); cv.width = W; cv.height = pad + zones.length * rowH;
+    var x = cv.getContext('2d');
+    x.fillStyle = '#FFFFFF'; x.fillRect(0, 0, cv.width, cv.height);
+    zones.forEach(function(zn, i){
+      var y = pad + i * rowH;
+      x.fillStyle = zn.c.hex || '#BDB6AA'; x.fillRect(pad, y, 300, rowH - pad);
+      x.strokeStyle = '#000000'; x.lineWidth = 2; x.strokeRect(pad, y, 300, rowH - pad);
+      x.fillStyle = '#000000'; x.font = 'bold 34px Arial, sans-serif';
+      x.fillText(zn.label, 350, y + 45);
+      x.font = '30px Arial, sans-serif';
+      x.fillText(zn.c.code + (zn.c.hexApprox ? ' (indicativo)' : (zn.c.hex ? '  ' + zn.c.hex : '')), 350, y + 90);
+    });
+    return cv.toDataURL('image/png');
+  }
   function righeDescriptionText(langOverride){
     var L = langOverride || LANG;
     function lab(it,en){ return L==='en' ? en : it; }
+    var spess = state.righeSpessore === 'larghe' ? lab('bande larghe, ','wide bands, ') : lab('righe sottili, ','thin lines, ');
     if(state.righeOrientamento === 'verticali'){
-      return lab('Verticali, ','Vertical, ') + (state.righeZona === 'alta' ? lab('parte alta','upper part') : lab('parte bassa','lower part'));
+      return spess + lab('verticali, ','vertical, ') + (state.righeZona === 'alta' ? lab('parte alta','upper part') : lab('parte bassa','lower part'));
     }
-    return lab('Orizzontali, ','Horizontal, ') + (state.righeExtent === 'tutta' ? lab('anche parte sopra','upper part too') : lab('solo parte bassa','lower part only'));
+    return spess + lab('orizzontali, ','horizontal, ') + (state.righeExtent === 'tutta' ? lab('anche parte sopra','upper part too') : lab('solo parte bassa','lower part only'));
   }
   var BOISERIE_STYLE_NAME = {
     arco: { it:'Boiserie con arco', en:'Boiserie with arch' },
