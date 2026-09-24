@@ -367,6 +367,13 @@
     </div>
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
 
+    <div class="section-label" id="righeExtentLabel" style="display:none" data-i18n="righeExtentLabel">Le righe coprono tutta la facciata o solo metà?</div>
+    <div class="seg-control" id="righeExtentControl" style="display:none">
+      <button data-v="tutta" class="active" data-i18n="btnRigheTutta">Tutta la facciata</button>
+      <button data-v="meta" data-i18n="btnRigheMeta">Solo metà (basso)</button>
+    </div>
+    <div class="seg-hint" id="righeExtentHint" style="display:none">Le righe alternate coprono l'intera altezza della facciata.</div>
+
     <button type="button" class="niche-toggle" id="davanzaliToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="55" y="30" width="70" height="60" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/><rect x="55" y="30" width="70" height="60" fill="none" stroke="#7FA3B5" stroke-width="3"/><line x1="90" y1="30" x2="90" y2="90" stroke="#93897A" stroke-width="3"/><rect x="46" y="90" width="88" height="14" fill="#B5652E"/></svg>
       <span class="nt-text"><span class="nt-title" data-i18n="davanzaliTitle">Personalizza il colore dei davanzali</span><span class="nt-desc" data-i18n="davanzaliDesc">Scegli un colore diverso dalla facciata per i davanzali delle finestre</span></span>
@@ -575,6 +582,9 @@
     btnMarcapiano: { it:"Marcapiano", en:"String course" },
     btnRigheOriz: { it:"Righe orizz.", en:"Horiz. stripes" },
     btnRigheVert: { it:"Righe vert.", en:"Vert. stripes" },
+    righeExtentLabel: { it:"Le righe coprono tutta la facciata o solo metà?", en:"Do the stripes cover the whole facade or just half?" },
+    btnRigheTutta: { it:"Tutta la facciata", en:"Whole facade" },
+    btnRigheMeta: { it:"Solo metà (basso)", en:"Half only (lower)" },
     boiserieStyleLabel: { it:"Scegli lo stile di boiserie", en:"Choose the boiserie style" },
     pannelloHeightLabel: { it:"Altezza boiserie", en:"Boiserie height" },
     btnBassa: { it:"Bassa", en:"Low" },
@@ -1408,7 +1418,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, addDavanzali:false, addSottotetto:false, addBalconi:false, colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'tutta', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, addDavanzali:false, addSottotetto:false, addBalconi:false, colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni.", en:"Match Point 360 collection: resistant colors designed for facades and exteriors." }
@@ -1433,6 +1443,14 @@
   var PANNELLO_HEIGHT_HINT = {
     bassa: { it:"Boiserie fino a circa 90-100cm da terra, il resto della parete sopra resta invariato.", en:"Boiserie up to about 90-100cm from the floor, the rest of the wall above stays unchanged." },
     alta: { it:"Boiserie dal pavimento al soffitto, su tutta l'altezza della parete.", en:"Boiserie from floor to ceiling, across the full height of the wall." }
+  };
+  // Estensione delle righe orizzontali sulla facciata: "tutta" alterna le due
+  // tinte su tutta l'altezza della facciata; "meta" tiene la parte alta in un
+  // unico colore (colorA) e alterna le righe solo nella metà bassa, verso terra
+  // (soluzione più diffusa in molte facciate reali, tipo zoccolo a righe).
+  var RIGHE_EXTENT_HINT = {
+    tutta: { it:"Le righe alternate coprono l'intera altezza della facciata.", en:"The alternating stripes cover the full height of the facade." },
+    meta: { it:"La parte alta resta di un unico colore, le righe alternate partono da metà facciata in giù, verso terra.", en:"The upper part stays a single color, the alternating stripes start from mid-facade down to the ground." }
   };
   // Layout facciata: solo per Imbiancatura Esterno. "Marcapiano" = tre fasce: parte
   // alta di un colore, la fascia del marcapiano vero e proprio di un colore diverso
@@ -1497,7 +1515,7 @@
 
   function resetSelectionForNewCategory(){
     state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.addDavanzali = false; state.addSottotetto = false; state.addBalconi = false; state.effetto = 'liscio';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'tutta'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.addDavanzali = false; state.addSottotetto = false; state.addBalconi = false; state.effetto = 'liscio';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncNicheToggleVisibility();
@@ -1625,6 +1643,21 @@
     balEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addBalconi = false; state.colorBalconi = null; }
     balEl.classList.toggle('active', state.addBalconi);
+    syncRigheExtentVisibility();
+  }
+
+  // L'estensione delle righe (tutta/metà facciata) ha senso solo quando il
+  // layout scelto è "righe orizzontali": per marcapiano/monocolore resta nascosta.
+  function syncRigheExtentVisibility(){
+    var show = state.material && state.material.id === 'imbiancatura' && state.context === 'esterno' && state.facadeLayout === 'righe_orizzontali';
+    document.getElementById('righeExtentLabel').style.display = show ? 'block' : 'none';
+    document.getElementById('righeExtentControl').style.display = show ? 'flex' : 'none';
+    document.getElementById('righeExtentHint').style.display = show ? 'block' : 'none';
+    if(!show){ state.righeExtent = 'tutta'; }
+    if(show){
+      Array.prototype.forEach.call(document.getElementById('righeExtentControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.righeExtent); });
+      document.getElementById('righeExtentHint').textContent = tr(RIGHE_EXTENT_HINT[state.righeExtent]);
+    }
   }
 
   // ---------- 1: CATEGORIA ----------
@@ -1725,7 +1758,7 @@
         state.context = opt.v;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
-        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
+        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='tutta';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
         syncNextStepEnabled();
@@ -2258,7 +2291,7 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = tr(CONTEXT_HINT[v]);
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='tutta';
     document.getElementById('colorSearch').value='';
     syncFacadeLayoutVisibility();
     renderStep2UI();
@@ -2270,11 +2303,20 @@
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('facadeLayoutHint').textContent = tr(FACADE_LAYOUT_HINT[v]);
     state.colorB = null; state.colorC = null;
+    syncRigheExtentVisibility();
     // riparte dal primo colore ancora mancante nell'ordine giusto per il nuovo layout
     var order = phaseOrder(); pickPhase = 'A';
     for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
     aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
     renderStep2UI();
+  });
+
+  document.getElementById('righeExtentControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    var v = btn.dataset.v; state.righeExtent = v;
+    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
+    document.getElementById('righeExtentHint').textContent = tr(RIGHE_EXTENT_HINT[v]);
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
   });
 
   document.getElementById('boiserieStyleControl').addEventListener('click', function(e){
@@ -2327,7 +2369,7 @@
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.hex : null,
         colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.hex : null,
         colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.hex : null,
-        facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
+        facadeLayout: needsSecondColor() ? state.facadeLayout : null, righeExtent: (state.facadeLayout === 'righe_orizzontali') ? state.righeExtent : null, context: state.context,
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
         boiserieStyleRefImage: boiserieStyleRefImage,
@@ -2530,7 +2572,8 @@
   function renderSummary(){
     var box=document.getElementById('summaryBox');
     var colorLine = facadeColorLine();
-    var facadeLine = needsSecondColor() ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFacciata')+tr(FACADE_LAYOUT_NAME[state.facadeLayout])+'</span></div>' : '';
+    var facadeLayoutText = tr(FACADE_LAYOUT_NAME[state.facadeLayout]) + ((state.facadeLayout === 'righe_orizzontali' && state.righeExtent === 'meta') ? tr({it:' — solo metà facciata (basso)', en:' — lower half only'}) : '');
+    var facadeLine = needsSecondColor() ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFacciata')+facadeLayoutText+'</span></div>' : '';
     var boiserieLine = (state.material.id === 'decorazioni') ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryStile')+tr(BOISERIE_STYLE_NAME[state.boiserieStyle])+'</span></div>' : '';
     var nicchiaLine = state.addNicchia ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryNicchia')+'</span></div>' : '';
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
@@ -2580,7 +2623,7 @@
       "Tipo cliente: "+(state.userType==='professionista' ? 'Professionista' : 'Privato'),
       "Lavorazione: "+state.material.name, "Colore: "+colorLine
     ];
-    if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it);
+    if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it+((state.facadeLayout==='righe_orizzontali' && state.righeExtent==='meta') ? " — solo metà facciata (basso)" : ""));
     if(state.material.id === 'decorazioni') lines.push("Stile boiserie: "+BOISERIE_STYLE_NAME[state.boiserieStyle].it);
     if(state.addNicchia) lines.push("Extra: nicchia incassata");
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+state.colorDavanzali.name+" ("+state.colorDavanzali.code+")");
