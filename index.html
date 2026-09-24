@@ -417,10 +417,16 @@
     <div class="section-label" id="effettoLabel" style="display:none" data-i18n="effettoLabel">Effetto superficie</div>
     <div class="seg-control" id="effettoControl" style="display:none">
       <button data-v="liscio" class="active" data-i18n="btnLiscio">Liscio</button>
-      <button data-v="materico" data-i18n="btnMaterico">Materico</button>
-      <button data-v="corten" data-i18n="btnCorten">Corten</button>
+      <button data-v="particolare" data-i18n="btnEffettiParticolari">Effetti particolari</button>
     </div>
     <div class="seg-hint" id="effettoHint" style="display:none">Un unico colore steso in modo uniforme, superficie liscia e continua.</div>
+    <!-- Sotto-scelta visibile solo quando è selezionato "Effetti particolari": qui vivono
+         Materico e Corten, entrambe finiture non lisce/non a tinta piatta scelta dal cliente. -->
+    <div class="seg-control" id="effettoParticolareControl" style="display:none">
+      <button data-v="materico" class="active" data-i18n="btnMaterico">Materico</button>
+      <button data-v="corten" data-i18n="btnCorten">Corten</button>
+    </div>
+    <div class="seg-hint" id="effettoParticolareHint" style="display:none">Superficie ruvida e materica con rilievo tattile, variazioni di tono naturali.</div>
     <!-- Effetti di finitura superficiale (Liscio/Materico/Corten): non miscelano colori, cambiano solo la texture della superficie. -->
 
     <div class="section-label" id="colorCatalogLabel" style="display:none" data-i18n="colorCatalogLabel">Da quale campionario scegliere il colore?</div>
@@ -429,6 +435,14 @@
       <button data-v="ncs" data-i18n="btnCatalogoNcs">Catalogo NCS</button>
     </div>
     <div class="seg-hint" id="colorCatalogHint" style="display:none">Una selezione ristretta di colori pensati per questa lavorazione.</div>
+
+    <!-- Il Corten ha un colore naturale/intrinseco (base ocra/ruggine data dalla
+         texture stessa): quando è attivo, tutta la scelta colore sparisce e
+         compare solo questo messaggio informativo. -->
+    <div class="niche-toggle" id="cortenColorNote" style="display:none; cursor:default;">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E3DCC9"/><rect x="20" y="20" width="140" height="90" fill="#A5602E"/><ellipse cx="55" cy="45" rx="18" ry="10" fill="#7A431F" opacity="0.7"/><ellipse cx="120" cy="80" rx="24" ry="13" fill="#6B3A1A" opacity="0.7"/><ellipse cx="95" cy="35" rx="12" ry="7" fill="#8B4A2E" opacity="0.6"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="cortenNoColorTitle">Il Corten ha già il suo colore</span><span class="nt-desc" data-i18n="cortenNoColorDesc">Base ocra/ruggine naturale, non serve scegliere un colore per questa finitura</span></span>
+    </div>
 
     <div class="chip-row" id="colorChips"></div>
     <div class="family-row" id="familyRow" style="display:none"></div>
@@ -600,6 +614,9 @@
     btnLiscio: { it:"Liscio", en:"Smooth" },
     btnMaterico: { it:"Materico", en:"Textured" },
     btnCorten: { it:"Corten", en:"Corten" },
+    btnEffettiParticolari: { it:"Effetti particolari", en:"Special effects" },
+    cortenNoColorTitle: { it:"Il Corten ha già il suo colore", en:"Corten already has its own color" },
+    cortenNoColorDesc: { it:"Base ocra/ruggine naturale, non serve scegliere un colore per questa finitura", en:"Natural ochre/rust base, no need to choose a color for this finish" },
     colorSearchPh: { it:"Cerca per codice (es. B6.38.18)", en:"Search by code (e.g. B6.38.18)" },
     colorCatalogLabel: { it:"Da quale campionario scegliere il colore?", en:"Which color catalog to choose from?" },
     btnCatalogoBase: { it:"Colori base", en:"Base colors" },
@@ -3367,15 +3384,39 @@
   // Microcemento e Scale — non su Pietra/Terrazzo (già hanno una texture a
   // graniglie) né su Imbiancatura/Decorazioni/HACCP.
   var EFFETTO_MATERIALS = ['monolith_spatolato', 'monolith_marmo', 'microcemento', 'scale'];
+  // Vero quando è attivo l'effetto Corten: in questo caso il colore è
+  // intrinseco alla texture (base ocra/ruggine), il cliente non ne sceglie uno.
+  function isCortenActive(){
+    return !!(state.material && EFFETTO_MATERIALS.indexOf(state.material.id) > -1 && state.effetto === 'corten');
+  }
+  // Colore fisso mostrato/usato internamente quando è attivo il Corten, così
+  // il resto del codice (chip, riepilogo, validazione step) continua a
+  // funzionare senza bisogno di una scelta reale del cliente.
+  var CORTEN_COLOR = { name:'Corten', code:'CORTEN', hex:'#A5602E' };
   function syncEffettoVisibility(){
     var show = state.material && EFFETTO_MATERIALS.indexOf(state.material.id) > -1;
+    // "Effetti particolari" raggruppa Materico e Corten sotto un secondo livello,
+    // per non buttare tre bottoni tutti insieme al cliente.
+    var group = state.effetto === 'liscio' ? 'liscio' : 'particolare';
     document.getElementById('effettoLabel').style.display = show ? 'block' : 'none';
     document.getElementById('effettoControl').style.display = show ? 'flex' : 'none';
     document.getElementById('effettoHint').style.display = show ? 'block' : 'none';
     if(show){
-      Array.prototype.forEach.call(document.getElementById('effettoControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.effetto); });
-      document.getElementById('effettoHint').textContent = tr(EFFETTO_HINT[state.effetto]);
+      Array.prototype.forEach.call(document.getElementById('effettoControl').children, function(b){ b.classList.toggle('active', b.dataset.v===group); });
+      document.getElementById('effettoHint').textContent = tr(EFFETTO_HINT[group === 'particolare' ? state.effetto : 'liscio']);
     }
+    var showSub = show && group === 'particolare';
+    document.getElementById('effettoParticolareControl').style.display = showSub ? 'flex' : 'none';
+    document.getElementById('effettoParticolareHint').style.display = showSub ? 'block' : 'none';
+    if(showSub){
+      Array.prototype.forEach.call(document.getElementById('effettoParticolareControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.effetto); });
+      document.getElementById('effettoParticolareHint').textContent = tr(EFFETTO_HINT[state.effetto]);
+    }
+    // Corten: nasconde tutta la scelta colore e assegna il colore fisso interno.
+    var corten = isCortenActive();
+    document.getElementById('cortenColorNote').style.display = corten ? 'flex' : 'none';
+    if(corten){ state.colorA = CORTEN_COLOR; }
+    else if(state.colorA === CORTEN_COLOR){ state.colorA = null; }
   }
 
   // Catalogo NCS: disponibile in alternativa ai colori base solo per le
@@ -3387,7 +3428,7 @@
     ncs: { it:"Il campionario NCS completo (oltre 1800 colori), cerca per famiglia o per codice.", en:"The full NCS catalog (1800+ colors), search by family or code." }
   };
   function syncColorCatalogVisibility(){
-    var show = state.material && NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1;
+    var show = state.material && NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1 && !isCortenActive();
     document.getElementById('colorCatalogLabel').style.display = show ? 'block' : 'none';
     document.getElementById('colorCatalogControl').style.display = show ? 'flex' : 'none';
     document.getElementById('colorCatalogHint').style.display = show ? 'block' : 'none';
@@ -3973,6 +4014,9 @@
   }
   function renderChips(){
     var row=document.getElementById('colorChips'); row.innerHTML='';
+    // Corten: il colore è fisso e già spiegato dal messaggio "cortenColorNote",
+    // niente chip da mostrare o rimuovere.
+    if(isCortenActive()) return;
     if(state.colorA) addColorChip(row, 'A', state.colorA);
     if(needsThirdColor()){
       if(state.colorC) addColorChip(row, 'C', state.colorC); else if(state.colorA) addPendingChip(row, 'pendingThird');
@@ -4025,6 +4069,19 @@
   function renderCluster(){
     var grid=document.getElementById('colorCluster'); grid.innerHTML='';
     var label=document.getElementById('clusterLabel');
+    // Corten: colore fisso e già spiegato da "cortenColorNote", nessuna
+    // griglia colori/famiglie/ricerca da mostrare.
+    if(isCortenActive()){
+      label.style.display = 'none';
+      grid.style.display = 'none';
+      document.getElementById('familyRow').style.display = 'none';
+      document.getElementById('colorSearch').style.display = 'none';
+      var emptyElCorten = document.getElementById('clusterEmpty');
+      if(emptyElCorten) emptyElCorten.style.display = 'none';
+      return;
+    }
+    label.style.display = 'block';
+    grid.style.display = '';
     var PHASE_LABEL_3 = {
       A: { it:'Colore parte alta', en:'Upper part color' },
       C: { it:'Colore marcapiano (fascia)', en:'String course color (band)' },
@@ -4143,10 +4200,21 @@
 
   document.getElementById('effettoControl').addEventListener('click', function(e){
     var btn = e.target.closest('button'); if(!btn) return;
-    var v = btn.dataset.v; state.effetto = v;
-    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
-    document.getElementById('effettoHint').textContent = tr(EFFETTO_HINT[v]);
+    var group = btn.dataset.v; // 'liscio' oppure 'particolare'
+    state.effetto = (group === 'liscio') ? 'liscio' : 'materico'; // entrando in "particolare" default a Materico
     aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
+    syncEffettoVisibility();
+    syncColorCatalogVisibility();
+    renderStep2UI();
+  });
+
+  document.getElementById('effettoParticolareControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    state.effetto = btn.dataset.v; // 'materico' oppure 'corten'
+    aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
+    syncEffettoVisibility();
+    syncColorCatalogVisibility();
+    renderStep2UI();
   });
 
   document.getElementById('contextControl').addEventListener('click', function(e){
