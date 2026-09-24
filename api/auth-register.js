@@ -1,14 +1,16 @@
 // api/auth-register.js
-// Funzione serverless (Vercel) per la registrazione di un nuovo account
-// PROFESSIONISTA (email, password, dati azienda, piano scelto). Vedi
-// api/_auth-lib.js per come configurare il database (Supabase) e le
+// Funzione serverless (Vercel) per la registrazione di un nuovo account,
+// sia PROFESSIONISTA che PRIVATO (email, password, nome/ragione sociale,
+// piano scelto — i 3 piani Basic/Medium/Pro sono gli stessi per entrambi).
+// Vedi api/_auth-lib.js per come configurare il database (Supabase) e le
 // variabili d'ambiente necessarie — senza quella configurazione questo
 // endpoint risponde con un errore chiaro invece di andare in crash.
 //
-// Il frontend chiama questo endpoint da "Area professionisti" → tab
-// "Registrati" nell'app. Se la registrazione va a buon fine, viene creata
-// una sessione (cookie) così l'utente risulta subito loggato, come se
-// avesse anche fatto login.
+// Il frontend chiama questo endpoint dal modulo di accesso → tab
+// "Registrati" nell'app, dove l'utente sceglie anche se è un Privato o un
+// Professionista. Se la registrazione va a buon fine, viene creata una
+// sessione (cookie) così l'utente risulta subito loggato, come se avesse
+// anche fatto login.
 
 const {
   getSupabaseConfig,
@@ -19,6 +21,7 @@ const {
 } = require("./_auth-lib");
 
 const VALID_TIERS = ["basic", "medium", "pro"];
+const VALID_ACCOUNT_TYPES = ["professionista", "privato"];
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -36,15 +39,21 @@ module.exports = async function handler(req, res) {
   const body = req.body || {};
   const email = String(body.email || "").trim().toLowerCase();
   const password = String(body.password || "");
+  const accountType = VALID_ACCOUNT_TYPES.includes(body.accountType) ? body.accountType : "professionista";
+  // companyName contiene la ragione sociale per i professionisti, oppure
+  // nome e cognome per i privati: stesso campo, etichetta diversa lato form.
   const companyName = String(body.companyName || "").trim();
-  const piva = String(body.piva || "").trim();
+  const piva = accountType === "privato" ? "" : String(body.piva || "").trim();
   const phone = String(body.phone || "").trim();
   const tier = VALID_TIERS.includes(body.tier) ? body.tier : "basic";
 
   const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   if (!emailOk || password.length < 6 || !companyName) {
     return res.status(400).json({
-      error: "Dati mancanti o non validi: servono email valida, password (min 6 caratteri) e ragione sociale.",
+      error:
+        accountType === "privato"
+          ? "Dati mancanti o non validi: servono nome e cognome, email valida e password (min 6 caratteri)."
+          : "Dati mancanti o non validi: servono ragione sociale, email valida e password (min 6 caratteri).",
     });
   }
 
@@ -71,6 +80,7 @@ module.exports = async function handler(req, res) {
           email: email,
           password_hash: hash,
           password_salt: salt,
+          account_type: accountType,
           company_name: companyName,
           piva: piva || null,
           phone: phone || null,
