@@ -182,14 +182,22 @@ module.exports = async function handler(req, res) {
     ? `Applica il colore ${colorRef(colorA, colorAHex)} al campo principale della superficie (la parte centrale), e il colore ${colorRef(colorB, colorBHex)} a una fascia/bordo perimetrale ben distinta che segue il contorno della superficie (lungo i muri, i bordi della piscina o i lati del vialetto), larga circa 20-30cm, con una linea di separazione netta e regolare tra campo e bordo, esattamente come nelle pose professionali reali di pavimentazioni decorative in graniglia.`
     : null;
 
+  // Il Corten ha un colore intrinseco (base ocra/ruggine dell'acciaio ossidato,
+  // già descritto in EFFETTO_TEXTURE.corten): il cliente non sceglie un colore
+  // per questo effetto, quindi il colore non entra nella descrizione — solo la
+  // texture/pattern Corten, aggiunta separatamente più sotto via effettoAddon.
+  const isCortenStyled = EFFETTO_MATERIALS.includes(materialId) && effetto === "corten";
+
   // Costruzione del prompt descrittivo per il modello di editing immagine.
-  const colorDesc = isFacadeStyled
-    ? FACADE_LAYOUT_DESC[facadeLayout]
-    : isGranigliaBordo
-      ? granigliaBordoDesc
-      : (colorB
-        ? `un effetto nuvolato che miscela il colore ${colorRef(colorA, colorAHex)} con il colore ${colorRef(colorB, colorBHex)}`
-        : `il colore uniforme ${colorRef(colorA, colorAHex)}`);
+  const colorDesc = isCortenStyled
+    ? "il colore naturale ocra/ruggine dell'effetto Corten (la texture stessa definisce già la tonalità, non è un colore scelto a parte)"
+    : isFacadeStyled
+      ? FACADE_LAYOUT_DESC[facadeLayout]
+      : isGranigliaBordo
+        ? granigliaBordoDesc
+        : (colorB
+          ? `un effetto nuvolato che miscela il colore ${colorRef(colorA, colorAHex)} con il colore ${colorRef(colorB, colorBHex)}`
+          : `il colore uniforme ${colorRef(colorA, colorAHex)}`);
 
   const sceneDesc = (materialId === "imbiancatura" && context === "esterno")
     ? "questa foto reale della facciata esterna di un edificio"
@@ -224,7 +232,10 @@ module.exports = async function handler(req, res) {
 
   // Rinforzo esplicito: quando abbiamo almeno un codice hex, ribadiamo che va
   // rispettato con precisione, non solo usato come vago riferimento.
-  const hasAnyHex = Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex);
+  // Per il Corten il colore non è scelto dal cliente (vedi isCortenStyled sopra),
+  // quindi anche se arrivasse un colorAHex residuo non lo trattiamo come vincolo
+  // esatto da rispettare: il Corten segue solo la sua texture/pattern.
+  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex);
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
