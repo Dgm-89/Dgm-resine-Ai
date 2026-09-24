@@ -245,6 +245,60 @@
   .cpm-select{ width:100%; border:none; border-radius:10px; padding:13px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; }
   .cpm-close{ position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--ink); font-size:14px; cursor:pointer; }
 
+  /* ---- Area professionisti: bottone header, badge account, modale login/registrazione ---- */
+  .header-actions{ display:flex; align-items:center; gap:8px; flex:none; }
+  .pro-account-badge{ display:flex; align-items:center; gap:6px; max-width:150px; }
+  .pro-account-badge-info{ display:flex; flex-direction:column; line-height:1.2; border:none; background:none; padding:0; margin:0; cursor:pointer; text-align:left; font-family:inherit; }
+  .pro-account-badge-name{ font-size:10.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100px; }
+  .pro-account-badge-tier{ font-size:9.5px; color:var(--ink-soft); text-transform:capitalize; }
+  .pro-account-badge-logout{ border:none; background:none; color:var(--ink-soft); font-size:10px; text-decoration:underline; cursor:pointer; font-family:inherit; padding:0; }
+  .pro-auth-modal{ position:fixed; inset:0; z-index:998; background:rgba(10,10,12,0.6); display:none; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+  .pro-auth-modal.open{ display:flex; }
+  .pro-auth-card{ position:relative; background:var(--surface); border-radius:16px; padding:26px 24px 22px; width:100%; max-width:380px; box-shadow:0 20px 50px rgba(0,0,0,0.35); max-height:90vh; overflow-y:auto; }
+  .pro-auth-close{ position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--ink); font-size:14px; cursor:pointer; flex:none; }
+  .pro-auth-title{ font-size:18px; font-weight:800; color:var(--ink); margin-bottom:4px; padding-right:26px; }
+  .pro-auth-sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:18px; line-height:1.4; }
+  .pro-auth-tabs{ display:flex; gap:8px; margin-bottom:18px; }
+  .pro-auth-tab{ flex:1; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; padding:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .pro-auth-tab.active{ border-color:var(--accent); background:var(--accent-soft); }
+  .pro-auth-section{ display:none; }
+  .pro-auth-section.active{ display:block; }
+  .pro-auth-tier-label{ font-size:12px; font-weight:600; color:var(--ink-soft); margin-bottom:8px; }
+  .pro-auth-tier-row{ display:flex; gap:8px; margin-bottom:18px; }
+  .pro-auth-tier{ flex:1; border:1.5px solid var(--line); background:var(--surface); border-radius:8px; padding:10px 6px; text-align:center; cursor:pointer; font-family:inherit; }
+  .pro-auth-tier.active{ border-color:var(--accent); background:var(--accent-soft); }
+  .pro-auth-tier .t-name{ font-size:13px; font-weight:800; color:var(--ink); }
+  .pro-auth-tier .t-desc{ font-size:9.5px; color:var(--ink-soft); margin-top:2px; }
+  .pro-auth-error{ font-size:12px; color:#C0392B; margin-top:-6px; margin-bottom:14px; min-height:14px; }
+  .pro-auth-submit{ width:100%; border:none; border-radius:10px; padding:13px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; margin-top:2px; }
+  .pro-auth-submit:disabled{ opacity:0.5; cursor:wait; }
+  /* ---- Cartella progetti professionista ---- */
+  .pro-projects-modal{ position:fixed; inset:0; z-index:998; background:rgba(10,10,12,0.6); display:none; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
+  .pro-projects-modal.open{ display:flex; }
+  .pro-projects-card{ position:relative; background:var(--surface); border-radius:16px; padding:26px 24px 22px; width:100%; max-width:420px; box-shadow:0 20px 50px rgba(0,0,0,0.35); max-height:90vh; overflow-y:auto; }
+  .pro-projects-close{ position:absolute; top:12px; right:12px; width:30px; height:30px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--ink); font-size:14px; cursor:pointer; }
+  .pro-projects-title{ font-size:18px; font-weight:800; color:var(--ink); margin-bottom:4px; padding-right:26px; }
+  .pro-projects-sub{ font-size:12.5px; color:var(--ink-soft); margin-bottom:16px; line-height:1.4; }
+  .pro-projects-view{ display:none; }
+  .pro-projects-view.active{ display:block; }
+  .pp-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:6px; }
+  .pp-card{ display:flex; align-items:center; gap:12px; border:1.5px solid var(--line); border-radius:10px; padding:10px; cursor:pointer; background:var(--surface); text-align:left; width:100%; font-family:inherit; }
+  .pp-card-photos{ display:flex; flex:none; }
+  .pp-card-photos img{ width:36px; height:36px; object-fit:cover; border-radius:6px; border:1.5px solid var(--bg); }
+  .pp-card-photos img:first-child{ margin-right:-14px; z-index:1; }
+  .pp-card-info{ flex:1; min-width:0; }
+  .pp-card-name{ font-size:13.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pp-card-meta{ font-size:11px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .pp-empty{ font-size:13px; color:var(--ink-soft); text-align:center; padding:24px 10px; }
+  .pp-new-btn{ width:100%; border:none; border-radius:10px; padding:13px; background:var(--accent); color:var(--accent-ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; margin-top:14px; }
+  .pp-form-photos{ display:flex; gap:10px; margin-bottom:16px; }
+  .pp-form-photos .pp-photo-box{ flex:1; text-align:center; }
+  .pp-form-photos img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; border:1px solid var(--line); }
+  .pp-form-photos .pp-photo-label{ font-size:10px; color:var(--ink-soft); margin-top:4px; font-weight:600; }
+  .pp-back-link{ border:none; background:none; color:var(--ink-soft); font-size:12px; cursor:pointer; font-family:inherit; padding:0; margin-bottom:14px; text-decoration:underline; }
+  .pp-error{ font-size:12px; color:#C0392B; margin-top:-6px; margin-bottom:14px; min-height:14px; }
+  .pp-delete-btn{ width:100%; border:1.5px solid #C0392B; background:none; color:#C0392B; border-radius:10px; padding:11px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-top:10px; }
+
   .ai-btn{ display:block; width:100%; margin-top:4px; border:none; border-radius:8px; padding:14px 16px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent-gradient); color:var(--accent-ink); }
   .ai-btn:disabled{ background:var(--accent-soft); color:var(--ink-soft); }
   .ai-btn:disabled{ opacity:0.5; cursor:wait; }
@@ -296,8 +350,99 @@
     <img class="brand-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgMCAgMDAwMEAwMEBQgFBQQEBQoHBwYIDAoMDAsKCwsNDhIQDQ4RDgsLEBYQERMUFRUVDA8XGBYUGBIUFRT/2wBDAQMEBAUEBQkFBQkUDQsNFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBT/wAARCADFAMgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDwC4k2g8//AF6ybqTbn19qknuGLZPWqF1Lu71+X04n7FUkVJ5gWPc1n3D5PWprkjkg8+1UXfPBr0YRPOnIilPHHSq7HPXmp3bBxUEnB4NdSOSTK8svPt0quXycVLMfm9KgZueK2RzSGy1Wk4qZ2PNVZCSev0ArVHPIjbmmFsdKeSQeaZIQK1RixjN+feoWbJpWYZ9KawBHFaIzYwsSfYVGxFOc49qjJDc1aM2yOTjGKa3H1NK789ajY5FWjFjX60wjinHOMnrTDzVohiA0hAzmkPWjp71Yhc8ZpuTQTmhjgUCGMoJooQHGSaKYH0BPcB++BVCeYv049aZNPxt6HFUml5r4+MD7qUh8z9qqSHHenvIOaryvgda64o45yIribyYZZCC2xS3HJ4r6u07/AIJw+ONd0fT9X07x/wCDrvTdRtY7y0uUivNssMiB0cfu+hUg18jzzbVODya+4/8AgnZ+09C9onwZ8S3Xl3cJkm8LXcpGJkJLyWJP95TuePPVSycbUB5cdLEUqDq4e11q9L6dben5XOKpUcba2Rxd1/wTY+IEXL+OvB4H/XG9/wDjdZc3/BOvxwnXx14RU+nkXv8A8br9GdSYEtniuR1NNxJJGR057V+eVeJcwh8Lj/4CezhsDTrfHJ/h/kfBEv8AwTy8ck/8jx4TI/64Xo5/791TuP8Agn541t+W8beFCPaG8/8AiK+4r3URbgjkkcdelYWo6yhU5bpxWC4qzLbmj/4Cj2qfD9Gb1cvvX+R8Tz/sM+LrfhvGfhgn0EN3/wDEVn3P7FvimAfN4x8NfhBdf/EV9aaxqobcQcf0rlLzVTn5myPauqnxHmc/tL/wFHrw4XwLXvc33/8AAPmKf9j7xErEDxl4dPPe3uh/7JVR/wBknxChAPjHw6CfWG6/+Ir6LvNVUnhu/Ssa61BBgu2R0/8A1V7dLOMynvJf+Aop8MZYt1L/AMC/4B4Hd/sl+MkjL2uveF9QbtGLm4gY/TfDt/WuE8XfBzx14Gt3udY8M3YsYxlr6wZL23UerPCW2j/eAr6tl1XIXacDPGTWnpmsXFo6zQzSRSD+KNiD+ddkc7xtF3qRjJejT++9vwOarwhgaq/c1JRfnZr7rJ/ifBMcqTqHRg6noVOQaDj619jfET4J+GPifFJdLFF4b8RtyurWUQEc7elxEuA4P99QHGc5bofkrxj4U1j4f+I7jQtetfsl/EBIrK26K4iP3ZYn/jQ4PPYgggEED6rL8zoZgmoaSW8Xv6ruv6aR+e5rk2KymS9srxe0ls/Lyfk/lcy2PemseKQyZHBppJbvXtpHzwoGT1pGxR0/Gmlu1UIUHikDBjjrQeBSE7aAFOBRTSN9FMR7DJODwagaTAz+lRyS8VAZSeePpmvmVE+xlMe8uaid8r71FIxxnoKh84jjqa3SOWUhsoJ+tY98k0U0Nzazy2l3byLNBc27lJIpFIKujDlWBAII5BFaryHn1qnN82c1vHR3OWdmrM+/f2Yf2+NL+IlnZeEfihfW+heNEUQ2+vTkRWWrkdPMbhYJyOucRuehViFP0vrJktpHSWNo3HZhivxR1LTo50IZQw969B+Gf7VHxS+DdjBpmk6//a3h+AbYtE15Dd20QAACxkkSRL/sxuo9q+KzbhWOLk62Bkoye8Xs/Rrb0tb0OzA5k8FJQqrmj+K/zP061e43EnOAM1xeragVVgSPqTXy/p//AAUYjuolj134dukmMPPpWq/IfXbHLGSP++zUd9+3Z4Puv+ZY8RJ6jzLc/wBa+M/1ZzenK0qDfo4v9T9AwvEGV296rb1T/wAj3DVNSIzk4AyBXJ32qHLAn/gQNeM337ZHhK6DAeH9fUH1eD/GsO7/AGrPDMx/d6LrajH8TQ/416+HyLMY/FQf4f5nsf6w5Rb/AHhfdL/I9jv9T2fxbSTn61iXut8YY/SvILr9pfQpj8mj6sAeu54s/wA6zX/aD0SRvm0nU1U/7UZ/rX0+HyvFRXvUn+H+Z5tfP8tb92uvx/yPbbDUTn52yDz1rb0/U0fIznjqTxXknhH4h6F4znFtpt95V6x+WyvV8mZs/wB3kq30BJ9q77TVaHyw8bIw6huuf/rVjicO4NxmrM9XBYuniI89KSlHunc9C0y480BR/wDqrI+Kfwvtviz4PfRnMcerW26bSb6TjyJyP9WW6iOTAVh2+VsZWnadcGMxbeQeOvH61upqKIuc7ox1Gec9vr9K8KKqUKqq0naS1X9fmeviKNHGUJYeurxkrP8Arut15n57Swz2dxNbXUMlrdQSNDNBKNrxSKSrKw7EEEfhT0bd9a9X/ao8PRaX8SYNctVVbbxBai5k28D7VGfLm4/2h5bn3c15EkmBX65hqyxNGFaP2l/w6+T0P5xxmFngsTUw094u3r2fzVmTEmmk+/NM38UA9zXTY4iYYI6c0mN2aYMjvinZ4yRSGANFITgEDk0UCPTC+SRUTHaeuaaTg9fxpjOK8FI+nlIC+VOTxUTHH0oL4FQyPgVqkc7YskgHQ5qu75PNIz0zcOw5rVIwbI5UDAis+4tg69K0mOaqXcsdvGXlkWNR1LHFaRfYylqtTDnsRzVOS0wele//AAx/Y8+MnxmtYb/w74HvLfRpcFNY1x1061ZD0dDLh5F941avR/Hn/BPuX4K+ET4k+K3xb8MeFrBnMNvBoun3Oq3N1LtLCKJG8ne3qeFXOWYDmq+s04SUJTXN26/ctTidm7LU+M2tPamfZR6V3s3hfQrm9Kadq2q3Nnn5Li60+GGRh6mNZnA+m4/Wri/DGzeLzX1m5SLP3xZKfz/ecVbxlOL5XLX0f+R3PLMVy8/Jp6r/ADPNfsw9KjaACvX7L4L6ZeY3eKLqMH+7pqHH1/e1u2X7M+l3boJPG1ygJ5KaShwP+/8A1qJZjh4fFP8ACX+RUMoxlT4Kd/8At6P+Z4XommTanrun2ltEZp5Z0VUAzxn5vwAyT7CvpD4a+P7mC+h8Na7N5zP+707UJ2JYv0W3lbqwPARjzn5TnII6DSfhX4Q+HVjP/YxudS1WaMpJq1+y+YEIwUjjX5YwccnLMeRnBxXk/jfTPNkkAyqg5DLwc9iD7H+VebVxFLMm6dvdWze9+6/r1Po8FhcTkkViL++3rG+luz/4G2lj6ITUBAXhduI8KB/PP5Up1YtyMqF/WuH8O+K5/Enh2w1m4KvfSxmC7AHHnxna7f8AAhtf/gdX01EtGdp4bHU8rj0r5p4dxk1LdH6jSxUa1ONSntJJr5nGftMFb7wZ4funGXtNUkhUnqBLDkj84RXz6hziva/2hNSA8I6DZsTvuNQkmAPpHEFz+cteIxnIr7PK4uOEivX83+p+OcTSUs0qNb2jf/wFfpYsD2NOz2NRKaeK9Q+YJN3TJp2ePao85pe1AB1NFAOKKAPQWYZ4qNn5oY5PvUbEZzXipHvtji471G7cVGWOAQabk4zWiRi2B6mmNgmms2KiaQKCxOAByTVmVzZ8K+Fta8e+KtK8MeGtMm1rxDqswt7Owt8bpGwSSSeFRVBZnYhVVSxIAr9Qv2cP2HfBfwBhtNc8SpZ+N/iGgEh1GePfY6c/UraROMEg4/fON5xlRGCRXN/8E7vgTB8N/hYvxK1a2I8VeMYN1mZVw1npW7MSr6GcqJWOeV8ocYOfonWdbK7gpJPfHb3r4XOs3qU5PDYd2to31b7LyX4+h34PBvFvml8Jra34zdiS8ru59STxX5T/ALe/j/UfiB+0lqOmXMznS/DNpb6dZW+4lEZ4kmnfHTc0khBPcRoOwr9BNW1syu2G55OFPIr82f2lLQTftI+PmCfevosYOT/x7xV5vD028VOpPpF2+9H01XAQpKmorr+hxOg6ThVbAxXe6LppjIZMZI7jjHv6is/wxpBl2fIcEfjXoWnacIo1YhRnHUV7WKxF20fR4PDWSZxPiHwxcaFaS6tpatJYxDfd2yZLwDvIo7x+v93/AHelfQ/GOUCCTO4c4969gtLRrby5I2KSpznb/n8q8f8Aid8O5PDaT+IvD1u39kj59QsI1/48s9ZYx/zxPcf8sz/sn5dcHjIYh+wrb9H38n59u+2+/DmWXVMEni8Mvd+0u3mvLuum+22wdcxAfmBLDJJ79q4vxJcLclmOD6AVj22vbkAWTAx6028vjPH7mvep4f2Urnzk8X7eFjoPhxfGDR9ctiTtS8imUf70bKR/5DX8q6O3umZwQCzE4wa47wtE0Ok3EuADcXIx/uxrjP5uw/A1D428dnwZYGC3kH9uTLiCMYJt1I/1reh/ujueeg546sHWxDp01dv/ACVz6nB1oYLLYV8Q7Rin87t2S830OS+M3iYa94xWyhkL2mkRfZFI6NKWLSkf8CO36IK4xDxVOFSOpyepJ6mrKV9ZTpRo04047I/IcTiZ4yvPET3k7+nZfJaE6mn5wKjHAoBz3rSxzkymnE81EMDvTwcmpKHZ4oprLRQB3LPigng+tRsd3OcGm768mx7XMIW6g9KQMOtIx3E0w5A461aRk2JI2c1b8PeGpvGvifQvDUD+Xca3qNrpaMOSDPMkWR/33VByQc9a779nQj/ho/4S5GQPFenHHqROp/nRJuEXJdNfuM5bM/YrxBcWehxDT7CJLXT7KNbS2gj4WOKNQkaj0AVQPwrzXWPECeY4Zhz2/pV3xbrTiSXew5J4WvL9X1ER3gaRjvAJHuB1r8Q1qSbZ+n4LCxpU0uxr3utKFlbcCWBIJOQeOua+EvjnqdhL+0r44tHu4I52vYtkbNtL5t4uhPBOe2a+pdX8SqW2uTtTtnG7mvz/AP2oZTqHx98XzNgl5oTx/wBe8dfZ8O4P21epCTteL/OJw53i5YCnTrQjf3rW+T/yPevDGklArOu0j1H869D07TMpypUZ6ccEDFfNvwD+Nltpl/B4e8ZXJ/s+XEdnq8x/49mPASY94z2bqnf5fu/Y9voxVQjxjIxg5HI7GvHziNfLq/sqy32fRry/VdPuv9bk+Mw2ZUPa0Hqt090/P9H19bpc/HaBcvjaDnjPT2ArPuw9vKJIxtYZzggj3HPUY4I712z6Z3K49vXisHV7AjcQMYHJIrxqWIUnY+phFWPlv4v/AAzXwq0viDw7Cy6CWzd2K8/YGJxuX/piSRj+4Tg8Fa8+sdSgmkRLi/trCJgd09yx2oO52jLMfYAk19b3iNBIxVVIIKskgDIykYKsp4KkZBB4INfLnxr+DsXhKVvEGgxltAmfFxbDLNp0jHABJ5MTE/Kx6H5W52l/1DJ8xWJisNiJe90ffyfn2fX13/JOIskll8njsHG9PeUf5fNW+z3X2fTalr3xXtrK2Sw8M27bIkEaX90gBHqyp6kknLdz0rzl2luriSeeV555GLPLIxZmPqSepoRAKnRa+uo4elhk1TWr3fV+p+eYzMMTmEk68tI7RWkV6L9Xd+YIlToKavFP6VqcQ4enanqtRg4FSKcCkxoXoacODTc5pwqShd2etFGaKBnYF8kUx2+bPakL9s0xj+Veakeo2PzTC5B96bnNNLc5qkiGwLnJNd3+zucftGfCknoPFOnnn/rsK4Fju56V3n7PRCftD/C1j0HiaxJ/7+is638Kfo/yJeuh+k/jbVFt7iUuQSzHAz0561494h15VkkBOx+T3xjPuf0rqPiHrZMs4JZmLEknoPwFeG+JNdCr5RbeO79xX5TgsL7Sx+vOfsokuseImd8Z3Ec8tgf/AF6+QvjjOb34v+JZi24vLEc+v7lK97u9ZLsY1Ykk465r50+JV5HqPxH8QTRtuQXPlbh3KKEP6qa/Rcnw/sajdun6o+F4gr+1oxj/AHv0ZzjQB0IIzX0p+zD+0qnhZ7PwV41u9ugsRFp2szHJ08npFKe8JPRv+Wf+79351jTimzWwcYIyK9XMMDQzOg8PiVdPZ9U+68/z2eh8xgsZXy+ssRhpWkvua7PyP1en0ooVDbQo5Q/eDjqCCOvHeud1uxAO4Lgk8jOc18sfsv8A7Uh8Hiz8EeOLst4cyItM1iYktppPSKQ9TAex/wCWf+7wPr/V4BCT5i/JgMHRgQwI4YEdQfX0r8Nx2VYjKcR7GtqntLpJf59109LN/u2TZzRzSlzw0kt49U/8uzPK9aszGHBX2HpXE6krQtIGRJ4ZFaKWCZd0ciNwyMD1UjgivVddtQw9s9ce1eea9bfMQoyp7n0r18HJuyZ9BUkpI+Vvip8Mx4Nuf7S0kPN4enfAViWeykP/ACyc91PO1u44PI54VDX1Rfsrxz208KXFnOhimgkGVkQ9Qf5g9QcEcgV88+PPBb+DtTBgZ7jSLhj9muG6qepjf/aHr0YcjuB+qZdjXXiqVV+8uvf/AIP5/efhvEOSLAzeJwq/dvdfyv8A+RfTtt2MNcGnFeKhR+KeDXtHxVx4p4qIGpENA0OFO603ilAINSWOHFFIKKQHVbs0vBFRswHbmkD5HNcFj0rivntzTCSKM80484oJIzkiu4+AEm34/wDwxI6jxJZY/wC/lcQ/TAre+FniGx8K/FnwTrmqXH2PTNN1i2u7mcoziONGyzbVBJx7AmoqpypzS7P8gjbmSfdH2n8SvEKJPOBJgZ4GeWNeFeINZEjyBWPU4HpUHjr9oDwbfXEr2etyXqhiVSCzmBI/4EqivH9e+NRniaLR9LKuxOLq/IYj6RjjP1J+lfOZdltaMVzQa9dPzPt8dmuGjdKon6a/kdN4u8Wx+EtNe5aTdqMoItIc5Jb++f8AZXr7kY9ceI24Z2Luxd2JZmY5JJ6k0+5nutVvJLu9nkurmQ5aWU5J9vYe3apoY8HpX2VKkqMbLd7nwOKxMsXNSaslsieMcCpSmV6UiDHtUq9OKGYFGe3DggjINfQn7OH7TTeD4rbwZ4zunk8Of6vTtUkJZtNJ6Rv3MPp3TPHy5A8HdcgnFUbi3Dg5Gc1yYrCUcfRdCurr8U+68/8AhnodWFxdbA1liMO7SX3Ndn5H6Sa/IdijIeEgNG6EEMpHBB6EEcgj8K4LVZUbeCQ2CeB2r5S+Hvx48V/DizGmRSx6zoIzt0zUSzLDnr5Tgho/XAO3JJKk13Z/ag0i8hBuvDt/ZSHJKW8yTLn6kKa+KWQ4nDztFcy7r/J6/n6n6thuKsDXpr2kvZy6ppv7mla3rZ+R2+rIrSsMYwelcrrFhaalZXNjex+bZTjEiDhgezKezA8g/wBCa5y7+Pmg3JJFhqq57bI//i6yZ/jJo03AsNSx7rH/APFV7FHA4mFnytE1s7y6onGVWLT331/A8+8QaBdeFtWksboh8DfFMowJYz0YDt6EdiCKpq2a63xZ430nxTpAt1srxLuJ/MgmkVMKeAwODnBH6gVyK9K+qpSnKCdRWZ+UY2nQpV2sNPmg9V5eT9PyHDrUinvTFpw5rQ4kSDmnA01aU9eKlloXJNFGRj3opDOiySeacoOKYWw3tX1z+xB+yB4M/ab8LeL9V8Va54j0qbRtRgs7dNDmt40dHh3kv5sLknPoRx2rzKtSNGDnN2SO9tLc+TdmRSAcGv1Ni/4JO/CeRdyeK/iGy9iLmyI/9JaVv+CTPwqPA8U/EQf9vFl/8i1539pYb+b8GPniu5+VrAniq0seQc1+lvjj/gkz4de0lXwd8RtZ06+UExw+JLKG5idscKzwiNkB/vBWx6GvgD4u/CvxT8EfHV54Q8Zad/ZusWyiZGjfzILuBidk8EnR42wcHgghlYKykDtoYmlX0pyuQ2mee3FkGYnFVvsgUVqyEMaieMGvSUjlcSisAFSCPHarATHbimlSDxVcwrDBTgM05QBzTtoz0pXAjC88U1k3ZHSpWYCoi5HQ00BWkgGD61AYAe1W2NR45rRMhoqm3HpQIAO1fQf7HvwZ8K/Gzxn4n0zxXHfyWthpC3lv9gu/s5EhuEQljtORtY8Vl/tefCfw38FfifpGheF0vU0660SK/kF/c+e/mtPOhw20YG2NeMdc15yzKi8Z9Q157X8rep0/VKn1f61b3L2+foeJeWBTgppQ4pfMGPevTOMQLSqKaHpQ+KBknSlBP4U3dS5xSGOzziimiikM3y1fo/8A8Eobjyfhv8TGz112zGP+3U1+bkh546V+g3/BL/URZfDj4ignBbXLU/8Aksa+ZzmXJgqj9PzR6lCHta0I+Z4l+338Y/iF4Z/a88eaXofj3xPomlW6aaYbHTdZuLeCPdp9szbURwoyxZjgckk9TXz+fj58WD/zVHxt/wCFFd//AByv0t+MH7C/gD47fEnWPHWuav4utdW1RYBNFpctutuvlQJCu0PAx+7GCck8k/SuMk/4JjfCeAgS+JfHkeezXVoP/baubD55l0KFOE90kn7vVLUcsrxPM1y31fU8s/4J6/tZfEy8+POifD3xJ4o1Xxf4a8Qx3KGPWrl7uazljt3mSWKRyXUfutrLu27WY4yAa9j/AOCs2iWN78HfAXikxr/aun+IG0qOUcMYLi3kkdT6gNboR6ZPqa9F+CP7Lnwu/Zmm1DxLozXcupCB0l8Q+KL+Im0gI+cIQsccQIHLY3YyN2CQfij/AIKAftQ6d+0F4p8PeB/A076n4b0Od2a+RdqajqEu2PMYPJjjX5VY43F5DgrtJww9aOYZpGrg42hFe87WXX89F36kVqDwmHarfE3ot2cD+zX+y145/ad1S5/4R2O30vw9YSrFf+ItUDC1hcjPlIFG6WXbzsXoCu4qGBP2/pH/AASl+Gul6VC/iXx14t1C6b5ftVo9npkDt/so8cp/8fNe1f2Lf/s8fs9nwr8MdBXxB4g8O6YLXTNPYogvL5mVZbmXcyqf3jPMwyMhdoxxj8xvG37JP7TPxJ8R3Wv+LfCur+IdZumLS3l/q1rI5yc7RmbCqM8KMADgACrp4+WYznKGIjRgnZXtzPz1a/rTUmdCpQ5bwcm9dL2X3H0x8Wf+CUzWOnTXfw48a3Nzeom6LRfFcMafaPZLuIKobsN0e0nqyjmvgbxF4f1Xwd4i1HQde0640fWtOmNveWN2m2SFx2I9DwQRkEEEEg5r7V/Y08G/tHfADx7puk674Y1ST4a6hJ9n1CwuNSt5orDdnF1CvnHy2RiC+0fOm4EE7SJ/+CoHgW11DTPBvxAsY0h1mS6Ph29ZfvXCMjSWzN6lNky564KjoorXC4+dPGRwVWrGopbSVvudv621LlhpPDvEKLVt07/ernhP7OX7Iviz9oiKXVoLqDwx4QglMEmuXsRlaeQfeS3hBHmlcjLFlQZxuzxX1fZ/8ExPhwLJBd+IfHF9cY+e6tpraBCf9lPIfA9txr0v4s+Lbf8AZX/Zu1aXw1ZwsvhLS7fTtMidAU85pEgWV16N88jStn7xznrX5IeJPiD4s8a68+ua94l1XVdYd/M+2XN27Ohzn5eflA7BcADgACuTCzzDO5TrUK3sqUXZaXb66/Jq+tvI6a8KGX8sKsOebV3rZK59gfGz/gnPrfhTSbzWfh1rdx4tgtgZJNB1CBYtRKDqYWT5JmAydmEY4woY4FfF63Sum8N8uM/Sv0N/4J/fH/xP8Q9C8S+G/FeqXGs3ugCC7sNUvJDJcGCRijRO55fawUqWJb5mGcBQPNfHvwN0bVv+Cgf9lz2UT+GdRRPFN3Y7f3bjyTJJGR/dkuEOR6ORXRgsyr4WvXweYNSdOLlzLqkk/LWzVvmmOtg4VqVKvhE7TfLZ9Htv2ON+B/7Efin4raJa+Ide1OPwV4eu0E1oZrcz3t5EeRIkO5QkbDOGdgSMMFZSCfb77/gnN4HWzxB4m8Xx3G3JuZYrd4s+vliMce2/8a0f2y/2jdY+E/g7TLHw3P8AZfEfiGWYLfgBmtLePbvZAeA7Fwqtj5QGIwdpH57yeOPFE2pnU5PE2syamTuN61/KZifXfuz+tYYRZvm8PrcaypQbfKkk9tNf6+SR2YqOXZXU+rTpurNW5ne2/Zf16n3l+zr+zxr/AOz58TvE1xeaja634f1DRhBa6pbDymMguI28uSEksjYDHgsuB97PFeGf8FBLz7T8aPD0meB4ZgGf+3q5/wAa9R/ZW/aA1r4l6Fqui+J7o32taOkcsWoPxJdW7Hb+89WRto3dWDDPIJPE/H7w3bfEf9rD4daLdr5ljcaZbC6TJG+FLi5kkXPbKKwz71xYOWIo51Orjrc0IO7WzSje/wA16eiPaxWGoVcjh9Rvac1ZPdNu1vk/U434LfsfeKfiro9tr2p6hB4Q8OXK77a4uoTNdXSdnigBX5D2Z2XPBXcK9A+K37GHhj4efCzxF4ltvE2u3d/pdp9ojW4toUgmbeq4IHIHzdia9D/aY+Ouq/C/4e28/h947bWNTuvsdrL5YItIlTczIpG3IGxVBGACT2FfDur/ABR8b+I7a6t9V8Za/qNtdKVnt7nU5pIpFJztZC2CMgcYxwK9TAzzXNZLFqoqdLm+G17pPXW1/K99+iPKzHD5ZlF8HKDqVeXWV7JNrTS/z9Op33wZ/Zr8UfGW1OqxTW/h/wANrI0f9q36s3nFeGEEa8yEHgklVzkbsjFe6Q/sG6BDbhZ/Fuu3M+P9fBpsSRn3ClmP/j1eR/Cj46/GaXw4PDfhTTf+EisbO2+w20yaSHbThtIQiRAqhgSWBl3Anrmsi9+Cfxyv77+0L2z1ee+J3fabjWojLn6mbIrbFPHyrzjPFwoxWy0ba8+az/TyJwVPA/V4Sp4OpXk/ifvJL05bp/1qdL8T/wBkXxB4F0u41bQtWi8V6fbKZJ4Ftzb3sSDksI8srhQOdrZ77cZx4QsgdQRyDzmvtb4Mar4+0bwrPZePEm/tSyuFNndXNxHPLLCV6M6s24qy9W5IbHOOPk/4vaVa+Hvir4o0+yQQ2iXrSwxKMLGsgEgUD0G7H4VtlOOr1qtTC4iSm46qUbWa07adVt6F53lVHC4aljsPGUIz0cJXvF699ej38n1OcHNFRq+etFfTHx5u7s4Ffcn/AATu1BbL4e+PATjOt2x/8ljXwuTt5r6G/Zd+PnhH4SeFPE2n+I7u+tbq+1GG6gFpZNOrRrDsOSCMHNfN5vRqV8HOFKLbdtF6o93LalOGKhKrJJK+r9GZX7ZnxK8XaV+0v4vtNK8Wa5plhHHYGK1stSmhiTNlATtVWAGSSeO5JqD9mf8AbD8R/CXxi8XjDWdV8SeENTKx3q3tzJdTWTDhbiHcSflz8yj7y+6qRwH7Q3jXSviZ8aPEHiXQ5Z5tKvY7RYXuYTE5MdtHG2VPT5kNeeSQArXbQwdKrgadCvD7MU9Nb2X4pnDWrzp4udWjL7Ta7Wu/wsfqd+0R8G/Dn7Tfw/tY2v7aLWIYDd+Hdfjk3W5EgDBXK53QSgL8wBKnDDOGVvy91DSNZ+Gvi+Wx1Swk03XtEvFaazn+8kkbBhyMgg4BDDIIIIJBFe6fsyftPD4VW0vhXxVLdz+EWLzWc0EfmyadMfmZVXIzE5ySo6Mdw6tnU/aV+KHwn+NOgR6jp2p6jB4006MR2s8mluiXcI/5d5WBOMZJRj05B4Py+Xl0MXltZ4OpFzpPZpN2v+Xmuj1239LG/VcfR+tU5KNXrFu1/T9H1Wm598eNPiVrfin4aX3iH4ay2l3ruo2EeqaIt/GJIrgMVkMRUkDeyb0GSMPjPevgyf8A4KO/GW1up7W5tPDdtdQu0csM+jlJI3BwyspfIIIIIPpXIfAH9qfVPg7p48ParaS634SMjSRQwuFubFmOWMJPylGOSYzgZJIKktn3TV/j38DfiRKl5rzaNdXgUfPr+hP9qA/utIsbbsem8ivMo5f/AGbOdOthvbQb0kld+j/pa7XO6danmEITpYhUppWcW7L5P/h/Oxy3gL9tj9oP4r68dF8K6J4d1e/WJ53WPTFRI0UZLPI8gVB2G4jJIA5IFef/AB2/aA+Lfj1tI8GfEjRbfQUg1aDUY4P7Ka0kZ13RhgxJ3JiRuRkHjmvWdR/a0+Gfw80aSy8H2K6gCSV0/Q9PGnWrvjgySMin8djHmvlj4hfFnX/iv41g8Q+JLncIHjS3s7cHybSBXDeXGpJ9ySTljySTXsYDDKdf2v1SNOC2bXvX/ry+bPMx7jSoezWJdSb3S1jb1/4PyR+iX7cmsrd/s5/EaIHOZ7Mflfxf4V+XyLxX19+0V+074I+Jfwu8VaDol9qM+oajLA8CT2DRIQtykjZYnj5VNfIyLxRw7h6uFwUqdWLi+ZuzVukTTPqlGti4yoSUlypXTvreR9a/8E7bsWfinx+2cE6VbDP/AG8V2HxE8dReHP26/DslxMkNvqnhyHSmmkOArSLJ5f5yBF/GvCP2Xfi14d+EmseKJ/ENxd28WoWUMMBtbYzbmWUsQcEY4rnP2lviFpHxV+JMOs6FNcS2Kabb2vmTwGFg6Fs4BJ9RzXNUwE8RmtZzi1CcOW9tNUkddLF0sNllKUJJ1I1FLlvro2/uf6nun7aXhDUPGnh/Q9f0u2ku20AzxX0MS7pBBIVYS7euEZWDY6BgegJHxoJY8ffX86+lPh3+1m1tY21h4vgumuoAETW7Eb3kA7zR5BLerqee65yTu3fxf+FUt3/aPnaI92GL+d/YR88se+fJzn3zV4GpjMspfVKlBzUb2cfN37Pr8/I9HG4XLs4q/XaGKjTcrc0ZWTTSt1a6eqvrczf2UfCV34e0/WPE9/C1smqQx2lgjghpYg+95cf3SVQKe/zenK3/AIyh1v8AbL8P+RIsiaNayac0qEENItvO8g/B5GX6qa5vx9+0411bzWnhaK4FxICp1a8G1kHrEmTg+jMeOwzgjyz4V+ILTwl8QtJ1nU5JhaQNMZpI0Mj5eJ1Bx3+ZhVwwNevKvjK8bSlGSUeuqt+lvNt6IdXMcHhY4TLcJPmjCpGU57LSV38tb32SS1ep7n+15qH27wt4WXP3b+4OPT91HXzTZWZ1C7t7VXEbTypCHbou5guf1r1T40/EjRfHWkaPbaVPczS2tzLJJ59uYxtZFAIJPPI6V5QyErwSD2I6g162U0ZYfBxpyVmr7+rPA4ir0sTmVSrSkpRajqnp8K6o+9PHXi+y+B/wx1CPw7psbafoyJBa2BJWNnMix+ZLjliSdzHqxOMjPHy3eftU/Ee6kaRNVsrRG6RQ6bAVH4spP5mu58NftFaRrmmC38V5stRMflXEr25mtbsEYLEAEqW/iUqR1IPOBRufEfwn0yV7lbXRZpDyFt7CSU/grDYPxxXzuCwkcLzRxeGdSbe9ua/36ed99dT7TMMQsdGnUy7HRo0krcvNyNfdrtpZ6aabnVfBvx54p8X+HNQ1XxLci5SS4WOxkFvHDuCq3mEBFGRkqM+oYdjXh3xsm8/4t+I5Ac7pIuR/1xSvQdN+P2j6jfagb5Z9MsIlijsolt/MdwN28tt4X+ABRwPevKPH2sWniLxvqupWDvLZ3DoY3kQoxARQcg9OQa9TL8NOljalSVLkTjslovh07evnc8jOsZQrZTRoU6/tZRnq2/eek7tpttK+1+ljHSiheBRX0Z8EjZOQSCc1FJGKmBznjPvTCQ3NcyOorFNppSvFTYyaRkq7kWKjwgg8VF5WD0q8V4phQZqkyGit5IxSG3yKtFRRtB7U7isUxBS+T7Vb247UhWi4cpWWLmpVQgU/binKMii4WImQGmeUM1YIHTFNK0XCxXaEY6VGYc1cK00p7cU7isU/JA7U7ywB0qwUzTStVcmxCI+KClSlcUECkFis0YqMw81bK0wgVSZNiuIqeExU2wYpCMdqLhawiiinAcUUhmynzCmSCiiuZbnWxEGMfWh+4ooquoiPoTSHpRRTJDb0pCMZoopiG9qAeaKKaAXGRmjoKKKAEJoJ4zRRQSNzxmjJ9aKKAQlIRk0UUxDSKaw6UUUxCNTCOKKKYgxzSEc0UUALRRRTQj//2Q==" alt="Rendra">
     <span class="brand-text"><span class="tag" data-i18n="brandTag">Pavimenti · Rivestimenti · Imbiancatura</span></span>
   </div>
-  <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
+  <div class="header-actions">
+    <button type="button" class="theme-btn" id="proAuthOpen" data-i18n="proAuthOpenBtn">Accedi</button>
+    <div class="pro-account-badge" id="proBadge" style="display:none">
+      <button type="button" class="pro-account-badge-info" id="proProjectsOpenBtn" aria-label="I miei progetti" data-i18n-aria="proProjectsLinkAria">
+        <span class="pro-account-badge-name" id="proBadgeName"></span>
+        <span class="pro-account-badge-tier" id="proBadgeTier"></span>
+      </button>
+      <button type="button" class="pro-account-badge-logout" id="proLogoutBtn" data-i18n="proLogoutBtn">Esci</button>
+    </div>
+    <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
+  </div>
 </header>
+
+<!-- Area professionisti: login/registrazione con scelta piano Basic/Medium/Pro -->
+<div class="pro-auth-modal" id="proAuthModal">
+  <div class="pro-auth-card">
+    <button type="button" class="pro-auth-close" id="proAuthClose" aria-label="Chiudi">✕</button>
+    <div class="pro-auth-title" data-i18n="proAuthTitle">Area professionisti</div>
+    <div class="pro-auth-sub" data-i18n="proAuthSub">Accedi o registrati per salvare i dati della tua azienda e scegliere il tuo piano.</div>
+    <div class="pro-auth-tabs">
+      <button type="button" class="pro-auth-tab active" id="proTabLogin" data-i18n="proTabLogin">Accedi</button>
+      <button type="button" class="pro-auth-tab" id="proTabRegister" data-i18n="proTabRegister">Registrati</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="pro-auth-section active" id="proSectionLogin">
+      <div class="field"><label for="paLoginEmail" data-i18n="proEmailLabel">Email</label><input id="paLoginEmail" type="email" autocomplete="email" placeholder="nome@azienda.it"></div>
+      <div class="field"><label for="paLoginPassword" data-i18n="proPasswordLabel">Password</label><input id="paLoginPassword" type="password" autocomplete="current-password"></div>
+      <div class="pro-auth-error" id="paLoginError"></div>
+      <button type="button" class="pro-auth-submit" id="paLoginSubmit" data-i18n="proLoginSubmit">Accedi</button>
+    </div>
+
+    <!-- REGISTRAZIONE -->
+    <div class="pro-auth-section" id="proSectionRegister">
+      <div class="field"><label for="paRegCompany" data-i18n="proCompanyLabel">Ragione sociale</label><input id="paRegCompany" type="text" autocomplete="organization" placeholder="Rossi Costruzioni Srl"></div>
+      <div class="row2">
+        <div class="field"><label for="paRegPiva" data-i18n="proPivaLabel">P.IVA (facoltativa)</label><input id="paRegPiva" type="text" autocomplete="off"></div>
+        <div class="field"><label for="paRegPhone" data-i18n="proPhoneLabel">Telefono</label><input id="paRegPhone" type="tel" autocomplete="tel"></div>
+      </div>
+      <div class="field"><label for="paRegEmail" data-i18n="proEmailLabel">Email</label><input id="paRegEmail" type="email" autocomplete="email" placeholder="nome@azienda.it"></div>
+      <div class="field"><label for="paRegPassword" data-i18n="proPasswordLabel">Password</label><input id="paRegPassword" type="password" autocomplete="new-password"></div>
+      <div class="pro-auth-tier-label" data-i18n="proTierLabel">Scegli il piano</div>
+      <div class="pro-auth-tier-row" id="proTierRow">
+        <button type="button" class="pro-auth-tier active" data-tier="basic"><span class="t-name">Basic</span><span class="t-desc" data-i18n="proTierBasicDesc">Per iniziare</span></button>
+        <button type="button" class="pro-auth-tier" data-tier="medium"><span class="t-name">Medium</span><span class="t-desc" data-i18n="proTierMediumDesc">Per chi cresce</span></button>
+        <button type="button" class="pro-auth-tier" data-tier="pro"><span class="t-name">Pro</span><span class="t-desc" data-i18n="proTierProDesc">Tutto incluso</span></button>
+      </div>
+      <div class="pro-auth-error" id="paRegError"></div>
+      <button type="button" class="pro-auth-submit" id="paRegSubmit" data-i18n="proRegSubmit">Crea account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cartella progetti: elenco progetti salvati + form crea/modifica -->
+<div class="pro-projects-modal" id="proProjectsModal">
+  <div class="pro-projects-card">
+    <button type="button" class="pro-projects-close" id="proProjectsClose" aria-label="Chiudi">✕</button>
+
+    <!-- Vista elenco -->
+    <div class="pro-projects-view active" id="ppViewList">
+      <div class="pro-projects-title" data-i18n="proProjectsTitle">I miei progetti</div>
+      <div class="pro-projects-sub" data-i18n="proProjectsSub">I progetti salvati per i tuoi clienti, con foto prima/dopo — non serve più tenerle sul telefono.</div>
+      <div class="pp-list" id="ppList"></div>
+      <div class="pp-empty" id="ppEmpty" style="display:none" data-i18n="proProjectsEmpty">Non hai ancora salvato nessun progetto.</div>
+      <button type="button" class="pp-new-btn" id="ppNewBtn" data-i18n="proProjectsNewBtn">+ Nuovo progetto</button>
+    </div>
+
+    <!-- Vista form (crea o modifica) -->
+    <div class="pro-projects-view" id="ppViewForm">
+      <button type="button" class="pp-back-link" id="ppBackBtn" data-i18n="proProjectsBack">← Torna all'elenco</button>
+      <div class="pro-projects-title" id="ppFormTitle" data-i18n="proProjectsFormTitleNew">Nuovo progetto</div>
+      <div class="pp-form-photos" id="ppFormPhotos" style="display:none">
+        <div class="pp-photo-box"><img id="ppPhotoBeforeImg" alt=""><div class="pp-photo-label" data-i18n="ppPhotoBefore">Prima</div></div>
+        <div class="pp-photo-box"><img id="ppPhotoAfterImg" alt=""><div class="pp-photo-label" data-i18n="ppPhotoAfter">Dopo</div></div>
+      </div>
+      <div class="field"><label for="ppClientName" data-i18n="ppClientNameLabel">Nome cliente</label><input id="ppClientName" type="text" placeholder="Mario Rossi"></div>
+      <div class="field"><label for="ppClientContact" data-i18n="ppClientContactLabel">Contatto (telefono/email)</label><input id="ppClientContact" type="text"></div>
+      <div class="field"><label for="ppSiteAddress" data-i18n="ppSiteAddressLabel">Indirizzo cantiere (facoltativo)</label><input id="ppSiteAddress" type="text"></div>
+      <div class="row2">
+        <div class="field"><label for="ppMaterial" data-i18n="ppMaterialLabel">Materiale</label><input id="ppMaterial" type="text"></div>
+        <div class="field"><label for="ppFinish" data-i18n="ppFinishLabel">Finitura</label><input id="ppFinish" type="text"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label for="ppColorName" data-i18n="ppColorNameLabel">Nome colore</label><input id="ppColorName" type="text"></div>
+        <div class="field"><label for="ppColorCode" data-i18n="ppColorCodeLabel">Codice colore</label><input id="ppColorCode" type="text"></div>
+      </div>
+      <div class="field"><label for="ppNotes" data-i18n="ppNotesLabel">Note</label><textarea id="ppNotes"></textarea></div>
+      <div class="pp-error" id="ppFormError"></div>
+      <button type="button" class="pro-auth-submit" id="ppSaveBtn" data-i18n="ppSaveBtn">Salva progetto</button>
+      <button type="button" class="pp-delete-btn" id="ppDeleteBtn" style="display:none" data-i18n="ppDeleteBtn">Elimina progetto</button>
+    </div>
+  </div>
+</div>
 
 <div class="progress-wrap" id="progressWrap">
   <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -450,12 +595,6 @@
     <div class="section-label" id="clusterLabel">Colore</div>
     <div class="swatch-grid" id="colorCluster"></div>
     <div class="cluster-empty" id="clusterEmpty" style="display:none">Nessun colore trovato con questo codice.</div>
-
-    <button type="button" class="niche-toggle" id="nicheToggle" style="display:none">
-      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E3DCC9"/><rect x="51" y="21" width="78" height="78" fill="none" stroke="#8C7355" stroke-width="3"/><rect x="55" y="25" width="70" height="70" fill="#4A3324"/><rect x="55" y="25" width="70" height="4" fill="#6B4A34" opacity="0.7"/><rect x="55" y="62" width="70" height="4" fill="#8C7355"/></svg>
-      <span class="nt-text"><span class="nt-title" data-i18n="nicheTitle">Aggiungi una nicchia incassata</span><span class="nt-desc" data-i18n="nicheDesc">Es. nicchia doccia per shampoo/saponi, con cornice, ripiano e illuminazione LED</span></span>
-      <span class="nt-check"></span>
-    </button>
   </section>
 
   <!-- 4: FINITURA -->
@@ -520,6 +659,7 @@
     <h1 class="title" data-i18n="panel3Title">I tuoi dati</h1>
     <div class="summary" id="summaryBox"></div>
     <button class="share-btn" id="shareConfigBtn" data-i18n="shareConfigBtn">📤 Salva o condividi questa selezione</button>
+    <button class="share-btn" id="panel3SaveProjectBtn" style="display:none" data-i18n="panel3SaveProjectBtn">📁 Salva questo progetto nella tua cartella</button>
     <canvas id="shareCardCanvas" width="800" height="1000" style="display:none"></canvas>
 
     <div class="field"><label for="fName" data-i18n="fNameLabel">Nome e cognome</label><input id="fName" type="text" placeholder="Mario Rossi" autocomplete="name"></div>
@@ -621,8 +761,52 @@
     colorCatalogLabel: { it:"Da quale campionario scegliere il colore?", en:"Which color catalog to choose from?" },
     btnCatalogoBase: { it:"Colori base", en:"Base colors" },
     btnCatalogoNcs: { it:"Catalogo NCS", en:"NCS catalog" },
-    nicheTitle: { it:"Aggiungi una nicchia incassata", en:"Add a recessed niche" },
-    nicheDesc: { it:"Es. nicchia doccia per shampoo/saponi, con cornice, ripiano e illuminazione LED", en:"E.g. a shower niche for shampoo/soap, with trim, shelf and LED lighting" },
+    proAuthOpenBtn: { it:"Accedi", en:"Sign in" },
+    proLogoutBtn: { it:"Esci", en:"Sign out" },
+    proAuthTitle: { it:"Area professionisti", en:"Professional area" },
+    proAuthSub: { it:"Accedi o registrati per salvare i dati della tua azienda e scegliere il tuo piano.", en:"Sign in or register to save your company details and choose your plan." },
+    proTabLogin: { it:"Accedi", en:"Sign in" },
+    proTabRegister: { it:"Registrati", en:"Register" },
+    proEmailLabel: { it:"Email", en:"Email" },
+    proPasswordLabel: { it:"Password", en:"Password" },
+    proLoginSubmit: { it:"Accedi", en:"Sign in" },
+    proCompanyLabel: { it:"Ragione sociale", en:"Company name" },
+    proPivaLabel: { it:"P.IVA (facoltativa)", en:"VAT number (optional)" },
+    proPhoneLabel: { it:"Telefono", en:"Phone" },
+    proTierLabel: { it:"Scegli il piano", en:"Choose your plan" },
+    proTierBasicDesc: { it:"Per iniziare", en:"To get started" },
+    proTierMediumDesc: { it:"Per chi cresce", en:"For growing businesses" },
+    proTierProDesc: { it:"Tutto incluso", en:"Everything included" },
+    proRegSubmit: { it:"Crea account", en:"Create account" },
+    proErrGeneric: { it:"Si è verificato un errore. Riprova.", en:"Something went wrong. Please try again." },
+    proErrFields: { it:"Compila email e password (almeno 6 caratteri).", en:"Fill in email and password (at least 6 characters)." },
+    proErrFieldsReg: { it:"Compila ragione sociale, email e password (almeno 6 caratteri).", en:"Fill in company name, email and password (at least 6 characters)." },
+    proErrEmailExists: { it:"Esiste già un account con questa email.", en:"An account with this email already exists." },
+    proErrLogin: { it:"Email o password non corretti.", en:"Incorrect email or password." },
+    proProjectsLinkAria: { it:"I miei progetti", en:"My projects" },
+    proProjectsTitle: { it:"I miei progetti", en:"My projects" },
+    proProjectsSub: { it:"I progetti salvati per i tuoi clienti, con foto prima/dopo — non serve più tenerle sul telefono.", en:"Your saved client projects, with before/after photos — no need to keep them on your phone." },
+    proProjectsEmpty: { it:"Non hai ancora salvato nessun progetto.", en:"You haven't saved any projects yet." },
+    proProjectsNewBtn: { it:"+ Nuovo progetto", en:"+ New project" },
+    proProjectsBack: { it:"← Torna all'elenco", en:"← Back to list" },
+    proProjectsFormTitleNew: { it:"Nuovo progetto", en:"New project" },
+    proProjectsFormTitleEdit: { it:"Modifica progetto", en:"Edit project" },
+    ppClientNameLabel: { it:"Nome cliente", en:"Client name" },
+    ppClientContactLabel: { it:"Contatto (telefono/email)", en:"Contact (phone/email)" },
+    ppSiteAddressLabel: { it:"Indirizzo cantiere (facoltativo)", en:"Site address (optional)" },
+    ppMaterialLabel: { it:"Materiale", en:"Material" },
+    ppColorNameLabel: { it:"Nome colore", en:"Color name" },
+    ppColorCodeLabel: { it:"Codice colore", en:"Color code" },
+    ppFinishLabel: { it:"Finitura", en:"Finish" },
+    ppNotesLabel: { it:"Note", en:"Notes" },
+    ppPhotoBefore: { it:"Prima", en:"Before" },
+    ppPhotoAfter: { it:"Dopo", en:"After" },
+    ppSaveBtn: { it:"Salva progetto", en:"Save project" },
+    ppDeleteBtn: { it:"Elimina progetto", en:"Delete project" },
+    ppDeleteConfirm: { it:"Eliminare questo progetto? L'operazione non si può annullare.", en:"Delete this project? This cannot be undone." },
+    ppErrClientName: { it:"Il nome del cliente è obbligatorio.", en:"Client name is required." },
+    ppErrGeneric: { it:"Si è verificato un errore. Riprova.", en:"Something went wrong. Please try again." },
+    panel3SaveProjectBtn: { it:"📁 Salva questo progetto nella tua cartella", en:"📁 Save this project to your folder" },
     davanzaliTitle: { it:"Personalizza il colore dei davanzali", en:"Customize window sill color" },
     davanzaliDesc: { it:"Scegli un colore diverso dalla facciata per i davanzali delle finestre", en:"Choose a color for the window sills different from the facade" },
     sottotettoTitle: { it:"Personalizza il colore del sottotetto", en:"Customize eave/soffit color" },
@@ -710,7 +894,6 @@
     progressStepOf: { it:" di ", en:" of " },
     summaryFacciata: { it:"Facciata: ", en:"Facade: " },
     summaryStile: { it:"Stile: ", en:"Style: " },
-    summaryNicchia: { it:"+ Nicchia incassata", en:"+ Recessed niche" },
     summaryDavanzali: { it:"Davanzali: ", en:"Window sills: " },
     summarySottotetto: { it:"Sottotetto: ", en:"Eave/soffit: " },
     summaryBalconi: { it:"Balconi: ", en:"Balconies: " },
@@ -3264,7 +3447,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'tutta', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addNicchia:false, addDavanzali:false, addSottotetto:false, addBalconi:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'tutta', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addSottotetto:false, addBalconi:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 360: colori resistenti pensati per facciate ed esterni.", en:"Match Point 360 collection: resistant colors designed for facades and exteriors." }
@@ -3361,23 +3544,11 @@
 
   function resetSelectionForNewCategory(){
     state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'tutta'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addNicchia = false; state.addDavanzali = false; state.addSottotetto = false; state.addBalconi = false; state.colorCatalog = 'base'; state.effetto = 'liscio';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'tutta'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addSottotetto = false; state.addBalconi = false; state.colorCatalog = 'base'; state.effetto = 'liscio';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
-    syncNicheToggleVisibility();
     syncEffettoVisibility();
     syncColorCatalogVisibility();
-  }
-
-  // La nicchia incassata (es. nicchia doccia) ha senso solo su materiali che si
-  // usano davvero in bagno/doccia: Microcemento e Monolith Spatolato/Marmo.
-  var NICHE_MATERIALS = ['microcemento', 'monolith_spatolato', 'monolith_marmo'];
-  function syncNicheToggleVisibility(){
-    var show = state.material && NICHE_MATERIALS.indexOf(state.material.id) > -1;
-    var el = document.getElementById('nicheToggle');
-    el.style.display = show ? 'flex' : 'none';
-    if(!show) state.addNicchia = false;
-    el.classList.toggle('active', state.addNicchia);
   }
 
   // Effetto superficie (Materico/Corten): ha senso solo su Resina Spatolata/Marmo,
@@ -3449,12 +3620,6 @@
     aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
     renderStep2UI();
   });
-  document.getElementById('nicheToggle').addEventListener('click', function(){
-    state.addNicchia = !state.addNicchia;
-    this.classList.toggle('active', state.addNicchia);
-    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
-  });
-
   document.getElementById('davanzaliToggle').addEventListener('click', function(){
     state.addDavanzali = !state.addDavanzali;
     this.classList.toggle('active', state.addDavanzali);
@@ -4306,7 +4471,6 @@
         boiserieStyleRefImage: boiserieStyleRefImage,
         resinaArea: (state.category && state.category.id === 'monolith') ? state.resinaArea : null,
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
-        addNicchia: state.addNicchia,
         addDavanzali: needsDavanzaliColor(),
         addSottotetto: needsSottotettoColor(),
         addBalconi: needsBalconiColor(),
@@ -4506,17 +4670,20 @@
     var facadeLayoutText = tr(FACADE_LAYOUT_NAME[state.facadeLayout]) + ((state.facadeLayout === 'righe_orizzontali' && state.righeExtent === 'meta') ? tr({it:' — solo metà facciata (basso)', en:' — lower half only'}) : '');
     var facadeLine = needsSecondColor() ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFacciata')+facadeLayoutText+'</span></div>' : '';
     var boiserieLine = (state.material.id === 'decorazioni') ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryStile')+tr(BOISERIE_STYLE_NAME[state.boiserieStyle])+'</span></div>' : '';
-    var nicchiaLine = state.addNicchia ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryNicchia')+'</span></div>' : '';
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
     var sottotettoLine = (needsSottotettoColor() && state.colorSottotetto) ? '<div class="line"><span class="sw" style="background:'+state.colorSottotetto.hex+'"></span><span>'+ts('summarySottotetto')+state.colorSottotetto.name+' ('+state.colorSottotetto.code+')</span></div>' : '';
     var balconiLine = (needsBalconiColor() && state.colorBalconi) ? '<div class="line"><span class="sw" style="background:'+state.colorBalconi.hex+'"></span><span>'+ts('summaryBalconi')+state.colorBalconi.name+' ('+state.colorBalconi.code+')</span></div>' : '';
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+LF(state.material,'name')+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      facadeLine + boiserieLine + nicchiaLine + davanzaliLine + sottotettoLine + balconiLine +
+      facadeLine + boiserieLine + davanzaliLine + sottotettoLine + balconiLine +
       '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
+    // Il salvataggio nella cartella progetti ha senso solo per un professionista
+    // loggato: per un privato il bottone resta nascosto.
+    var saveProjectBtn = document.getElementById('panel3SaveProjectBtn');
+    if(saveProjectBtn) saveProjectBtn.style.display = proAccount ? 'block' : 'none';
   }
 
   document.getElementById('next1').addEventListener('click', function(){
@@ -4556,7 +4723,6 @@
     ];
     if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it+((state.facadeLayout==='righe_orizzontali' && state.righeExtent==='meta') ? " — solo metà facciata (basso)" : ""));
     if(state.material.id === 'decorazioni') lines.push("Stile boiserie: "+BOISERIE_STYLE_NAME[state.boiserieStyle].it);
-    if(state.addNicchia) lines.push("Extra: nicchia incassata");
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+state.colorDavanzali.name+" ("+state.colorDavanzali.code+")");
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+state.colorSottotetto.name+" ("+state.colorSottotetto.code+")");
     if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+state.colorBalconi.name+" ("+state.colorBalconi.code+")");
@@ -4694,7 +4860,6 @@
     syncEffettoVisibility();
     syncColorCatalogVisibility();
     syncContextVisibility();
-    syncNicheToggleVisibility();
     var finHint = document.getElementById('finituraHint');
     if(finHint) finHint.textContent = tr(FINITURA_HINT[state.finitura]);
     if(state.material){ renderChips(); renderCluster(); }
@@ -4720,6 +4885,271 @@
     langToggleBtn.addEventListener('click', function(){ setLanguage(LANG==='it' ? 'en' : 'it'); });
   }
   applyStaticI18n();
+
+  // ---------- Area professionisti: login/registrazione, badge account ----------
+  // Nota: questa parte richiede il backend con database (Supabase) configurato
+  // su Vercel — vedi i commenti in cima ai file api/auth-*.js per come attivarlo.
+  // Finché non è configurato, il modulo di login funziona lato interfaccia ma
+  // le chiamate a /api/auth-* falliranno con un messaggio d'errore generico.
+  var proAccount = null; // { id, email, companyName, piva, phone, tier }
+  var proSelectedTier = 'basic';
+
+  function proAuthOpen(){
+    // Riparte sempre dalla scheda "Accedi": se l'ultima volta l'utente era
+    // arrivato su "Registrati" (es. dopo essere uscito), non deve ritrovarsela
+    // ancora aperta la volta dopo.
+    if(!proAccount) proSwitchTab('login');
+    document.getElementById('proAuthModal').classList.add('open');
+  }
+  function proAuthClose(){ document.getElementById('proAuthModal').classList.remove('open'); }
+  function proSwitchTab(tab){
+    var isLogin = tab === 'login';
+    document.getElementById('proTabLogin').classList.toggle('active', isLogin);
+    document.getElementById('proTabRegister').classList.toggle('active', !isLogin);
+    document.getElementById('proSectionLogin').classList.toggle('active', isLogin);
+    document.getElementById('proSectionRegister').classList.toggle('active', !isLogin);
+  }
+  function proUpdateHeader(){
+    var openBtn = document.getElementById('proAuthOpen');
+    var badge = document.getElementById('proBadge');
+    if(proAccount){
+      openBtn.style.display = 'none';
+      badge.style.display = 'flex';
+      document.getElementById('proBadgeName').textContent = proAccount.companyName || proAccount.email;
+      var tierLabel = proAccount.tier ? (proAccount.tier.charAt(0).toUpperCase()+proAccount.tier.slice(1)) : '';
+      document.getElementById('proBadgeTier').textContent = (LANG==='en' ? 'Plan ' : 'Piano ') + tierLabel;
+    } else {
+      openBtn.style.display = '';
+      badge.style.display = 'none';
+    }
+  }
+
+  document.getElementById('proAuthOpen').addEventListener('click', proAuthOpen);
+  document.getElementById('proAuthClose').addEventListener('click', proAuthClose);
+  document.getElementById('proAuthModal').addEventListener('click', function(e){ if(e.target.id === 'proAuthModal') proAuthClose(); });
+  document.getElementById('proTabLogin').addEventListener('click', function(){ proSwitchTab('login'); });
+  document.getElementById('proTabRegister').addEventListener('click', function(){ proSwitchTab('register'); });
+  document.getElementById('proTierRow').addEventListener('click', function(e){
+    var btn = e.target.closest('.pro-auth-tier'); if(!btn) return;
+    proSelectedTier = btn.dataset.tier;
+    Array.prototype.forEach.call(document.getElementById('proTierRow').children, function(b){ b.classList.toggle('active', b===btn); });
+  });
+
+  document.getElementById('paLoginSubmit').addEventListener('click', function(){
+    var email = document.getElementById('paLoginEmail').value.trim();
+    var password = document.getElementById('paLoginPassword').value;
+    var errEl = document.getElementById('paLoginError');
+    errEl.textContent = '';
+    if(!email || password.length < 6){ errEl.textContent = ts('proErrFields'); return; }
+    var btn = this; btn.disabled = true;
+    fetch('/api/auth-login', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email: email, password: password })
+    })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        btn.disabled = false;
+        if(!res.ok){ errEl.textContent = (res.data && res.data.error) ? res.data.error : ts('proErrLogin'); return; }
+        proAccount = res.data.user;
+        proUpdateHeader();
+        proAuthClose();
+      })
+      .catch(function(){ btn.disabled = false; errEl.textContent = ts('proErrGeneric'); });
+  });
+
+  document.getElementById('paRegSubmit').addEventListener('click', function(){
+    var company = document.getElementById('paRegCompany').value.trim();
+    var piva = document.getElementById('paRegPiva').value.trim();
+    var phone = document.getElementById('paRegPhone').value.trim();
+    var email = document.getElementById('paRegEmail').value.trim();
+    var password = document.getElementById('paRegPassword').value;
+    var errEl = document.getElementById('paRegError');
+    errEl.textContent = '';
+    if(!company || !email || password.length < 6){ errEl.textContent = ts('proErrFieldsReg'); return; }
+    var btn = this; btn.disabled = true;
+    fetch('/api/auth-register', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ companyName: company, piva: piva, phone: phone, email: email, password: password, tier: proSelectedTier })
+    })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(data){ return { ok: r.ok, status: r.status, data: data }; }); })
+      .then(function(res){
+        btn.disabled = false;
+        if(!res.ok){
+          errEl.textContent = res.status === 409 ? ts('proErrEmailExists') : ((res.data && res.data.error) ? res.data.error : ts('proErrGeneric'));
+          return;
+        }
+        proAccount = res.data.user;
+        proUpdateHeader();
+        proAuthClose();
+      })
+      .catch(function(){ btn.disabled = false; errEl.textContent = ts('proErrGeneric'); });
+  });
+
+  document.getElementById('proLogoutBtn').addEventListener('click', function(){
+    fetch('/api/auth-logout', { method:'POST' }).catch(function(){});
+    proAccount = null;
+    proUpdateHeader();
+  });
+
+  function proCheckSession(){
+    fetch('/api/auth-me')
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(data){ if(data && data.user){ proAccount = data.user; proUpdateHeader(); } })
+      .catch(function(){});
+  }
+  proCheckSession();
+
+  // ---------- Cartella progetti professionista ----------
+  var ppProjects = [];
+  var ppEditingId = null; // null = nuovo progetto, altrimenti id del progetto in modifica
+
+  function ppEscapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, function(c){
+      return { '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c];
+    });
+  }
+
+  function ppShowView(view){
+    document.getElementById('ppViewList').classList.toggle('active', view === 'list');
+    document.getElementById('ppViewForm').classList.toggle('active', view === 'form');
+  }
+
+  function ppOpen(){
+    document.getElementById('proProjectsModal').classList.add('open');
+    ppShowView('list');
+    ppLoadProjects();
+  }
+  function ppClose(){ document.getElementById('proProjectsModal').classList.remove('open'); }
+
+  function ppLoadProjects(){
+    var listEl = document.getElementById('ppList');
+    listEl.innerHTML = '<div class="pp-empty">' + (LANG==='en' ? 'Loading…' : 'Caricamento…') + '</div>';
+    fetch('/api/projects-list')
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(data){ ppProjects = (data && data.projects) || []; ppRenderList(); })
+      .catch(function(){ ppProjects = []; ppRenderList(); });
+  }
+
+  function ppRenderList(){
+    var listEl = document.getElementById('ppList');
+    var emptyEl = document.getElementById('ppEmpty');
+    listEl.innerHTML = '';
+    if(!ppProjects.length){
+      emptyEl.style.display = 'block';
+      return;
+    }
+    emptyEl.style.display = 'none';
+    ppProjects.forEach(function(p){
+      var card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'pp-card';
+      var photosHtml = '<div class="pp-card-photos">'
+        + (p.photoBeforeUrl ? '<img src="'+p.photoBeforeUrl+'" alt="">' : '')
+        + (p.photoAfterUrl ? '<img src="'+p.photoAfterUrl+'" alt="">' : '')
+        + '</div>';
+      var metaParts = [];
+      if(p.material) metaParts.push(p.material);
+      if(p.colorName) metaParts.push(p.colorName);
+      var meta = metaParts.length ? metaParts.join(' · ') : (p.createdAt ? new Date(p.createdAt).toLocaleDateString(LANG==='en' ? 'en-GB' : 'it-IT') : '');
+      card.innerHTML = photosHtml
+        + '<div class="pp-card-info"><div class="pp-card-name">'+ppEscapeHtml(p.clientName)+'</div><div class="pp-card-meta">'+ppEscapeHtml(meta)+'</div></div>';
+      card.addEventListener('click', function(){ ppOpenForm(p); });
+      listEl.appendChild(card);
+    });
+  }
+
+  // Apre il form: senza argomento = nuovo progetto (precompilato con la
+  // configurazione corrente), con un progetto = modifica di quello esistente.
+  function ppOpenForm(project){
+    ppEditingId = project ? project.id : null;
+    document.getElementById('ppFormError').textContent = '';
+    document.getElementById('ppFormTitle').textContent = project ? ts('proProjectsFormTitleEdit') : ts('proProjectsFormTitleNew');
+    document.getElementById('ppDeleteBtn').style.display = project ? 'block' : 'none';
+
+    var photosBox = document.getElementById('ppFormPhotos');
+    var beforeImg = document.getElementById('ppPhotoBeforeImg');
+    var afterImg = document.getElementById('ppPhotoAfterImg');
+    var photoBeforeSrc = project ? project.photoBeforeUrl : (state.photoBase64 ? ('data:'+(state.photoMime||'image/jpeg')+';base64,'+state.photoBase64) : null);
+    var photoAfterSrc = project ? project.photoAfterUrl : (aiResultImageBase64 ? ('data:'+(aiResultImageMime||'image/png')+';base64,'+aiResultImageBase64) : null);
+    if(photoBeforeSrc || photoAfterSrc){
+      photosBox.style.display = 'flex';
+      document.getElementById('ppPhotoBeforeImg').closest('.pp-photo-box').style.display = photoBeforeSrc ? '' : 'none';
+      document.getElementById('ppPhotoAfterImg').closest('.pp-photo-box').style.display = photoAfterSrc ? '' : 'none';
+      if(photoBeforeSrc) beforeImg.src = photoBeforeSrc;
+      if(photoAfterSrc) afterImg.src = photoAfterSrc;
+    } else {
+      photosBox.style.display = 'none';
+    }
+
+    document.getElementById('ppClientName').value = project ? (project.clientName || '') : (document.getElementById('fName') ? document.getElementById('fName').value : '');
+    document.getElementById('ppClientContact').value = project ? (project.clientContact || '') : [document.getElementById('fPhone') ? document.getElementById('fPhone').value : '', document.getElementById('fEmail') ? document.getElementById('fEmail').value : ''].filter(Boolean).join(' · ');
+    document.getElementById('ppSiteAddress').value = project ? (project.siteAddress || '') : (document.getElementById('fCity') ? document.getElementById('fCity').value : '');
+    document.getElementById('ppMaterial').value = project ? (project.material || '') : (state.material ? LF(state.material,'name') : '');
+    document.getElementById('ppFinish').value = project ? (project.finish || '') : (state.finitura || '');
+    document.getElementById('ppColorName').value = project ? (project.colorName || '') : (state.colorA ? state.colorA.name : '');
+    document.getElementById('ppColorCode').value = project ? (project.colorCode || '') : (state.colorA ? state.colorA.code : '');
+    document.getElementById('ppNotes').value = project ? (project.notes || '') : '';
+
+    ppShowView('form');
+  }
+
+  document.getElementById('proProjectsOpenBtn').addEventListener('click', ppOpen);
+  document.getElementById('panel3SaveProjectBtn').addEventListener('click', function(){ ppOpen(); ppOpenForm(null); });
+  document.getElementById('proProjectsClose').addEventListener('click', ppClose);
+  document.getElementById('proProjectsModal').addEventListener('click', function(e){ if(e.target.id === 'proProjectsModal') ppClose(); });
+  document.getElementById('ppNewBtn').addEventListener('click', function(){ ppOpenForm(null); });
+  document.getElementById('ppBackBtn').addEventListener('click', function(){ ppShowView('list'); ppLoadProjects(); });
+
+  document.getElementById('ppSaveBtn').addEventListener('click', function(){
+    var clientName = document.getElementById('ppClientName').value.trim();
+    var errEl = document.getElementById('ppFormError');
+    errEl.textContent = '';
+    if(!clientName){ errEl.textContent = ts('ppErrClientName'); return; }
+
+    var payload = {
+      clientName: clientName,
+      clientContact: document.getElementById('ppClientContact').value.trim(),
+      siteAddress: document.getElementById('ppSiteAddress').value.trim(),
+      material: document.getElementById('ppMaterial').value.trim(),
+      finish: document.getElementById('ppFinish').value.trim(),
+      colorName: document.getElementById('ppColorName').value.trim(),
+      colorCode: document.getElementById('ppColorCode').value.trim(),
+      notes: document.getElementById('ppNotes').value.trim()
+    };
+
+    var url, method;
+    if(ppEditingId){
+      payload.id = ppEditingId;
+      url = '/api/projects-update';
+    } else {
+      // Solo per un progetto nuovo alleghiamo le foto correnti (prima/dopo);
+      // in modifica le foto già salvate restano quelle, non le ricarichiamo.
+      if(state.photoBase64) payload.photoBeforeDataUrl = 'data:'+(state.photoMime||'image/jpeg')+';base64,'+state.photoBase64;
+      if(aiResultImageBase64) payload.photoAfterDataUrl = 'data:'+(aiResultImageMime||'image/png')+';base64,'+aiResultImageBase64;
+      url = '/api/projects-create';
+    }
+
+    var btn = this; btn.disabled = true;
+    fetch(url, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(data){ return { ok: r.ok, data: data }; }); })
+      .then(function(res){
+        btn.disabled = false;
+        if(!res.ok){ errEl.textContent = (res.data && res.data.error) ? res.data.error : ts('ppErrGeneric'); return; }
+        ppShowView('list');
+        ppLoadProjects();
+      })
+      .catch(function(){ btn.disabled = false; errEl.textContent = ts('ppErrGeneric'); });
+  });
+
+  document.getElementById('ppDeleteBtn').addEventListener('click', function(){
+    if(!ppEditingId) return;
+    if(!window.confirm(ts('ppDeleteConfirm'))) return;
+    var btn = this; btn.disabled = true;
+    fetch('/api/projects-delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: ppEditingId }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(){ btn.disabled = false; ppShowView('list'); ppLoadProjects(); })
+      .catch(function(){ btn.disabled = false; });
+  });
 
   initDownloads();
   setTimeout(function(){
