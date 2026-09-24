@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, effetto, finitura, facadeLayout, righeExtent, context, boiserieStyle, boiserieHeight, addNicchia, addDavanzali, addSottotetto, addBalconi, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, effetto, finitura, facadeLayout, righeExtent, context, boiserieStyle, boiserieHeight, addDavanzali, addSottotetto, addBalconi, addSerramenti, boiserieStyleRefImage, resinaArea, granigliaLayout } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -95,7 +95,6 @@ module.exports = async function handler(req, res) {
     cassettoni: "boiserie a cassettoni: pannelli quadrati profondi incassati nella parete, ciascuno con una cornice importante in forte rilievo (diversi livelli di modanatura) e un'ombra marcata e realistica sul fondo del cassettone, effetto tridimensionale scenografico, stile importante/classico",
     mezza: "mezza boiserie (wainscoting): solo la parte bassa della parete, fino a circa 100-120cm di altezza da terra, è rivestita con pannelli incorniciati; sopra c'è un cornicione/listello di passaggio orizzontale e poi la parete liscia dipinta o del colore scelto fino al soffitto",
     liscia: "boiserie liscia con cornice perimetrale: un grande pannello liscio e uniforme, bordato da un'unica cornice sottile ed elegante lungo il perimetro, nessuna ulteriore decorazione interna, stile minimale e pulito",
-    nicchia: "un SINGOLO vano rettangolare incassato nella parete (profondità reale, con ombra interna scura), bordato da una sottile cornice perimetrale in rilievo, eventualmente con una piccola mensola/ripiano visibile all'interno del vano. IMPORTANTE: applica SOLO questo vano/nicchia come elemento puntuale, NON rivestire il resto della parete con pannelli: il resto della parete deve restare invariato (stesso colore/materiale della foto originale)",
     specchio: "boiserie con inserto a specchio: pannello incorniciato con una vera lastra di specchio inserita al centro (superficie riflettente con un lieve riflesso/highlight diagonale), cornice in rilievo intorno allo specchio, stile elegante da ingresso o camera",
     doghe: "boiserie a doghe verticali in legno: listelli verticali stretti e ravvicinati (profilo squadrato tipo listone, non arrotondato), accostati l'uno all'altro dal pavimento al soffitto con una sottile fuga d'ombra tra una doga e l'altra, superficie calda e materica con venatura del legno naturale, stile contemporaneo caldo",
     pannello: "boiserie a pannello semplice: 2-4 pannelli rettangolari LARGHI (proporzione orizzontale, MAI quadrati, MAI una fitta griglia di tanti riquadri piccoli tipo scacchiera) per ogni parete inquadrata, ciascuno largo almeno il doppio della sua altezza, incorniciati da una modanatura sottile e lineare (profilo semplice, NON bugnato, NON scolpito, niente cornici multilivello elaborate), superficie interna liscia, geometria essenziale e minimale, ombre leggere e nette solo lungo il bordo della cornice"
@@ -173,6 +172,16 @@ module.exports = async function handler(req, res) {
     ? ` Inoltre, dipingi TUTTI i parapetti/ringhiere dei balconi visibili nella foto nel colore ${colorRef(colorBalconi, colorBalconiHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO ai parapetti/ringhiere dei balconi, non al resto della facciata né al pavimento dei balconi.`
     : "";
 
+  // Serramenti (finestre/porte esterne in legno) in un colore diverso dalla
+  // facciata: opzione indipendente, disponibile solo per Imbiancatura Esterno,
+  // come davanzali/sottotetto/balconi. Applica il colore SOLO ai telai/ante
+  // degli infissi (finestre e porte esterne), non ai davanzali, ai vetri né al
+  // resto della facciata.
+  const isSerramentiStyled = materialId === "imbiancatura" && context === "esterno" && addSerramenti && colorSerramenti;
+  const serramentiNote = isSerramentiStyled
+    ? ` Inoltre, dipingi TUTTI i serramenti (i telai/ante in legno di finestre e porte esterne visibili nella foto) nel colore ${colorRef(colorSerramenti, colorSerramentiHex)}, ben distinto dal colore della facciata. Applica questo colore SOLO al telaio/anta dell'infisso in legno, non ai davanzali, non ai vetri e non al resto della facciata.`
+    : "";
+
   // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
   // fascia/bordo perimetrale in un colore diverso, che segue il perimetro della
   // superficie (contro i muri/bordi) come nelle pose reali fotografate dal cliente
@@ -214,14 +223,6 @@ module.exports = async function handler(req, res) {
     ? " La boiserie deve avere volume e spessore reali, non un'immagine piatta incollata sopra la foto: segui esattamente la prospettiva e le linee di fuga della parete originale, fai cadere le ombre delle cornici/modanature/scanalature nella stessa direzione della luce già presente nella stanza, usa una texture di legno naturale con leggere variazioni di tono (mai un colore piatto e uniforme), e lascia che mobili/oggetti già presenti nella foto restino davanti alla boiserie dove la coprirebbero nella realtà. IMPORTANTE: se nella foto sono presenti porte, finestre, prese elettriche, interruttori o altri elementi già esistenti, NON coprirli né trasformarli in pannellatura: devono restare riconoscibili esattamente come nella foto originale, e la boiserie va applicata solo all'area di parete libera intorno a loro. Il risultato finale deve sembrare una vera fotografia di una posa reale, non un rendering 3D né un adesivo digitale."
     : "";
 
-  // Nicchia incassata: opzione indipendente dalla boiserie, pensata soprattutto per
-  // bagno/doccia (Microcemento, Monolith Spatolato/Marmo). Elemento puntuale, non va
-  // a coprire il resto della superficie, e include di default una striscia LED
-  // (molto richiesta oggi nelle nicchie doccia moderne).
-  const nicchiaNote = addNicchia
-    ? " Aggiungi inoltre, in un punto sensato della superficie inquadrata (tipicamente sulla parete doccia se è un bagno), UN SINGOLO vano rettangolare incassato (nicchia) con profondità reale, bordato da una sottile cornice, con un piccolo ripiano interno e una striscia LED nascosta lungo il bordo superiore o laterale della nicchia che illumina delicatamente l'interno del vano con una luce calda. Applica questo elemento SOLO come dettaglio puntuale: non rivestire né alterare il resto della parete, che deve mantenere la stessa lavorazione/colore già applicati nel resto della foto."
-    : "";
-
   // Altezza della boiserie a pannello: prova mirata solo su questo stile, gli
   // altri stili boiserie non hanno questa scelta e non ricevono questa nota.
   const pannelloHeightNote = (materialId === "decorazioni" && boiserieStyle === "pannello" && boiserieHeight)
@@ -235,7 +236,7 @@ module.exports = async function handler(req, res) {
   // Per il Corten il colore non è scelto dal cliente (vedi isCortenStyled sopra),
   // quindi anche se arrivasse un colorAHex residuo non lo trattiamo come vincolo
   // esatto da rispettare: il Corten segue solo la sua texture/pattern.
-  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex);
+  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex || colorSerramentiHex);
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
@@ -272,10 +273,10 @@ module.exports = async function handler(req, res) {
         : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`,
     boiserieRealismNote,
     pannelloHeightNote,
-    nicchiaNote,
     davanzaliNote,
     sottotettoNote,
     balconiNote,
+    serramentiNote,
     boiserieStyleRefNote,
     colorFidelityNote,
     globalPreservationNote
