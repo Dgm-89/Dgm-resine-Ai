@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana, righeSpessore, colorCardImage } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -208,16 +208,22 @@ module.exports = async function handler(req, res) {
   // SEMPRE questi due colori espliciti, mai "il colore già presente".
   const righeZonaEff = righeOrientamento === "verticali" ? (righeZona === "alta" ? "alta" : "bassa") : (righeExtent === "tutta" ? "tutta" : "bassa");
   const zoneBase = (z) => (z === "bassa" && twoColorFacade) ? [colorB, colorBHex] : [colorA, colorAHex];
-  const bandPair = (base) => `una banda nel colore ${colorRef(base[0], base[1])} e una banda nel colore ${colorRef(colorRighe, colorRigheHex)}, poi di nuovo ${colorRef(base[0], base[1])}, poi ${colorRef(colorRighe, colorRigheHex)}, e così via`;
+  const thin = righeSpessore !== "larghe";
+  // Descrizione delle righe su una zona: "sottili" = linee strette distanziate
+  // sul fondo; "larghe" = fasce alte uguali alternate. Sempre con i due colori
+  // scritti per esteso, mai "il colore già presente".
+  const stripesOn = (base, dir) => thin
+    ? `sul fondo nel colore ${colorRef(base[0], base[1])} disegna righe ${dir} SOTTILI (spessore circa 5-8 cm, come una linea decorativa) nel colore ${colorRef(colorRighe, colorRigheHex)}, distanziate in modo regolare (circa 40-60 cm tra una riga e l'altra): tra una riga e l'altra il muro resta nel colore di fondo ${base[0]}. Le righe sono linee strette, NON fasce larghe`
+    : `disegna bande ${dir} LARGHE di uguale ${dir === "verticali" ? "larghezza" : "altezza"} (circa 30-50 cm ciascuna) alternando esattamente due colori: una banda nel colore ${colorRef(base[0], base[1])}, una banda nel colore ${colorRef(colorRighe, colorRigheHex)}, poi di nuovo ${base[0]}, poi ${colorRighe}, e così via`;
   const sameAsUpper = twoColorFacade && righeZonaEff === "bassa" && String(colorA).trim().toUpperCase() === String(colorRighe).trim().toUpperCase()
-    ? ` Le bande ${colorRighe} sono la STESSA IDENTICA tinta della parte alta della facciata: devono risultare esattamente dello stesso grigio/colore della parte alta, non un'altra tonalità.`
+    ? ` Il colore delle righe (${colorRighe}) è la STESSA IDENTICA tinta della parte alta della facciata: le righe devono risultare esattamente dello stesso colore della parte alta, non un'altra tonalità.`
     : "";
   const righeNote = isRigheStyled
     ? (righeOrientamento === "verticali"
-      ? ` Inoltre, nella ${righeZonaEff === "alta" ? "parte alta" : "parte bassa"} della facciata, disegna bande VERTICALI di uguale larghezza alternando esattamente due colori: ${bandPair(zoneBase(righeZonaEff))}, lungo tutta l'altezza di quella zona. Non usare nessun terzo colore per le bande.${sameAsUpper} L'altra parte della facciata resta a tinta unita nel suo colore.`
+      ? ` Inoltre, nella ${righeZonaEff === "alta" ? "parte alta" : "parte bassa"} della facciata, ${stripesOn(zoneBase(righeZonaEff), "verticali")}, lungo tutta l'altezza di quella zona. Non usare nessun terzo colore.${sameAsUpper} L'altra parte della facciata resta a tinta unita nel suo colore, senza righe.`
       : (righeZonaEff === "tutta"
-        ? ` Inoltre, dipingi l'intera facciata a bande ORIZZONTALI di uguale altezza, dalla linea di gronda fino a terra: nella parte alta alterna ${bandPair(zoneBase("alta"))}${twoColorFacade ? `; nella parte bassa alterna ${bandPair(zoneBase("bassa"))}` : ""}. Non usare nessun altro colore per le bande.`
-        : ` Inoltre, nella parte bassa della facciata (dal terreno fino alla linea di divisione con la parte alta), disegna bande ORIZZONTALI di uguale altezza alternando esattamente due colori: ${bandPair(zoneBase("bassa"))}. Non usare nessun terzo colore e nessuna tonalità intermedia per le bande.${sameAsUpper} La parte alta della facciata resta a tinta unita nel suo colore.`))
+        ? ` Inoltre, su tutta la facciata dalla linea di gronda fino a terra: nella parte alta ${stripesOn(zoneBase("alta"), "orizzontali")}${twoColorFacade ? `; nella parte bassa ${stripesOn(zoneBase("bassa"), "orizzontali")}` : ""}. Non usare nessun altro colore.`
+        : ` Inoltre, nella parte bassa della facciata (dal terreno fino alla linea di divisione con la parte alta), ${stripesOn(zoneBase("bassa"), "orizzontali")}. Non usare nessun terzo colore e nessuna tonalità intermedia.${sameAsUpper} La parte alta della facciata resta a tinta unita nel suo colore, senza righe.`))
     : "";
 
   // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
@@ -306,7 +312,7 @@ module.exports = async function handler(req, res) {
   if (!(isDavanzaliStyled)) keepList.push("i davanzali");
   if (!(isBalconiStyled)) keepList.push("i balconi/parapetti");
   const changeList = ["il colore/texture della facciata"];
-  if (isRigheStyled) changeList.push("le bande decorative");
+  if (isRigheStyled) changeList.push("le righe decorative");
   if (isMarcapianoStyled) changeList.push("il marcapiano");
   if (isDavanzaliStyled) changeList.push("i davanzali");
   if (isSottotettoStyled) changeList.push("il sottotetto/sporto di gronda");
@@ -321,10 +327,10 @@ module.exports = async function handler(req, res) {
   if (isExteriorFacade) {
     if (twoColorFacade) {
       zones.push(`parte alta della facciata = ${colorRef(colorA, colorAHex)}`);
-      zones.push(`parte bassa della facciata = ${colorRef(colorB, colorBHex)}${isRigheStyled && righeZonaEff !== "alta" ? ` con bande ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} alternate ${colorB} / ${colorRighe}` : ""}`);
-      if (isRigheStyled && righeZonaEff !== "bassa") zones[0] += ` con bande ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} alternate ${colorA} / ${colorRighe}`;
+      zones.push(`parte bassa della facciata = ${colorRef(colorB, colorBHex)}${isRigheStyled && righeZonaEff !== "alta" ? ` con ${thin ? "righe sottili" : "bande larghe"} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe}` : ""}`);
+      if (isRigheStyled && righeZonaEff !== "bassa") zones[0] += ` con ${thin ? "righe sottili" : "bande larghe"} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe}`;
     } else {
-      zones.push(`facciata = ${colorRef(colorA, colorAHex)}${isRigheStyled ? ` con bande alternate ${colorA} / ${colorRighe}` : ""}`);
+      zones.push(`facciata = ${colorRef(colorA, colorAHex)}${isRigheStyled ? ` con ${thin ? "righe sottili" : "bande larghe"} nel colore ${colorRighe}` : ""}`);
     }
     if (isMarcapianoStyled) zones.push(`marcapiano = ${colorRef(colorC, colorCHex)}`);
     else if (twoColorFacade) zones.push("tra parte alta e parte bassa NESSUNA fascia o cornice di un terzo colore: solo il cambio netto di colore");
@@ -337,6 +343,13 @@ module.exports = async function handler(req, res) {
     ? ` RIEPILOGO VINCOLANTE, ZONA PER ZONA (ogni riga va rispettata; se lo stesso colore compare in più zone è voluto, non cambiarlo): ${zones.map((z, i) => `(${i + 1}) ${z}`).join("; ")}. Prima di restituire l'immagine controlla che ognuna di queste zone abbia esattamente il colore indicato.`
     : "";
   const exteriorPreservationNote = " REGOLA ASSOLUTA: non spostare, aggiungere o rimuovere nessun elemento della foto e non cambiare inquadratura o prospettiva. Tutto ciò che non è elencato nelle istruzioni resta identico all'originale; tutto ciò che è elencato (vedi riepilogo) va modificato OBBLIGATORIAMENTE, anche se si tratta di serramenti, persiane, porte o sottotetto.";
+
+  const colorCardClean = (typeof colorCardImage === "string" && colorCardImage.length < 2_000_000)
+    ? colorCardImage.replace(/^data:image\/\w+;base64,/, "")
+    : null;
+  const colorCardNote = colorCardClean
+    ? " CARTELLA COLORI: ti sono state fornite DUE immagini. La PRIMA è la foto reale da modificare. La SECONDA è la cartella colori ufficiale: ogni riquadro pieno mostra il colore ESATTO da usare per la zona scritta accanto (es. PARTE ALTA FACCIATA, PARTE BASSA FACCIATA, RIGHE, SOTTOTETTO, SERRAMENTI E PERSIANE). Riproduci quelle tinte il più fedelmente possibile (luminosità e tonalità), zona per zona: se un colore è un grigio medio deve restare un grigio medio, non schiarirlo né scurirlo. La cartella colori serve SOLO come riferimento: NON inserirla, NON copiarla e NON scrivere testo nell'immagine finale."
+    : "";
 
   const prompt = [
     `Modifica ${sceneDesc}.`,
@@ -358,6 +371,7 @@ module.exports = async function handler(req, res) {
     righeNote,
     boiserieStyleRefNote,
     zonesSummary,
+    colorCardNote,
     colorFidelityNote,
     isExteriorFacade ? exteriorPreservationNote : globalPreservationNote
   ].join(" ");
@@ -376,7 +390,7 @@ module.exports = async function handler(req, res) {
   let apiUrl;
   try {
     apiUrl = new URL(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent"
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent"
     );
     apiUrl.searchParams.set("key", apiKey);
   } catch (err) {
@@ -398,6 +412,9 @@ module.exports = async function handler(req, res) {
         }
       }
     ];
+    if (colorCardClean) {
+      contentParts.push({ inline_data: { mime_type: "image/png", data: colorCardClean } });
+    }
     if (boiserieStyleRefImageClean) {
       contentParts.push({
         inline_data: {
@@ -415,7 +432,8 @@ module.exports = async function handler(req, res) {
           {
             parts: contentParts
           }
-        ]
+        ],
+        generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
       })
     });
 
