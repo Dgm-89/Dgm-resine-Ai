@@ -528,7 +528,7 @@
 
     <button type="button" class="niche-toggle" id="marcapianoToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="20" y="20" width="140" height="42" fill="#D9C7A8"/><rect x="20" y="62" width="140" height="10" fill="#B5652E"/><rect x="20" y="72" width="140" height="38" fill="#8F7A5A"/></svg>
-      <span class="nt-text"><span class="nt-title" data-i18n="marcapianoTitle">Aggiungi il marcapiano</span><span class="nt-desc" data-i18n="marcapianoDesc">Striscia sottile (5-10 cm) di un terzo colore che separa la parte alta dalla parte bassa</span></span>
+      <span class="nt-text"><span class="nt-title" data-i18n="marcapianoTitle">Aggiungi il marcapiano</span><span class="nt-desc" data-i18n="marcapianoDesc">Striscia sottile (5-10 cm) di un colore diverso a un'altezza della facciata</span></span>
       <span class="nt-check"></span>
     </button>
 
@@ -780,7 +780,7 @@
     btnMonocolore: { it:"Un colore", en:"One color" },
     btnDueColori: { it:"Due colori", en:"Two colors" },
     marcapianoTitle: { it:"Aggiungi il marcapiano", en:"Add the string course" },
-    marcapianoDesc: { it:"Striscia sottile (5-10 cm) di un terzo colore che separa la parte alta dalla parte bassa", en:"Thin strip (5-10 cm) in a third color that separates the upper part from the lower part" },
+    marcapianoDesc: { it:"Striscia sottile (5-10 cm) di un colore diverso a un'altezza della facciata", en:"Thin strip (5-10 cm) in a different color at a height of the facade" },
     righeTitle: { it:"Aggiungi righe decorative", en:"Add decorative stripes" },
     righeDesc: { it:"Righe alternate, verticali o orizzontali, su una parte della facciata", en:"Alternating stripes, vertical or horizontal, on part of the facade" },
     righeOrientLabel: { it:"Righe verticali o orizzontali?", en:"Vertical or horizontal stripes?" },
@@ -3394,12 +3394,13 @@
   // Vero quando serve un secondo colore (layout "due colori": alto/basso).
   function needsSecondColor(){ return facadeColorCount() >= 2; }
   // Vero quando il cliente ha attivato il toggle "marcapiano" (striscia sottile
-  // di colore diverso che separa parte alta e parte bassa): ha senso solo se il
-  // layout è "due colori", altrimenti non c'è nulla da dividere.
+  // di colore diverso): disponibile sia con "un colore" (striscia decorativa a
+  // un'altezza naturale della facciata) sia con "due colori" (striscia sulla
+  // linea di divisione tra le due tinte).
   // NOTA: la funzione si chiama ancora needsThirdColor() per non dover toccare
   // tutti i punti del codice che già la usano per gestire state.colorC — il
   // significato però ora è "il marcapiano è attivo", non più "layout a 3 fasce".
-  function needsMarcapianoColor(){ return !!(state.addMarcapiano && state.facadeLayout === 'due_colori' && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  function needsMarcapianoColor(){ return !!(state.addMarcapiano && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   function needsThirdColor(){ return needsMarcapianoColor(); }
   // Vero quando il cliente ha attivato il toggle "davanzali colore diverso"
   // (solo per Imbiancatura Esterno, come marcapiano/righe).
@@ -3652,10 +3653,10 @@
     davEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addDavanzali = false; state.colorDavanzali = null; }
     davEl.classList.toggle('active', state.addDavanzali);
-    // Il marcapiano (striscia che divide parte alta/bassa) ha senso solo
-    // quando la facciata è impostata su "due colori": con un colore solo non
-    // c'è nulla da dividere.
-    var marcShow = show && state.facadeLayout === 'due_colori';
+    // Il marcapiano è disponibile sempre (sia con "un colore" che con "due
+    // colori"): con un colore solo è una striscia decorativa a un'altezza
+    // naturale della facciata, con due colori segna la linea di divisione.
+    var marcShow = show;
     var marcEl = document.getElementById('marcapianoToggle');
     marcEl.style.display = marcShow ? 'flex' : 'none';
     if(!marcShow){ state.addMarcapiano = false; state.colorC = null; }
