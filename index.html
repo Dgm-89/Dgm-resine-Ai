@@ -4461,12 +4461,7 @@
     list.forEach(function(c){
       var cell=document.createElement('button');
       cell.type='button'; cell.className='swatch';
-      var otherChosen = [];
-      if(pickPhase!=='A' && state.colorA) otherChosen.push(state.colorA.code);
-      if(pickPhase!=='C' && state.colorC) otherChosen.push(state.colorC.code);
-      if(pickPhase!=='B' && state.colorB) otherChosen.push(state.colorB.code);
-      var excluded = needsSecondColor() && otherChosen.indexOf(c.code) > -1;
-      if(excluded) cell.disabled = true;
+      // Nessun blocco: lo stesso colore si può scegliere per più parti.
       var curr = colorForPhase(pickPhase);
       if(curr && curr.code===c.code) cell.classList.add('selected');
       cell.innerHTML='<span class="sw-color" style="'+swatchBgStyle(c)+'"><span class="sw-check"></span></span><span class="sw-name">'+c.name+'</span>';
