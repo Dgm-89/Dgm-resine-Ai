@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana, righeSpessore, colorCardImage } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana, righeSpessore, colorCardImage, step } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -143,7 +143,7 @@ module.exports = async function handler(req, res) {
   // (striscia sottile che separa le due zone) e le righe decorative sono note
   // aggiuntive indipendenti, definite più sotto come i davanzali/balconi/ecc.
   const FACADE_LAYOUT_DESC = {
-    due_colori: `Dividi la facciata in due parti orizzontali sovrapposte: (1) la parte alta della facciata, dalla linea di gronda/tetto fino a circa metà altezza (o fino al piano di divisione naturale dell'edificio, es. tra primo piano e piano terra, se visibile), nel colore ${colorRef(colorA, colorAHex)}; (2) la parte bassa della facciata, da quella linea fino a terra, nel colore ${colorRef(colorB, colorBHex)}. ATTENZIONE: il colore della parte bassa deve riempire TUTTA quella porzione di facciata (comprese le zone intorno a porte e finestre del piano terra), non solo una sottile striscia rasoterra. La linea di separazione tra le due parti deve essere orizzontale, netta e ben visibile.`
+    due_colori: `Dividi la facciata in due parti orizzontali sovrapposte: (1) la parte alta = la METÀ SUPERIORE dell'altezza della facciata, dalla linea di gronda fino ESATTAMENTE a metà altezza, nel colore ${colorRef(colorA, colorAHex)}; (2) la parte bassa = la METÀ INFERIORE della facciata, da metà altezza fino a terra, nel colore ${colorRef(colorB, colorBHex)}. La linea di divisione va a metà altezza della facciata (misurata dalla gronda a terra): la parte bassa deve occupare il 50% dell'altezza, MAI meno. Non abbassare la divisione fino al solaio del piano terra o alla linea delle finestre del piano terra. ATTENZIONE: il colore della parte bassa deve riempire TUTTA quella porzione di facciata (comprese le zone intorno a porte e finestre del piano terra), non solo una sottile striscia rasoterra. La linea di separazione tra le due parti deve essere orizzontale, netta e ben visibile.`
   };
   const isFacadeStyled = materialId === "imbiancatura" && context === "esterno" && facadeLayout === "due_colori" && colorB;
 
@@ -214,7 +214,9 @@ module.exports = async function handler(req, res) {
   // scritti per esteso, mai "il colore già presente".
   const stripesOn = (base, dir) => thin
     ? `sul fondo nel colore ${colorRef(base[0], base[1])} disegna righe ${dir} SOTTILI (spessore circa 5-8 cm, come una linea decorativa) nel colore ${colorRef(colorRighe, colorRigheHex)}, distanziate in modo regolare (circa 40-60 cm tra una riga e l'altra): tra una riga e l'altra il muro resta nel colore di fondo ${base[0]}. Le righe sono linee strette, NON fasce larghe`
-    : `disegna bande ${dir} LARGHE di uguale ${dir === "verticali" ? "larghezza" : "altezza"} (circa 30-50 cm ciascuna) alternando esattamente due colori: una banda nel colore ${colorRef(base[0], base[1])}, una banda nel colore ${colorRef(colorRighe, colorRigheHex)}, poi di nuovo ${base[0]}, poi ${colorRighe}, e così via`;
+    : (dir === "orizzontali"
+      ? `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: prima dipingi tutta la zona nel colore di fondo ${base[0]}, poi SOVRAPPONI sopra il fondo le strisce nel colore ${colorRef(colorRighe, colorRigheHex)}. MISURE REALI: questa zona (metà facciata, un piano) è alta 3,00 m. La linea di metà casa deve essere un passaggio NETTO tra la parte alta e il colore scuro di fondo ${base[0]}: subito sotto la parte alta c'è SEMPRE il fondo ${base[0]}, mai una striscia. Partendo DALLA LINEA DI METÀ CASA verso il basso la sequenza è: 50 cm di fondo ${base[0]}, poi 50 cm di striscia ${colorRighe}, poi 50 cm di fondo ${base[0]}, poi 50 cm di striscia ${colorRighe}, poi 50 cm di fondo ${base[0]}, poi 50 cm di striscia ${colorRighe} che arriva a terra (6 fasce da 50 cm = 3,00 m). In totale 3 strisce ${colorRighe} alte 50 cm ciascuna, tutte della stessa altezza e distanziate da 50 cm di fondo. Usa porte e finestre come riferimento di scala (una porta è alta circa 2,10 m) per rispettare queste misure in prospettiva`
+      : `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: prima dipingi tutta la zona nel colore di fondo, poi SOVRAPPONI sopra il fondo strisce verticali nel colore ${colorRef(colorRighe, colorRigheHex)} larghe 50 cm, separate da 50 cm di fondo ${base[0]}, partendo dallo spigolo della facciata con 50 cm di fondo ${base[0]} (usa porte e finestre come riferimento di scala: una porta è larga circa 90 cm)`);
   const sameAsUpper = twoColorFacade && righeZonaEff === "bassa" && String(colorA).trim().toUpperCase() === String(colorRighe).trim().toUpperCase()
     ? ` Il colore delle righe (${colorRighe}) è la STESSA IDENTICA tinta della parte alta della facciata: le righe devono risultare esattamente dello stesso colore della parte alta, non un'altra tonalità.`
     : "";
@@ -327,7 +329,7 @@ module.exports = async function handler(req, res) {
   if (isExteriorFacade) {
     if (twoColorFacade) {
       zones.push(`parte alta della facciata = ${colorRef(colorA, colorAHex)}`);
-      zones.push(`parte bassa della facciata = ${colorRef(colorB, colorBHex)}${isRigheStyled && righeZonaEff !== "alta" ? ` con ${thin ? "righe sottili" : "bande larghe"} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe}` : ""}`);
+      zones.push(`parte bassa della facciata = ${colorRef(colorB, colorBHex)}${isRigheStyled && righeZonaEff !== "alta" ? ` come FONDO, con ${thin ? "righe sottili" : "strisce da 50 cm alternate a 50 cm di fondo, partendo dalla linea di metà casa con 50 cm di fondo scuro,"} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe} sovrapposte al fondo (fondo e strisce NON invertiti)` : ""}`);
       if (isRigheStyled && righeZonaEff !== "bassa") zones[0] += ` con ${thin ? "righe sottili" : "bande larghe"} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe}`;
     } else {
       zones.push(`facciata = ${colorRef(colorA, colorAHex)}${isRigheStyled ? ` con ${thin ? "righe sottili" : "bande larghe"} nel colore ${colorRighe}` : ""}`);
@@ -348,10 +350,26 @@ module.exports = async function handler(req, res) {
     ? colorCardImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
   const colorCardNote = colorCardClean
-    ? " CARTELLA COLORI: ti sono state fornite DUE immagini. La PRIMA è la foto reale da modificare. La SECONDA è la cartella colori ufficiale: ogni riquadro pieno mostra il colore ESATTO da usare per la zona scritta accanto (es. PARTE ALTA FACCIATA, PARTE BASSA FACCIATA, RIGHE, SOTTOTETTO, SERRAMENTI E PERSIANE). Riproduci quelle tinte il più fedelmente possibile (luminosità e tonalità), zona per zona: se un colore è un grigio medio deve restare un grigio medio, non schiarirlo né scurirlo. La cartella colori serve SOLO come riferimento: NON inserirla, NON copiarla e NON scrivere testo nell'immagine finale."
+    ? " CARTELLA COLORI: ti sono state fornite DUE immagini. La PRIMA è la foto reale da modificare. La SECONDA è la cartella colori ufficiale: a sinistra ogni riquadro pieno mostra il colore ESATTO da usare per la zona scritta accanto (es. PARTE ALTA FACCIATA, PARTE BASSA FACCIATA, RIGHE, SOTTOTETTO, SERRAMENTI E PERSIANE); a destra c'è lo SCHEMA DELLA FACCIATA, un disegno semplificato che mostra dove va ogni colore e con quali proporzioni (altezza della divisione, fondo e strisce, larghezza delle strisce rispetto al fondo). Segui quello schema per la disposizione dei colori sulla facciata vera della foto, adattandolo alla sua prospettiva. Riproduci quelle tinte il più fedelmente possibile (luminosità e tonalità), zona per zona: se un colore è un grigio medio deve restare un grigio medio, non schiarirlo né scurirlo. La cartella colori serve SOLO come riferimento: NON inserirla, NON copiarla e NON scrivere testo nell'immagine finale."
     : "";
 
-  const prompt = [
+  // SECONDO PASSAGGIO (solo quando ci sono le righe): la foto arriva già
+  // tinteggiata dal primo passaggio; qui l'AI deve fare UNA sola cosa,
+  // aggiungere le strisce, senza toccare nient'altro.
+  const isRigheStep = step === "righe" && isRigheStyled;
+  const righeZoneName = righeOrientamento === "verticali"
+    ? (righeZonaEff === "alta" ? "sulla parte alta della facciata" : "sulla parte bassa della facciata")
+    : (righeZonaEff === "tutta" ? "su tutta la facciata" : "sulla parte bassa della facciata");
+  const righeStepPrompt = [
+    "Questa è una foto di una facciata esterna GIÀ TINTEGGIATA: i colori sono già corretti e NON vanno cambiati.",
+    twoColorFacade ? `La facciata è già divisa a metà altezza: parte alta nel colore ${colorRef(colorA, colorAHex)} e parte bassa nel colore ${colorRef(colorB, colorBHex)}. Il confine già visibile tra le due è la LINEA DI METÀ CASA.` : `La facciata è già tinteggiata nel colore ${colorRef(colorA, colorAHex)}.`,
+    `UNICO COMPITO: aggiungi le strisce decorative ${righeZoneName}.${righeNote}`,
+    "Le strisce sono pittura sul muro: seguono la prospettiva della facciata, restano dietro a grondaie, pluviali, lampade, persiane e oggetti davanti al muro, e non coprono porte, finestre, vetri e serramenti.",
+    colorCardNote,
+    "REGOLA ASSOLUTA: a parte le strisce, l'immagine deve restare IDENTICA a quella ricevuta: stessi colori della parte alta e della parte bassa, stesso sottotetto, stessi serramenti, stessa luce, stessa inquadratura. Non ridipingere e non schiarire o scurire nessuna zona."
+  ].filter(Boolean).join(" ");
+
+  const prompt = isRigheStep ? righeStepPrompt : [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
     isFacadeStyled ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
