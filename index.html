@@ -513,25 +513,22 @@
     </div>
     <div class="seg-hint" id="contextHint" style="display:none">Colori pensati per pareti e superfici interne.</div>
 
-    <div class="section-label" id="facadeLayoutLabel" style="display:none" data-i18n="facadeLayoutLabel">Come dividere i colori sulla facciata?</div>
+    <div class="section-label" id="facadeLayoutLabel" style="display:none" data-i18n="facadeLayoutLabel">Quanti colori sulla facciata?</div>
     <div class="seg-control" id="facadeLayoutControl" style="display:none">
       <button data-v="monocolore" class="active" data-i18n="btnMonocolore">Un colore</button>
-      <button data-v="marcapiano" data-i18n="btnMarcapiano">Marcapiano</button>
-      <button data-v="righe_orizzontali" data-i18n="btnRigheOriz">Righe orizz.</button>
-      <!-- Righe verticali temporaneamente rimosse su richiesta (23/09/2026) -->
+      <button data-v="due_colori" data-i18n="btnDueColori">Due colori</button>
     </div>
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
-
-    <div class="section-label" id="righeExtentLabel" style="display:none" data-i18n="righeExtentLabel">Le righe coprono tutta la facciata o solo metà?</div>
-    <div class="seg-control" id="righeExtentControl" style="display:none">
-      <button data-v="tutta" class="active" data-i18n="btnRigheTutta">Tutta la facciata</button>
-      <button data-v="meta" data-i18n="btnRigheMeta">Solo metà (basso)</button>
-    </div>
-    <div class="seg-hint" id="righeExtentHint" style="display:none">Le righe alternate coprono l'intera altezza della facciata.</div>
 
     <button type="button" class="niche-toggle" id="davanzaliToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="55" y="30" width="70" height="60" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/><rect x="55" y="30" width="70" height="60" fill="none" stroke="#7FA3B5" stroke-width="3"/><line x1="90" y1="30" x2="90" y2="90" stroke="#93897A" stroke-width="3"/><rect x="46" y="90" width="88" height="14" fill="#B5652E"/></svg>
       <span class="nt-text"><span class="nt-title" data-i18n="davanzaliTitle">Personalizza il colore dei davanzali</span><span class="nt-desc" data-i18n="davanzaliDesc">Scegli un colore diverso dalla facciata per i davanzali delle finestre</span></span>
+      <span class="nt-check"></span>
+    </button>
+
+    <button type="button" class="niche-toggle" id="marcapianoToggle" style="display:none">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="20" y="20" width="140" height="42" fill="#D9C7A8"/><rect x="20" y="62" width="140" height="10" fill="#B5652E"/><rect x="20" y="72" width="140" height="38" fill="#8F7A5A"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="marcapianoTitle">Aggiungi il marcapiano</span><span class="nt-desc" data-i18n="marcapianoDesc">Striscia sottile (5-10 cm) di un terzo colore che separa la parte alta dalla parte bassa</span></span>
       <span class="nt-check"></span>
     </button>
 
@@ -541,17 +538,42 @@
       <span class="nt-check"></span>
     </button>
 
+    <button type="button" class="niche-toggle" id="serramentiToggle" style="display:none">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="45" y="20" width="90" height="90" fill="#E3DCC9" stroke="#6B4A2A" stroke-width="6"/><line x1="90" y1="20" x2="90" y2="110" stroke="#6B4A2A" stroke-width="5"/><line x1="45" y1="65" x2="135" y2="65" stroke="#6B4A2A" stroke-width="5"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="serramentiTitle">Personalizza il colore dei serramenti</span><span class="nt-desc" data-i18n="serramentiDesc">Scegli il colore di finestre/porte esterne in legno (Noce, Bianco, Grigio chiaro, Grigio canna di fucile)</span></span>
+      <span class="nt-check"></span>
+    </button>
+
     <button type="button" class="niche-toggle" id="balconiToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="30" y="20" width="120" height="70" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/><rect x="20" y="88" width="140" height="10" fill="#93897A"/><rect x="26" y="98" width="4" height="22" fill="#7A7166"/><rect x="150" y="98" width="4" height="22" fill="#7A7166"/><line x1="40" y1="98" x2="40" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="58" y1="98" x2="58" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="76" y1="98" x2="76" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="94" y1="98" x2="94" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="112" y1="98" x2="112" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="130" y1="98" x2="130" y2="120" stroke="#7A7166" stroke-width="3"/><line x1="148" y1="98" x2="148" y2="120" stroke="#7A7166" stroke-width="3"/></svg>
       <span class="nt-text"><span class="nt-title" data-i18n="balconiTitle">Personalizza il colore dei balconi</span><span class="nt-desc" data-i18n="balconiDesc">Scegli un colore diverso dalla facciata per parapetti/ringhiere dei balconi</span></span>
       <span class="nt-check"></span>
     </button>
 
-    <button type="button" class="niche-toggle" id="serramentiToggle" style="display:none">
-      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="45" y="20" width="90" height="90" fill="#E3DCC9" stroke="#6B4A2A" stroke-width="6"/><line x1="90" y1="20" x2="90" y2="110" stroke="#6B4A2A" stroke-width="5"/><line x1="45" y1="65" x2="135" y2="65" stroke="#6B4A2A" stroke-width="5"/></svg>
-      <span class="nt-text"><span class="nt-title" data-i18n="serramentiTitle">Personalizza il colore dei serramenti</span><span class="nt-desc" data-i18n="serramentiDesc">Scegli il colore di finestre/porte esterne in legno (Noce, Bianco, Grigio chiaro, Grigio canna di fucile)</span></span>
+    <button type="button" class="niche-toggle" id="righeToggle" style="display:none">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="20" y="20" width="140" height="90" fill="#D9C7A8"/><rect x="34" y="20" width="14" height="90" fill="#8F7A5A"/><rect x="62" y="20" width="14" height="90" fill="#8F7A5A"/><rect x="90" y="20" width="14" height="90" fill="#8F7A5A"/><rect x="118" y="20" width="14" height="90" fill="#8F7A5A"/><rect x="146" y="20" width="14" height="90" fill="#8F7A5A"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="righeTitle">Aggiungi righe decorative</span><span class="nt-desc" data-i18n="righeDesc">Righe alternate, verticali o orizzontali, su una parte della facciata</span></span>
       <span class="nt-check"></span>
     </button>
+
+    <div class="section-label" id="righeOrientLabel" style="display:none" data-i18n="righeOrientLabel">Righe verticali o orizzontali?</div>
+    <div class="seg-control" id="righeOrientControl" style="display:none">
+      <button data-v="verticali" class="active" data-i18n="btnRigheVerticali">Verticali</button>
+      <button data-v="orizzontali" data-i18n="btnRigheOrizzontali">Orizzontali</button>
+    </div>
+
+    <div class="section-label" id="righeZonaLabel" style="display:none" data-i18n="righeZonaLabel">Su quale parte della facciata?</div>
+    <div class="seg-control" id="righeZonaControl" style="display:none">
+      <button data-v="bassa" class="active" data-i18n="btnRigheZonaBassa">Parte bassa</button>
+      <button data-v="alta" data-i18n="btnRigheZonaAlta">Parte alta</button>
+    </div>
+
+    <div class="section-label" id="righeExtentLabel" style="display:none" data-i18n="righeExtentLabel">Le righe orizzontali coprono anche la parte sopra?</div>
+    <div class="seg-control" id="righeExtentControl" style="display:none">
+      <button data-v="meta" class="active" data-i18n="btnRigheMeta">Solo parte bassa</button>
+      <button data-v="tutta" data-i18n="btnRigheTutta">Anche parte sopra</button>
+    </div>
+    <div class="seg-hint" id="righeExtentHint" style="display:none">Le righe orizzontali alternate coprono solo la parte bassa della facciata, verso terra.</div>
 
     <div class="section-label" id="boiserieStyleLabel" style="display:none" data-i18n="boiserieStyleLabel">Scegli lo stile di boiserie</div>
     <!-- TODO PLACEHOLDER: foto Orac usate temporaneamente per costruire l'app — sostituire con foto proprie o foto autorizzate da Orac prima di pubblicare pubblicamente. La foto "Liscia con cornice" (data-v="liscia") è già stata sostituita con una foto reale DGM, non è più un placeholder. -->
@@ -754,14 +776,22 @@
     contextLabel: { it:"Ambiente", en:"Setting" },
     btnInterno: { it:"Interno", en:"Indoor" },
     btnEsterno: { it:"Esterno", en:"Outdoor" },
-    facadeLayoutLabel: { it:"Come dividere i colori sulla facciata?", en:"How should the colors be split on the facade?" },
+    facadeLayoutLabel: { it:"Quanti colori sulla facciata?", en:"How many colors on the facade?" },
     btnMonocolore: { it:"Un colore", en:"One color" },
-    btnMarcapiano: { it:"Marcapiano", en:"String course" },
-    btnRigheOriz: { it:"Righe orizz.", en:"Horiz. stripes" },
-    btnRigheVert: { it:"Righe vert.", en:"Vert. stripes" },
-    righeExtentLabel: { it:"Le righe coprono tutta la facciata o solo metà?", en:"Do the stripes cover the whole facade or just half?" },
-    btnRigheTutta: { it:"Tutta la facciata", en:"Whole facade" },
-    btnRigheMeta: { it:"Solo metà (basso)", en:"Half only (lower)" },
+    btnDueColori: { it:"Due colori", en:"Two colors" },
+    marcapianoTitle: { it:"Aggiungi il marcapiano", en:"Add the string course" },
+    marcapianoDesc: { it:"Striscia sottile (5-10 cm) di un terzo colore che separa la parte alta dalla parte bassa", en:"Thin strip (5-10 cm) in a third color that separates the upper part from the lower part" },
+    righeTitle: { it:"Aggiungi righe decorative", en:"Add decorative stripes" },
+    righeDesc: { it:"Righe alternate, verticali o orizzontali, su una parte della facciata", en:"Alternating stripes, vertical or horizontal, on part of the facade" },
+    righeOrientLabel: { it:"Righe verticali o orizzontali?", en:"Vertical or horizontal stripes?" },
+    btnRigheVerticali: { it:"Verticali", en:"Vertical" },
+    btnRigheOrizzontali: { it:"Orizzontali", en:"Horizontal" },
+    righeZonaLabel: { it:"Su quale parte della facciata?", en:"On which part of the facade?" },
+    btnRigheZonaBassa: { it:"Parte bassa", en:"Lower part" },
+    btnRigheZonaAlta: { it:"Parte alta", en:"Upper part" },
+    righeExtentLabel: { it:"Le righe orizzontali coprono anche la parte sopra?", en:"Do the horizontal stripes also cover the upper part?" },
+    btnRigheMeta: { it:"Solo parte bassa", en:"Lower part only" },
+    btnRigheTutta: { it:"Anche parte sopra", en:"Upper part too" },
     boiserieStyleLabel: { it:"Scegli lo stile di boiserie", en:"Choose the boiserie style" },
     pannelloHeightLabel: { it:"Altezza boiserie", en:"Boiserie height" },
     btnBassa: { it:"Bassa", en:"Low" },
@@ -881,19 +911,21 @@
     familyAllBtn: { it:"Tutti", en:"All" },
     clusterLabelDefault: { it:"Colore", en:"Color" },
     clusterLabelFacciata: { it:"Colore facciata principale", en:"Main facade color" },
-    clusterLabelFirst: { it:"Primo colore (basamento/bande)", en:"First color (base/stripes)" },
-    clusterLabelSecond: { it:"Secondo colore", en:"Second color" },
+    clusterLabelFirst: { it:"Colore parte alta", en:"Upper part color" },
+    clusterLabelSecond: { it:"Colore parte bassa", en:"Lower part color" },
     clusterLabelDavanzali: { it:"Colore davanzali finestre", en:"Window sill color" },
     clusterLabelSottotetto: { it:"Colore sottotetto", en:"Eave/soffit color" },
     clusterLabelBalconi: { it:"Colore balconi", en:"Balcony color" },
     clusterLabelSerramenti: { it:"Colore serramenti", en:"Window frame color" },
+    clusterLabelRighe: { it:"Colore righe", en:"Stripe color" },
     pendingThird: { it:"+ Marcapiano da scegliere", en:"+ String course to choose" },
     pendingSecondOf3: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
-    pendingSecondOf2: { it:"+ Secondo colore da scegliere", en:"+ Second color to choose" },
+    pendingSecondOf2: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
     pendingDavanzali: { it:"+ Colore davanzali da scegliere", en:"+ Window sill color to choose" },
     pendingSottotetto: { it:"+ Colore sottotetto da scegliere", en:"+ Eave color to choose" },
     pendingBalconi: { it:"+ Colore balconi da scegliere", en:"+ Balcony color to choose" },
     pendingSerramenti: { it:"+ Colore serramenti da scegliere", en:"+ Window frame color to choose" },
+    pendingRighe: { it:"+ Colore righe da scegliere", en:"+ Stripe color to choose" },
     colorStepHint: { it:"Seleziona tutti i colori richiesti (quelli tratteggiati sono ancora da scegliere)", en:"Choose every required color (dashed chips are still to be picked)" },
     clusterEmptyChooseFamily: { it:"Scegli una famiglia di colore qui sopra (o cerca un codice) per vedere le tonalità disponibili.", en:"Choose a color family above (or search a code) to see the available shades." },
     clusterEmptyNoMatch: { it:"Nessun colore trovato con questo codice.", en:"No color found with this code." },
@@ -919,9 +951,11 @@
     summaryFacciata: { it:"Facciata: ", en:"Facade: " },
     summaryStile: { it:"Stile: ", en:"Style: " },
     summaryDavanzali: { it:"Davanzali: ", en:"Window sills: " },
+    summaryMarcapiano: { it:"Marcapiano: ", en:"String course: " },
     summarySottotetto: { it:"Sottotetto: ", en:"Eave/soffit: " },
     summaryBalconi: { it:"Balconi: ", en:"Balconies: " },
     summarySerramenti: { it:"Serramenti: ", en:"Window frames: " },
+    summaryRighe: { it:"Righe: ", en:"Stripes: " },
     summaryFinitura: { it:"Finitura", en:"Finish" },
     summaryEdit: { it:"modifica selezione", en:"edit selection" },
     effettoWord: { it:"Effetto", en:"Effect" },
@@ -3287,7 +3321,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'tutta', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addSottotetto:false, addBalconi:false, addSerramenti:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, colorSerramenti:null, finitura:'satinato', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -3313,27 +3347,30 @@
     bassa: { it:"Boiserie fino a circa 90-100cm da terra, il resto della parete sopra resta invariato.", en:"Boiserie up to about 90-100cm from the floor, the rest of the wall above stays unchanged." },
     alta: { it:"Boiserie dal pavimento al soffitto, su tutta l'altezza della parete.", en:"Boiserie from floor to ceiling, across the full height of the wall." }
   };
-  // Estensione delle righe orizzontali sulla facciata: "tutta" alterna le due
-  // tinte su tutta l'altezza della facciata; "meta" tiene la parte alta in un
-  // unico colore (colorA) e alterna le righe solo nella metà bassa, verso terra
-  // (soluzione più diffusa in molte facciate reali, tipo zoccolo a righe).
+  // Estensione delle righe orizzontali sulla facciata: "meta" (default) alterna
+  // le righe solo nella parte bassa, verso terra (soluzione più diffusa, tipo
+  // zoccolo a righe); "tutta" estende le righe anche alla parte sopra.
   var RIGHE_EXTENT_HINT = {
-    tutta: { it:"Le righe alternate coprono l'intera altezza della facciata.", en:"The alternating stripes cover the full height of the facade." },
-    meta: { it:"La parte alta resta di un unico colore, le righe alternate partono da metà facciata in giù, verso terra.", en:"The upper part stays a single color, the alternating stripes start from mid-facade down to the ground." }
+    meta: { it:"Le righe orizzontali alternate coprono solo la parte bassa della facciata, verso terra.", en:"The alternating horizontal stripes cover only the lower part of the facade, toward the ground." },
+    tutta: { it:"Le righe orizzontali alternate coprono anche la parte sopra della facciata.", en:"The alternating horizontal stripes also cover the upper part of the facade." }
   };
-  // Layout facciata: solo per Imbiancatura Esterno. "Marcapiano" = tre fasce: parte
-  // alta di un colore, la fascia del marcapiano vero e proprio di un colore diverso
-  // (spesso a contrasto), e la parte bassa/basamento di un terzo colore — come nelle
-  // classiche palazzine italiane. Le righe sono un'alternativa più moderna, a bande
-  // orizzontali o verticali alternate tra due soli colori.
+  // Su quale metà della facciata applicare le righe verticali (l'altra metà
+  // resta del colore pieno già assegnato a quella zona).
+  var RIGHE_ZONA_HINT = {
+    bassa: { it:"Le righe verticali alternate coprono solo la parte bassa della facciata.", en:"The alternating vertical stripes cover only the lower part of the facade." },
+    alta: { it:"Le righe verticali alternate coprono solo la parte alta della facciata.", en:"The alternating vertical stripes cover only the upper part of the facade." }
+  };
+  // Layout principale facciata: solo per Imbiancatura Esterno. "Un colore" =
+  // tutta la facciata tinta unita; "Due colori" = parte alta e parte bassa di
+  // due colori diversi (colorA/colorB), divise da una linea semplice. Il
+  // marcapiano (striscia sottile 5-10cm di colore diverso che separa le due
+  // zone) e le righe decorative sono scelte aggiuntive indipendenti, più sotto.
   var FACADE_LAYOUT_HINT = {
     monocolore: { it:"L'intera facciata dello stesso colore.", en:"The whole facade in the same color." },
-    marcapiano: { it:"Parte alta, fascia del marcapiano e parte bassa/basamento: tre colori diversi, divisi da linee orizzontali.", en:"Upper part, string-course band and lower/base part: three different colors, divided by horizontal lines." },
-    righe_orizzontali: { it:"Bande orizzontali alternate tra i due colori scelti.", en:"Horizontal bands alternating between the two chosen colors." },
-    righe_verticali: { it:"Bande verticali alternate tra i due colori scelti.", en:"Vertical bands alternating between the two chosen colors." }
+    due_colori: { it:"Parte alta e parte bassa della facciata di due colori diversi.", en:"Upper and lower part of the facade in two different colors." }
   };
   // Quanti colori servono per ogni layout facciata (oltre al caso "monocolore" = 1).
-  var FACADE_COLOR_COUNT = { monocolore:1, marcapiano:3, righe_orizzontali:2, righe_verticali:2 };
+  var FACADE_COLOR_COUNT = { monocolore:1, due_colori:2 };
   var GRANIGLIA_COLOR_COUNT = { unico:1, bordo:2 };
   var pickPhase = 'A';
   var familyFilter = null; // famiglia colore attiva (solo per palette con "family", es. Sikkens), null = tutte
@@ -3354,10 +3391,16 @@
     }
     return 1;
   }
-  // Vero quando serve un secondo colore (marcapiano o righe).
+  // Vero quando serve un secondo colore (layout "due colori": alto/basso).
   function needsSecondColor(){ return facadeColorCount() >= 2; }
-  // Vero solo per il marcapiano, che ha una terza tinta dedicata alla fascia.
-  function needsThirdColor(){ return facadeColorCount() >= 3; }
+  // Vero quando il cliente ha attivato il toggle "marcapiano" (striscia sottile
+  // di colore diverso che separa parte alta e parte bassa): ha senso solo se il
+  // layout è "due colori", altrimenti non c'è nulla da dividere.
+  // NOTA: la funzione si chiama ancora needsThirdColor() per non dover toccare
+  // tutti i punti del codice che già la usano per gestire state.colorC — il
+  // significato però ora è "il marcapiano è attivo", non più "layout a 3 fasce".
+  function needsMarcapianoColor(){ return !!(state.addMarcapiano && state.facadeLayout === 'due_colori' && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  function needsThirdColor(){ return needsMarcapianoColor(); }
   // Vero quando il cliente ha attivato il toggle "davanzali colore diverso"
   // (solo per Imbiancatura Esterno, come marcapiano/righe).
   function needsDavanzaliColor(){ return !!(state.addDavanzali && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
@@ -3370,25 +3413,39 @@
   // Vero quando il cliente ha attivato il toggle "serramenti colore diverso"
   // (solo per Imbiancatura Esterno, come davanzali/sottotetto/balconi).
   function needsSerramentiColor(){ return !!(state.addSerramenti && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
-  // Ordine in cui si scelgono i colori: per il marcapiano A (parte alta) -> C
-  // (fascia marcapiano) -> B (parte bassa/basamento); per le righe solo A -> B.
-  // Davanzali (fase D), sottotetto in legno (fase E), balconi (fase F) e
-  // serramenti (fase G), quando attivi, si scelgono sempre per ultimi.
+  // Vero quando il cliente ha attivato il toggle "righe decorative"
+  // (solo per Imbiancatura Esterno, indipendente dal layout principale).
+  function needsRigheColor(){ return !!(state.addRighe && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  // Ordine in cui si scelgono i colori: prima la facciata principale (A, poi B
+  // se "due colori"), poi le scelte aggiuntive nell'ordine in cui compaiono
+  // nell'interfaccia: davanzali (D), marcapiano (C), sottotetto (E), serramenti
+  // (G), balconi (F), righe (H).
   function phaseOrder(){
     var order = ['A'];
-    if(needsThirdColor()) order.push('C');
     if(needsSecondColor()) order.push('B');
     if(needsDavanzaliColor()) order.push('D');
+    if(needsMarcapianoColor()) order.push('C');
     if(needsSottotettoColor()) order.push('E');
-    if(needsBalconiColor()) order.push('F');
     if(needsSerramentiColor()) order.push('G');
+    if(needsBalconiColor()) order.push('F');
+    if(needsRigheColor()) order.push('H');
     return order;
   }
-  function colorForPhase(p){ return p==='A' ? state.colorA : (p==='C' ? state.colorC : (p==='D' ? state.colorDavanzali : (p==='E' ? state.colorSottotetto : (p==='F' ? state.colorBalconi : (p==='G' ? state.colorSerramenti : state.colorB))))); }
+  function colorForPhase(p){
+    if(p==='A') return state.colorA;
+    if(p==='B') return state.colorB;
+    if(p==='C') return state.colorC;
+    if(p==='D') return state.colorDavanzali;
+    if(p==='E') return state.colorSottotetto;
+    if(p==='F') return state.colorBalconi;
+    if(p==='G') return state.colorSerramenti;
+    if(p==='H') return state.colorRighe;
+    return null;
+  }
 
   function resetSelectionForNewCategory(){
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'tutta'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addSottotetto = false; state.addBalconi = false; state.colorCatalog = 'base'; state.effetto = 'liscio';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncEffettoVisibility();
@@ -3508,6 +3565,44 @@
     renderStep2UI();
   });
 
+  document.getElementById('marcapianoToggle').addEventListener('click', function(){
+    state.addMarcapiano = !state.addMarcapiano;
+    this.classList.toggle('active', state.addMarcapiano);
+    if(!state.addMarcapiano) state.colorC = null;
+    // riparte dal primo colore ancora mancante nell'ordine giusto (di solito 'C')
+    var order = phaseOrder(); pickPhase = order[0];
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    renderStep2UI();
+  });
+
+  document.getElementById('righeToggle').addEventListener('click', function(){
+    state.addRighe = !state.addRighe;
+    this.classList.toggle('active', state.addRighe);
+    if(!state.addRighe) state.colorRighe = null;
+    syncRigheSubVisibility();
+    // riparte dal primo colore ancora mancante nell'ordine giusto (di solito 'H')
+    var order = phaseOrder(); pickPhase = order[0];
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    renderStep2UI();
+  });
+
+  document.getElementById('righeOrientControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    state.righeOrientamento = btn.dataset.v;
+    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
+    syncRigheSubVisibility();
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+  });
+
+  document.getElementById('righeZonaControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    state.righeZona = btn.dataset.v;
+    Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+  });
+
   function syncBoiserieStyleVisibility(){
     var show = state.material && state.material.id === 'decorazioni';
     document.getElementById('boiserieStyleLabel').style.display = show ? 'block' : 'none';
@@ -3557,30 +3652,54 @@
     davEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addDavanzali = false; state.colorDavanzali = null; }
     davEl.classList.toggle('active', state.addDavanzali);
+    // Il marcapiano (striscia che divide parte alta/bassa) ha senso solo
+    // quando la facciata è impostata su "due colori": con un colore solo non
+    // c'è nulla da dividere.
+    var marcShow = show && state.facadeLayout === 'due_colori';
+    var marcEl = document.getElementById('marcapianoToggle');
+    marcEl.style.display = marcShow ? 'flex' : 'none';
+    if(!marcShow){ state.addMarcapiano = false; state.colorC = null; }
+    marcEl.classList.toggle('active', state.addMarcapiano);
     var sotEl = document.getElementById('sottotettoToggle');
     sotEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addSottotetto = false; state.colorSottotetto = null; }
     sotEl.classList.toggle('active', state.addSottotetto);
-    var balEl = document.getElementById('balconiToggle');
-    balEl.style.display = show ? 'flex' : 'none';
-    if(!show){ state.addBalconi = false; state.colorBalconi = null; }
-    balEl.classList.toggle('active', state.addBalconi);
     var serEl = document.getElementById('serramentiToggle');
     serEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addSerramenti = false; state.colorSerramenti = null; }
     serEl.classList.toggle('active', state.addSerramenti);
-    syncRigheExtentVisibility();
+    var balEl = document.getElementById('balconiToggle');
+    balEl.style.display = show ? 'flex' : 'none';
+    if(!show){ state.addBalconi = false; state.colorBalconi = null; }
+    balEl.classList.toggle('active', state.addBalconi);
+    var righeEl = document.getElementById('righeToggle');
+    righeEl.style.display = show ? 'flex' : 'none';
+    if(!show){ state.addRighe = false; state.colorRighe = null; }
+    righeEl.classList.toggle('active', state.addRighe);
+    syncRigheSubVisibility();
   }
 
-  // L'estensione delle righe (tutta/metà facciata) ha senso solo quando il
-  // layout scelto è "righe orizzontali": per marcapiano/monocolore resta nascosta.
-  function syncRigheExtentVisibility(){
-    var show = state.material && state.material.id === 'imbiancatura' && state.context === 'esterno' && state.facadeLayout === 'righe_orizzontali';
-    document.getElementById('righeExtentLabel').style.display = show ? 'block' : 'none';
-    document.getElementById('righeExtentControl').style.display = show ? 'flex' : 'none';
-    document.getElementById('righeExtentHint').style.display = show ? 'block' : 'none';
-    if(!show){ state.righeExtent = 'tutta'; }
+  // Le scelte secondarie delle righe (orientamento, e poi zona per le
+  // verticali oppure estensione per le orizzontali) compaiono solo quando il
+  // toggle "Righe" è attivo.
+  function syncRigheSubVisibility(){
+    var show = state.material && state.material.id === 'imbiancatura' && state.context === 'esterno' && state.addRighe;
+    document.getElementById('righeOrientLabel').style.display = show ? 'block' : 'none';
+    document.getElementById('righeOrientControl').style.display = show ? 'flex' : 'none';
     if(show){
+      Array.prototype.forEach.call(document.getElementById('righeOrientControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.righeOrientamento); });
+    }
+    var showZona = show && state.righeOrientamento === 'verticali';
+    document.getElementById('righeZonaLabel').style.display = showZona ? 'block' : 'none';
+    document.getElementById('righeZonaControl').style.display = showZona ? 'flex' : 'none';
+    if(showZona){
+      Array.prototype.forEach.call(document.getElementById('righeZonaControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.righeZona); });
+    }
+    var showExtent = show && state.righeOrientamento === 'orizzontali';
+    document.getElementById('righeExtentLabel').style.display = showExtent ? 'block' : 'none';
+    document.getElementById('righeExtentControl').style.display = showExtent ? 'flex' : 'none';
+    document.getElementById('righeExtentHint').style.display = showExtent ? 'block' : 'none';
+    if(showExtent){
       Array.prototype.forEach.call(document.getElementById('righeExtentControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.righeExtent); });
       document.getElementById('righeExtentHint').textContent = tr(RIGHE_EXTENT_HINT[state.righeExtent]);
     }
@@ -3689,7 +3808,7 @@
         state.context = opt.v;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
-        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='tutta';
+        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
         syncNextStepEnabled();
@@ -4015,14 +4134,15 @@
     D: { it:'Davanzali: ', en:'Window sills: ' },
     E: { it:'Sottotetto: ', en:'Eave: ' },
     F: { it:'Balconi: ', en:'Balconies: ' },
-    G: { it:'Serramenti: ', en:'Window frames: ' }
+    G: { it:'Serramenti: ', en:'Window frames: ' },
+    H: { it:'Righe: ', en:'Stripes: ' }
   };
   function addColorChip(row, phase, color){
-    // Monocolore ma con davanzali/sottotetto/balconi/serramenti attivi: anche il
-    // chip del colore facciata deve avere un'etichetta, altrimenti si confonde
-    // con gli extra.
-    var isFacciataMono = phase==='A' && !needsSecondColor() && (needsDavanzaliColor() || needsSottotettoColor() || needsBalconiColor() || needsSerramentiColor());
-    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='F' || phase==='G' || isFacciataMono; // marcapiano (3 zone), davanzali, sottotetto, balconi e serramenti distinguono sempre l'etichetta
+    // Monocolore ma con davanzali/marcapiano/sottotetto/balconi/serramenti/righe
+    // attivi: anche il chip del colore facciata deve avere un'etichetta,
+    // altrimenti si confonde con gli extra.
+    var isFacciataMono = phase==='A' && !needsSecondColor() && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor());
+    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='F' || phase==='G' || phase==='H' || isFacciataMono; // marcapiano, davanzali, sottotetto, balconi, serramenti e righe distinguono sempre l'etichetta
     var labelText = isFacciataMono ? tr({it:'Facciata: ', en:'Facade: '}) : (showLabel ? tr(PHASE_CHIP_LABEL[phase]) : '');
     var chip=document.createElement('span'); chip.className='chip';
     chip.innerHTML='<span class="dot" style="background:'+color.hex+'"></span>'+labelText+color.name+'<button aria-label="'+ts('removeAria')+'">×</button>';
@@ -4033,6 +4153,7 @@
       else if(phase==='E'){ state.colorSottotetto=null; }
       else if(phase==='F'){ state.colorBalconi=null; }
       else if(phase==='G'){ state.colorSerramenti=null; }
+      else if(phase==='H'){ state.colorRighe=null; }
       else { state.colorB=null; }
       pickPhase=phase; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; renderStep2UI();
     });
@@ -4049,23 +4170,26 @@
     // niente chip da mostrare o rimuovere.
     if(isCortenActive()) return;
     if(state.colorA) addColorChip(row, 'A', state.colorA);
-    if(needsThirdColor()){
-      if(state.colorC) addColorChip(row, 'C', state.colorC); else if(state.colorA) addPendingChip(row, 'pendingThird');
-    }
     if(needsSecondColor()){
-      if(state.colorB) addColorChip(row, 'B', state.colorB); else if(state.colorA && (!needsThirdColor() || state.colorC)) addPendingChip(row, needsThirdColor() ? 'pendingSecondOf3' : 'pendingSecondOf2');
+      if(state.colorB) addColorChip(row, 'B', state.colorB); else if(state.colorA) addPendingChip(row, 'pendingSecondOf2');
     }
     if(needsDavanzaliColor()){
       if(state.colorDavanzali) addColorChip(row, 'D', state.colorDavanzali); else addPendingChip(row, 'pendingDavanzali');
     }
+    if(needsMarcapianoColor()){
+      if(state.colorC) addColorChip(row, 'C', state.colorC); else addPendingChip(row, 'pendingThird');
+    }
     if(needsSottotettoColor()){
       if(state.colorSottotetto) addColorChip(row, 'E', state.colorSottotetto); else addPendingChip(row, 'pendingSottotetto');
+    }
+    if(needsSerramentiColor()){
+      if(state.colorSerramenti) addColorChip(row, 'G', state.colorSerramenti); else addPendingChip(row, 'pendingSerramenti');
     }
     if(needsBalconiColor()){
       if(state.colorBalconi) addColorChip(row, 'F', state.colorBalconi); else addPendingChip(row, 'pendingBalconi');
     }
-    if(needsSerramentiColor()){
-      if(state.colorSerramenti) addColorChip(row, 'G', state.colorSerramenti); else addPendingChip(row, 'pendingSerramenti');
+    if(needsRigheColor()){
+      if(state.colorRighe) addColorChip(row, 'H', state.colorRighe); else addPendingChip(row, 'pendingRighe');
     }
   }
 
@@ -4129,20 +4253,23 @@
       label.textContent = ts('clusterLabelBalconi');
     } else if(pickPhase==='G'){
       label.textContent = ts('clusterLabelSerramenti');
+    } else if(pickPhase==='H'){
+      label.textContent = ts('clusterLabelRighe');
     } else if(needsThirdColor()){
       label.textContent = tr(PHASE_LABEL_3[pickPhase]);
     } else if(needsSecondColor()){
       label.textContent = pickPhase==='A' ? ts('clusterLabelFirst') : ts('clusterLabelSecond');
-    } else if(pickPhase==='A' && (needsDavanzaliColor() || needsSottotettoColor() || needsBalconiColor() || needsSerramentiColor())){
-      // Monocolore ma con davanzali/sottotetto/balconi/serramenti attivi: va
-      // chiarito che questo è il colore della facciata principale, distinto
-      // dagli extra.
+    } else if(pickPhase==='A' && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor())){
+      // Monocolore ma con davanzali/marcapiano/sottotetto/balconi/serramenti/righe
+      // attivi: va chiarito che questo è il colore della facciata principale,
+      // distinto dagli extra.
       label.textContent = ts('clusterLabelFacciata');
     } else { label.textContent = ts('clusterLabelDefault'); }
-    // Contatore "1 di 2/3" per rendere evidente al cliente quanti colori deve
-    // ancora scegliere in totale (non conta davanzali/sottotetto/balconi/serramenti, opzionali).
-    var coreOrder = phaseOrder().filter(function(p){ return p!=='D' && p!=='E' && p!=='F' && p!=='G'; });
-    if(coreOrder.length > 1 && pickPhase !== 'D' && pickPhase !== 'E' && pickPhase !== 'F' && pickPhase !== 'G'){
+    // Contatore "1 di 2" per rendere evidente al cliente quanti colori deve
+    // ancora scegliere per la facciata principale (non conta davanzali,
+    // marcapiano, sottotetto, balconi, serramenti, righe: tutti opzionali).
+    var coreOrder = phaseOrder().filter(function(p){ return p==='A' || p==='B'; });
+    if(coreOrder.length > 1 && (pickPhase==='A' || pickPhase==='B')){
       var stepIdx = coreOrder.indexOf(pickPhase) + 1;
       if(stepIdx > 0) label.textContent += ' (' + stepIdx + ' ' + (LANG==='en' ? 'of' : 'di') + ' ' + coreOrder.length + ')';
     }
@@ -4230,6 +4357,7 @@
     else if(pickPhase==='E'){ state.colorSottotetto=c; }
     else if(pickPhase==='F'){ state.colorBalconi=c; }
     else if(pickPhase==='G'){ state.colorSerramenti=c; }
+    else if(pickPhase==='H'){ state.colorRighe=c; }
     else { state.colorB=c; }
     // avanza alla prossima fase richiesta ma non ancora scelta, nell'ordine giusto
     var order = phaseOrder();
@@ -4267,7 +4395,7 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = tr(CONTEXT_HINT[v]);
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.addDavanzali=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='tutta';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa';
     document.getElementById('colorSearch').value='';
     syncFacadeLayoutVisibility();
     renderStep2UI();
@@ -4278,8 +4406,9 @@
     var v = btn.dataset.v; state.facadeLayout = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('facadeLayoutHint').textContent = tr(FACADE_LAYOUT_HINT[v]);
-    state.colorB = null; state.colorC = null;
-    syncRigheExtentVisibility();
+    state.colorB = null;
+    // Tornando a "un colore" il marcapiano non ha più senso (nulla da dividere).
+    syncFacadeLayoutVisibility();
     // riparte dal primo colore ancora mancante nell'ordine giusto per il nuovo layout
     var order = phaseOrder(); pickPhase = 'A';
     for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
@@ -4346,16 +4475,22 @@
         colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.hex : null,
         colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.hex : null,
         colorSerramenti: (needsSerramentiColor() && state.colorSerramenti) ? state.colorSerramenti.name : null, colorSerramentiHex: (needsSerramentiColor() && state.colorSerramenti) ? state.colorSerramenti.hex : null,
-        facadeLayout: needsSecondColor() ? state.facadeLayout : null, righeExtent: (state.facadeLayout === 'righe_orizzontali') ? state.righeExtent : null, context: state.context,
+        colorRighe: (needsRigheColor() && state.colorRighe) ? state.colorRighe.name : null, colorRigheHex: (needsRigheColor() && state.colorRighe) ? state.colorRighe.hex : null,
+        facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
         boiserieStyleRefImage: boiserieStyleRefImage,
         resinaArea: (state.category && state.category.id === 'monolith') ? state.resinaArea : null,
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
         addDavanzali: needsDavanzaliColor(),
+        addMarcapiano: needsMarcapianoColor(),
         addSottotetto: needsSottotettoColor(),
         addBalconi: needsBalconiColor(),
         addSerramenti: needsSerramentiColor(),
+        addRighe: needsRigheColor(),
+        righeOrientamento: needsRigheColor() ? state.righeOrientamento : null,
+        righeZona: (needsRigheColor() && state.righeOrientamento === 'verticali') ? state.righeZona : null,
+        righeExtent: (needsRigheColor() && state.righeOrientamento === 'orizzontali') ? state.righeExtent : null,
         effetto: state.effetto, finitura: state.finitura
       })
     })
@@ -4444,7 +4579,7 @@
     var ok = true;
     if(currentPanel==='panelResinaArea') ok = !!state.resinaArea;
     else if(currentPanel==='panelSub') ok = !!state.material;
-    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti));
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
     else if(currentPanel==='panelPhoto') ok = !!photoImg;
     btn.disabled = !ok;
   }
@@ -4515,10 +4650,18 @@
 
   var FACADE_LAYOUT_NAME = {
     monocolore: { it:'Un colore', en:'One color' },
-    marcapiano: { it:'Marcapiano (3 colori)', en:'String course (3 colors)' },
-    righe_orizzontali: { it:'Righe orizzontali (2 colori)', en:'Horizontal stripes (2 colors)' },
-    righe_verticali: { it:'Righe verticali (2 colori)', en:'Vertical stripes (2 colors)' }
+    due_colori: { it:'Due colori (alto/basso)', en:'Two colors (top/bottom)' }
   };
+  // Descrizione leggibile della scelta righe (orientamento + zona/estensione),
+  // usata sia nel riepilogo che nel messaggio di richiesta preventivo.
+  function righeDescriptionText(langOverride){
+    var L = langOverride || LANG;
+    function lab(it,en){ return L==='en' ? en : it; }
+    if(state.righeOrientamento === 'verticali'){
+      return lab('Verticali, ','Vertical, ') + (state.righeZona === 'alta' ? lab('parte alta','upper part') : lab('parte bassa','lower part'));
+    }
+    return lab('Orizzontali, ','Horizontal, ') + (state.righeExtent === 'tutta' ? lab('anche parte sopra','upper part too') : lab('solo parte bassa','lower part only'));
+  }
   var BOISERIE_STYLE_NAME = {
     arco: { it:'Boiserie con arco', en:'Boiserie with arch' },
     specchiatura: { it:'Specchiatura classica', en:'Classic recessed panel' },
@@ -4537,29 +4680,31 @@
   function facadeColorLine(langOverride){
     var L = langOverride || LANG;
     function lab(it,en){ return L==='en' ? en : it; }
-    if(needsThirdColor()){
-      return lab('Alto: ','High: ')+state.colorA.name+' ('+state.colorA.code+') · '+lab('Marcapiano: ','String course: ')+state.colorC.name+' ('+state.colorC.code+') · '+lab('Basso: ','Low: ')+state.colorB.name+' ('+state.colorB.code+')';
+    if(needsSecondColor()){
+      return lab('Alto: ','High: ')+state.colorA.name+' ('+state.colorA.code+') · '+lab('Basso: ','Low: ')+state.colorB.name+' ('+state.colorB.code+')';
     }
     if(state.material && state.material.id === 'graniglia_esterni' && state.colorB){
       return lab('Campo: ','Field: ')+state.colorA.name+' ('+state.colorA.code+') · '+lab('Bordo: ','Border: ')+state.colorB.name+' ('+state.colorB.code+')';
     }
-    return state.colorA.name+' ('+state.colorA.code+')' + (state.colorB ? ' + '+state.colorB.name+' ('+state.colorB.code+')' : '');
+    return state.colorA.name+' ('+state.colorA.code+')';
   }
 
   function renderSummary(){
     var box=document.getElementById('summaryBox');
     var colorLine = facadeColorLine();
-    var facadeLayoutText = tr(FACADE_LAYOUT_NAME[state.facadeLayout]) + ((state.facadeLayout === 'righe_orizzontali' && state.righeExtent === 'meta') ? tr({it:' — solo metà facciata (basso)', en:' — lower half only'}) : '');
+    var facadeLayoutText = tr(FACADE_LAYOUT_NAME[state.facadeLayout]);
     var facadeLine = needsSecondColor() ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFacciata')+facadeLayoutText+'</span></div>' : '';
     var boiserieLine = (state.material.id === 'decorazioni') ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryStile')+tr(BOISERIE_STYLE_NAME[state.boiserieStyle])+'</span></div>' : '';
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
+    var marcapianoLine = (needsMarcapianoColor() && state.colorC) ? '<div class="line"><span class="sw" style="background:'+state.colorC.hex+'"></span><span>'+ts('summaryMarcapiano')+state.colorC.name+' ('+state.colorC.code+')</span></div>' : '';
     var sottotettoLine = (needsSottotettoColor() && state.colorSottotetto) ? '<div class="line"><span class="sw" style="background:'+state.colorSottotetto.hex+'"></span><span>'+ts('summarySottotetto')+state.colorSottotetto.name+' ('+state.colorSottotetto.code+')</span></div>' : '';
     var balconiLine = (needsBalconiColor() && state.colorBalconi) ? '<div class="line"><span class="sw" style="background:'+state.colorBalconi.hex+'"></span><span>'+ts('summaryBalconi')+state.colorBalconi.name+' ('+state.colorBalconi.code+')</span></div>' : '';
     var serramentiLine = (needsSerramentiColor() && state.colorSerramenti) ? '<div class="line"><span class="sw" style="background:'+state.colorSerramenti.hex+'"></span><span>'+ts('summarySerramenti')+state.colorSerramenti.name+' ('+state.colorSerramenti.code+')</span></div>' : '';
+    var righeLine = (needsRigheColor() && state.colorRighe) ? '<div class="line"><span class="sw" style="background:'+state.colorRighe.hex+'"></span><span>'+ts('summaryRighe')+righeDescriptionText()+' — '+state.colorRighe.name+' ('+state.colorRighe.code+')</span></div>' : '';
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+LF(state.material,'name')+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      facadeLine + boiserieLine + davanzaliLine + sottotettoLine + balconiLine + serramentiLine +
+      facadeLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + serramentiLine + balconiLine + righeLine +
       '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
@@ -4604,12 +4749,14 @@
       "Tipo cliente: "+(state.userType==='professionista' ? 'Professionista' : 'Privato'),
       "Lavorazione: "+state.material.name, "Colore: "+colorLine
     ];
-    if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it+((state.facadeLayout==='righe_orizzontali' && state.righeExtent==='meta') ? " — solo metà facciata (basso)" : ""));
+    if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it);
     if(state.material.id === 'decorazioni') lines.push("Stile boiserie: "+BOISERIE_STYLE_NAME[state.boiserieStyle].it);
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+state.colorDavanzali.name+" ("+state.colorDavanzali.code+")");
+    if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+state.colorC.name+" ("+state.colorC.code+")");
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+state.colorSottotetto.name+" ("+state.colorSottotetto.code+")");
-    if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+state.colorBalconi.name+" ("+state.colorBalconi.code+")");
     if(needsSerramentiColor() && state.colorSerramenti) lines.push("Serramenti: "+state.colorSerramenti.name+" ("+state.colorSerramenti.code+")");
+    if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+state.colorBalconi.name+" ("+state.colorBalconi.code+")");
+    if(needsRigheColor() && state.colorRighe) lines.push("Righe ("+righeDescriptionText('it')+"): "+state.colorRighe.name+" ("+state.colorRighe.code+")");
     lines.push(
       "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
       "Nome: "+name, "Telefono: "+phone
