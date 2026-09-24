@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it">
+<html lang="it" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -25,9 +25,13 @@
     padding-top: env(safe-area-inset-top, 0px);
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  /* Tema scuro "premium": ora attivo di default su tutta l'app (vedi
+     data-theme="dark" sul tag <html>), coerente con lo splash screen e il
+     logo Rendrum che vivono gia su un marrone scuro caldo. Palette calda
+     (non grigio/blu freddo) per restare in famiglia con --logo-bg. */
   :root[data-theme="dark"]{
-    --bg:#17181A; --surface:#212226; --ink:#F1EFE9; --ink-soft:#9A968B;
-    --line:#333335; --accent:#E0965A; --accent-soft:#3A2A20; --accent-ink:#1A1006;
+    --bg:#0F0D0B; --surface:#1A160F; --ink:#F5EFE6; --ink-soft:#B0A897;
+    --line:#2E2820; --accent:#E0965A; --accent-soft:#3A2A20; --accent-ink:#1A1006;
     --accent-gradient: linear-gradient(135deg, #F2B978, #C1682F);
   }
   html{ height:100%; }
@@ -106,8 +110,9 @@
   .material-card.photo-tile:active{ transform:scale(.96); }
   .material-card.photo-tile .sw{ display:none; }
   .material-card.photo-tile .tile-icon{
+    position:absolute; top:14px; left:14px; z-index:2;
     width:44px; height:44px; border-radius:12px; background:rgba(255,255,255,.18);
-    display:flex; align-items:center; justify-content:center; margin-bottom:2px;
+    display:flex; align-items:center; justify-content:center;
   }
   .material-card.photo-tile .tile-icon svg{ width:24px; height:24px; }
   .material-card.photo-tile .tile-content{ position:relative; z-index:2; display:flex; flex-direction:column; gap:3px; }
@@ -928,6 +933,16 @@
     if(!obj) return '';
     if(LANG==='en' && obj[field+'En']) return obj[field+'En'];
     return obj[field] || '';
+  }
+  // Converte un colore hex (#RRGGBB) in rgba(...) con l'alpha indicato: usato
+  // per il bagliore (glow) colorato dietro l'icona di ogni card categoria/
+  // materiale, nel tema scuro "premium".
+  function hexToRgba(hex, alpha){
+    if(!hex) return 'rgba(224,150,90,' + alpha + ')';
+    var h = hex.replace('#','');
+    if(h.length === 3) h = h.split('').map(function(c){ return c+c; }).join('');
+    var r = parseInt(h.substring(0,2),16), g = parseInt(h.substring(2,4),16), b = parseInt(h.substring(4,6),16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
 
   function applyStaticI18n(){
@@ -3780,6 +3795,8 @@
       card.innerHTML = '<span class="tile-icon">' + (styleInfo ? styleInfo.icon : '') + '</span>'
         + '<span class="tile-check">✓</span>'
         + '<span class="tile-content"><span class="m-name">'+LF(cat,'name')+'</span><span class="m-desc">'+LF(cat,'desc')+'</span>'+(cat.professionistiOnly ? '<span class="pro-badge">'+ts('proBadge')+'</span>' : '')+'</span>';
+      var catIconEl = card.querySelector('.tile-icon');
+      if(catIconEl && cat.swatch) catIconEl.style.boxShadow = '0 0 16px ' + hexToRgba(cat.swatch, 0.55);
       card.addEventListener('click', function(){
         state.category = cat;
         state.material = cat.subs ? null : cat;
@@ -3828,6 +3845,8 @@
       card.innerHTML = '<span class="tile-icon">' + (styleInfo ? styleInfo.icon : '') + '</span>'
         + '<span class="tile-check">✓</span>'
         + '<span class="tile-content"><span class="m-name">'+LF(sub,'name')+'</span><span class="m-desc">'+LF(sub,'desc')+'</span></span>';
+      var subIconEl = card.querySelector('.tile-icon');
+      if(subIconEl && sub.swatch) subIconEl.style.boxShadow = '0 0 16px ' + hexToRgba(sub.swatch, 0.55);
       card.addEventListener('click', function(){
         state.material = sub;
         resetSelectionForNewCategory();
