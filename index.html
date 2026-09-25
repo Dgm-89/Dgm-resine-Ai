@@ -6126,6 +6126,10 @@
   }
   function proVerifyText(email){ return 'Ti abbiamo inviato un\'email a ' + email + '. Clicca il link che trovi dentro per attivare l\'account (controlla anche la cartella spam).'; }
   function proUpdateHeader(){
+    if(proAccount && typeof proPendingClick !== 'undefined' && proPendingClick && (!proAccount.paymentsEnabled || subActive())){
+      var pid = proPendingClick; proPendingClick = null;
+      setTimeout(function(){ var el = document.getElementById(pid); if(el) el.click(); }, 300);
+    }
     document.body.classList.remove('pro-logged');
     var openBtn = document.getElementById('proAuthOpen');
     var badge = document.getElementById('proBadge');
@@ -6161,6 +6165,25 @@
       .then(function(d){ if(d && d.url) window.location.href = d.url; else alert((d && d.error) || 'Impossibile aprire la gestione abbonamento.'); })
       .catch(function(){});
   }
+  var proPendingClick = null;
+  // Blocco accesso: per usare l'app bisogna avere un account (email confermata) e un abbonamento attivo.
+  document.addEventListener('click', function(e){
+    var t = e.target.closest && e.target.closest('#landingPrivato, #landingPro, #next1, #nextStep');
+    if(!t) return;
+    if(!proAccount){
+      e.preventDefault(); e.stopImmediatePropagation();
+      proPendingClick = t.id;
+      proAuthOpen(); proSwitchTab('login');
+      var er = document.getElementById('paLoginError');
+      if(er) er.textContent = 'Per usare Rendrum accedi con la tua email, oppure premi "Registrati".';
+      return;
+    }
+    if(proAccount.paymentsEnabled && !subActive()){
+      e.preventDefault(); e.stopImmediatePropagation();
+      proPendingClick = t.id;
+      if(confirm('Per usare Rendrum serve un abbonamento attivo. Vuoi attivarlo adesso?')) startCheckout();
+    }
+  }, true);
   document.getElementById('proSubBtn').addEventListener('click', function(){ if(subActive()) openBillingPortal(); else startCheckout(); });
   (function(){
     var q = new URLSearchParams(location.search), p = q.get('pagamento');
