@@ -4570,7 +4570,7 @@
     if(!state.material) return null;
     var id = state.material.id;
     if(id==='imbiancatura') return state.context==='esterno' ? (ph==='T' ? null : 'pittura') : 'pittura';
-    return ({monolith_spatolato:'spatolato', scale:'spatolato', monolith_marmo:'marmo', monolith_terrazzo:'terrazzo', monolith_pietra:'pietra',
+    return ({monolith_spatolato:'microcemento', scale:'microcemento', monolith_marmo:'microcemento', monolith_terrazzo:'microcemento', monolith_pietra:'microcemento',
              microcemento:'microcemento', decorazioni:'pittura', resina_haccp:'resina', parquet:'parquet', spc:'parquet', piastrelle:'piastrelle'})[id] || null;
   }
   // La texture viene "tinta" su canvas: ogni pixel = colore esatto x rilievo
