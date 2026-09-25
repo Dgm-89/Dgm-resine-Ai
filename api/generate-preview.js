@@ -152,7 +152,7 @@ module.exports = async function handler(req, res) {
     rivestimento: "SOLO alle pareti inquadrate (non applicare al pavimento anche se visibile nella foto)",
     tutto: "sia al pavimento che alle pareti inquadrate nella foto, in modo uniforme e continuo su entrambe le superfici, come un ambiente completamente resinato dal pavimento alle pareti"
   };
-  const resinaAreaDesc = (materialId && materialId.indexOf("monolith") === 0 && resinaArea && RESINA_AREA_DESC[resinaArea])
+  const resinaAreaDesc = (materialId && (materialId.indexOf("monolith") === 0 || materialId === "microcemento") && resinaArea && RESINA_AREA_DESC[resinaArea])
     ? RESINA_AREA_DESC[resinaArea]
     : null;
 
@@ -432,7 +432,7 @@ module.exports = async function handler(req, res) {
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
     isFacadeStyled ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
-    `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).`,
+    finitura ? `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).` : "",
     isExteriorFacade
       ? facadeKeepSentence
       : isFloorOnly
