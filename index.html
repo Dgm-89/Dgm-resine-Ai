@@ -268,6 +268,50 @@
     .landing-card:hover{ border-color:var(--accent); }
   }
 
+  /* ===== Home 2026: hero con prima/dopo ===== */
+  .lp{ display:grid; grid-template-columns:minmax(0,1fr); grid-template-areas:"copy" "ba" "cta" "how" "priv"; gap:22px; padding:6px 0 10px; }
+  .lp-copy{ grid-area:copy; display:flex; flex-direction:column; gap:14px; }
+  .lp-kicker{ align-self:flex-start; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); display:inline-flex; align-items:center; gap:8px; }
+  .lp-kicker::before{ content:""; width:22px; height:2px; border-radius:2px; background:var(--accent); }
+  .lp-title{ margin:0; font-size:clamp(30px, 8.4vw, 56px); line-height:1.04; font-weight:800; letter-spacing:-.03em; color:var(--ink); text-wrap:balance; }
+  .lp-tag{ margin:0; font-size:15.5px; line-height:1.55; color:var(--ink-soft); max-width:46ch; }
+  .lp-ba{ grid-area:ba; margin:0; display:flex; flex-direction:column; gap:10px; }
+  .ba-frame{ position:relative; border-radius:22px; overflow:hidden; aspect-ratio:4/3; max-width:100%; background:var(--surface); border:1px solid var(--line); box-shadow:0 24px 60px -24px rgba(0,0,0,.65); user-select:none; -webkit-user-select:none; touch-action:pan-y; }
+  .ba-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+  .ba-after{ clip-path:inset(0 0 0 var(--pos)); }
+  .ba-line{ position:absolute; top:0; bottom:0; left:var(--pos); width:2px; margin-left:-1px; background:#fff; box-shadow:0 0 12px rgba(0,0,0,.35); pointer-events:none; }
+  .ba-knob{ position:absolute; top:50%; left:50%; width:42px; height:42px; margin:-21px 0 0 -21px; border-radius:50%; background:#fff; color:#1A1006; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,.35); }
+  .ba-lab{ position:absolute; top:14px; font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:#fff; background:rgba(15,13,11,.55); backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); padding:6px 10px; border-radius:999px; pointer-events:none; }
+  .ba-lab-l{ left:14px; } .ba-lab-r{ right:14px; }
+  .ba-range{ position:absolute; inset:0; width:100%; height:100%; margin:0; opacity:0; cursor:ew-resize; -webkit-appearance:none; appearance:none; }
+  .ba-range:focus-visible + *, .ba-frame:focus-within{ outline:2px solid var(--accent); outline-offset:3px; }
+  .lp-cap{ font-size:12px; color:var(--ink-soft); }
+  .lp-cta{ grid-area:cta; display:flex; flex-direction:column; gap:12px; }
+  .lp-choices{ max-width:none !important; margin:0 !important; }
+  .lp .landing-card{ border-radius:16px; padding:14px 16px; transition:transform .12s ease, border-color .15s ease, background .15s ease; box-shadow:none; }
+  .lp #landingPrivato{ background:var(--accent-gradient); border-color:transparent; }
+  .lp #landingPrivato .lc-title, .lp #landingPrivato .lc-arrow{ color:#1A1006; }
+  .lp #landingPrivato .lc-desc{ color:rgba(26,16,6,.78); }
+  .lp #landingPrivato .lc-icon{ background:rgba(26,16,6,.14); }
+  .lp #landingPrivato .lc-icon svg{ color:#1A1006; }
+  .lp-trust{ font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; gap:8px; }
+  .lp-trust::before{ content:""; width:8px; height:8px; border-radius:50%; background:#6FBF73; box-shadow:0 0 0 4px rgba(111,191,115,.15); flex:none; }
+  .lp-how{ grid-area:how; margin-top:10px; }
+  .lp .landing-privacy{ grid-area:priv; justify-self:center; }
+  .lp.no-ba{ grid-template-areas:"copy" "cta" "how" "priv"; }
+  .lp.no-ba .lp-ba{ display:none; }
+  @media (min-width:1024px){
+    .lp{ grid-template-columns:minmax(0,1fr) minmax(0,1.15fr); grid-template-areas:"copy ba" "cta ba" "how how" "priv priv"; column-gap:56px; row-gap:26px; padding-top:28px; align-items:start; }
+    .lp-copy{ align-self:end; }
+    .lp-ba{ align-self:center; }
+    .ba-frame{ aspect-ratio:5/4; }
+    .lp-how .how-steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .lp-how{ margin-top:34px; padding-top:28px; border-top:1px solid var(--line); }
+    .lp.no-ba{ grid-template-columns:minmax(0,640px); justify-content:center; grid-template-areas:"copy" "cta" "how" "priv"; }
+    .lp .landing-card:hover{ transform:translateY(-1px); }
+  }
+  @media (prefers-reduced-motion:reduce){ .lp .landing-card{ transition:none; } }
+
   .family-row{ display:flex; gap:0; border-radius:10px; overflow:hidden; margin:2px 0 14px; border:1px solid var(--line); }
   .family-row button{ flex:1; height:44px; border:none; cursor:pointer; position:relative; padding:0; }
   .family-row button:not(:last-child){ border-right:1px solid rgba(255,255,255,0.35); }
@@ -419,7 +463,7 @@
 <header>
   <div class="brand">
     <img class="brand-logo" src="data:image/jpeg;base64,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" alt="Rendrum">
-    <span class="brand-text"><span class="tag" data-i18n="brandTag">Pavimenti · Rivestimenti · Imbiancatura</span></span>
+    <span class="brand-text"><span class="name">Rendrum</span><span class="tag" data-i18n="brandTag">Pavimenti · Rivestimenti · Imbiancatura</span></span>
   </div>
   <div class="header-actions">
     <button type="button" class="theme-btn" id="proAuthOpen" data-i18n="proAuthOpenBtn">Accedi</button>
@@ -529,14 +573,25 @@
 <main>
   <!-- 0: INGRESSO -->
   <section class="panel active" id="panelLanding">
-    <div class="landing">
-      <div class="landing-hero">
-        <div class="landing-blob"></div>
-        <span class="landing-kicker" data-i18n="landingKicker">Vedi il risultato prima di scegliere</span>
-        <h1 class="landing-title" data-i18n="landingTitle">Vedi il lavoro finito sulla tua casa, prima di iniziare</h1>
-        <p class="landing-tag" data-i18n="landingTag">Resine, microcemento, pittura e facciate: scegli colori e finiture, carica una foto e ricevi l'anteprima realistica e il preventivo.</p>
+    <div class="lp" id="lp">
+      <div class="lp-copy">
+        <span class="lp-kicker" data-i18n="landingKicker">Vedi il risultato prima di scegliere</span>
+        <h1 class="lp-title" data-i18n="landingTitle">Vedi il lavoro finito sulla tua casa, prima di iniziare</h1>
+        <p class="lp-tag" data-i18n="landingTag">Resine, microcemento, pittura e facciate: scegli colori e finiture, carica una foto e ricevi l'anteprima realistica e il preventivo.</p>
       </div>
-      <div class="landing-choices">
+      <figure class="lp-ba" id="lpBA">
+        <div class="ba-frame" id="baFrame" style="--pos:50%">
+          <img class="ba-img" id="baBefore" src="esempi/prima.jpg" alt="Prima dei lavori" data-i18n-alt="baBeforeAlt" draggable="false">
+          <img class="ba-img ba-after" id="baAfter" src="esempi/dopo.jpg" alt="Anteprima dopo i lavori" data-i18n-alt="baAfterAlt" draggable="false">
+          <span class="ba-line" aria-hidden="true"><span class="ba-knob"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l-6 6 6 6"/><path d="M15 6l6 6-6 6"/></svg></span></span>
+          <span class="ba-lab ba-lab-l" data-i18n="baBefore">Prima</span>
+          <span class="ba-lab ba-lab-r" data-i18n="baAfter">Dopo</span>
+          <input class="ba-range" id="baRange" type="range" min="0" max="100" value="50" aria-label="Confronta prima e dopo" data-i18n-aria="baRangeAria">
+        </div>
+        <figcaption class="lp-cap" id="baCaption" data-i18n="baCaption">Anteprima creata con Rendrum: stessa casa, facciata prima e dopo</figcaption>
+      </figure>
+      <div class="lp-cta">
+        <div class="landing-choices lp-choices">
         <button type="button" class="landing-card" id="landingPrivato">
           <span class="lc-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span>
           <span class="lc-text"><span class="lc-title" data-i18n="landingPrivatoTitle">Privati</span><span class="lc-desc" data-i18n="landingPrivatoDesc">Configura casa, terrazzo o facciata</span></span>
@@ -547,18 +602,18 @@
           <span class="lc-text"><span class="lc-title" data-i18n="landingProTitle">Professionisti</span><span class="lc-desc" data-i18n="landingProDesc">Imprese, architetti, rivenditori</span></span>
           <span class="lc-arrow">›</span>
         </button>
+        </div>
+        <div class="lp-trust" data-i18n="landingTrust">Anteprima gratuita · Nessuna registrazione per i privati</div>
       </div>
-      <div class="landing-how">
+      <div class="lp-how">
         <div class="how-title" data-i18n="howTitle">Come funziona</div>
         <div class="how-steps">
           <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.5 0-1.2-1-1.5-1-2.5s.8-1.5 2-1.5h2A4.5 4.5 0 0 0 21 11c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/></svg></span><span class="how-num">1</span><span class="how-txt" data-i18n="how1">Scegli lavorazione, colori e finiture</span></div>
           <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span><span class="how-num">2</span><span class="how-txt" data-i18n="how2">Carica una foto del tuo ambiente o della facciata</span></div>
           <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7-7-1z"/></svg></span><span class="how-num">3</span><span class="how-txt" data-i18n="how3">Guarda l'anteprima e richiedi il preventivo</span></div>
         </div>
-        <div class="landing-trust" data-i18n="landingTrust">Anteprima gratuita · Nessuna registrazione per i privati</div>
-        <!-- ESEMPI PRIMA/DOPO: da aggiungere con foto reali di lavori DGM quando disponibili -->
-        <button type="button" class="privacy-link landing-privacy" data-open-privacy data-i18n="privacyShort">Privacy</button>
       </div>
+      <button type="button" class="privacy-link landing-privacy" data-open-privacy data-i18n="privacyShort">Privacy</button>
     </div>
   </section>
 
@@ -607,7 +662,7 @@
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
 
     <details class="facade-extras" id="facadeExtras" style="display:none">
-      <summary><span class="fx-title" data-i18n="facadeExtrasTitle">Personalizza altre parti della facciata</span><span class="fx-sub" id="facadeExtrasSub">Davanzali, marcapiano, sottotetto, serramenti, balconi, righe</span></summary>
+      <summary><span class="fx-title" data-i18n="facadeExtrasTitle">Personalizza altre parti della facciata</span><span class="fx-sub" id="facadeExtrasSub">Davanzali, marcapiano, sottotetto, tetto, cornici, serramenti, balconi, righe</span></summary>
       <div class="fx-body">
     <button type="button" class="niche-toggle" id="davanzaliToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="55" y="30" width="70" height="60" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/><rect x="55" y="30" width="70" height="60" fill="none" stroke="#7FA3B5" stroke-width="3"/><line x1="90" y1="30" x2="90" y2="90" stroke="#93897A" stroke-width="3"/><rect x="46" y="90" width="88" height="14" fill="#B5652E"/></svg>
@@ -627,6 +682,16 @@
       <span class="nt-check"></span>
     </button>
 
+    <button type="button" class="niche-toggle" id="tettoToggle" style="display:none">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><polygon points="14,62 90,14 166,62" fill="#4E524F" stroke="#2F322F" stroke-width="3"/><path d="M40,46 L140,46 M28,55 L152,55 M55,36 L125,36" stroke="#6A6E6A" stroke-width="2"/><rect x="34" y="62" width="112" height="56" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="tettoTitle">Rinnova il colore del tetto</span><span class="nt-desc" data-i18n="tettoDesc">Tetto pulito nel colore che scegli (guaina, lamiera o tegole in cemento). Anteprima indicativa: il tetto va valutato a parte nel preventivo</span></span>
+      <span class="nt-check"></span>
+    </button>
+    <button type="button" class="niche-toggle" id="corniciToggle" style="display:none">
+      <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E3DCC9"/><rect x="28" y="24" width="50" height="70" fill="#F4F1E9" stroke="#C9C2B2" stroke-width="2"/><rect x="38" y="34" width="30" height="50" fill="#5E7A93"/><path d="M104,110 L104,48 A26,26 0 0 1 156,48 L156,110 Z" fill="#F4F1E9" stroke="#C9C2B2" stroke-width="2"/><path d="M114,110 L114,50 A16,16 0 0 1 146,50 L146,110 Z" fill="#6B4A33"/></svg>
+      <span class="nt-text"><span class="nt-title" data-i18n="corniciTitle">Colore delle cornici di porte e finestre</span><span class="nt-desc" data-i18n="corniciDesc">Le fasce in rilievo intorno a finestre e porte (cornici, archi, spallette) in un colore diverso dalla facciata</span></span>
+      <span class="nt-check"></span>
+    </button>
     <button type="button" class="niche-toggle" id="serramentiToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="45" y="20" width="90" height="90" fill="#E3DCC9" stroke="#6B4A2A" stroke-width="6"/><line x1="90" y1="20" x2="90" y2="110" stroke="#6B4A2A" stroke-width="5"/><line x1="45" y1="65" x2="135" y2="65" stroke="#6B4A2A" stroke-width="5"/></svg>
       <span class="nt-text"><span class="nt-title" data-i18n="serramentiTitle">Personalizza il colore dei serramenti</span><span class="nt-desc" data-i18n="serramentiDesc">Scegli il colore di finestre/porte esterne in legno (Noce, Bianco, Grigio chiaro, Grigio canna di fucile)</span></span>
@@ -890,6 +955,12 @@
   // cambia lingua.
   var I18N_STATIC = {
     brandTag: { it:"Pavimenti · Rivestimenti · Imbiancatura", en:"Flooring · Wall coverings · Painting" },
+    baBefore: { it:"Prima", en:"Before" },
+    baBeforeAlt: { it:"Prima dei lavori", en:"Before the work" },
+    baAfterAlt: { it:"Anteprima dopo i lavori", en:"Preview after the work" },
+    baRangeAria: { it:"Confronta prima e dopo", en:"Compare before and after" },
+    baAfter: { it:"Dopo", en:"After" },
+    baCaption: { it:"Anteprima creata con Rendrum: stessa casa, facciata prima e dopo", en:"Preview made with Rendrum: same house, facade before and after" },
     landingKicker: { it:"Vedi il risultato prima di scegliere", en:"See the result before you choose" },
     landingTag: { it:"Resine, microcemento, pittura e facciate: scegli colori e finiture, carica una foto e ricevi l'anteprima realistica e il preventivo.", en:"Resins, microcement, painting and facades: choose colors and finishes, upload a photo and get a realistic preview and a quote." },
     landingPrivatoTitle: { it:"Privati", en:"Homeowners" },
@@ -995,6 +1066,16 @@
     panel3SaveProjectBtn: { it:"Salva questo progetto nella tua cartella", en:"Save this project to your folder" },
     davanzaliTitle: { it:"Personalizza il colore dei davanzali", en:"Customize window sill color" },
     davanzaliDesc: { it:"Scegli un colore diverso dalla facciata per i davanzali delle finestre", en:"Choose a color for the window sills different from the facade" },
+    tettoTitle: { it:"Rinnova il colore del tetto", en:"Refresh the roof color" },
+    tettoDesc: { it:"Tetto pulito nel colore che scegli (guaina, lamiera o tegole in cemento). Anteprima indicativa: il tetto va valutato a parte nel preventivo", en:"Clean roof in the color you choose (coating, metal or concrete tiles). Indicative preview: the roof is quoted separately" },
+    corniciTitle: { it:"Colore delle cornici di porte e finestre", en:"Door and window surround color" },
+    corniciDesc: { it:"Le fasce in rilievo intorno a finestre e porte (cornici, archi, spallette) in un colore diverso dalla facciata", en:"The raised bands around windows and doors (surrounds, arches, reveals) in a color different from the facade" },
+    clusterLabelTetto: { it:"Colore tetto", en:"Roof color" },
+    clusterLabelCornici: { it:"Colore cornici porte e finestre", en:"Door and window surround color" },
+    pendingTetto: { it:"+ Colore tetto da scegliere", en:"+ Roof color to choose" },
+    pendingCornici: { it:"+ Colore cornici da scegliere", en:"+ Surround color to choose" },
+    summaryTetto: { it:"Tetto: ", en:"Roof: " },
+    summaryCornici: { it:"Cornici porte e finestre: ", en:"Door/window surrounds: " },
     sottotettoTitle: { it:"Personalizza il colore del sottotetto", en:"Customize eave/soffit color" },
     sottotettoDesc: { it:"Scegli un colore diverso dalla facciata per lo sporto di gronda/sottotetto (legno o cemento)", en:"Choose a color for the eave overhang (wood or plaster) different from the facade" },
     balconiTitle: { it:"Personalizza il colore dei balconi", en:"Customize balcony color" },
@@ -3471,7 +3552,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -3558,6 +3639,8 @@
   // Vero quando il cliente ha attivato il toggle "sottotetto in legno colore diverso"
   // (solo per Imbiancatura Esterno, come davanzali/marcapiano/righe).
   function needsSottotettoColor(){ return !!(state.addSottotetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  function needsTettoColor(){ return !!(state.addTetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  function needsCorniciColor(){ return !!(state.addCornici && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   // Vero quando il cliente ha attivato il toggle "balconi colore diverso"
   // (solo per Imbiancatura Esterno, come davanzali/sottotetto/marcapiano/righe).
   function needsBalconiColor(){ return !!(state.addBalconi && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
@@ -3577,6 +3660,8 @@
     if(needsDavanzaliColor()) order.push('D');
     if(needsMarcapianoColor()) order.push('C');
     if(needsSottotettoColor()) order.push('E');
+    if(needsTettoColor()) order.push('T');
+    if(needsCorniciColor()) order.push('K');
     if(needsSerramentiColor()) order.push('G');
     if(needsBalconiColor()) order.push('F');
     if(needsRigheColor()) order.push('H');
@@ -3588,6 +3673,8 @@
     if(p==='C') return state.colorC;
     if(p==='D') return state.colorDavanzali;
     if(p==='E') return state.colorSottotetto;
+    if(p==='T') return state.colorTetto;
+    if(p==='K') return state.colorCornici;
     if(p==='F') return state.colorBalconi;
     if(p==='G') return state.colorSerramenti;
     if(p==='H') return state.colorRighe;
@@ -3595,8 +3682,8 @@
   }
 
   function resetSelectionForNewCategory(){
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncEffettoVisibility();
@@ -3692,6 +3779,20 @@
     for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
     aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
     renderStep2UI();
+  });
+
+  ['tetto','cornici'].forEach(function(k){
+    var el = document.getElementById(k+'Toggle'); if(!el) return;
+    el.addEventListener('click', function(){
+      var addKey = k==='tetto' ? 'addTetto' : 'addCornici', colKey = k==='tetto' ? 'colorTetto' : 'colorCornici';
+      state[addKey] = !state[addKey];
+      this.classList.toggle('active', state[addKey]);
+      if(!state[addKey]) state[colKey] = null;
+      var order = phaseOrder(); pickPhase = order[0];
+      for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+      aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+      renderStep2UI();
+    });
   });
 
   document.getElementById('balconiToggle').addEventListener('click', function(){
@@ -3796,11 +3897,13 @@
     if(state.addDavanzali) names.push(tr({it:'davanzali',en:'window sills'}));
     if(state.addMarcapiano) names.push(tr({it:'marcapiano',en:'string course'}));
     if(state.addSottotetto) names.push(tr({it:'sottotetto',en:'eave'}));
+    if(state.addTetto) names.push(tr({it:'tetto',en:'roof'}));
+    if(state.addCornici) names.push(tr({it:'cornici',en:'surrounds'}));
     if(state.addSerramenti) names.push(tr({it:'serramenti',en:'window frames'}));
     if(state.addBalconi) names.push(tr({it:'balconi',en:'balconies'}));
     if(state.addRighe) names.push(tr({it:'righe',en:'stripes'}));
     var sub = document.getElementById('facadeExtrasSub');
-    sub.textContent = names.length ? tr({it:'Attivi: ',en:'Active: '}) + names.join(', ') : tr({it:'Davanzali, marcapiano, sottotetto, serramenti, balconi, righe',en:'Sills, string course, eave, frames, balconies, stripes'});
+    sub.textContent = names.length ? tr({it:'Attivi: ',en:'Active: '}) + names.join(', ') : tr({it:'Davanzali, marcapiano, sottotetto, tetto, cornici, serramenti, balconi, righe',en:'Sills, string course, eave, roof, surrounds, frames, balconies, stripes'});
     sub.classList.toggle('active', names.length > 0);
   }
   function syncFacadeLayoutVisibility(){
@@ -3830,6 +3933,12 @@
     sotEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addSottotetto = false; state.colorSottotetto = null; }
     sotEl.classList.toggle('active', state.addSottotetto);
+    [['tettoToggle','addTetto','colorTetto'],['corniciToggle','addCornici','colorCornici']].forEach(function(t){
+      var el = document.getElementById(t[0]); if(!el) return;
+      el.style.display = show ? 'flex' : 'none';
+      if(!show){ state[t[1]] = false; state[t[2]] = null; }
+      el.classList.toggle('active', !!state[t[1]]);
+    });
     var serEl = document.getElementById('serramentiToggle');
     serEl.style.display = show ? 'flex' : 'none';
     if(!show){ state.addSerramenti = false; state.colorSerramenti = null; }
@@ -4000,7 +4109,7 @@
         state.context = opt.v;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
-        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
+        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addTetto=false; state.addCornici=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
         syncNextStepEnabled();
@@ -4338,7 +4447,7 @@
     return 'background-color:' + hex + ';background-image:url(' + t.tex + '),url(' + t.ombra + ');background-size:' + (size||GRANA_TILE_PX) + 'px;background-repeat:repeat;background-blend-mode:soft-light,multiply;';
   }
   // I serramenti sono in legno: niente grana.
-  function granaAppliesToPhase(ph){ return granaActive() && ph !== 'G'; }
+  function granaAppliesToPhase(ph){ return granaActive() && ph !== 'G' && ph !== 'T' && ph !== 'K'; }
   var granaImgs = {};
   Object.keys(GRANA_TEX).forEach(function(k){
     granaImgs[k] = { tex:new Image(), ombra:new Image() };
@@ -4380,6 +4489,8 @@
     B: { it:'Parte bassa: ', en:'Lower part: ' },
     D: { it:'Davanzali: ', en:'Window sills: ' },
     E: { it:'Sottotetto: ', en:'Eave: ' },
+    T: { it:'Tetto: ', en:'Roof: ' },
+    K: { it:'Cornici: ', en:'Surrounds: ' },
     F: { it:'Balconi: ', en:'Balconies: ' },
     G: { it:'Serramenti: ', en:'Window frames: ' },
     H: { it:'Righe: ', en:'Stripes: ' }
@@ -4388,8 +4499,8 @@
     // Monocolore ma con davanzali/marcapiano/sottotetto/balconi/serramenti/righe
     // attivi: anche il chip del colore facciata deve avere un'etichetta,
     // altrimenti si confonde con gli extra.
-    var isFacciataMono = phase==='A' && !needsSecondColor() && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor());
-    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='F' || phase==='G' || phase==='H' || isFacciataMono; // marcapiano, davanzali, sottotetto, balconi, serramenti e righe distinguono sempre l'etichetta
+    var isFacciataMono = phase==='A' && !needsSecondColor() && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsTettoColor() || needsCorniciColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor());
+    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='T' || phase==='K' || phase==='F' || phase==='G' || phase==='H' || isFacciataMono; // marcapiano, davanzali, sottotetto, balconi, serramenti e righe distinguono sempre l'etichetta
     var labelText = isFacciataMono ? tr({it:'Facciata: ', en:'Facade: '}) : (showLabel ? tr(PHASE_CHIP_LABEL[phase]) : '');
     var chip=document.createElement('span'); chip.className='chip';
     chip.innerHTML='<span class="dot" style="'+(granaAppliesToPhase(phase) ? granaStyle(color.hex, 40) : 'background:'+color.hex+';')+'"></span>'+labelText+color.name+'<button aria-label="'+ts('removeAria')+'">×</button>';
@@ -4398,6 +4509,8 @@
       else if(phase==='C'){ state.colorC=null; }
       else if(phase==='D'){ state.colorDavanzali=null; }
       else if(phase==='E'){ state.colorSottotetto=null; }
+      else if(phase==='T'){ state.colorTetto=null; }
+      else if(phase==='K'){ state.colorCornici=null; }
       else if(phase==='F'){ state.colorBalconi=null; }
       else if(phase==='G'){ state.colorSerramenti=null; }
       else if(phase==='H'){ state.colorRighe=null; }
@@ -4431,6 +4544,12 @@
     }
     if(needsSottotettoColor()){
       if(state.colorSottotetto) addColorChip(row, 'E', state.colorSottotetto); else addPendingChip(row, 'pendingSottotetto');
+    }
+    if(needsTettoColor()){
+      if(state.colorTetto) addColorChip(row, 'T', state.colorTetto); else addPendingChip(row, 'pendingTetto');
+    }
+    if(needsCorniciColor()){
+      if(state.colorCornici) addColorChip(row, 'K', state.colorCornici); else addPendingChip(row, 'pendingCornici');
     }
     if(needsSerramentiColor()){
       if(state.colorSerramenti) addColorChip(row, 'G', state.colorSerramenti); else addPendingChip(row, 'pendingSerramenti');
@@ -4562,6 +4681,10 @@
       label.textContent = ts('clusterLabelDavanzali');
     } else if(pickPhase==='E'){
       label.textContent = ts('clusterLabelSottotetto');
+    } else if(pickPhase==='T'){
+      label.textContent = ts('clusterLabelTetto');
+    } else if(pickPhase==='K'){
+      label.textContent = ts('clusterLabelCornici');
     } else if(pickPhase==='F'){
       label.textContent = ts('clusterLabelBalconi');
     } else if(pickPhase==='G'){
@@ -4572,7 +4695,7 @@
       label.textContent = tr(PHASE_LABEL_3[pickPhase]);
     } else if(needsSecondColor()){
       label.textContent = pickPhase==='A' ? ts('clusterLabelFirst') : ts('clusterLabelSecond');
-    } else if(pickPhase==='A' && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor())){
+    } else if(pickPhase==='A' && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsTettoColor() || needsCorniciColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor())){
       // Monocolore ma con davanzali/marcapiano/sottotetto/balconi/serramenti/righe
       // attivi: va chiarito che questo è il colore della facciata principale,
       // distinto dagli extra.
@@ -4684,6 +4807,8 @@
     else if(pickPhase==='C'){ state.colorC=c; }
     else if(pickPhase==='D'){ state.colorDavanzali=c; }
     else if(pickPhase==='E'){ state.colorSottotetto=c; }
+    else if(pickPhase==='T'){ state.colorTetto=c; }
+    else if(pickPhase==='K'){ state.colorCornici=c; }
     else if(pickPhase==='F'){ state.colorBalconi=c; }
     else if(pickPhase==='G'){ state.colorSerramenti=c; }
     else if(pickPhase==='H'){ state.colorRighe=c; }
@@ -4731,7 +4856,7 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = tr(CONTEXT_HINT[v]);
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addTetto=false; state.addCornici=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
     document.getElementById('colorSearch').value='';
     syncFacadeLayoutVisibility();
     renderStep2UI();
@@ -4848,6 +4973,8 @@
         colorA: state.colorA.name, colorAHex: apiHex(state.colorA), colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? apiHex(state.colorB) : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? apiHex(state.colorC) : null,
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? apiHex(state.colorDavanzali) : null,
         colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? apiHex(state.colorSottotetto) : null,
+        colorTetto: (needsTettoColor() && state.colorTetto) ? state.colorTetto.name : null, colorTettoHex: (needsTettoColor() && state.colorTetto) ? apiHex(state.colorTetto) : null,
+        colorCornici: (needsCorniciColor() && state.colorCornici) ? state.colorCornici.name : null, colorCorniciHex: (needsCorniciColor() && state.colorCornici) ? apiHex(state.colorCornici) : null,
         colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? apiHex(state.colorBalconi) : null,
         colorSerramenti: (needsSerramentiColor() && state.colorSerramenti) ? state.colorSerramenti.name : null, colorSerramentiHex: (needsSerramentiColor() && state.colorSerramenti) ? apiHex(state.colorSerramenti) : null,
         colorRighe: (needsRigheColor() && state.colorRighe) ? state.colorRighe.name : null, colorRigheHex: (needsRigheColor() && state.colorRighe) ? apiHex(state.colorRighe) : null,
@@ -4862,6 +4989,8 @@
         addDavanzali: needsDavanzaliColor(),
         addMarcapiano: needsMarcapianoColor(),
         addSottotetto: needsSottotettoColor(),
+        addTetto: needsTettoColor(),
+        addCornici: needsCorniciColor(),
         addBalconi: needsBalconiColor(),
         addSerramenti: needsSerramentiColor(),
         addRighe: needsRigheColor(),
@@ -4987,7 +5116,7 @@
     var ok = true;
     if(currentPanel==='panelResinaArea') ok = !!state.resinaArea;
     else if(currentPanel==='panelSub') ok = !!state.material;
-    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
     else if(currentPanel==='panelPhoto') ok = !!photoImg;
     btn.disabled = !ok;
   }
@@ -5076,6 +5205,8 @@
     if(needsRigheColor() && !cardSkipRighe) add('RIGHE', state.colorRighe);
     if(needsDavanzaliColor()) add('DAVANZALI', state.colorDavanzali);
     if(needsSottotettoColor()) add('SOTTOTETTO', state.colorSottotetto);
+    if(needsTettoColor()) add('TETTO', state.colorTetto);
+    if(needsCorniciColor()) add('CORNICI PORTE E FINESTRE', state.colorCornici);
     if(needsSerramentiColor()) add('SERRAMENTI E PERSIANE', state.colorSerramenti);
     if(needsBalconiColor()) add('BALCONI', state.colorBalconi);
     return z;
@@ -5109,7 +5240,7 @@
     x.fillText('SCHEMA DELLA FACCIATA', X, Y + 22);
     var roofH = 110, top = Y + 50 + roofH, fx = X + 20, fw = W - 40, fh = Htot - roofH - 60;
     // tetto e sottotetto
-    x.fillStyle = '#6E5A4E'; x.beginPath(); x.moveTo(X, top); x.lineTo(X + W/2, top - roofH); x.lineTo(X + W, top); x.closePath(); x.fill();
+    x.fillStyle = needsTettoColor() ? hex(state.colorTetto,'#6E5A4E') : '#6E5A4E'; x.beginPath(); x.moveTo(X, top); x.lineTo(X + W/2, top - roofH); x.lineTo(X + W, top); x.closePath(); x.fill();
     x.fillStyle = needsSottotettoColor() ? hex(state.colorSottotetto,'#D8CDB8') : '#D8CDB8';
     x.fillRect(X, top, W, 16);
     // facciata
@@ -5234,13 +5365,15 @@
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
     var marcapianoLine = (needsMarcapianoColor() && state.colorC) ? '<div class="line"><span class="sw" style="background:'+state.colorC.hex+'"></span><span>'+ts('summaryMarcapiano')+state.colorC.name+' ('+state.colorC.code+')</span></div>' : '';
     var sottotettoLine = (needsSottotettoColor() && state.colorSottotetto) ? '<div class="line"><span class="sw" style="background:'+state.colorSottotetto.hex+'"></span><span>'+ts('summarySottotetto')+state.colorSottotetto.name+' ('+state.colorSottotetto.code+')</span></div>' : '';
+    var tettoLine = (needsTettoColor() && state.colorTetto) ? '<div class="line"><span class="sw" style="background:'+state.colorTetto.hex+'"></span><span>'+ts('summaryTetto')+state.colorTetto.name+' ('+state.colorTetto.code+')</span></div>' : '';
+    var corniciLine = (needsCorniciColor() && state.colorCornici) ? '<div class="line"><span class="sw" style="background:'+state.colorCornici.hex+'"></span><span>'+ts('summaryCornici')+state.colorCornici.name+' ('+state.colorCornici.code+')</span></div>' : '';
     var balconiLine = (needsBalconiColor() && state.colorBalconi) ? '<div class="line"><span class="sw" style="background:'+state.colorBalconi.hex+'"></span><span>'+ts('summaryBalconi')+state.colorBalconi.name+' ('+state.colorBalconi.code+')</span></div>' : '';
     var serramentiLine = (needsSerramentiColor() && state.colorSerramenti) ? '<div class="line"><span class="sw" style="background:'+state.colorSerramenti.hex+'"></span><span>'+ts('summarySerramenti')+state.colorSerramenti.name+' ('+state.colorSerramenti.code+')</span></div>' : '';
     var righeLine = (needsRigheColor() && state.colorRighe) ? '<div class="line"><span class="sw" style="background:'+state.colorRighe.hex+'"></span><span>'+ts('summaryRighe')+righeDescriptionText()+' — '+state.colorRighe.name+' ('+state.colorRighe.code+')</span></div>' : '';
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+LF(state.material,'name')+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      contextLine + granaLine + facadeLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + serramentiLine + balconiLine + righeLine +
+      contextLine + granaLine + facadeLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + tettoLine + corniciLine + serramentiLine + balconiLine + righeLine +
       '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
@@ -5301,6 +5434,8 @@
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+colorLabel(state.colorDavanzali));
     if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+colorLabel(state.colorC));
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+colorLabel(state.colorSottotetto));
+    if(needsTettoColor() && state.colorTetto) lines.push("Tetto: "+colorLabel(state.colorTetto));
+    if(needsCorniciColor() && state.colorCornici) lines.push("Cornici porte e finestre: "+colorLabel(state.colorCornici));
     if(needsSerramentiColor() && state.colorSerramenti) lines.push("Serramenti: "+colorLabel(state.colorSerramenti));
     if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+colorLabel(state.colorBalconi));
     if(needsRigheColor() && state.colorRighe) lines.push("Righe ("+righeDescriptionText('it')+"): "+colorLabel(state.colorRighe));
@@ -5760,6 +5895,18 @@
     if(sp) sp.classList.add('hide');
   }, 2000);
   goTo('panelLanding');
+})();
+</script>
+
+<script>
+(function(){
+  var lp=document.getElementById('lp'), frame=document.getElementById('baFrame'), range=document.getElementById('baRange');
+  if(!lp||!frame||!range) return;
+  var imgs=[document.getElementById('baBefore'),document.getElementById('baAfter')], failed=false;
+  imgs.forEach(function(im){ im.addEventListener('error',function(){ if(!failed){ failed=true; lp.classList.add('no-ba'); } }); if(im.complete && im.naturalWidth===0 && im.getAttribute('src')){ failed=true; lp.classList.add('no-ba'); } });
+  function set(v){ frame.style.setProperty('--pos', v+'%'); }
+  range.addEventListener('input',function(){ set(range.value); });
+  set(range.value);
 })();
 </script>
 </body>
