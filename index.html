@@ -382,6 +382,9 @@
     padding:12px 12px; font-size:15px; border-radius:8px; font-family:inherit;
   }
   .field textarea{ min-height:74px; resize:vertical; }
+  /* iPhone: Safari ingrandisce la pagina quando si tocca un campo con testo
+     sotto i 16px. Tutti i campi a 16px = niente zoom automatico. */
+  input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]), textarea, select{ font-size:16px !important; }
   .field input:focus, .field textarea:focus{ outline:none; border-color:var(--accent); }
   .row2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
 
