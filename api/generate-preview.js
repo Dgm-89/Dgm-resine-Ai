@@ -49,8 +49,16 @@ module.exports = async function handler(req, res) {
     return hex ? `"${name}" (codice esadecimale esatto ${hex})` : `"${name}"`;
   }
 
+  // Fornitore AI: OpenAI (GPT Image 2.5, primo nella classifica di editing di
+  // Artificial Analysis) se è configurata OPENAI_API_KEY, altrimenti Google
+  // Gemini. Si può forzare con la variabile AI_PROVIDER = "openai" | "gemini".
+  const openaiKey = (process.env.OPENAI_API_KEY || "").trim();
   const apiKey = (process.env.GEMINI_API_KEY || "").trim();
-  if (!apiKey) {
+  const provider = ((process.env.AI_PROVIDER || "").trim().toLowerCase()) || (openaiKey ? "openai" : "gemini");
+  if (provider === "openai" && !openaiKey) {
+    return res.status(500).json({ error: "OPENAI_API_KEY non configurata sul server" });
+  }
+  if (provider !== "openai" && !apiKey) {
     return res.status(500).json({ error: "GEMINI_API_KEY non configurata sul server" });
   }
 
@@ -209,24 +217,40 @@ module.exports = async function handler(req, res) {
   const righeZonaEff = righeOrientamento === "verticali" ? (righeZona === "alta" ? "alta" : "bassa") : (righeExtent === "tutta" ? "tutta" : "bassa");
   const zoneBase = (z) => (z === "bassa" && twoColorFacade) ? [colorB, colorBHex] : [colorA, colorAHex];
   const thin = righeSpessore !== "larghe";
-  // Descrizione delle righe su una zona: "sottili" = linee strette distanziate
-  // sul fondo; "larghe" = fasce alte uguali alternate. Sempre con i due colori
-  // scritti per esteso, mai "il colore già presente".
-  const stripesOn = (base, dir) => thin
-    ? `sul fondo nel colore ${colorRef(base[0], base[1])} disegna righe ${dir} SOTTILI (spessore circa 5-8 cm, come una linea decorativa) nel colore ${colorRef(colorRighe, colorRigheHex)}, distanziate in modo regolare (circa 40-60 cm tra una riga e l'altra): tra una riga e l'altra il muro resta nel colore di fondo ${base[0]}. Le righe sono linee strette, NON fasce larghe`
-    : (dir === "orizzontali"
-      ? `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: prima dipingi tutta la zona nel colore di fondo ${base[0]}, poi SOVRAPPONI sopra il fondo le strisce nel colore ${colorRef(colorRighe, colorRigheHex)}. MISURE REALI: questa zona (metà facciata, un piano) è alta 3,00 m. La linea di metà casa deve essere un passaggio NETTO tra la parte alta e il colore scuro di fondo ${base[0]}: subito sotto la parte alta c'è SEMPRE il fondo ${base[0]}, mai una striscia. Partendo DALLA LINEA DI METÀ CASA verso il basso la sequenza è: 50 cm di fondo ${base[0]}, poi 50 cm di striscia ${colorRighe}, poi 50 cm di fondo ${base[0]}, poi 50 cm di striscia ${colorRighe}, poi 50 cm di fondo ${base[0]}, poi 50 cm di striscia ${colorRighe} che arriva a terra (6 fasce da 50 cm = 3,00 m). In totale 3 strisce ${colorRighe} alte 50 cm ciascuna, tutte della stessa altezza e distanziate da 50 cm di fondo. Usa porte e finestre come riferimento di scala (una porta è alta circa 2,10 m) per rispettare queste misure in prospettiva`
-      : `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: prima dipingi tutta la zona nel colore di fondo, poi SOVRAPPONI sopra il fondo strisce verticali nel colore ${colorRef(colorRighe, colorRigheHex)} larghe 50 cm, separate da 50 cm di fondo ${base[0]}, partendo dallo spigolo della facciata con 50 cm di fondo ${base[0]} (usa porte e finestre come riferimento di scala: una porta è larga circa 90 cm)`);
+  // Misure delle strisce "larghe": striscia più stretta del fondo, così il
+  // fondo resta il colore dominante e l'effetto non si legge al contrario.
+  const STRIPE_CM = 25, GAP_CM = 50;
+  const stripesInM = (m) => Math.floor((m * 100) / (STRIPE_CM + GAP_CM));
+  // Righe orizzontali su una zona: dal punto "start" verso il basso,
+  // SEMPRE prima GAP_CM di fondo, poi STRIPE_CM di striscia, e così via.
+  const hStripes = (base, start, heightM, end = "terra") => thin
+    ? `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: sul fondo disegna righe orizzontali SOTTILI (spessore circa 5-8 cm, come una linea decorativa) nel colore ${colorRef(colorRighe, colorRigheHex)}, distanziate in modo regolare (circa 50 cm tra una riga e l'altra), partendo ${start.replace(/^la /, "dalla ")} verso il basso con 50 cm di fondo prima della prima riga. Tra una riga e l'altra il muro resta nel colore di fondo ${base[0]}. Le righe sono linee strette, NON fasce larghe`
+    : `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: prima dipingi tutta la zona nel colore di fondo ${base[0]}, poi SOVRAPPONI sopra il fondo le strisce nel colore ${colorRef(colorRighe, colorRigheHex)}. MISURE REALI: la zona è alta circa ${heightM},00 m. Partendo ${start.replace(/^la /, "dalla ")} verso il basso la sequenza è: ${GAP_CM} cm di fondo ${base[0]}, poi ${STRIPE_CM} cm di striscia ${colorRighe}, poi ${GAP_CM} cm di fondo, poi ${STRIPE_CM} cm di striscia, e così via fino a ${end}: in totale ${stripesInM(heightM)} strisce ${colorRighe} alte ${STRIPE_CM} cm ciascuna, tutte uguali, separate da ${GAP_CM} cm di fondo. Le strisce sono più STRETTE del fondo (circa la metà): il fondo ${base[0]} deve restare chiaramente il colore dominante della zona. Subito sotto ${start} c'è SEMPRE il fondo ${base[0]}, mai una striscia. Usa porte e finestre come riferimento di scala (una porta è alta circa 2,10 m) per rispettare queste misure in prospettiva`;
+  const vStripes = (base) => thin
+    ? `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: sul fondo disegna righe verticali SOTTILI (larghe circa 5-8 cm) nel colore ${colorRef(colorRighe, colorRigheHex)}, distanziate in modo regolare di circa 50 cm, partendo dallo spigolo della facciata con 50 cm di fondo. Le righe sono linee strette, NON fasce larghe`
+    : `questa zona ha come FONDO il colore ${colorRef(base[0], base[1])}: prima dipingi tutta la zona nel colore di fondo, poi SOVRAPPONI sopra il fondo strisce verticali nel colore ${colorRef(colorRighe, colorRigheHex)} larghe ${STRIPE_CM} cm, separate da ${GAP_CM} cm di fondo ${base[0]}, partendo dallo spigolo della facciata con ${GAP_CM} cm di fondo; il fondo resta il colore dominante (usa porte e finestre come riferimento di scala: una porta è larga circa 90 cm)`;
+  const MID_TWO = "la linea di metà casa (il cambio di colore tra parte alta e parte bassa)";
+  const MID_ONE = "la metà altezza della facciata (una linea immaginaria: lì il colore NON cambia, cominciano solo le strisce)";
+  const GRONDA = "la linea di gronda/sottotetto";
   const sameAsUpper = twoColorFacade && righeZonaEff === "bassa" && String(colorA).trim().toUpperCase() === String(colorRighe).trim().toUpperCase()
     ? ` Il colore delle righe (${colorRighe}) è la STESSA IDENTICA tinta della parte alta della facciata: le righe devono risultare esattamente dello stesso colore della parte alta, non un'altra tonalità.`
     : "";
-  const righeNote = isRigheStyled
-    ? (righeOrientamento === "verticali"
-      ? ` Inoltre, nella ${righeZonaEff === "alta" ? "parte alta" : "parte bassa"} della facciata, ${stripesOn(zoneBase(righeZonaEff), "verticali")}, lungo tutta l'altezza di quella zona. Non usare nessun terzo colore.${sameAsUpper} L'altra parte della facciata resta a tinta unita nel suo colore, senza righe.`
-      : (righeZonaEff === "tutta"
-        ? ` Inoltre, su tutta la facciata dalla linea di gronda fino a terra: nella parte alta ${stripesOn(zoneBase("alta"), "orizzontali")}${twoColorFacade ? `; nella parte bassa ${stripesOn(zoneBase("bassa"), "orizzontali")}` : ""}. Non usare nessun altro colore.`
-        : ` Inoltre, nella parte bassa della facciata (dal terreno fino alla linea di divisione con la parte alta), ${stripesOn(zoneBase("bassa"), "orizzontali")}. Non usare nessun terzo colore e nessuna tonalità intermedia.${sameAsUpper} La parte alta della facciata resta a tinta unita nel suo colore, senza righe.`))
-    : "";
+  let righeNote = "";
+  if (isRigheStyled) {
+    const A = [colorA, colorAHex], B = twoColorFacade ? [colorB, colorBHex] : A;
+    if (righeOrientamento === "verticali") {
+      const alta = righeZonaEff === "alta";
+      righeNote = ` Inoltre, nella ${alta ? "metà alta" : "metà bassa"} della facciata (${alta ? "dalla gronda fino a metà altezza" : "da metà altezza fino a terra"}), ${vStripes(alta ? A : B)}. Non usare nessun terzo colore. L'altra metà della facciata resta a tinta unita nel suo colore, senza strisce.`;
+    } else if (righeZonaEff === "tutta") {
+      righeNote = twoColorFacade
+        ? ` Inoltre, le strisce orizzontali coprono TUTTA la facciata. Nella parte alta (dalla gronda fino a metà casa, circa 3,00 m) ${hStripes(A, GRONDA, 3, "la linea di metà casa")}. Nella parte bassa (da metà casa fino a terra, circa 3,00 m) ${hStripes(B, MID_TWO, 3)}. Non usare nessun terzo colore.`
+        : ` Inoltre, le strisce orizzontali coprono TUTTA la facciata, dalla gronda fino a terra (circa 6,00 m, due piani): ${hStripes(A, GRONDA, 6)}. Non usare nessun terzo colore.`;
+    } else {
+      righeNote = twoColorFacade
+        ? ` Inoltre, nella parte bassa della facciata (da metà casa fino a terra, circa 3,00 m), ${hStripes(B, MID_TWO, 3)}. Non usare nessun terzo colore e nessuna tonalità intermedia.${sameAsUpper} La parte alta della facciata resta a tinta unita nel suo colore, senza strisce.`
+        : ` Inoltre, la facciata è tutta di un unico colore ${colorRef(colorA, colorAHex)}, ma le strisce vanno SOLO nella metà bassa (da metà altezza fino a terra, circa 3,00 m): ${hStripes(A, MID_ONE, 3)}. La metà alta della facciata resta a tinta unita ${colorA}, SENZA strisce. Non usare nessun terzo colore.`;
+    }
+  }
 
   // Graniglia per Esterni con bordo bicolore: campo principale in un colore e una
   // fascia/bordo perimetrale in un colore diverso, che segue il perimetro della
@@ -329,10 +353,11 @@ module.exports = async function handler(req, res) {
   if (isExteriorFacade) {
     if (twoColorFacade) {
       zones.push(`parte alta della facciata = ${colorRef(colorA, colorAHex)}`);
-      zones.push(`parte bassa della facciata = ${colorRef(colorB, colorBHex)}${isRigheStyled && righeZonaEff !== "alta" ? ` come FONDO, con ${thin ? "righe sottili" : "strisce da 50 cm alternate a 50 cm di fondo, partendo dalla linea di metà casa con 50 cm di fondo scuro,"} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe} sovrapposte al fondo (fondo e strisce NON invertiti)` : ""}`);
+      zones.push(`parte bassa della facciata = ${colorRef(colorB, colorBHex)}${isRigheStyled && righeZonaEff !== "alta" ? ` come FONDO, con ${thin ? "righe sottili" : `strisce da ${STRIPE_CM} cm alternate a ${GAP_CM} cm di fondo, partendo dalla linea di metà casa con ${GAP_CM} cm di fondo,`} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe} sovrapposte al fondo (fondo e strisce NON invertiti)` : ""}`);
       if (isRigheStyled && righeZonaEff !== "bassa") zones[0] += ` con ${thin ? "righe sottili" : "bande larghe"} ${righeOrientamento === "verticali" ? "verticali" : "orizzontali"} nel colore ${colorRighe}`;
     } else {
-      zones.push(`facciata = ${colorRef(colorA, colorAHex)}${isRigheStyled ? ` con ${thin ? "righe sottili" : "bande larghe"} nel colore ${colorRighe}` : ""}`);
+      const whereStripes = righeOrientamento === "verticali" ? (righeZonaEff === "alta" ? "verticali nella metà alta" : "verticali nella metà bassa") : (righeZonaEff === "tutta" ? "orizzontali su tutta l'altezza" : "orizzontali SOLO nella metà bassa");
+      zones.push(`facciata tutta = ${colorRef(colorA, colorAHex)}${isRigheStyled ? ` come fondo, con ${thin ? "righe sottili" : `strisce da ${STRIPE_CM} cm alternate a ${GAP_CM} cm di fondo`} ${whereStripes} nel colore ${colorRighe}` : ""}`);
     }
     if (isMarcapianoStyled) zones.push(`marcapiano = ${colorRef(colorC, colorCHex)}`);
     else if (twoColorFacade) zones.push("tra parte alta e parte bassa NESSUNA fascia o cornice di un terzo colore: solo il cambio netto di colore");
@@ -403,6 +428,53 @@ module.exports = async function handler(req, res) {
   }
   if (imageBase64.length > 8_000_000) {
     return res.status(413).json({ error: "La foto è troppo pesante, prova con una foto più piccola" });
+  }
+
+  if (provider === "openai") {
+    const model = (process.env.OPENAI_IMAGE_MODEL || "gpt-image-2.5-sunburst").trim();
+    const quality = (process.env.OPENAI_IMAGE_QUALITY || "max").trim();
+    const ext = (m) => (m.includes("png") ? "png" : m.includes("webp") ? "webp" : "jpg");
+    // Stesso ordine delle immagini descritto nel prompt: 1) foto del cliente,
+    // 2) cartella colori (o riferimento boiserie).
+    const images = [{ b64: imageBase64, mime: mimeType || "image/jpeg" }];
+    if (colorCardClean) images.push({ b64: colorCardClean, mime: "image/png" });
+    if (boiserieStyleRefImageClean) images.push({ b64: boiserieStyleRefImageClean, mime: "image/jpeg" });
+    const send = (extra) => {
+      const fd = new FormData();
+      fd.append("model", model);
+      fd.append("prompt", prompt);
+      fd.append("n", "1");
+      images.forEach((im, i) => fd.append("image[]", new Blob([Buffer.from(im.b64, "base64")], { type: im.mime }), `immagine${i + 1}.${ext(im.mime)}`));
+      Object.entries(extra).forEach(([k, v]) => fd.append(k, v));
+      return fetch("https://api.openai.com/v1/images/edits", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${openaiKey}` },
+        body: fd
+      });
+    };
+    try {
+      let outMime = "image/jpeg";
+      let r = await send({ quality, input_fidelity: "high", size: "auto", output_format: "jpeg" });
+      let txt = await r.text();
+      // Se un parametro opzionale non è accettato dal modello, riproviamo con i soli essenziali.
+      if (r.status === 400 && /input_fidelity|size|output_format|quality/i.test(txt)) {
+        outMime = "image/png";
+        r = await send({ quality: /quality/i.test(txt) ? "high" : quality });
+        txt = await r.text();
+      }
+      let data;
+      try { data = JSON.parse(txt); } catch (e) {
+        return res.status(502).json({ error: "Risposta non valida dal servizio AI (OpenAI)", details: txt.slice(0, 500) });
+      }
+      if (!r.ok) {
+        return res.status(r.status).json({ error: "Errore dal servizio AI (OpenAI)", details: (data && data.error && data.error.message) || data });
+      }
+      const b64 = data && data.data && data.data[0] && data.data[0].b64_json;
+      if (!b64) return res.status(502).json({ error: "Il modello non ha restituito un'immagine", details: data });
+      return res.status(200).json({ imageBase64: b64, mimeType: outMime });
+    } catch (err) {
+      return res.status(500).json({ error: "Errore imprevisto lato server", details: String(err && err.message ? err.message : err) });
+    }
   }
 
   let apiUrl;
