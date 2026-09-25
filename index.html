@@ -3,7 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rendrum — Preventivo</title>
+<title>Rendrum – Vedi la tua casa rinnovata prima dei lavori</title>
+<meta name="description" content="Carica una foto e guarda in anteprima resine, microcemento, pittura e facciate con i colori che scegli. Anteprima realistica con intelligenza artificiale e preventivo gratuito.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Rendrum">
+<meta property="og:title" content="Rendrum – Vedi la tua casa rinnovata prima dei lavori">
+<meta property="og:description" content="Scegli colori e finiture, carica una foto e ricevi l'anteprima realistica e il preventivo.">
+<meta property="og:url" content="https://rendrum.com/">
+<meta property="og:image" content="https://rendrum.com/icon-512.png">
+<meta property="og:locale" content="it_IT">
+<meta name="twitter:card" content="summary">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.ico" sizes="any">
@@ -61,13 +70,24 @@
   .landing-hero{ position:relative; width:100%; border-radius:28px; padding:38px 22px 34px; margin-bottom:24px; background:var(--logo-bg); overflow:hidden; display:flex; flex-direction:column; align-items:center; }
   .landing-blob{ position:absolute; top:-70px; right:-70px; width:220px; height:220px; border-radius:50%; background:var(--accent); opacity:0.15; pointer-events:none; }
   .landing-kicker{ font-size:10px; font-weight:800; letter-spacing:0.06em; text-transform:uppercase; color:var(--accent); background:var(--surface); border:1px solid var(--line); border-radius:20px; padding:6px 14px; margin-bottom:20px; position:relative; }
+  .landing-title{ font-size:24px; line-height:1.2; font-weight:800; color:#FFF3E6; margin:0; max-width:340px; position:relative; }
+  .landing-how{ width:100%; max-width:360px; margin:26px auto 0; text-align:left; }
+  .how-title{ font-size:12px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); margin-bottom:10px; }
+  .how-steps{ display:flex; flex-direction:column; gap:10px; }
+  .how-step{ display:flex; align-items:center; gap:12px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:12px 14px; position:relative; }
+  .how-ico{ width:40px; height:40px; flex:none; border-radius:11px; background:var(--accent-soft); color:var(--accent); display:flex; align-items:center; justify-content:center; }
+  .how-num{ position:absolute; left:44px; top:6px; width:18px; height:18px; border-radius:50%; background:var(--accent); color:#1A1A1A; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .how-txt{ font-size:13.5px; color:var(--ink); line-height:1.35; }
+  .landing-trust{ font-size:12px; color:var(--ink-soft); text-align:center; margin-top:14px; }
+  .landing-privacy{ display:block; margin:10px auto 0; font-size:12px; color:var(--ink-soft); }
+  .landing-card .lc-icon svg, .confirm .icon svg{ color:var(--accent); }
   .landing-logo-wrap{ display:inline-flex; position:relative; }
   .landing-logo{ height:66px; width:auto; display:block; }
   .landing-tag{ font-size:14px; color:#E8DCCF; max-width:300px; margin:18px 0 0; line-height:1.5; position:relative; }
   .landing-choices{ display:flex; flex-direction:column; gap:12px; width:100%; max-width:360px; margin:0 auto; }
   .landing-card{ display:flex; align-items:center; gap:14px; text-align:left; border:1.5px solid var(--line); background:var(--surface); border-radius:16px; padding:16px; cursor:pointer; font-family:inherit; box-shadow:0 3px 12px rgba(0,0,0,0.05); transition:transform .12s ease; }
   .landing-card:active{ border-color:var(--accent); background:var(--accent-soft); transform:scale(0.98); }
-  .landing-card .lc-icon{ font-size:22px; flex:none; width:48px; height:48px; border-radius:13px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; }
+  .landing-card .lc-icon{ color:var(--accent); font-size:22px; flex:none; width:48px; height:48px; border-radius:13px; background:var(--accent-soft); display:flex; align-items:center; justify-content:center; }
   .landing-card .lc-text{ display:flex; flex-direction:column; gap:2px; flex:1; }
   .landing-card .lc-title{ font-size:16px; font-weight:800; color:var(--ink); }
   .landing-card .lc-desc{ font-size:12px; color:var(--ink-soft); line-height:1.35; }
@@ -78,7 +98,7 @@
   .progress-fill{ height:100%; width:0%; background:var(--accent); border-radius:3px; transition:width .25s ease; }
   .progress-label{ font-size:11.5px; font-weight:600; color:var(--ink-soft); margin-top:8px; }
 
-  main{ max-width:640px; margin:0 auto; padding: 18px 20px 150px; }
+  main{ max-width:640px; margin:0 auto; padding: 18px 20px 200px; }
   .panel{ display:none; }
   .panel.active{ display:block; animation:rise .3s ease; }
   @keyframes rise{ from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;} }
@@ -102,7 +122,7 @@
   #materialGrid{ gap:12px; }
   #subGrid{ gap:12px; }
   .material-card.photo-tile{
-    position:relative; min-height:150px; padding:18px 14px; border:none; border-radius:calc(var(--radius) + 4px);
+    position:relative; min-height:150px; padding:70px 14px 18px; border:none; border-radius:calc(var(--radius) + 4px);
     overflow:hidden; display:flex; flex-direction:column; justify-content:flex-end; gap:10px;
     transition:transform .15s ease, box-shadow .15s ease; box-shadow:0 2px 10px rgba(0,0,0,.15);
     background-size:cover;
@@ -193,6 +213,15 @@
   .boiserie-grid button.active{ box-shadow:0 0 0 3px var(--accent), 0 4px 14px rgba(0,0,0,.25); }
   .boiserie-grid button.active .tile-check{ display:flex; }
 
+  .facade-extras{ border:1.5px solid var(--line); border-radius:14px; background:var(--surface); margin:4px 0 18px; }
+  .facade-extras > summary{ list-style:none; cursor:pointer; padding:14px 44px 14px 16px; position:relative; display:flex; flex-direction:column; gap:2px; }
+  .facade-extras > summary::-webkit-details-marker{ display:none; }
+  .facade-extras > summary::after{ content:'+'; position:absolute; right:16px; top:50%; transform:translateY(-50%); width:24px; height:24px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-weight:800; display:flex; align-items:center; justify-content:center; }
+  .facade-extras[open] > summary::after{ content:'–'; }
+  .fx-title{ font-size:14.5px; font-weight:700; color:var(--ink); }
+  .fx-sub{ font-size:12px; color:var(--ink-soft); }
+  .fx-sub.active{ color:var(--accent); font-weight:600; }
+  .fx-body{ padding:4px 12px 2px; }
   .niche-toggle{ display:flex; align-items:center; gap:12px; width:100%; border:1.5px solid var(--line); background:var(--surface); border-radius:12px; padding:10px 14px; cursor:pointer; margin:2px 0 16px; text-align:left; font-family:inherit; }
   .niche-toggle svg{ width:48px; height:40px; border-radius:6px; flex:none; }
   .niche-toggle .nt-text{ display:flex; flex-direction:column; gap:2px; }
@@ -224,6 +253,20 @@
   .swatch.selected .sw-name{ color:var(--ink); font-weight:700; }
   .swatch:disabled{ opacity:0.3; cursor:not-allowed; }
   @media (min-width:480px){ .swatch-grid{ grid-template-columns:repeat(4,1fr); } }
+  /* Computer: più spazio, griglie più larghe, home su due colonne */
+  @media (min-width:1024px){
+    main, .progress-wrap, .bar{ max-width:980px; }
+    .material-grid{ grid-template-columns:repeat(4,1fr); gap:14px; }
+    .swatch-grid{ grid-template-columns:repeat(6,1fr); }
+    .hero{ max-width:760px; margin-left:auto; margin-right:auto; }
+    .landing{ display:grid; grid-template-columns:1.15fr 1fr; gap:28px; align-items:start; text-align:left; }
+    .landing-hero{ grid-row:span 2; min-height:420px; justify-content:center; margin-bottom:0; }
+    .landing-title{ font-size:34px; max-width:460px; }
+    .landing-tag{ font-size:16px; max-width:440px; }
+    .landing-choices, .landing-how{ max-width:none; margin:0; }
+    .landing-how{ margin-top:4px; }
+    .landing-card:hover{ border-color:var(--accent); }
+  }
 
   .family-row{ display:flex; gap:0; border-radius:10px; overflow:hidden; margin:2px 0 14px; border:1px solid var(--line); }
   .family-row button{ flex:1; height:44px; border:none; cursor:pointer; position:relative; padding:0; }
@@ -246,6 +289,18 @@
   .swatch.selected .sw-check{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
   .swatch.selected .sw-check::after{ content:"✓"; }
 
+  .privacy-modal{ position:fixed; inset:0; z-index:1000; background:rgba(10,10,12,0.7); display:none; align-items:center; justify-content:center; padding:16px; }
+  .privacy-modal.open{ display:flex; }
+  .privacy-card{ background:var(--surface); color:var(--ink); border-radius:16px; max-width:640px; width:100%; max-height:86vh; overflow:auto; padding:22px 20px; position:relative; font-size:13.5px; line-height:1.55; }
+  .privacy-card h2{ font-size:18px; margin:0 0 10px; }
+  .privacy-card h3{ font-size:14px; margin:16px 0 4px; }
+  .privacy-card .todo{ background:#FFF3B0; color:#5A4500; padding:0 4px; border-radius:4px; }
+  .privacy-card .draft{ font-size:12px; color:var(--ink-soft); border:1px dashed var(--line); padding:8px 10px; border-radius:8px; margin-bottom:12px; }
+  .privacy-close{ position:sticky; top:0; float:right; width:34px; height:34px; border-radius:50%; border:none; background:var(--accent-soft); color:var(--ink); font-size:16px; cursor:pointer; }
+  .consent-row{ display:flex; gap:10px; align-items:flex-start; font-size:12.5px; color:var(--ink-soft); margin:6px 0 14px; line-height:1.45; }
+  .consent-row input{ width:20px; height:20px; flex:0 0 20px; margin-top:1px; accent-color:var(--accent); }
+  .privacy-link{ color:var(--accent); text-decoration:underline; cursor:pointer; background:none; border:none; padding:0; font:inherit; }
+  .ai-photo-note{ font-size:11.5px; color:var(--ink-soft); text-align:center; margin:8px 4px 0; line-height:1.4; }
   .color-preview-modal{ position:fixed; inset:0; z-index:999; background:rgba(10,10,12,0.6); display:none; align-items:center; justify-content:center; padding:20px; }
   .color-preview-modal.open{ display:flex; }
   .cpm-card{ position:relative; background:var(--surface); border-radius:16px; padding:24px 24px 20px; width:100%; max-width:340px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.35); }
@@ -312,6 +367,9 @@
   .ai-btn{ display:block; width:100%; margin-top:4px; border:none; border-radius:8px; padding:14px 16px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent-gradient); color:var(--accent-ink); }
   .ai-btn:disabled{ background:var(--accent-soft); color:var(--ink-soft); }
   .ai-btn:disabled{ opacity:0.5; cursor:wait; }
+  .ai-progress{ height:8px; border-radius:6px; background:var(--accent-soft); overflow:hidden; margin-top:12px; }
+  .ai-progress-fill{ height:100%; width:0; border-radius:6px; background:linear-gradient(90deg, var(--accent), #F3B27A); transition:width .8s ease; }
+  .ai-progress-msg{ font-size:12.5px; color:var(--ink); margin-top:8px; text-align:center; }
   .ai-status{ font-size:11.5px; color:var(--ink-soft); margin-top:8px; min-height:14px; }
   .ai-status.error{ color:#C0392B; }
   .ai-result{ margin-top:12px; border:1px solid var(--line); border-radius:var(--radius); overflow:hidden; }
@@ -413,6 +471,7 @@
         <button type="button" class="pro-auth-tier" data-tier="pro"><span class="t-name">Pro</span><span class="t-desc" data-i18n="proTierProDesc">Tutto incluso</span></button>
       </div>
       <div class="pro-auth-error" id="paRegError"></div>
+      <label class="consent-row"><input type="checkbox" id="paRegConsent"><span><span data-i18n="consentRegText">Ho letto l'informativa privacy e acconsento al trattamento dei miei dati per la gestione dell'account.</span> <button type="button" class="privacy-link" data-open-privacy data-i18n="privacyLinkText">Leggi l'informativa</button></span></label>
       <button type="button" class="pro-auth-submit" id="paRegSubmit" data-i18n="proRegSubmit">Crea account</button>
     </div>
   </div>
@@ -471,20 +530,31 @@
       <div class="landing-hero">
         <div class="landing-blob"></div>
         <span class="landing-kicker" data-i18n="landingKicker">Vedi il risultato prima di scegliere</span>
-        <div class="landing-logo-wrap"><img class="landing-logo" src="data:image/jpeg;base64,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" alt="Rendrum"></div>
-        <p class="landing-tag" data-i18n="landingTag">Scegli il tuo profilo per iniziare a configurare colori e finiture, con anteprima fotorealistica del risultato.</p>
+        <h1 class="landing-title" data-i18n="landingTitle">Vedi il lavoro finito sulla tua casa, prima di iniziare</h1>
+        <p class="landing-tag" data-i18n="landingTag">Resine, microcemento, pittura e facciate: scegli colori e finiture, carica una foto e ricevi l'anteprima realistica e il preventivo.</p>
       </div>
       <div class="landing-choices">
         <button type="button" class="landing-card" id="landingPrivato">
-          <span class="lc-icon">🏠</span>
+          <span class="lc-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg></span>
           <span class="lc-text"><span class="lc-title" data-i18n="landingPrivatoTitle">Privati</span><span class="lc-desc" data-i18n="landingPrivatoDesc">Configura casa, terrazzo o facciata</span></span>
           <span class="lc-arrow">›</span>
         </button>
         <button type="button" class="landing-card" id="landingPro">
-          <span class="lc-icon">🏗️</span>
+          <span class="lc-icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg></span>
           <span class="lc-text"><span class="lc-title" data-i18n="landingProTitle">Professionisti</span><span class="lc-desc" data-i18n="landingProDesc">Imprese, architetti, rivenditori</span></span>
           <span class="lc-arrow">›</span>
         </button>
+      </div>
+      <div class="landing-how">
+        <div class="how-title" data-i18n="howTitle">Come funziona</div>
+        <div class="how-steps">
+          <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.5 0-1.2-1-1.5-1-2.5s.8-1.5 2-1.5h2A4.5 4.5 0 0 0 21 11c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/></svg></span><span class="how-num">1</span><span class="how-txt" data-i18n="how1">Scegli lavorazione, colori e finiture</span></div>
+          <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span><span class="how-num">2</span><span class="how-txt" data-i18n="how2">Carica una foto del tuo ambiente o della facciata</span></div>
+          <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7-7-1z"/></svg></span><span class="how-num">3</span><span class="how-txt" data-i18n="how3">Guarda l'anteprima e richiedi il preventivo</span></div>
+        </div>
+        <div class="landing-trust" data-i18n="landingTrust">Anteprima gratuita · Nessuna registrazione per i privati</div>
+        <!-- ESEMPI PRIMA/DOPO: da aggiungere con foto reali di lavori DGM quando disponibili -->
+        <button type="button" class="privacy-link landing-privacy" data-open-privacy data-i18n="privacyShort">Privacy</button>
       </div>
     </div>
   </section>
@@ -533,6 +603,9 @@
     </div>
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
 
+    <details class="facade-extras" id="facadeExtras" style="display:none">
+      <summary><span class="fx-title" data-i18n="facadeExtrasTitle">Personalizza altre parti della facciata</span><span class="fx-sub" id="facadeExtrasSub">Davanzali, marcapiano, sottotetto, serramenti, balconi, righe</span></summary>
+      <div class="fx-body">
     <button type="button" class="niche-toggle" id="davanzaliToggle" style="display:none">
       <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#BFDCEE"/><rect x="55" y="30" width="70" height="60" fill="#E3DCC9" stroke="#93897A" stroke-width="3"/><rect x="55" y="30" width="70" height="60" fill="none" stroke="#7FA3B5" stroke-width="3"/><line x1="90" y1="30" x2="90" y2="90" stroke="#93897A" stroke-width="3"/><rect x="46" y="90" width="88" height="14" fill="#B5652E"/></svg>
       <span class="nt-text"><span class="nt-title" data-i18n="davanzaliTitle">Personalizza il colore dei davanzali</span><span class="nt-desc" data-i18n="davanzaliDesc">Scegli un colore diverso dalla facciata per i davanzali delle finestre</span></span>
@@ -594,6 +667,9 @@
       <button data-v="larghe" data-i18n="btnRigheLarghe">Bande larghe</button>
     </div>
     <div class="seg-hint" id="righeSpessoreHint" style="display:none"></div>
+    <div class="seg-hint" id="righeWarn" style="display:none;color:#E0A040;font-weight:600"></div>
+      </div>
+    </details>
 
     <div class="section-label" id="boiserieStyleLabel" style="display:none" data-i18n="boiserieStyleLabel">Scegli lo stile di boiserie</div>
     <!-- TODO PLACEHOLDER: foto Orac usate temporaneamente per costruire l'app — sostituire con foto proprie o foto autorizzate da Orac prima di pubblicare pubblicamente. La foto "Liscia con cornice" (data-v="liscia") è già stata sostituita con una foto reale DGM, non è più un placeholder. -->
@@ -674,15 +750,16 @@
     <div class="hero" id="heroPhoto">
       <img id="photoPreviewImg" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" alt="Foto caricata" data-i18n-alt="photoUploadedAlt">
       <div class="hero-empty" id="heroEmptyPhoto">
-        <span class="icon">🏠</span>
+        <span class="icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span>
         <span data-i18n="heroEmptyPhoto">Carica una foto del tuo ambiente o scegli un esempio qui sotto</span>
       </div>
       <div class="hero-actions">
-        <label class="hero-btn primary" for="photoInput" data-i18n="btnUploadPhoto">📷 Carica foto</label>
+        <label class="hero-btn primary" for="photoInput" data-i18n="btnUploadPhoto">Carica foto</label>
         <input type="file" id="photoInput" accept="image/*" style="display:none">
       </div>
     </div>
     <div class="hero-hint" id="photoHint">Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica</div>
+    <p class="ai-photo-note"><span data-i18n="aiPhotoNote">La foto viene elaborata da un servizio di intelligenza artificiale solo per creare l'anteprima.</span> <button type="button" class="privacy-link" data-open-privacy data-i18n="privacyShort">Privacy</button></p>
 
     <div id="templateSection">
       <div class="section-label" style="margin-top:0" data-i18n="templateSectionLabel">Oppure prova su un ambiente di esempio</div>
@@ -694,7 +771,7 @@
   <!-- 6: RISULTATO -->
   <section class="panel" id="panelResult">
     <h1 class="title" data-i18n="panelResultTitle">Anteprima del risultato</h1>
-    <div class="dgm-badge" data-i18n="dgmBadge">🎨 Generata sui colori e materiali originali Rendrum</div>
+    <div class="dgm-badge" data-i18n="dgmBadge">Generata sui colori e materiali originali Rendrum</div>
     <div class="hero" id="hero">
       <div class="hero-slides" id="heroSlides">
         <div class="hero-slide"><canvas id="canvasBefore"></canvas><span class="tag" id="tagBefore" data-i18n="tagBefore" style="display:none">PRIMA</span></div>
@@ -709,7 +786,9 @@
     </div>
     <div class="hero-hint" id="heroHint" data-i18n="heroHint">Genera l'anteprima AI per vedere il risultato fotorealistico</div>
 
-    <button class="ai-btn" id="aiGenerateBtn" disabled data-i18n="aiGenerateBtn">✨ Genera anteprima AI fotorealistica</button>
+    <button class="ai-btn" id="aiGenerateBtn" disabled data-i18n="aiGenerateBtn">Genera anteprima AI fotorealistica</button>
+    <div class="ai-progress" id="aiProgress" hidden><div class="ai-progress-fill" id="aiProgressFill"></div></div>
+    <div class="ai-progress-msg" id="aiProgressMsg" hidden></div>
     <div class="ai-status" id="aiStatus"></div>
   </section>
 
@@ -717,8 +796,8 @@
   <section class="panel" id="panel3">
     <h1 class="title" data-i18n="panel3Title">I tuoi dati</h1>
     <div class="summary" id="summaryBox"></div>
-    <button class="share-btn" id="shareConfigBtn" data-i18n="shareConfigBtn">📤 Salva o condividi questa selezione</button>
-    <button class="share-btn" id="panel3SaveProjectBtn" style="display:none" data-i18n="panel3SaveProjectBtn">📁 Salva questo progetto nella tua cartella</button>
+    <button class="share-btn" id="shareConfigBtn" data-i18n="shareConfigBtn">Salva o condividi questa selezione</button>
+    <button class="share-btn" id="panel3SaveProjectBtn" style="display:none" data-i18n="panel3SaveProjectBtn">Salva questo progetto nella tua cartella</button>
     <canvas id="shareCardCanvas" width="800" height="1000" style="display:none"></canvas>
 
     <div class="field"><label for="fName" data-i18n="fNameLabel">Nome e cognome</label><input id="fName" type="text" placeholder="Mario Rossi" autocomplete="name"></div>
@@ -731,17 +810,39 @@
       <div class="field"><label for="fCity" data-i18n="fCityLabel">Città / indirizzo</label><input id="fCity" type="text" placeholder="Via, città" autocomplete="street-address" data-i18n-ph="fCityPh"></div>
     </div>
     <div class="field"><label for="fNote" data-i18n="fNoteLabel">Note (opzionale)</label><textarea id="fNote" placeholder="Ambiente, tempistiche, dettagli utili" data-i18n-ph="fNotePh"></textarea></div>
+    <label class="consent-row"><input type="checkbox" id="fConsent"><span><span data-i18n="consentText">Ho letto l'informativa privacy e acconsento al trattamento dei miei dati e della foto per ricevere l'anteprima e il preventivo.</span> <button type="button" class="privacy-link" data-open-privacy data-i18n="privacyLinkText">Leggi l'informativa</button></span></label>
   </section>
 
   <!-- CONFIRM -->
   <section class="panel" id="panelConfirm">
     <div class="confirm">
-      <div class="icon">✅</div>
+      <div class="icon"><svg viewBox="0 0 24 24" width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg></div>
       <div class="title" data-i18n="confirmTitle">Richiesta pronta</div>
       <p id="confirmMessage">Si è aperto WhatsApp con il messaggio già compilato: ti basta premere invia. In alternativa scrivici via email qui sotto.</p>
       <button type="button" class="btn btn-primary" id="btnBackToMenu" data-i18n="btnBackToMenu" style="margin-top:24px;">Torna al menu</button>
     </div>
   </section>
+
+  <div class="privacy-modal" id="privacyModal" role="dialog" aria-modal="true" aria-labelledby="privacyTitle">
+    <div class="privacy-card">
+      <button type="button" class="privacy-close" id="privacyClose" aria-label="Chiudi">✕</button>
+      <h2 id="privacyTitle">Informativa privacy</h2>
+      <div class="draft">BOZZA – da completare con i dati della società e da far verificare al proprio consulente privacy prima della pubblicazione. Le parti evidenziate in giallo vanno sostituite.</div>
+      <h3>1. Titolare del trattamento</h3>
+      <p><span class="todo">[RAGIONE SOCIALE SRLS]</span>, <span class="todo">[INDIRIZZO SEDE]</span>, P.IVA <span class="todo">[P.IVA]</span>, email <span class="todo">[EMAIL PRIVACY]</span>.</p>
+      <h3>2. Quali dati raccogliamo</h3>
+      <p>Nome e cognome, telefono, email, città/indirizzo, metri quadri e note che inserisci nel modulo; la foto del tuo ambiente che carichi nell'app; le scelte di lavorazione e colore. Per gli account professionisti anche ragione sociale, partita IVA e credenziali di accesso.</p>
+      <h3>3. Perché li usiamo</h3>
+      <p>a) Creare l'anteprima del lavoro sulla tua foto; b) rispondere alla tua richiesta e prepararti un preventivo; c) gestire l'account professionisti. La base giuridica è l'esecuzione di misure precontrattuali richieste da te (art. 6.1.b GDPR) e il tuo consenso (art. 6.1.a) per l'elaborazione della foto.</p>
+      <h3>4. Intelligenza artificiale e fornitori</h3>
+      <p>La foto e le tue scelte vengono inviate a un servizio di intelligenza artificiale (<span class="todo">[Google – Gemini API e/o OpenAI – Images API]</span>) al solo scopo di generare l'anteprima. L'app è ospitata su Vercel. Questi fornitori agiscono come responsabili del trattamento e possono trovarsi anche fuori dall'Unione Europea: il trasferimento avviene con le garanzie previste dal GDPR (es. clausole contrattuali standard). Non vendiamo i tuoi dati a terzi.</p>
+      <h3>5. Per quanto tempo</h3>
+      <p>Per il tempo necessario a gestire la richiesta e l'eventuale lavoro e comunque non oltre <span class="todo">[24 mesi]</span>, salvo obblighi di legge (es. fiscali).</p>
+      <h3>6. I tuoi diritti</h3>
+      <p>Puoi chiedere accesso, rettifica, cancellazione, limitazione, portabilità dei dati, opporti al trattamento e revocare il consenso in qualsiasi momento scrivendo a <span class="todo">[EMAIL PRIVACY]</span>. Puoi anche presentare reclamo al Garante per la protezione dei dati personali (garanteprivacy.it).</p>
+      <p style="font-size:12px;color:var(--ink-soft)">Ultimo aggiornamento: <span class="todo">[DATA]</span></p>
+    </div>
+  </div>
 
   <div class="color-preview-modal" id="colorPreviewModal">
     <div class="cpm-card">
@@ -787,7 +888,7 @@
   var I18N_STATIC = {
     brandTag: { it:"Pavimenti · Rivestimenti · Imbiancatura", en:"Flooring · Wall coverings · Painting" },
     landingKicker: { it:"Vedi il risultato prima di scegliere", en:"See the result before you choose" },
-    landingTag: { it:"Scegli il tuo profilo per iniziare a configurare colori e finiture, con anteprima fotorealistica del risultato.", en:"Choose your profile to start configuring colors and finishes, with a photorealistic preview of the result." },
+    landingTag: { it:"Resine, microcemento, pittura e facciate: scegli colori e finiture, carica una foto e ricevi l'anteprima realistica e il preventivo.", en:"Resins, microcement, painting and facades: choose colors and finishes, upload a photo and get a realistic preview and a quote." },
     landingPrivatoTitle: { it:"Privati", en:"Homeowners" },
     landingPrivatoDesc: { it:"Configura casa, terrazzo o facciata", en:"Configure your home, terrace or facade" },
     landingProTitle: { it:"Professionisti", en:"Professionals" },
@@ -798,6 +899,7 @@
     contextLabel: { it:"Ambiente", en:"Setting" },
     btnInterno: { it:"Interno", en:"Indoor" },
     btnEsterno: { it:"Esterno", en:"Outdoor" },
+    facadeExtrasTitle: { it:"Personalizza altre parti della facciata", en:"Customize other parts of the facade" },
     facadeLayoutLabel: { it:"Quanti colori sulla facciata?", en:"How many colors on the facade?" },
     btnMonocolore: { it:"Un colore", en:"One color" },
     btnDueColori: { it:"Due colori", en:"Two colors" },
@@ -887,7 +989,7 @@
     ppDeleteConfirm: { it:"Eliminare questo progetto? L'operazione non si può annullare.", en:"Delete this project? This cannot be undone." },
     ppErrClientName: { it:"Il nome del cliente è obbligatorio.", en:"Client name is required." },
     ppErrGeneric: { it:"Si è verificato un errore. Riprova.", en:"Something went wrong. Please try again." },
-    panel3SaveProjectBtn: { it:"📁 Salva questo progetto nella tua cartella", en:"📁 Save this project to your folder" },
+    panel3SaveProjectBtn: { it:"Salva questo progetto nella tua cartella", en:"Save this project to your folder" },
     davanzaliTitle: { it:"Personalizza il colore dei davanzali", en:"Customize window sill color" },
     davanzaliDesc: { it:"Scegli un colore diverso dalla facciata per i davanzali delle finestre", en:"Choose a color for the window sills different from the facade" },
     sottotettoTitle: { it:"Personalizza il colore del sottotetto", en:"Customize eave/soffit color" },
@@ -904,19 +1006,19 @@
     panelPhotoTitle: { it:"Carica la foto del tuo ambiente", en:"Upload a photo of your space" },
     photoUploadedAlt: { it:"Foto caricata", en:"Uploaded photo" },
     heroEmptyPhoto: { it:"Carica una foto del tuo ambiente o scegli un esempio qui sotto", en:"Upload a photo of your space or pick an example below" },
-    btnUploadPhoto: { it:"📷 Carica foto", en:"📷 Upload photo" },
+    btnUploadPhoto: { it:"Carica foto", en:"Upload photo" },
     templateSectionLabel: { it:"Oppure prova su un ambiente di esempio", en:"Or try it on an example space" },
     toggleTemplatesBtn: { it:"Prova invece su un ambiente di esempio", en:"Try an example space instead" },
     panelResultTitle: { it:"Anteprima del risultato", en:"Result preview" },
-    dgmBadge: { it:"🎨 Generata sui colori e materiali originali Rendrum", en:"🎨 Generated using Rendrum's original colors and materials" },
+    dgmBadge: { it:"Generata sui colori e materiali originali Rendrum", en:"Generated using Rendrum's original colors and materials" },
     tagBefore: { it:"PRIMA", en:"BEFORE" },
     tagAfter: { it:"DOPO", en:"AFTER" },
     heroSwipeHint: { it:"Scorri ⟷", en:"Swipe ⟷" },
     heroExpandAria: { it:"Schermo intero", en:"Full screen" },
     heroHint: { it:"Genera l'anteprima AI per vedere il risultato fotorealistico", en:"Generate the AI preview to see the photorealistic result" },
-    aiGenerateBtn: { it:"✨ Genera anteprima AI fotorealistica", en:"✨ Generate photorealistic AI preview" },
+    aiGenerateBtn: { it:"Genera anteprima AI fotorealistica", en:"Generate photorealistic AI preview" },
     panel3Title: { it:"I tuoi dati", en:"Your details" },
-    shareConfigBtn: { it:"📤 Salva o condividi questa selezione", en:"📤 Save or share this selection" },
+    shareConfigBtn: { it:"Salva o condividi questa selezione", en:"Save or share this selection" },
     fNameLabel: { it:"Nome e cognome", en:"Full name" },
     fPhoneLabel: { it:"Telefono", en:"Phone" },
     fEmailLabel: { it:"Email", en:"Email" },
@@ -963,9 +1065,9 @@
     photoHintFloorOnly: { it:"Questa finitura si applica solo al pavimento: carica una foto che inquadri bene il pavimento dell'ambiente (non le pareti).", en:"This finish only applies to the floor: upload a photo that clearly shows the floor of the space (not the walls)." },
     photoHintGraniglia: { it:"Carica una foto dello spazio esterno (terrazzo, vialetto, giardino, bordo piscina o rampa garage) inquadrando bene la superficie calpestabile.", en:"Upload a photo of the outdoor space (terrace, driveway, garden, pool edge or garage ramp), framing the walkable surface clearly." },
     photoHintDefault: { it:"Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica", en:"Upload a real photo of your space: we'll use it in the next step to generate the photorealistic AI preview" },
-    aiStatusStep1: { it:"Passo 1 di 2: coloro la facciata… (20-50 secondi)", en:"Step 1 of 2: painting the facade… (20-50 seconds)" },
-    aiStatusStep2: { it:"Passo 2 di 2: aggiungo le righe… (20-50 secondi)", en:"Step 2 of 2: adding the stripes… (20-50 seconds)" },
-    aiStatusGenerating: { it:"Generazione in corso… può richiedere 20-50 secondi.", en:"Generating… this can take 20-50 seconds." },
+    aiStatusStep1: { it:"Passo 1 di 2: coloro la facciata… (1-2 minuti)", en:"Step 1 of 2: painting the facade… (1-2 minutes)" },
+    aiStatusStep2: { it:"Passo 2 di 2: aggiungo le righe… (1-2 minuti)", en:"Step 2 of 2: adding the stripes… (1-2 minutes)" },
+    aiStatusGenerating: { it:"Generazione in corso… può richiedere 1-2 minuti.", en:"Generating… this can take 1-2 minutes." },
     aiStatusDone: { it:"Fatto — questa è la vera immagine generata dall'AI. Trascina per confrontare prima e dopo.", en:"Done — this is the real AI-generated image. Swipe to compare before and after." },
     aiStatusErrorPrefix: { it:"Non sono riuscito a generare l'anteprima AI (", en:"I couldn't generate the AI preview (" },
     aiStatusErrorSuffix: { it:"). Il confronto prima/dopo resta comunque valido.", en:"). The before/after comparison is still valid." },
@@ -990,6 +1092,18 @@
     summarySerramenti: { it:"Serramenti: ", en:"Window frames: " },
     summaryRighe: { it:"Righe: ", en:"Stripes: " },
     summaryFinitura: { it:"Finitura", en:"Finish" },
+    consentText: { it:"Ho letto l'informativa privacy e acconsento al trattamento dei miei dati e della foto per ricevere l'anteprima e il preventivo.", en:"I have read the privacy notice and consent to the processing of my data and photo to receive the preview and the quote." },
+    privacyLinkText: { it:"Leggi l'informativa", en:"Read the notice" },
+    consentRegText: { it:"Ho letto l'informativa privacy e acconsento al trattamento dei miei dati per la gestione dell'account.", en:"I have read the privacy notice and consent to the processing of my data to manage the account." },
+    privacyShort: { it:"Privacy", en:"Privacy" },
+    aiPhotoNote: { it:"La foto viene elaborata da un servizio di intelligenza artificiale solo per creare l'anteprima.", en:"The photo is processed by an artificial intelligence service only to create the preview." },
+    consentRequired: { it:"Per inviare la richiesta devi accettare l'informativa privacy.", en:"To send the request you must accept the privacy notice." },
+    landingTitle: { it:"Vedi il lavoro finito sulla tua casa, prima di iniziare", en:"See the finished work on your home, before you start" },
+    howTitle: { it:"Come funziona", en:"How it works" },
+    how1: { it:"Scegli lavorazione, colori e finiture", en:"Choose the work, colors and finishes" },
+    how2: { it:"Carica una foto del tuo ambiente o della facciata", en:"Upload a photo of your room or facade" },
+    how3: { it:"Guarda l'anteprima e richiedi il preventivo", en:"See the preview and request a quote" },
+    landingTrust: { it:"Anteprima gratuita · Nessuna registrazione per i privati", en:"Free preview · No sign-up for homeowners" },
     summaryEdit: { it:"modifica selezione", en:"edit selection" },
     effettoWord: { it:"Effetto", en:"Effect" },
     shareCanvasHeading: { it:"La tua selezione", en:"Your selection" },
@@ -3673,9 +3787,23 @@
     syncFacadeLayoutVisibility();
   }
 
+  function syncFacadeExtrasSummary(){
+    var box = document.getElementById('facadeExtras'); if(!box) return;
+    var names = [];
+    if(state.addDavanzali) names.push(tr({it:'davanzali',en:'window sills'}));
+    if(state.addMarcapiano) names.push(tr({it:'marcapiano',en:'string course'}));
+    if(state.addSottotetto) names.push(tr({it:'sottotetto',en:'eave'}));
+    if(state.addSerramenti) names.push(tr({it:'serramenti',en:'window frames'}));
+    if(state.addBalconi) names.push(tr({it:'balconi',en:'balconies'}));
+    if(state.addRighe) names.push(tr({it:'righe',en:'stripes'}));
+    var sub = document.getElementById('facadeExtrasSub');
+    sub.textContent = names.length ? tr({it:'Attivi: ',en:'Active: '}) + names.join(', ') : tr({it:'Davanzali, marcapiano, sottotetto, serramenti, balconi, righe',en:'Sills, string course, eave, frames, balconies, stripes'});
+    sub.classList.toggle('active', names.length > 0);
+  }
   function syncFacadeLayoutVisibility(){
     syncGranaVisibility();
     var show = state.material && state.material.id === 'imbiancatura' && state.context === 'esterno';
+    document.getElementById('facadeExtras').style.display = show ? 'block' : 'none';
     document.getElementById('facadeLayoutLabel').style.display = show ? 'block' : 'none';
     document.getElementById('facadeLayoutControl').style.display = show ? 'flex' : 'none';
     document.getElementById('facadeLayoutHint').style.display = show ? 'block' : 'none';
@@ -3712,6 +3840,7 @@
     if(!show){ state.addRighe = false; state.colorRighe = null; }
     righeEl.classList.toggle('active', state.addRighe);
     syncRigheSubVisibility();
+    syncFacadeExtrasSummary();
   }
 
   // Le scelte secondarie delle righe (orientamento, e poi zona per le
@@ -3744,10 +3873,25 @@
       Array.prototype.forEach.call(document.getElementById('righeSpessoreControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.righeSpessore); });
       document.getElementById('righeSpessoreHint').textContent = tr(RIGHE_SPESSORE_HINT[state.righeSpessore]);
     }
+    updateRigheWarning();
+  }
+  // Avviso (non blocca): righe dello stesso colore del fondo non si vedono.
+  function updateRigheWarning(){
+    var el = document.getElementById('righeWarn'); if(!el) return;
+    var msg = '';
+    if(needsRigheColor() && state.colorRighe){
+      var two = needsSecondColor();
+      var A = state.colorA, B = two ? state.colorB : state.colorA, bases = [];
+      if(state.righeOrientamento === 'verticali') bases = [state.righeZona === 'alta' ? A : B];
+      else bases = state.righeExtent === 'tutta' ? [A, B] : [B];
+      var same = bases.filter(function(c){ return c && c.code === state.colorRighe.code; })[0];
+      if(same) msg = tr({ it:'Attenzione: il colore delle righe ('+same.code+') è uguale al colore di fondo, quindi le righe non si vedranno. Puoi comunque continuare.', en:'Note: the stripe color ('+same.code+') is the same as the background, so the stripes won\'t be visible. You can still continue.' });
+    }
+    el.textContent = msg; el.style.display = msg ? 'block' : 'none';
   }
   var RIGHE_SPESSORE_HINT = {
     sottili: { it:"Linee sottili (circa 5-8 cm) distanziate, sul colore di fondo della zona.", en:"Thin, spaced lines (about 5-8 cm) over the zone's base color." },
-    larghe:  { it:"Fasce alte uguali, alternate tra il colore di fondo e il colore righe.", en:"Equal-height bands alternating between the base color and the stripe color." }
+    larghe:  { it:"Strisce da 25 cm ogni 50 cm di fondo: il colore di fondo resta dominante.", en:"25 cm stripes every 50 cm of background: the background color stays dominant." }
   };
 
   // ---------- 1: CATEGORIA ----------
@@ -4266,6 +4410,8 @@
   }
   function renderChips(){
     if(typeof syncGranaVisibility==='function') syncGranaVisibility();
+    if(typeof updateRigheWarning==='function') updateRigheWarning();
+    if(typeof syncFacadeExtrasSummary==='function') syncFacadeExtrasSummary();
     var row=document.getElementById('colorChips'); row.innerHTML='';
     // Corten: il colore è fisso e già spiegato dal messaggio "cortenColorNote",
     // niente chip da mostrare o rimuovere.
@@ -4643,11 +4789,45 @@
   });
 
   // ---------- AI generation ----------
+  // ---------- barra di avanzamento durante la generazione AI ----------
+  // Il servizio non comunica l'avanzamento reale: la barra avanza in modo
+  // graduale (rallentando verso il 95%) e i messaggi cambiano, così il cliente
+  // vede che l'app sta lavorando e non chiude la pagina.
+  var aiProgTimer = null, aiProgStart = 0;
+  var AI_PROGRESS_MSGS = [
+    { it:'Analizzo la foto…', en:'Analyzing the photo…' },
+    { it:'Riconosco pareti, pavimenti e facciata…', en:'Detecting walls, floors and facade…' },
+    { it:'Applico colori e materiali scelti…', en:'Applying the chosen colors and materials…' },
+    { it:'Aggiungo texture e dettagli…', en:'Adding texture and details…' },
+    { it:'Rifinisco luci e ombre…', en:'Refining light and shadows…' },
+    { it:'Quasi pronto…', en:'Almost ready…' }
+  ];
+  function startAiProgress(){
+    var bar = document.getElementById('aiProgress'), fill = document.getElementById('aiProgressFill'), msg = document.getElementById('aiProgressMsg');
+    bar.hidden = false; msg.hidden = false; fill.style.width = '2%';
+    aiProgStart = Date.now();
+    clearInterval(aiProgTimer);
+    aiProgTimer = setInterval(function(){
+      var t = (Date.now() - aiProgStart) / 1000;
+      var pct = 95 * (1 - Math.exp(-t / 35));
+      fill.style.width = pct.toFixed(1) + '%';
+      var i = Math.min(AI_PROGRESS_MSGS.length - 1, Math.floor(t / 15));
+      msg.textContent = tr(AI_PROGRESS_MSGS[i]);
+    }, 700);
+  }
+  function stopAiProgress(ok){
+    clearInterval(aiProgTimer);
+    var bar = document.getElementById('aiProgress'), fill = document.getElementById('aiProgressFill'), msg = document.getElementById('aiProgressMsg');
+    if(ok){ fill.style.width = '100%'; setTimeout(function(){ bar.hidden = true; msg.hidden = true; }, 900); }
+    else { bar.hidden = true; msg.hidden = true; }
+  }
+
   document.getElementById('aiGenerateBtn').addEventListener('click', function(){
     if(!state.photoBase64 || !state.colorA) return;
     var btn = this; var statusEl = document.getElementById('aiStatus');
     btn.disabled = true; statusEl.classList.remove('error');
     statusEl.textContent = ts('aiStatusGenerating');
+    startAiProgress();
     // Foto di riferimento dello stile di boiserie scelto (una delle 10 miniature già
     // presenti nella griglia .boiserie-grid): la inviamo al backend, insieme alla foto
     // del cliente, solo quando la lavorazione è "decorazioni" e uno stile è selezionato,
@@ -4717,7 +4897,10 @@
     }
     // Con le righe: due passaggi. 1) la casa colorata senza righe; 2) sulla
     // foto già colorata l'AI aggiunge SOLO le righe.
-    var withRighe = needsRigheColor() && state.material.id === 'imbiancatura' && state.context === 'esterno';
+    // Due passaggi disattivati: tutto (colori + strisce) in un'unica generazione.
+    // Per riattivarli basta mettere RIGHE_DUE_PASSAGGI = true.
+    var RIGHE_DUE_PASSAGGI = false;
+    var withRighe = RIGHE_DUE_PASSAGGI && needsRigheColor() && state.material.id === 'imbiancatura' && state.context === 'esterno';
     var job;
     if(withRighe){
       cardSkipRighe = true;
@@ -4739,10 +4922,12 @@
         aiResultImageMime = result.mime;
         renderHeroPreview();
         statusEl.textContent = ts('aiStatusDone');
+        stopAiProgress(true);
       })
       .catch(function(err){
         statusEl.classList.add('error');
         statusEl.textContent = ts('aiStatusErrorPrefix') + err.message + ts('aiStatusErrorSuffix');
+        stopAiProgress(false);
       })
       .finally(function(){ btn.disabled = false; });
   });
@@ -4772,6 +4957,12 @@
     }
     if(!(state.category && (state.category.subs || state.category.id === 'imbiancatura' || state.category.id === 'graniglia_esterni'))){
       seq = seq.filter(function(id){ return id!=='panelSub'; });
+    }
+    // Facciate esterne con grana: la superficie è per forza opaca, il passo
+    // "Finitura" non serve e verrebbe solo a confondere.
+    if(typeof granaActive === 'function' && granaActive()){
+      seq = seq.filter(function(id){ return id!=='panelFinitura'; });
+      state.finitura = 'opaco';
     }
     return seq;
   }
@@ -4807,7 +4998,8 @@
     var label = (id==='panelSub' && state.category && state.category.id==='imbiancatura') ? ts('subTitleContext')
       : (id==='panelSub' && state.category && state.category.id==='graniglia_esterni') ? ts('subTitleGraniglia')
       : tr(STEP_LABELS[id]);
-    document.getElementById('progressLabel').textContent = id==='panelConfirm' ? ts('progressRequestSent') : (ts('progressStepPrefix')+stepNum+ts('progressStepOf')+totalSteps+(label?' · '+label:''));
+    var ofTotal = state.category ? ts('progressStepOf')+totalSteps : '';
+    document.getElementById('progressLabel').textContent = id==='panelConfirm' ? ts('progressRequestSent') : (ts('progressStepPrefix')+stepNum+ofTotal+(label?' · '+label:''));
   }
 
   function goTo(id){
@@ -4929,15 +5121,17 @@
       var cm = zh / 300; // la zona è metà facciata = un piano ≈ 3,00 m
       if(state.righeSpessore !== 'larghe'){
         // righe sottili: 6 cm di riga ogni 50 cm circa
-        for(var q = 50; q + 6 <= 280; q += 56){
+        var lenT = vertical ? zw/cm : 300;
+        for(var q = 50; q + 6 <= lenT - 20; q += 56){
           if(vertical) x.fillRect(zx + q*cm, zy, 6*cm, zh); else x.fillRect(zx, zy + zh - (q+6)*cm, zw, 6*cm);
         }
         return;
       }
       // bande larghe: dalla linea di metà casa (o dallo spigolo) 50 cm di fondo, 50 cm di striscia, e così via
       var len = vertical ? zw/cm : 300;
-      for(var p = 50; p + 50 <= len; p += 100){
-        if(vertical) x.fillRect(zx + p*cm, zy, 50*cm, zh); else x.fillRect(zx, zy + p*cm, zw, 50*cm); // dall'alto: 50 fondo, 50 striscia…
+      // 50 cm di fondo, poi 25 cm di striscia, e così via
+      for(var p = 50; p + 25 <= len; p += 75){
+        if(vertical) x.fillRect(zx + p*cm, zy, 25*cm, zh); else x.fillRect(zx, zy + p*cm, zw, 25*cm);
       }
     }
     if(needsRigheColor()){
@@ -4958,15 +5152,27 @@
       if(needsDavanzaliColor() && state.colorDavanzali){ x.fillStyle = hex(state.colorDavanzali, '#FFFFFF'); x.fillRect(wx - 16, wy + wh, ww + 32, 7); }
     }
     win(fx + 60, top + 60, 60, 80); win(fx + fw - 120, top + 60, 60, 80);
+    if(needsBalconiColor() && state.colorBalconi){
+      // balcone sotto la finestra alta di destra: soletta + parapetto
+      var bx = fx + fw - 150, by = top + 140;
+      x.fillStyle = '#8A8A8A'; x.fillRect(bx, by, 120, 8);
+      x.fillStyle = hex(state.colorBalconi, '#666666'); x.fillRect(bx, by - 40, 120, 40);
+      x.strokeStyle = '#000000'; x.lineWidth = 1; x.strokeRect(bx, by - 40, 120, 40);
+    }
     win(fx + 60, midY + 50, 60, 80);
     x.fillStyle = frame; x.fillRect(fx + fw - 130, midY + fh / 2 - 150, 80, 150);
     if(needsRigheColor() && !cardSkipRighe && state.righeSpessore === 'larghe' && state.righeOrientamento !== 'verticali'){
       var cmS = (fh / 2) / 300, gy = midY + fh / 2;
       x.fillStyle = '#000000'; x.font = '15px Arial, sans-serif';
-      ['50','50','50','50','50','50'].forEach(function(t, i){ x.fillText(t, fx - 22, gy - (i*50 + 25)*cmS + 5); });
+      var topY = midY; [50,25,50,25,50,25,50,25].reduce(function(y0, h){ x.fillText(String(h), fx - 24, (y0 + h/2)*cmS + topY + 5); return y0 + h; }, 0);
       x.fillText('cm', fx - 24, gy + 18);
     }
     x.strokeStyle = '#000000'; x.lineWidth = 2; x.strokeRect(fx, top + 16, fw, fh);
+    if(!two && needsRigheColor()){
+      x.save(); x.setLineDash([10, 8]); x.strokeStyle = '#222222'; x.lineWidth = 2;
+      x.beginPath(); x.moveTo(fx - 10, midY); x.lineTo(fx + fw + 10, midY); x.stroke(); x.restore();
+      x.fillStyle = '#222222'; x.font = 'bold 16px Arial, sans-serif'; x.fillText('metà altezza', fx + fw - 105, midY - 8);
+    }
     // quote: metà altezza
     x.fillStyle = '#000000'; x.font = '18px Arial, sans-serif';
     if(two){ x.fillText('50%', X + W - 18, midY - fh/4 + 6); x.fillText('50%', X + W - 18, midY + fh/4 + 6); }
@@ -4995,22 +5201,31 @@
 
   // langOverride: forza l'italiano (usato da buildMessage(), il messaggio che
   // legge il personale DGM) anche quando l'interfaccia è in inglese.
+  // Nome del colore + codice tra parentesi, ma solo se diverso dal nome
+  // (evita "F9.28.83 (F9.28.83)").
+  function colorLabel(c){
+    if(!c) return '';
+    var n = String(c.name||''), k = String(c.code||'');
+    return (k && k !== n) ? n+' ('+k+')' : n;
+  }
   function facadeColorLine(langOverride){
     var L = langOverride || LANG;
     function lab(it,en){ return L==='en' ? en : it; }
     if(needsSecondColor()){
-      return lab('Alto: ','High: ')+state.colorA.name+' ('+state.colorA.code+') · '+lab('Basso: ','Low: ')+state.colorB.name+' ('+state.colorB.code+')';
+      return lab('Alto: ','High: ')+state.colorA.name+' ('+state.colorA.code+') · '+lab('Basso: ','Low: ')+colorLabel(state.colorB);
     }
     if(state.material && state.material.id === 'graniglia_esterni' && state.colorB){
-      return lab('Campo: ','Field: ')+state.colorA.name+' ('+state.colorA.code+') · '+lab('Bordo: ','Border: ')+state.colorB.name+' ('+state.colorB.code+')';
+      return lab('Campo: ','Field: ')+state.colorA.name+' ('+state.colorA.code+') · '+lab('Bordo: ','Border: ')+colorLabel(state.colorB);
     }
-    return state.colorA.name+' ('+state.colorA.code+')';
+    return colorLabel(state.colorA);
   }
 
   function renderSummary(){
     var box=document.getElementById('summaryBox');
     var colorLine = facadeColorLine();
     var facadeLayoutText = tr(FACADE_LAYOUT_NAME[state.facadeLayout]);
+    var contextLine = (state.material && state.material.id === 'imbiancatura') ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+tr({it:'Ambiente: ',en:'Area: '})+(state.context === 'esterno' ? tr({it:'Esterno',en:'Exterior'}) : tr({it:'Interno',en:'Interior'}))+'</span></div>' : '';
+    var granaLine = granaActive() ? '<div class="line"><span class="sw" style="'+granaStyle(state.colorA ? state.colorA.hex : '#BBBBBB', 20)+'"></span><span>'+tr(GRANA_NAME[state.grana])+'</span></div>' : '';
     var facadeLine = needsSecondColor() ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFacciata')+facadeLayoutText+'</span></div>' : '';
     var boiserieLine = (state.material.id === 'decorazioni') ? '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryStile')+tr(BOISERIE_STYLE_NAME[state.boiserieStyle])+'</span></div>' : '';
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
@@ -5022,7 +5237,7 @@
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+LF(state.material,'name')+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      facadeLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + serramentiLine + balconiLine + righeLine +
+      contextLine + granaLine + facadeLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + serramentiLine + balconiLine + righeLine +
       '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
@@ -5046,8 +5261,17 @@
   });
   document.getElementById('back3').addEventListener('click', function(){ goTo('panelResult'); });
 
+  // ---------- informativa privacy ----------
+  var privacyModal = document.getElementById('privacyModal');
+  document.addEventListener('click', function(e){
+    if(e.target.closest('[data-open-privacy]')){ e.preventDefault(); privacyModal.classList.add('open'); }
+  });
+  document.getElementById('privacyClose').addEventListener('click', function(){ privacyModal.classList.remove('open'); });
+  privacyModal.addEventListener('click', function(e){ if(e.target === privacyModal) privacyModal.classList.remove('open'); });
+  document.getElementById('fConsent').addEventListener('change', function(){ checkForm(); });
+
   function checkForm(){
-    var ok=document.getElementById('fName').value.trim() && document.getElementById('fPhone').value.trim();
+    var ok=document.getElementById('fName').value.trim() && document.getElementById('fPhone').value.trim() && document.getElementById('fConsent').checked;
     document.getElementById('sendWa').disabled = !ok;
   }
   ['fName','fPhone','fEmail','fMq','fCity','fNote'].forEach(function(id){ document.getElementById(id).addEventListener('input', checkForm); });
@@ -5067,15 +5291,16 @@
       "Tipo cliente: "+(state.userType==='professionista' ? 'Professionista' : 'Privato'),
       "Lavorazione: "+state.material.name, "Colore: "+colorLine
     ];
+    if(state.material.id === 'imbiancatura') lines.push("Ambiente: "+(state.context === 'esterno' ? 'Esterno' : 'Interno'));
     if(granaActive()) lines.push("Tipo lavorazione: "+GRANA_NAME[state.grana].it);
     if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it);
     if(state.material.id === 'decorazioni') lines.push("Stile boiserie: "+BOISERIE_STYLE_NAME[state.boiserieStyle].it);
-    if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+state.colorDavanzali.name+" ("+state.colorDavanzali.code+")");
-    if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+state.colorC.name+" ("+state.colorC.code+")");
-    if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+state.colorSottotetto.name+" ("+state.colorSottotetto.code+")");
-    if(needsSerramentiColor() && state.colorSerramenti) lines.push("Serramenti: "+state.colorSerramenti.name+" ("+state.colorSerramenti.code+")");
-    if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+state.colorBalconi.name+" ("+state.colorBalconi.code+")");
-    if(needsRigheColor() && state.colorRighe) lines.push("Righe ("+righeDescriptionText('it')+"): "+state.colorRighe.name+" ("+state.colorRighe.code+")");
+    if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+colorLabel(state.colorDavanzali));
+    if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+colorLabel(state.colorC));
+    if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+colorLabel(state.colorSottotetto));
+    if(needsSerramentiColor() && state.colorSerramenti) lines.push("Serramenti: "+colorLabel(state.colorSerramenti));
+    if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+colorLabel(state.colorBalconi));
+    if(needsRigheColor() && state.colorRighe) lines.push("Righe ("+righeDescriptionText('it')+"): "+colorLabel(state.colorRighe));
     lines.push(
       "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
       "Nome: "+name, "Telefono: "+phone
@@ -5094,6 +5319,7 @@
   });
   document.getElementById('sendEmail').addEventListener('click', function(e){
     e.preventDefault();
+    if(!document.getElementById('fConsent').checked){ alert(ts('consentRequired')); return; }
     var linkEl = e.currentTarget;
     var subject = "Richiesta preventivo — " + state.material.name;
     var originalText = linkEl.textContent;
@@ -5339,6 +5565,7 @@
     var errEl = document.getElementById('paRegError');
     errEl.textContent = '';
     if(!company || !email || password.length < 6){ errEl.textContent = ts('proErrFieldsReg'); return; }
+    if(!document.getElementById('paRegConsent').checked){ errEl.textContent = ts('consentRequired'); return; }
     var btn = this; btn.disabled = true;
     fetch('/api/auth-register', {
       method: 'POST', headers: {'Content-Type':'application/json'},
