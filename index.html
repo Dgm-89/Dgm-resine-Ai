@@ -763,6 +763,13 @@
     </div>
     <div class="seg-hint" id="pannelloHeightHint" style="display:none">Boiserie fino a circa 90-100cm da terra, il resto della parete sopra resta invariato.</div>
 
+    <div class="section-label" id="marmoLayoutLabel" hidden>Colori del marmo</div>
+    <div class="seg-control" id="marmoLayoutControl" hidden>
+      <button type="button" data-v="uno" class="active">Un colore</button>
+      <button type="button" data-v="due" >Due colori</button>
+    </div>
+    <div class="seg-hint" id="marmoLayoutHint" hidden>Fondo e venature nello stesso colore, con sfumature naturali.</div>
+
     <div class="section-label" id="effettoLabel" style="display:none" data-i18n="effettoLabel">Effetto superficie</div>
     <div class="seg-control" id="effettoControl" style="display:none">
       <button data-v="liscio" class="active" data-i18n="btnLiscio">Liscio</button>
@@ -1143,6 +1150,7 @@
     clusterLabelRighe: { it:"Colore righe", en:"Stripe color" },
     pendingThird: { it:"+ Marcapiano da scegliere", en:"+ String course to choose" },
     pendingSecondOf3: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
+    pendingVenature: { it:"+ Colore venature da scegliere", en:"+ Vein color to choose" },
     pendingSecondOf2: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
     pendingDavanzali: { it:"+ Colore davanzali da scegliere", en:"+ Window sill color to choose" },
     pendingSottotetto: { it:"+ Colore sottotetto da scegliere", en:"+ Eave color to choose" },
@@ -3589,7 +3597,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -3657,6 +3665,7 @@
     if(state.material && state.material.id === 'graniglia_esterni'){
       return GRANIGLIA_COLOR_COUNT[state.granigliaLayout] || 1;
     }
+    if(state.material && state.material.id === 'monolith_marmo' && state.marmoLayout === 'due') return 2;
     return 1;
   }
   // Vero quando serve un secondo colore (layout "due colori": alto/basso).
@@ -3720,7 +3729,7 @@
 
   function resetSelectionForNewCategory(){
     state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.marmoLayout = 'uno'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncEffettoVisibility();
@@ -3730,7 +3739,7 @@
   // Effetto superficie (Materico/Corten): ha senso solo su Resina Spatolata/Marmo,
   // Microcemento e Scale — non su Pietra/Terrazzo (già hanno una texture a
   // graniglie) né su Imbiancatura/Decorazioni/HACCP.
-  var EFFETTO_MATERIALS = ['monolith_spatolato', 'monolith_marmo', 'microcemento', 'scale'];
+  var EFFETTO_MATERIALS = ['monolith_spatolato', 'microcemento', 'scale'];
   // Vero quando è attivo l'effetto Corten: in questo caso il colore è
   // intrinseco alla texture (base ocra/ruggine), il cliente non ne sceglie uno.
   function isCortenActive(){
@@ -3740,7 +3749,17 @@
   // il resto del codice (chip, riepilogo, validazione step) continua a
   // funzionare senza bisogno di una scelta reale del cliente.
   var CORTEN_COLOR = { name:'Corten', code:'CORTEN', hex:'#A5602E' };
+  var MARMO_HINT = { uno:{it:"Fondo e venature nello stesso colore, con sfumature naturali.", en:"Background and veins in the same color, with natural shading."},
+                    due:{it:"Scegli il colore di fondo e il colore delle venature.", en:"Choose the background color and the vein color."} };
+  function syncMarmoLayout(){
+    var show = !!(state.material && state.material.id === 'monolith_marmo');
+    ['marmoLayoutLabel','marmoLayoutControl','marmoLayoutHint'].forEach(function(id){ document.getElementById(id).hidden = !show; });
+    if(!show) return;
+    Array.prototype.forEach.call(document.getElementById('marmoLayoutControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.marmoLayout); });
+    document.getElementById('marmoLayoutHint').textContent = tr(MARMO_HINT[state.marmoLayout] || MARMO_HINT.uno);
+  }
   function syncEffettoVisibility(){
+    syncMarmoLayout();
     var show = state.material && EFFETTO_MATERIALS.indexOf(state.material.id) > -1;
     // "Effetti particolari" raggruppa Materico e Corten sotto un secondo livello,
     // per non buttare tre bottoni tutti insieme al cliente.
@@ -4571,7 +4590,7 @@
     if(!state.material) return null;
     var id = state.material.id;
     if(id==='imbiancatura') return state.context==='esterno' ? (ph==='T' ? null : 'pittura') : 'pittura';
-    return ({monolith_spatolato:'microcemento', scale:'microcemento', monolith_marmo:'microcemento', monolith_terrazzo:'microcemento', monolith_pietra:'microcemento',
+    return ({monolith_spatolato:'microcemento', scale:'microcemento', monolith_marmo:'marmo', monolith_terrazzo:'terrazzo', monolith_pietra:'pietra',
              microcemento:'microcemento', decorazioni:'pittura', resina_haccp:'resina', parquet:'parquet', spc:'parquet', piastrelle:'piastrelle'})[id] || null;
   }
   // La texture viene "tinta" su canvas: ogni pixel = colore esatto x rilievo
@@ -4674,7 +4693,7 @@
     if(isCortenActive()) return;
     if(state.colorA) addColorChip(row, 'A', state.colorA);
     if(needsSecondColor()){
-      if(state.colorB) addColorChip(row, 'B', state.colorB); else if(state.colorA) addPendingChip(row, 'pendingSecondOf2');
+      if(state.colorB) addColorChip(row, 'B', state.colorB); else if(state.colorA) addPendingChip(row, (state.material && state.material.id==='monolith_marmo') ? 'pendingVenature' : 'pendingSecondOf2');
     }
     if(needsDavanzaliColor()){
       if(state.colorDavanzali) addColorChip(row, 'D', state.colorDavanzali); else addPendingChip(row, 'pendingDavanzali');
@@ -4834,7 +4853,7 @@
     } else if(needsThirdColor()){
       label.textContent = tr(PHASE_LABEL_3[pickPhase]);
     } else if(needsSecondColor()){
-      label.textContent = pickPhase==='A' ? ts('clusterLabelFirst') : ts('clusterLabelSecond');
+      label.textContent = (state.material && state.material.id==='monolith_marmo') ? (pickPhase==='A' ? tr({it:'Colore di fondo',en:'Background color'}) : tr({it:'Colore delle venature',en:'Vein color'})) : (pickPhase==='A' ? ts('clusterLabelFirst') : ts('clusterLabelSecond'));
     } else if(pickPhase==='A' && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsTettoColor() || needsCorniciColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor())){
       // Monocolore ma con davanzali/marcapiano/sottotetto/balconi/serramenti/righe
       // attivi: va chiarito che questo è il colore della facciata principale,
@@ -4968,6 +4987,14 @@
 
   function renderStep2UI(){ renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled(); }
 
+  document.getElementById('marmoLayoutControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn) return;
+    state.marmoLayout = btn.dataset.v;
+    if(state.marmoLayout === 'uno') state.colorB = null;
+    pickPhase = state.colorA ? (state.marmoLayout==='due' && !state.colorB ? 'B' : 'A') : 'A';
+    aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
+    syncMarmoLayout(); renderStep2UI();
+  });
   document.getElementById('effettoControl').addEventListener('click', function(e){
     var btn = e.target.closest('button'); if(!btn) return;
     var group = btn.dataset.v; // 'liscio' oppure 'particolare'
@@ -5120,7 +5147,7 @@
         colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? apiHex(state.colorBalconi) : null,
         colorSerramenti: (needsSerramentiColor() && state.colorSerramenti) ? state.colorSerramenti.name : null, colorSerramentiHex: (needsSerramentiColor() && state.colorSerramenti) ? apiHex(state.colorSerramenti) : null,
         colorRighe: (needsRigheColor() && state.colorRighe) ? state.colorRighe.name : null, colorRigheHex: (needsRigheColor() && state.colorRighe) ? apiHex(state.colorRighe) : null,
-        facadeLayout: needsSecondColor() ? state.facadeLayout : null, context: state.context,
+        facadeLayout: needsSecondColor() ? state.facadeLayout : null, marmoLayout: (state.material && state.material.id==='monolith_marmo') ? state.marmoLayout : null, context: state.context,
         boiserieStyle: state.material.id === 'decorazioni' ? state.boiserieStyle : null,
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
         boiserieStyleRefImage: boiserieStyleRefImage,
