@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana, righeSpessore, colorCardImage, step } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, step } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -78,7 +78,8 @@ module.exports = async function handler(req, res) {
     imbiancatura: "pittura murale opaca stesa in modo uniforme sulla parete, finitura pittorica classica, nessuna texture materica particolare",
     decorazioni: "boiserie in legno applicata a parete",
     resina_haccp: "resina industriale bianca lucida ad alta resistenza chimica e meccanica, superficie liscia, compatta e priva di fughe o giunti, con raccordi a raggio sanitario (curvi, senza spigoli vivi) tra pavimento e pareti dove visibili, tipica dei pavimenti certificati HACCP per cucine professionali e industria alimentare, finitura lucida uniforme",
-    parquet: "parquet in legno vero posato a pavimento, tavole/doghe rettangolari disposte in modo ordinato (es. posa a correre), con leggera variazione naturale di tono e venatura del legno visibile tra una tavola e l'altra, sottili fughe/giunti lineari ben visibili nella direzione di posa, superficie opaca-satinata calda e materica tipica del legno trattato, non una superficie piatta e uniforme come la resina",
+    spc: "pavimento SPC (Stone Plastic Composite) flottante a incastro: doghe o piastrelle rigide con pellicola decorativa ad alta definizione (effetto legno, pietra, cemento o marmo a seconda del colore indicato) protetta da uno strato d'usura, superficie opaca-satinata realistica, sottili giunti a incastro ben allineati tra un elemento e l'altro, senza fughe stuccate, posato su tutto il pavimento",
+    parquet: "parquet in legno vero posato a pavimento, tavole/doghe/listelli disposti in modo ordinato secondo lo schema di posa indicato, con leggera variazione naturale di tono e venatura del legno visibile tra una tavola e l'altra, sottili fughe/giunti lineari ben visibili nella direzione di posa, superficie opaca-satinata calda e materica tipica del legno trattato, non una superficie piatta e uniforme come la resina",
     piastrelle: "pavimentazione in piastrelle ceramiche/gres porcellanato, moduli quadrati o rettangolari regolari con sottili fughe dritte e uniformi ben visibili tra una piastrella e l'altra secondo una griglia regolare, superficie piana con leggerissima variazione naturale di tono tra i pezzi, texture e fughe chiaramente riconoscibili, non una superficie continua senza giunti come la resina",
     graniglia_esterni: "pavimentazione decorativa da esterno in resina drenante con graniglie/sassolini naturali di piccola pezzatura ben visibili e distribuiti in modo uniforme e denso su tutta la superficie, texture granulare e materica (non liscia né piatta), tipica dei rivestimenti decorativi per terrazzi, vialetti, bordi piscina e rampe carrabili, superficie compatta ma con i singoli sassolini chiaramente riconoscibili, finitura leggermente lucida come resina trasparente che lega la graniglia"
   };
@@ -120,12 +121,25 @@ module.exports = async function handler(req, res) {
       ? GRANA_TEXTURE[grana]
       : (MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`);
   const effettoAddon = (EFFETTO_MATERIALS.includes(materialId) && EFFETTO_TEXTURE[effetto]) ? EFFETTO_TEXTURE[effetto] : "";
-  const textureDesc = baseTextureDesc + effettoAddon;
+  const PARQUET_POSA_DESC = {
+    cassero_regolare: "posa a cassero regolare: tavole lunghe in file parallele, con i giunti di testa sfalsati a passo costante (ogni fila spostata di metà tavola rispetto alla precedente)",
+    cassero_irregolare: "posa a cassero irregolare (a correre): tavole in file parallele con i giunti di testa sfalsati in modo casuale, lunghezze delle tavole variabili",
+    spina_pesce: "posa a spina di pesce classica: listelli rettangolari corti con le teste tagliate dritte, incastrati a 90° uno contro l'altro in modo da formare un motivo a zig-zag continuo",
+    spina_ungherese: "posa a spina ungherese (chevron): listelli con le teste tagliate a 45°, accostati in punta in modo da formare file di frecce continue tutte nella stessa direzione, con le punte allineate lungo linee dritte",
+    quadri: "posa a quadri (mosaico/dama): quadrotti formati da gruppi di listelli paralleli, con la direzione dei listelli alternata di 90° da un quadrotto all'altro come una scacchiera",
+    cassero: "posa a cassero (a correre): doghe lunghe parallele con i giunti di testa sfalsati in modo naturale",
+    dritta: "posa dritta in linea: piastrelle rettangolari grandi (circa 60x120 cm) accostate su una griglia regolare con giunti allineati in entrambe le direzioni",
+    fascia_bindello: "posa con fascia e bindello: campo centrale in listelli paralleli, incorniciato lungo tutto il perimetro della stanza da una fascia di listelli posati in senso perpendicolare e da un sottile bindello (listello di bordo) che corre parallelo ai muri, con gli angoli tagliati a 45°"
+  };
+  const posaAddon = ((materialId === "parquet" || materialId === "spc") && PARQUET_POSA_DESC[parquetPosa])
+    ? `. SCHEMA DI POSA OBBLIGATORIO: ${PARQUET_POSA_DESC[parquetPosa]}; il disegno della posa deve essere chiaramente riconoscibile su tutto il pavimento e seguire la prospettiva della stanza, e la superficie ha il colore indicato${materialId === "spc" ? " con la stampa decorativa realistica (venature del legno oppure disegno di pietra, cemento o marmo)" : " con venature naturali"}`
+    : "";
+  const textureDesc = baseTextureDesc + effettoAddon + posaAddon;
 
   // Monolith Pietra e Terrazzo si posano SOLO a pavimento (non a parete): lo
   // diciamo esplicitamente all'AI così non applica la lavorazione anche ai muri
   // inquadrati nella foto.
-  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "piastrelle", "graniglia_esterni"];
+  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "spc", "piastrelle", "graniglia_esterni"];
   const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId);
 
   // Per la categoria "Resine" (monolith), l'utente ora sceglie esplicitamente DOVE
