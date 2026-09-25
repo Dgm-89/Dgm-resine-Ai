@@ -177,7 +177,59 @@ function publicUser(row) {
     phone: row.phone,
     tier: row.tier,
     logoUrl: row.logo_url,
+    subscriptionStatus: row.subscription_status || "none",
+    usageMonth: row.usage_month || null,
+    usageCount: row.usage_count || 0,
+    usageLimit: (PLAN_LIMITS[row.tier] || 0),
+    paymentsEnabled: paymentsEnabled(),
   };
+}
+
+// Piani a pagamento (prezzi in centesimi di euro al mese, IVA esclusa) e
+// anteprime AI incluse ogni mese. Valgono sia per i privati sia per i
+// professionisti. Per cambiare un prezzo basta modificarlo qui.
+const PLANS = {
+  basic:  { name: "Rendrum Basic",  priceCents: 1900, images: 30 },
+  medium: { name: "Rendrum Medium", priceCents: 4900, images: 150 },
+  pro:    { name: "Rendrum Pro",    priceCents: 9900, images: 400 },
+};
+const PLAN_LIMITS = { basic: PLANS.basic.images, medium: PLANS.medium.images, pro: PLANS.pro.images };
+
+// I pagamenti sono attivi solo quando su Vercel c'è STRIPE_SECRET_KEY: finché
+// manca, l'app continua a funzionare come prima (anteprime libere).
+function paymentsEnabled() { return Boolean((process.env.STRIPE_SECRET_KEY || "").trim()); }
+
+// Chiamata alla REST API di Stripe (form-encoded), senza librerie esterne.
+function toForm(obj, prefix, out) {
+  out = out || [];
+  Object.keys(obj).forEach(function (k) {
+    const v = obj[k]; if (v === undefined || v === null) return;
+    const key = prefix ? prefix + "[" + k + "]" : k;
+    if (typeof v === "object") toForm(v, key, out);
+    else out.push(encodeURIComponent(key) + "=" + encodeURIComponent(String(v)));
+  });
+  return out;
+}
+async function stripeRequest(method, path, params) {
+  const key = (process.env.STRIPE_SECRET_KEY || "").trim();
+  const r = await fetch("https://api.stripe.com/v1" + path, {
+    method,
+    headers: { Authorization: "Bearer " + key, "Content-Type": "application/x-www-form-urlencoded" },
+    body: params ? toForm(params).join("&") : undefined,
+  });
+  const data = await r.json().catch(function () { return null; });
+  return { ok: r.ok, status: r.status, data };
+}
+
+// Legge l'account della sessione corrente (o null).
+async function currentAccount(req) {
+  const { configured } = getSupabaseConfig();
+  if (!configured) return null;
+  const token = readSessionCookie(req);
+  const session = token ? verifySession(token) : null;
+  if (!session || !session.sub) return null;
+  const found = await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(session.sub) + "&select=*", { method: "GET" });
+  return found.ok && Array.isArray(found.data) && found.data[0] ? found.data[0] : null;
 }
 
 module.exports = {
@@ -190,4 +242,9 @@ module.exports = {
   readSessionCookie,
   verifySession,
   publicUser,
+  PLANS,
+  PLAN_LIMITS,
+  paymentsEnabled,
+  stripeRequest,
+  currentAccount,
 };
