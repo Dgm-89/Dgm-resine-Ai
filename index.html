@@ -503,6 +503,23 @@
       <div class="field"><label for="paLoginPassword" data-i18n="proPasswordLabel">Password</label><input id="paLoginPassword" type="password" autocomplete="current-password"></div>
       <div class="pro-auth-error" id="paLoginError"></div>
       <button type="button" class="pro-auth-submit" id="paLoginSubmit" data-i18n="proLoginSubmit">Accedi</button>
+      <div style="text-align:center;margin-top:12px"><a href="#" id="paForgotLink" style="font-size:13px;color:inherit;opacity:.75">Password dimenticata?</a></div>
+    </div>
+
+    <!-- MESSAGGIO (verifica email / reset inviato) -->
+    <div class="pro-auth-section" id="proSectionMsg">
+      <p id="paMsgText" style="font-size:14px;line-height:1.5;margin:4px 0 16px"></p>
+      <div class="pro-auth-error" id="paMsgError"></div>
+      <button type="button" class="pro-auth-submit" id="paResendBtn" style="display:none">Rimanda email di conferma</button>
+      <div style="text-align:center;margin-top:12px"><a href="#" id="paBackLogin" style="font-size:13px;color:inherit;opacity:.75">Torna all'accesso</a></div>
+    </div>
+
+    <!-- NUOVA PASSWORD -->
+    <div class="pro-auth-section" id="proSectionReset">
+      <p style="font-size:14px;margin:4px 0 14px">Scegli una nuova password (almeno 6 caratteri).</p>
+      <div class="field"><label for="paResetPassword">Nuova password</label><input id="paResetPassword" type="password" autocomplete="new-password"></div>
+      <div class="pro-auth-error" id="paResetError"></div>
+      <button type="button" class="pro-auth-submit" id="paResetSubmit">Salva nuova password</button>
     </div>
 
     <!-- REGISTRAZIONE -->
@@ -6088,7 +6105,22 @@
     document.getElementById('proTabRegister').classList.toggle('active', !isLogin);
     document.getElementById('proSectionLogin').classList.toggle('active', isLogin);
     document.getElementById('proSectionRegister').classList.toggle('active', !isLogin);
+    document.getElementById('proSectionMsg').classList.remove('active');
+    document.getElementById('proSectionReset').classList.remove('active');
   }
+  function proShowSection(id){
+    ['proSectionLogin','proSectionRegister','proSectionMsg','proSectionReset'].forEach(function(x){ document.getElementById(x).classList.toggle('active', x===id); });
+  }
+  var paPendingEmail = '';
+  function proShowMsg(text, withResend, email){
+    paPendingEmail = email || paPendingEmail;
+    document.getElementById('paMsgText').textContent = text;
+    document.getElementById('paMsgError').textContent = '';
+    document.getElementById('paResendBtn').style.display = withResend ? 'block' : 'none';
+    document.getElementById('proAuthModal').classList.add('open');
+    proShowSection('proSectionMsg');
+  }
+  function proVerifyText(email){ return 'Ti abbiamo inviato un\'email a ' + email + '. Clicca il link che trovi dentro per attivare l\'account (controlla anche la cartella spam).'; }
   function proUpdateHeader(){
     var openBtn = document.getElementById('proAuthOpen');
     var badge = document.getElementById('proBadge');
@@ -6112,13 +6144,13 @@
   // ---------- Abbonamenti (Stripe) ----------
   function subActive(){ return !!(proAccount && (proAccount.subscriptionStatus === 'active' || proAccount.subscriptionStatus === 'trialing')); }
   function startCheckout(tier){
-    fetch('/api/stripe-checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tier: tier || (proAccount && proAccount.tier) || 'basic' }) })
+    fetch('/api/stripe?action=checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tier: tier || (proAccount && proAccount.tier) || 'basic' }) })
       .then(function(r){ return r.json().catch(function(){ return {}; }); })
       .then(function(d){ if(d && d.url) window.location.href = d.url; else alert((d && d.error) || 'Impossibile aprire il pagamento, riprova.'); })
       .catch(function(){ alert('Impossibile aprire il pagamento, riprova.'); });
   }
   function openBillingPortal(){
-    fetch('/api/stripe-portal', { method:'POST' })
+    fetch('/api/stripe?action=portal', { method:'POST' })
       .then(function(r){ return r.json().catch(function(){ return {}; }); })
       .then(function(d){ if(d && d.url) window.location.href = d.url; else alert((d && d.error) || 'Impossibile aprire la gestione abbonamento.'); })
       .catch(function(){});
@@ -6164,6 +6196,7 @@
       .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(data){ return { ok: r.ok, data: data }; }); })
       .then(function(res){
         btn.disabled = false;
+        if(!res.ok && res.data && res.data.code === 'email_not_verified'){ proShowMsg('Devi prima confermare la tua email. ' + proVerifyText(email), true, email); return; }
         if(!res.ok){ errEl.textContent = (res.data && res.data.error) ? res.data.error : ts('proErrLogin'); return; }
         proAccount = res.data.user;
         proUpdateHeader();
@@ -6195,6 +6228,11 @@
           errEl.textContent = res.status === 409 ? ts('proErrEmailExists') : ((res.data && res.data.error) ? res.data.error : ts('proErrGeneric'));
           return;
         }
+        if(res.data && res.data.needsVerification){
+          try{ sessionStorage.setItem('rendrumTier', proSelectedTier || 'basic'); }catch(e){}
+          proShowMsg(res.data.emailSent === false ? 'Account creato, ma non siamo riusciti a inviare l\'email di conferma a ' + email + '. Premi "Rimanda email di conferma".' : proVerifyText(email), true, email);
+          return;
+        }
         proAccount = res.data.user;
         proUpdateHeader();
         proAuthClose();
@@ -6209,13 +6247,80 @@
     proUpdateHeader();
   });
 
-  function proCheckSession(){
+  function proCheckSession(cb){
     fetch('/api/auth-me')
       .then(function(r){ return r.ok ? r.json() : null; })
-      .then(function(data){ if(data && data.user){ proAccount = data.user; proUpdateHeader(); } })
-      .catch(function(){});
+      .then(function(data){ if(data && data.user){ proAccount = data.user; proUpdateHeader(); } if(cb) cb(); })
+      .catch(function(){ if(cb) cb(); });
   }
-  proCheckSession();
+
+  function paPost(action, body){
+    return fetch('/api/auth-email?action=' + action, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, data:d }; }); });
+  }
+  document.getElementById('paBackLogin').addEventListener('click', function(e){ e.preventDefault(); proSwitchTab('login'); });
+  document.getElementById('paResendBtn').addEventListener('click', function(){
+    var btn = this, errEl = document.getElementById('paMsgError');
+    if(!paPendingEmail) return;
+    btn.disabled = true; errEl.textContent = '';
+    paPost('resend', { email: paPendingEmail }).then(function(res){
+      btn.disabled = false;
+      errEl.style.color = res.ok ? '#2E7D32' : '';
+      errEl.textContent = res.ok ? 'Email inviata di nuovo a ' + paPendingEmail + '.' : ((res.data && res.data.error) || 'Invio non riuscito, riprova tra poco.');
+    }).catch(function(){ btn.disabled = false; errEl.textContent = 'Invio non riuscito, riprova tra poco.'; });
+  });
+  document.getElementById('paForgotLink').addEventListener('click', function(e){
+    e.preventDefault();
+    var email = document.getElementById('paLoginEmail').value.trim();
+    var errEl = document.getElementById('paLoginError');
+    if(!email || email.indexOf('@') < 0){ errEl.textContent = 'Scrivi la tua email qui sopra e poi premi "Password dimenticata?".'; return; }
+    errEl.textContent = '';
+    paPost('forgot', { email: email }).then(function(res){
+      if(!res.ok){ errEl.textContent = (res.data && res.data.error) || 'Invio non riuscito, riprova tra poco.'; return; }
+      proShowMsg('Se esiste un account con ' + email + ', ti abbiamo inviato un link per scegliere una nuova password. Il link vale 1 ora.', false, email);
+    }).catch(function(){ errEl.textContent = 'Invio non riuscito, riprova tra poco.'; });
+  });
+  var paResetToken = '';
+  document.getElementById('paResetSubmit').addEventListener('click', function(){
+    var pw = document.getElementById('paResetPassword').value, errEl = document.getElementById('paResetError'), btn = this;
+    errEl.textContent = '';
+    if(pw.length < 6){ errEl.textContent = 'La password deve avere almeno 6 caratteri.'; return; }
+    btn.disabled = true;
+    paPost('reset', { token: paResetToken, password: pw }).then(function(res){
+      btn.disabled = false;
+      if(!res.ok){ errEl.textContent = (res.data && res.data.error) || 'Link non valido o scaduto: richiedi un nuovo link.'; return; }
+      if(res.data && res.data.user){ proAccount = res.data.user; proUpdateHeader(); }
+      proShowMsg('Password aggiornata! Ora sei dentro al tuo account.', false);
+    }).catch(function(){ btn.disabled = false; errEl.textContent = 'Errore di rete, riprova.'; });
+  });
+
+  (function(){
+    var q = new URLSearchParams(location.search);
+    var v = q.get('verificato'), rt = q.get('reset');
+    if(!v && !rt){ proCheckSession(); return; }
+    history.replaceState(null, '', location.pathname);
+    if(rt){
+      paResetToken = rt;
+      proCheckSession();
+      document.getElementById('proAuthModal').classList.add('open');
+      proShowSection('proSectionReset');
+      return;
+    }
+    if(v === '1'){
+      proCheckSession(function(){
+        var tier = 'basic'; try{ tier = sessionStorage.getItem('rendrumTier') || (proAccount && proAccount.tier) || 'basic'; }catch(e){}
+        if(proAccount && proAccount.paymentsEnabled && !subActive()){
+          proShowMsg('Email confermata! Ora ti portiamo al pagamento per attivare l\'abbonamento…', false);
+          setTimeout(function(){ startCheckout(tier); }, 1500);
+        } else {
+          proShowMsg('Email confermata! Il tuo account è attivo.', false);
+        }
+      });
+    } else {
+      proCheckSession();
+      proShowMsg('Il link di conferma non è valido o è scaduto. Accedi con la tua email e password: potrai farti rimandare l\'email di conferma.', false);
+    }
+  })();
 
   // ---------- Cartella progetti professionista ----------
   var ppProjects = [];
