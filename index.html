@@ -5169,7 +5169,50 @@
         righeExtent: (needsRigheColor() && state.righeOrientamento === 'orizzontali') ? state.righeExtent : null,
         effetto: state.effetto, finitura: noFinitura() ? null : state.finitura, grana: granaActive() ? state.grana : null
     };
+    // L'AI restituisce immagini in pochi formati fissi (quadrato, 3:2, 2:3): se la
+    // foto ha un'altra proporzione, il risultato veniva tagliato o spostato e non
+    // combaciava più con l'originale. Qui la foto viene portata al formato giusto
+    // con bande laterali sfocate e, al ritorno, il risultato viene ritagliato
+    // esattamente sulla zona della foto originale e riportato alle sue dimensioni.
+    function loadImg(src){ return new Promise(function(res, rej){ var i = new Image(); i.onload = function(){ res(i); }; i.onerror = rej; i.src = src; }); }
+    function padForAI(b64, mime){
+      return loadImg('data:' + mime + ';base64,' + b64).then(function(im){
+        var w = im.naturalWidth, h = im.naturalHeight, r = w / h;
+        var best = null;
+        [1, 1.5, 2/3].forEach(function(t){
+          var W = t >= r ? Math.round(h * t) : w, H = t >= r ? h : Math.round(w / t);
+          var area = W * H; if(!best || area < best.area) best = { W:W, H:H, area:area };
+        });
+        var W = best.W, H = best.H;
+        if(W === w && H === h) return { b64:b64, mime:mime, box:null };
+        var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+        var cx = cv.getContext('2d');
+        try { cx.filter = 'blur(40px) brightness(0.8)'; } catch(e){}
+        cx.drawImage(im, 0, 0, W, H);
+        try { cx.filter = 'none'; } catch(e){}
+        var x = Math.round((W - w) / 2), y = Math.round((H - h) / 2);
+        cx.drawImage(im, x, y, w, h);
+        var m = /^data:(.+);base64,(.*)$/.exec(cv.toDataURL('image/jpeg', 0.9));
+        return { b64:m[2], mime:m[1], box:{ x:x/W, y:y/H, w:w/W, h:h/H, ow:w, oh:h } };
+      });
+    }
+    function unpadFromAI(img, box){
+      if(!box) return Promise.resolve(null);
+      var rw = img.naturalWidth, rh = img.naturalHeight;
+      var cv = document.createElement('canvas'); cv.width = box.ow; cv.height = box.oh;
+      cv.getContext('2d').drawImage(img, box.x*rw, box.y*rh, box.w*rw, box.h*rh, 0, 0, box.ow, box.oh);
+      var m = /^data:(.+);base64,(.*)$/.exec(cv.toDataURL('image/jpeg', 0.92));
+      return loadImg(cv.toDataURL('image/jpeg', 0.92)).then(function(i){ return { img:i, base64:m[2], mime:m[1] }; });
+    }
     function callAI(body){
+      return padForAI(body.imageBase64, body.mimeType || 'image/jpeg').then(function(pad){
+        var sendBody = Object.assign({}, body, { imageBase64: pad.b64, mimeType: pad.mime, paddedBands: !!pad.box });
+        return callAIRaw(sendBody).then(function(result){
+          return unpadFromAI(result.img, pad.box).then(function(cut){ return cut || result; });
+        });
+      });
+    }
+    function callAIRaw(body){
       return fetch(AI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
       .then(function(r){
         return r.text().then(function(text){
