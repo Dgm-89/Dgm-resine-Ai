@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana, righeSpessore, colorCardImage, step } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, grana, righeSpessore, colorCardImage, step } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -187,6 +187,20 @@ module.exports = async function handler(req, res) {
     ? ` Inoltre, dipingi TUTTO il sottotetto/sporto di gronda visibile nella foto (la parte sotto la falda del tetto, sia essa in legno a vista con travetti/assito, sia intonacata/cementizia) nel colore ${colorRef(colorSottotetto, colorSottotettoHex)}. Applica questo colore SOLO al sottotetto/gronda, non al manto di copertura del tetto (tegole/coppi) né al resto della facciata.`
     : "";
 
+  // Tetto: il manto di copertura ripulito e ricolorato (guaina, lamiera,
+  // tegole in cemento). Solo Imbiancatura Esterno, opzione indipendente.
+  const isTettoStyled = materialId === "imbiancatura" && context === "esterno" && addTetto && colorTetto;
+  const tettoNote = isTettoStyled
+    ? ` Inoltre, rinnova TUTTO il manto di copertura del tetto visibile nella foto nel colore ${colorRef(colorTetto, colorTettoHex)}: il tetto deve apparire pulito e in ordine, senza muschio, macchie, ruggine, lamiere rotte o elementi mancanti, mantenendo la stessa forma, la stessa pendenza e lo stesso disegno delle tegole/lastre. Comignolo, grondaie e pluviali restano come sono, solo puliti.`
+    : "";
+
+  // Cornici di porte e finestre: le fasce in rilievo intorno alle aperture
+  // (cornici, archi, spallette, imbotti) in un colore diverso dalla facciata.
+  const isCorniciStyled = materialId === "imbiancatura" && context === "esterno" && addCornici && colorCornici;
+  const corniciNote = isCorniciStyled
+    ? ` Inoltre, dipingi TUTTE le cornici in rilievo intorno a finestre e porte (fasce, archi, spallette e imbotti) nel colore ${colorRef(colorCornici, colorCorniciHex)}, con bordi netti e puliti. Se una finestra non ha una cornice in rilievo, non inventarla: colora solo quelle che esistono. Non colorare vetri, telai, persiane, porte e davanzali.`
+    : "";
+
   // Balconi (parapetti/ringhiere) in un colore diverso dalla facciata: opzione
   // indipendente, disponibile solo per Imbiancatura Esterno, come davanzali e
   // sottotetto. Applica il colore SOLO ai parapetti/ringhiere dei balconi, non
@@ -306,7 +320,7 @@ module.exports = async function handler(req, res) {
   // Per il Corten il colore non è scelto dal cliente (vedi isCortenStyled sopra),
   // quindi anche se arrivasse un colorAHex residuo non lo trattiamo come vincolo
   // esatto da rispettare: il Corten segue solo la sua texture/pattern.
-  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorBalconiHex || colorSerramentiHex || colorRigheHex);
+  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorTettoHex || colorCorniciHex || colorBalconiHex || colorSerramentiHex || colorRigheHex);
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
@@ -332,7 +346,9 @@ module.exports = async function handler(req, res) {
     : "";
 
   const isExteriorFacade = materialId === "imbiancatura" && context === "esterno";
-  const keepList = ["la prospettiva", "la luce", "le ombre", "il manto di copertura del tetto (tegole/coppi)", "il terreno, il giardino, gli oggetti e l'ambiente circostante"];
+  const keepList = ["la prospettiva", "la luce", "le ombre", "il terreno, il giardino, gli oggetti e l'ambiente circostante"];
+  if (!(isTettoStyled)) keepList.splice(3, 0, "il manto di copertura del tetto (tegole/coppi)");
+  if (!(isCorniciStyled)) keepList.push("le cornici di porte e finestre");
   if (!(isSerramentiStyled)) keepList.push("gli infissi, le persiane e le porte");
   if (!(isSottotettoStyled)) keepList.push("il sottotetto/sporto di gronda");
   if (!(isDavanzaliStyled)) keepList.push("i davanzali");
@@ -342,6 +358,8 @@ module.exports = async function handler(req, res) {
   if (isMarcapianoStyled) changeList.push("il marcapiano");
   if (isDavanzaliStyled) changeList.push("i davanzali");
   if (isSottotettoStyled) changeList.push("il sottotetto/sporto di gronda");
+  if (isTettoStyled) changeList.push("il manto di copertura del tetto");
+  if (isCorniciStyled) changeList.push("le cornici di porte e finestre");
   if (isSerramentiStyled) changeList.push("TUTTI i serramenti, persiane e porte esterne");
   if (isBalconiStyled) changeList.push("i balconi/parapetti");
   const facadeKeepSentence = `Mantieni identici ${keepList.join(", ")}. Devi invece modificare, in modo fotorealistico come una vera lavorazione professionale: ${changeList.join(", ")}.`;
@@ -363,19 +381,21 @@ module.exports = async function handler(req, res) {
     else if (twoColorFacade) zones.push("tra parte alta e parte bassa NESSUNA fascia o cornice di un terzo colore: solo il cambio netto di colore");
     if (isDavanzaliStyled) zones.push(`davanzali = ${colorRef(colorDavanzali, colorDavanzaliHex)}`);
     if (isSottotettoStyled) zones.push(`sottotetto/sporto di gronda (travetti e assito compresi) = ${colorRef(colorSottotetto, colorSottotettoHex)}`);
+    if (isTettoStyled) zones.push(`manto di copertura del tetto (pulito e rinnovato) = ${colorRef(colorTetto, colorTettoHex)}`);
+    if (isCorniciStyled) zones.push(`cornici in rilievo di porte e finestre (archi e spallette compresi) = ${colorRef(colorCornici, colorCorniciHex)}`);
     if (isSerramentiStyled) zones.push(`serramenti, persiane, scuri e porte esterne = ${colorRef(colorSerramenti, colorSerramentiHex)}`);
     if (isBalconiStyled) zones.push(`balconi/parapetti = ${colorRef(colorBalconi, colorBalconiHex)}`);
   }
   const zonesSummary = zones.length > 1
     ? ` RIEPILOGO VINCOLANTE, ZONA PER ZONA (ogni riga va rispettata; se lo stesso colore compare in più zone è voluto, non cambiarlo): ${zones.map((z, i) => `(${i + 1}) ${z}`).join("; ")}. Prima di restituire l'immagine controlla che ognuna di queste zone abbia esattamente il colore indicato.`
     : "";
-  const exteriorPreservationNote = " REGOLA ASSOLUTA: non spostare, aggiungere o rimuovere nessun elemento della foto e non cambiare inquadratura o prospettiva. Tutto ciò che non è elencato nelle istruzioni resta identico all'originale; tutto ciò che è elencato (vedi riepilogo) va modificato OBBLIGATORIAMENTE, anche se si tratta di serramenti, persiane, porte o sottotetto.";
+  const exteriorPreservationNote = " REGOLA ASSOLUTA: non spostare, aggiungere o rimuovere nessun elemento della foto e non cambiare inquadratura o prospettiva. Tutto ciò che non è elencato nelle istruzioni resta identico all'originale; tutto ciò che è elencato (vedi riepilogo) va modificato OBBLIGATORIAMENTE, anche se si tratta di serramenti, persiane, porte, cornici, sottotetto o tetto.";
 
   const colorCardClean = (typeof colorCardImage === "string" && colorCardImage.length < 2_000_000)
     ? colorCardImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
   const colorCardNote = colorCardClean
-    ? " CARTELLA COLORI: ti sono state fornite DUE immagini. La PRIMA è la foto reale da modificare. La SECONDA è la cartella colori ufficiale: a sinistra ogni riquadro pieno mostra il colore ESATTO da usare per la zona scritta accanto (es. PARTE ALTA FACCIATA, PARTE BASSA FACCIATA, RIGHE, SOTTOTETTO, SERRAMENTI E PERSIANE); a destra c'è lo SCHEMA DELLA FACCIATA, un disegno semplificato che mostra dove va ogni colore e con quali proporzioni (altezza della divisione, fondo e strisce, larghezza delle strisce rispetto al fondo). Segui quello schema per la disposizione dei colori sulla facciata vera della foto, adattandolo alla sua prospettiva. Riproduci quelle tinte il più fedelmente possibile (luminosità e tonalità), zona per zona: se un colore è un grigio medio deve restare un grigio medio, non schiarirlo né scurirlo. La cartella colori serve SOLO come riferimento: NON inserirla, NON copiarla e NON scrivere testo nell'immagine finale."
+    ? " CARTELLA COLORI: ti sono state fornite DUE immagini. La PRIMA è la foto reale da modificare. La SECONDA è la cartella colori ufficiale: a sinistra ogni riquadro pieno mostra il colore ESATTO da usare per la zona scritta accanto (es. PARTE ALTA FACCIATA, PARTE BASSA FACCIATA, RIGHE, SOTTOTETTO, TETTO, CORNICI PORTE E FINESTRE, SERRAMENTI E PERSIANE); a destra c'è lo SCHEMA DELLA FACCIATA, un disegno semplificato che mostra dove va ogni colore e con quali proporzioni (altezza della divisione, fondo e strisce, larghezza delle strisce rispetto al fondo). Segui quello schema per la disposizione dei colori sulla facciata vera della foto, adattandolo alla sua prospettiva. Riproduci quelle tinte il più fedelmente possibile (luminosità e tonalità), zona per zona: se un colore è un grigio medio deve restare un grigio medio, non schiarirlo né scurirlo. La cartella colori serve SOLO come riferimento: NON inserirla, NON copiarla e NON scrivere testo nell'immagine finale."
     : "";
 
   // SECONDO PASSAGGIO (solo quando ci sono le righe): la foto arriva già
@@ -409,6 +429,8 @@ module.exports = async function handler(req, res) {
     davanzaliNote,
     marcapianoNote,
     sottotettoNote,
+    tettoNote,
+    corniciNote,
     serramentiNote,
     balconiNote,
     righeNote,
