@@ -9,6 +9,7 @@ const {
   verifyPassword,
   setSessionCookie,
   publicUser,
+  emailEnabled,
 } = require("./_auth-lib");
 
 module.exports = async function handler(req, res) {
@@ -45,6 +46,9 @@ module.exports = async function handler(req, res) {
       return res.status(401).json({ error: "Email o password non corretti." });
     }
 
+    if (emailEnabled() && row.email_verified === false) {
+      return res.status(403).json({ error: "Devi prima confermare la tua email: apri il messaggio che ti abbiamo inviato e clicca \"Conferma email\".", code: "email_not_verified" });
+    }
     setSessionCookie(res, row.id);
     return res.status(200).json({ ok: true, user: publicUser(row) });
   } catch (err) {

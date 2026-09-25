@@ -18,6 +18,9 @@ const {
   hashPassword,
   setSessionCookie,
   publicUser,
+  emailEnabled,
+  newToken,
+  sendVerifyEmail,
 } = require("./_auth-lib");
 
 const VALID_TIERS = ["basic", "medium", "pro"];
@@ -71,6 +74,7 @@ module.exports = async function handler(req, res) {
     }
 
     const { hash, salt } = hashPassword(password);
+    const verifyToken = newToken();
 
     const inserted = await supabaseRequest("/pro_accounts", {
       method: "POST",
@@ -85,6 +89,8 @@ module.exports = async function handler(req, res) {
           piva: piva || null,
           phone: phone || null,
           tier: tier,
+          email_verified: !emailEnabled(),
+          verify_token: emailEnabled() ? verifyToken : null,
         },
       ]),
     });
@@ -94,6 +100,11 @@ module.exports = async function handler(req, res) {
     }
 
     const newUser = inserted.data[0];
+    // Con le email attive l'account resta bloccato finché non si conferma l'email.
+    if (emailEnabled()) {
+      const sent = await sendVerifyEmail(req, email, verifyToken);
+      return res.status(200).json({ ok: true, needsVerification: true, emailSent: sent, email: email });
+    }
     setSessionCookie(res, newUser.id);
     return res.status(200).json({ ok: true, user: publicUser(newUser) });
   } catch (err) {
