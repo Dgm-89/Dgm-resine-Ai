@@ -453,6 +453,8 @@
   .confirm .title{ font-size:22px; font-weight:700; margin-bottom:10px; }
   .confirm p{ color:var(--ink-soft); font-size:14px; line-height:1.55; max-width:380px; margin:0 auto; }
   .confirm .icon{ font-size:44px; margin-bottom:14px; }
+  /* Ambienti di esempio tolti: il cliente usa sempre la foto di casa sua */
+  #templateSection, #toggleTemplates{ display:none !important; }
 </style>
 </head>
 <body>
@@ -4574,7 +4576,7 @@
     var id = state.material.id;
     if(id==='imbiancatura') return state.context==='esterno' ? (ph==='T' ? null : 'pittura') : 'pittura';
     return ({monolith_spatolato:'spatolato', scale:'spatolato', monolith_marmo:'marmo', monolith_terrazzo:'terrazzo', monolith_pietra:'pietra',
-             microcemento:'microcemento', decorazioni:'pittura', resina_haccp:'resina', parquet:'parquet', spc:'spc_legno', piastrelle:'piastrelle'})[id] || null;
+             microcemento:'microcemento', decorazioni:'pittura', resina_haccp:'resina', parquet:'parquet', spc:'parquet', piastrelle:'piastrelle'})[id] || null;
   }
   // La texture viene "tinta" su canvas: ogni pixel = colore esatto x rilievo
   // della texture (grigio 128 = colore pieno). Così venature e rilievo si
@@ -5142,7 +5144,7 @@
         righeOrientamento: needsRigheColor() ? state.righeOrientamento : null,
         righeZona: (needsRigheColor() && state.righeOrientamento === 'verticali') ? state.righeZona : null,
         righeExtent: (needsRigheColor() && state.righeOrientamento === 'orizzontali') ? state.righeExtent : null,
-        effetto: state.effetto, finitura: state.finitura, grana: granaActive() ? state.grana : null
+        effetto: state.effetto, finitura: noFinitura() ? null : state.finitura, grana: granaActive() ? state.grana : null
     };
     function callAI(body){
       return fetch(AI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
@@ -5212,6 +5214,7 @@
   // ---------- navigation a passi ----------
   // Sequenza: 1 Categoria -> (2 Sotto-materiale, solo se la categoria ha "subs") ->
   // 3 Colore -> 4 Finitura -> 5 Carica foto -> 6 Risultato -> 7 Dati -> Confirm.
+  function noFinitura(){ return !!(state.material && ['piastrelle','parquet','spc'].indexOf(state.material.id) > -1); }
   var ALL_PANELS = ['panelLanding','panel1','panelResinaArea','panelSub','panelColor','panelFinitura','panelPhoto','panelResult','panel3','panelConfirm'];
   var STEP_LABELS = {
     panel1: { it:'Lavorazione', en:'Category' },
@@ -5237,6 +5240,10 @@
     }
     // Facciate esterne con grana: la superficie è per forza opaca, il passo
     // "Finitura" non serve e verrebbe solo a confondere.
+    // Piastrelle, parquet e SPC: il cliente sceglie solo colore (e posa), niente finitura.
+    if(noFinitura()){
+      seq = seq.filter(function(id){ return id!=='panelFinitura'; });
+    }
     if(typeof granaActive === 'function' && granaActive()){
       seq = seq.filter(function(id){ return id!=='panelFinitura'; });
       state.finitura = 'opaco';
@@ -5521,7 +5528,7 @@
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+LF(state.material,'name')+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
       contextLine + granaLine + facadeLine + posaLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + tettoLine + corniciLine + serramentiLine + balconiLine + righeLine +
-      '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>' +
+      (noFinitura() ? '' : '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>') +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
     // Il salvataggio nella cartella progetti ha senso solo per un professionista
@@ -5587,8 +5594,8 @@
     if(needsSerramentiColor() && state.colorSerramenti) lines.push("Serramenti: "+colorLabel(state.colorSerramenti));
     if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+colorLabel(state.colorBalconi));
     if(needsRigheColor() && state.colorRighe) lines.push("Righe ("+righeDescriptionText('it')+"): "+colorLabel(state.colorRighe));
+    if(!noFinitura()) lines.push("Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1));
     lines.push(
-      "Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1),
       "Nome: "+name, "Telefono: "+phone
     );
     if(email) lines.push("Email: "+email);
