@@ -479,6 +479,7 @@
         <span class="pro-account-badge-name" id="proBadgeName"></span>
         <span class="pro-account-badge-tier" id="proBadgeTier"></span>
       </button>
+      <button type="button" class="pro-account-badge-logout" id="proSubBtn" style="display:none">Abbonamento</button>
       <button type="button" class="pro-account-badge-logout" id="proLogoutBtn" data-i18n="proLogoutBtn">Esci</button>
     </div>
     <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
@@ -506,10 +507,10 @@
 
     <!-- REGISTRAZIONE -->
     <div class="pro-auth-section" id="proSectionRegister">
-      <div class="pro-auth-tier-label" data-i18n="proAccountTypeLabel">Che tipo di account?</div>
+      <div class="pro-auth-tier-label" data-i18n="proAccountTypeLabel" style="font-size:15px;font-weight:800;color:var(--ink)">Sei un privato o un professionista?</div>
       <div class="pro-auth-tier-row" id="proAccountTypeRow">
         <button type="button" class="pro-auth-tier" data-account-type="privato"><span class="t-name" data-i18n="proAccountTypePrivato">Privato</span></button>
-        <button type="button" class="pro-auth-tier active" data-account-type="professionista"><span class="t-name" data-i18n="proAccountTypePro">Professionista</span></button>
+        <button type="button" class="pro-auth-tier" data-account-type="professionista"><span class="t-name" data-i18n="proAccountTypePro">Professionista</span></button>
       </div>
       <div class="field"><label for="paRegCompany" id="paRegCompanyLabel" data-i18n="proCompanyLabel">Ragione sociale</label><input id="paRegCompany" type="text" autocomplete="organization" placeholder="Rossi Costruzioni Srl"></div>
       <div class="row2" id="paRegPivaRow">
@@ -520,10 +521,11 @@
       <div class="field"><label for="paRegPassword" data-i18n="proPasswordLabel">Password</label><input id="paRegPassword" type="password" autocomplete="new-password"></div>
       <div class="pro-auth-tier-label" data-i18n="proTierLabel">Scegli il piano</div>
       <div class="pro-auth-tier-row" id="proTierRow">
-        <button type="button" class="pro-auth-tier active" data-tier="basic"><span class="t-name">Basic</span><span class="t-desc" data-i18n="proTierBasicDesc">Per iniziare</span></button>
-        <button type="button" class="pro-auth-tier" data-tier="medium"><span class="t-name">Medium</span><span class="t-desc" data-i18n="proTierMediumDesc">Per chi cresce</span></button>
-        <button type="button" class="pro-auth-tier" data-tier="pro"><span class="t-name">Pro</span><span class="t-desc" data-i18n="proTierProDesc">Tutto incluso</span></button>
+        <button type="button" class="pro-auth-tier active" data-tier="basic"><span class="t-name">Basic</span><span class="t-desc">19 €/mese · 30 foto</span></button>
+        <button type="button" class="pro-auth-tier" data-tier="medium"><span class="t-name">Medium</span><span class="t-desc">49 €/mese · 150 foto</span></button>
+        <button type="button" class="pro-auth-tier" data-tier="pro"><span class="t-name">Pro</span><span class="t-desc">99 €/mese · 400 foto</span></button>
       </div>
+      <div class="pro-auth-tier-label" style="font-size:11.5px;font-weight:500;margin-top:-4px">Prezzi IVA esclusa · rinnovo mensile · disdici quando vuoi</div>
       <div class="pro-auth-error" id="paRegError"></div>
       <label class="consent-row"><input type="checkbox" id="paRegConsent"><span><span data-i18n="consentRegText">Ho letto l'informativa privacy e acconsento al trattamento dei miei dati per la gestione dell'account.</span> <button type="button" class="privacy-link" data-open-privacy data-i18n="privacyLinkText">Leggi l'informativa</button></span></label>
       <button type="button" class="pro-auth-submit" id="paRegSubmit" data-i18n="proRegSubmit">Crea account</button>
@@ -610,7 +612,7 @@
           <span class="lc-arrow">›</span>
         </button>
         </div>
-        <div class="lp-trust" data-i18n="landingTrust">Anteprima gratuita · Nessuna registrazione per i privati</div>
+        <div class="lp-trust" data-i18n="landingTrust">Abbonamenti da 19 €/mese · Disdici quando vuoi</div>
       </div>
       <div class="lp-how">
         <div class="how-title" data-i18n="howTitle">Come funziona</div>
@@ -1051,7 +1053,7 @@
     proAuthSub: { it:"Accedi o registrati per salvare i tuoi dati e scegliere il tuo piano.", en:"Sign in or register to save your details and choose your plan." },
     proTabLogin: { it:"Accedi", en:"Sign in" },
     proTabRegister: { it:"Registrati", en:"Register" },
-    proAccountTypeLabel: { it:"Che tipo di account?", en:"What type of account?" },
+    proAccountTypeLabel: { it:"Sei un privato o un professionista?", en:"What type of account?" },
     proAccountTypePrivato: { it:"Privato", en:"Individual" },
     proAccountTypePro: { it:"Professionista", en:"Professional" },
     proEmailLabel: { it:"Email", en:"Email" },
@@ -1222,7 +1224,7 @@
     how1: { it:"Scegli lavorazione, colori e finiture", en:"Choose the work, colors and finishes" },
     how2: { it:"Carica una foto del tuo ambiente o della facciata", en:"Upload a photo of your room or facade" },
     how3: { it:"Guarda l'anteprima e richiedi il preventivo", en:"See the preview and request a quote" },
-    landingTrust: { it:"Anteprima gratuita · Nessuna registrazione per i privati", en:"Free preview · No sign-up for homeowners" },
+    landingTrust: { it:"Abbonamenti da 19 €/mese · Disdici quando vuoi", en:"Plans from €19/month · Cancel anytime" },
     summaryEdit: { it:"modifica selezione", en:"edit selection" },
     effettoWord: { it:"Effetto", en:"Effect" },
     shareCanvasHeading: { it:"La tua selezione", en:"Your selection" },
@@ -1314,7 +1316,7 @@
     { id:"microcemento", name:"Microcemento", nameEn:"Microcement", desc:"Superfici continue, effetto materico", descEn:"Seamless surfaces, textured effect", swatch:"#8F8B82" },
     { id:"scale", name:"Scale", nameEn:"Stairs", desc:"Rivestimento di scale interne ed esterne, colori ed effetti Resina Spatolata", descEn:"Indoor and outdoor stair coverings, Spatolato resin colors and effects", swatch:"#9C9186" },
     { id:"imbiancatura", name:"Imbiancatura", nameEn:"Painting", desc:"Interventi civili e industriali", descEn:"Residential and industrial painting work", swatch:"#D6D2C8" },
-    { id:"decorazioni", name:"Decorazioni", nameEn:"Decorations", desc:"Finiture e boiserie su misura", descEn:"Custom finishes and boiserie panelling", swatch:"#B5652E" },
+    { id:"decorazioni", hidden:true, name:"Decorazioni", nameEn:"Decorations", desc:"Finiture e boiserie su misura", descEn:"Custom finishes and boiserie panelling", swatch:"#B5652E" },
     { id:"resina_haccp", name:"Resina Industriale HACCP", nameEn:"HACCP Industrial Resin", desc:"Pavimenti resistenti e certificati per cucine professionali e industria alimentare", descEn:"Certified, resistant flooring for professional kitchens and the food industry", swatch:"#E9E7DE", professionistiOnly:true },
     { id:"spc", name:"SPC", nameEn:"SPC flooring", desc:"Pavimento flottante a incastro effetto legno, pietra o cemento — interni", descEn:"Click-lock floating floor with wood, stone or concrete look — indoors", swatch:"#8C8378" },
     { id:"parquet", name:"Parquet", nameEn:"Parquet", desc:"Pavimenti in legno, tavole e doghe — solo pavimenti interni", descEn:"Wood flooring, planks and strips — indoor floors only", swatch:"#B08552" },
@@ -4286,7 +4288,8 @@
   function syncCategoryVisibility(){
     Array.prototype.forEach.call(materialGrid.children, function(card, i){
       var cat = CATEGORIES[i];
-      var hide = cat.professionistiOnly && state.userType !== 'professionista';
+      // hidden:true = categoria sospesa (es. boiserie): resta nel codice ma non si vede.
+      var hide = cat.hidden || (cat.professionistiOnly && state.userType !== 'professionista');
       card.style.display = hide ? 'none' : '';
     });
   }
@@ -5448,7 +5451,7 @@
             var detailStr = typeof res.data.details === 'string' ? res.data.details : JSON.stringify(res.data.details);
             msg += ' — ' + detailStr.slice(0, 300);
           }
-          throw new Error(msg);
+          var e2 = new Error(msg); e2.code = res.data && res.data.code; throw e2;
         }
         if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
         return new Promise(function(resolve, reject){
@@ -5489,6 +5492,8 @@
         stopAiProgress(true);
       })
       .catch(function(err){
+        if(err && err.code === 'login_required'){ proAuthOpen(); proSwitchTab('register'); }
+        else if(err && err.code === 'subscription_required'){ startCheckout(); }
         statusEl.classList.add('error');
         statusEl.textContent = ts('aiStatusErrorPrefix') + err.message + ts('aiStatusErrorSuffix');
         stopAiProgress(false);
@@ -6052,7 +6057,7 @@
   // le chiamate a /api/auth-* falliranno con un messaggio d'errore generico.
   var proAccount = null; // { id, email, accountType, companyName, piva, phone, tier }
   var proSelectedTier = 'basic';
-  var proSelectedAccountType = 'professionista';
+  var proSelectedAccountType = null;
 
   function proApplyAccountType(){
     var isPrivato = proSelectedAccountType === 'privato';
@@ -6072,7 +6077,7 @@
     if(!proAccount) proSwitchTab('login');
     // Pre-seleziona Privato/Professionista in base alla scelta già fatta
     // dall'utente nel configuratore, così non deve sceglierlo due volte.
-    proSelectedAccountType = state.userType === 'privato' ? 'privato' : 'professionista';
+    proSelectedAccountType = state.userType === 'privato' ? 'privato' : (state.userType === 'professionista' ? 'professionista' : null);
     proApplyAccountType();
     document.getElementById('proAuthModal').classList.add('open');
   }
@@ -6092,12 +6097,42 @@
       badge.style.display = 'flex';
       document.getElementById('proBadgeName').textContent = proAccount.companyName || proAccount.email;
       var tierLabel = proAccount.tier ? (proAccount.tier.charAt(0).toUpperCase()+proAccount.tier.slice(1)) : '';
-      document.getElementById('proBadgeTier').textContent = (LANG==='en' ? 'Plan ' : 'Piano ') + tierLabel;
+      var typeLabel = proAccount.accountType === 'privato' ? tr({it:'Privato',en:'Homeowner'}) : tr({it:'Professionista',en:'Professional'});
+      var subTxt = !proAccount.paymentsEnabled ? '' : (subActive() ? ' · ' + (proAccount.usageCount||0) + '/' + (proAccount.usageLimit||0) + ' foto' : ' · non attivo');
+      document.getElementById('proBadgeTier').textContent = typeLabel + ' · ' + (LANG==='en' ? 'Plan ' : 'Piano ') + tierLabel + subTxt;
+      var sb = document.getElementById('proSubBtn');
+      sb.style.display = proAccount.paymentsEnabled ? '' : 'none';
+      sb.textContent = subActive() ? 'Abbonamento' : 'Attiva abbonamento';
     } else {
       openBtn.style.display = '';
       badge.style.display = 'none';
     }
   }
+
+  // ---------- Abbonamenti (Stripe) ----------
+  function subActive(){ return !!(proAccount && (proAccount.subscriptionStatus === 'active' || proAccount.subscriptionStatus === 'trialing')); }
+  function startCheckout(tier){
+    fetch('/api/stripe-checkout', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ tier: tier || (proAccount && proAccount.tier) || 'basic' }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(d){ if(d && d.url) window.location.href = d.url; else alert((d && d.error) || 'Impossibile aprire il pagamento, riprova.'); })
+      .catch(function(){ alert('Impossibile aprire il pagamento, riprova.'); });
+  }
+  function openBillingPortal(){
+    fetch('/api/stripe-portal', { method:'POST' })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(d){ if(d && d.url) window.location.href = d.url; else alert((d && d.error) || 'Impossibile aprire la gestione abbonamento.'); })
+      .catch(function(){});
+  }
+  document.getElementById('proSubBtn').addEventListener('click', function(){ if(subActive()) openBillingPortal(); else startCheckout(); });
+  (function(){
+    var q = new URLSearchParams(location.search), p = q.get('pagamento');
+    if(!p) return;
+    history.replaceState(null, '', location.pathname);
+    setTimeout(function(){
+      alert(p === 'ok' ? 'Grazie! Abbonamento attivato: ora puoi creare le anteprime.' : 'Pagamento annullato: puoi attivare l\'abbonamento quando vuoi dal pulsante "Attiva abbonamento" in alto.');
+      if(typeof proCheckSession === 'function') proCheckSession();
+    }, 800);
+  })();
 
   document.getElementById('proAuthOpen').addEventListener('click', proAuthOpen);
   document.getElementById('proAuthClose').addEventListener('click', proAuthClose);
@@ -6146,6 +6181,7 @@
     var errEl = document.getElementById('paRegError');
     errEl.textContent = '';
     if(!company || !email || password.length < 6){ errEl.textContent = ts('proErrFieldsReg'); return; }
+    if(!proSelectedAccountType){ errEl.textContent = tr({it:'Scegli se sei un privato o un professionista.', en:'Choose whether you are a homeowner or a professional.'}); return; }
     if(!document.getElementById('paRegConsent').checked){ errEl.textContent = ts('consentRequired'); return; }
     var btn = this; btn.disabled = true;
     fetch('/api/auth-register', {
@@ -6162,6 +6198,7 @@
         proAccount = res.data.user;
         proUpdateHeader();
         proAuthClose();
+        if(proAccount && proAccount.paymentsEnabled && !subActive()) startCheckout(proSelectedTier);
       })
       .catch(function(){ btn.disabled = false; errEl.textContent = ts('proErrGeneric'); });
   });
