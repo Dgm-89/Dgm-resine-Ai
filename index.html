@@ -356,11 +356,13 @@
 
   /* ---- Area professionisti: bottone header, badge account, modale login/registrazione ---- */
   .header-actions{ display:flex; align-items:center; gap:8px; flex:none; }
-  .pro-account-badge{ display:flex; align-items:center; gap:6px; max-width:150px; }
+  .pro-account-badge{ display:flex; align-items:center; gap:8px; min-width:0; }
+  @media (max-width:560px){ body.pro-logged .brand .tag{ display:none; } .pro-account-badge-name{ max-width:88px; } .pro-account-badge-tier{ max-width:96px; } .pro-account-badge{ gap:6px; } .header-actions{ gap:6px; } }
+  .pro-account-badge-actions{ display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex:none; }
   .pro-account-badge-info{ display:flex; flex-direction:column; line-height:1.2; border:none; background:none; padding:0; margin:0; cursor:pointer; text-align:left; font-family:inherit; }
   .pro-account-badge-name{ font-size:10.5px; font-weight:700; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100px; }
   .pro-account-badge-tier{ font-size:9.5px; color:var(--ink-soft); text-transform:capitalize; }
-  .pro-account-badge-logout{ border:none; background:none; color:var(--ink-soft); font-size:10px; text-decoration:underline; cursor:pointer; font-family:inherit; padding:0; }
+  .pro-account-badge-logout{ white-space:nowrap; border:none; background:none; color:var(--ink-soft); font-size:10px; text-decoration:underline; cursor:pointer; font-family:inherit; padding:0; }
   .pro-auth-modal{ position:fixed; inset:0; z-index:998; background:rgba(10,10,12,0.6); display:none; align-items:center; justify-content:center; padding:20px; overflow-y:auto; }
   .pro-auth-modal.open{ display:flex; }
   .pro-auth-card{ position:relative; background:var(--surface); border-radius:16px; padding:26px 24px 22px; width:100%; max-width:380px; box-shadow:0 20px 50px rgba(0,0,0,0.35); max-height:90vh; overflow-y:auto; }
@@ -479,8 +481,10 @@
         <span class="pro-account-badge-name" id="proBadgeName"></span>
         <span class="pro-account-badge-tier" id="proBadgeTier"></span>
       </button>
-      <button type="button" class="pro-account-badge-logout" id="proSubBtn" style="display:none">Abbonamento</button>
-      <button type="button" class="pro-account-badge-logout" id="proLogoutBtn" data-i18n="proLogoutBtn">Esci</button>
+      <div class="pro-account-badge-actions">
+        <button type="button" class="pro-account-badge-logout" id="proSubBtn" style="display:none">Abbonamento</button>
+        <button type="button" class="pro-account-badge-logout" id="proLogoutBtn" data-i18n="proLogoutBtn">Esci</button>
+      </div>
     </div>
     <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
   </div>
@@ -6122,10 +6126,12 @@
   }
   function proVerifyText(email){ return 'Ti abbiamo inviato un\'email a ' + email + '. Clicca il link che trovi dentro per attivare l\'account (controlla anche la cartella spam).'; }
   function proUpdateHeader(){
+    document.body.classList.remove('pro-logged');
     var openBtn = document.getElementById('proAuthOpen');
     var badge = document.getElementById('proBadge');
     if(proAccount){
       openBtn.style.display = 'none';
+      document.body.classList.add('pro-logged');
       badge.style.display = 'flex';
       document.getElementById('proBadgeName').textContent = proAccount.companyName || proAccount.email;
       var tierLabel = proAccount.tier ? (proAccount.tier.charAt(0).toUpperCase()+proAccount.tier.slice(1)) : '';
