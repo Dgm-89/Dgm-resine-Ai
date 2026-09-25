@@ -798,6 +798,10 @@
     <div class="section-label" id="clusterLabel">Colore</div>
     <div class="swatch-grid" id="colorCluster"></div>
     <div class="cluster-empty" id="clusterEmpty" style="display:none">Nessun colore trovato con questo codice.</div>
+    <div id="posaBox" hidden>
+      <div class="section-label" id="posaLabel" data-i18n="subTitleParquet">Che schema di posa vuoi?</div>
+      <div class="material-grid" id="posaGrid"></div>
+    </div>
   </section>
 
   <!-- 4: FINITURA -->
@@ -4069,7 +4073,7 @@
         if(cat.subs) buildSubGrid(cat);
         else if(cat.id==='imbiancatura') buildContextChoice(cat);
         else if(cat.id==='graniglia_esterni') buildGranigliaLayoutChoice(cat);
-        else if(cat.id==='parquet' || cat.id==='spc') buildParquetPosaChoice(cat);
+        if(cat.id==='parquet' || cat.id==='spc'){ state.parquetPosa = null; var pb=document.getElementById('posaBox'); if(pb){ pb.dataset.mat=''; document.getElementById('posaGrid').innerHTML=''; } }
         if(cat.id==='monolith') buildResinaAreaChoice();
         if(cat.id==='graniglia_esterni') state.context = 'esterno';
         syncContextVisibility();
@@ -4181,9 +4185,9 @@
   function posaStyleFor(id){ return id==='spc' ? SPC_POSA_STYLE : PARQUET_POSA_STYLE; }
   function buildParquetPosaChoice(cat){
     var STY = posaStyleFor(cat.id);
-    if(!STY[state.parquetPosa]) state.parquetPosa = Object.keys(STY)[0];
+    if(!STY[state.parquetPosa]) state.parquetPosa = null;
+    var subGrid = document.getElementById('posaGrid');
     subGrid.innerHTML = '';
-    document.getElementById('subTitle').textContent = ts('subTitleParquet');
     Object.keys(STY).forEach(function(k){
       var st = STY[k];
       var card = document.createElement('button');
@@ -4195,9 +4199,20 @@
         state.parquetPosa = k; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected'); syncNextStepEnabled();
+        if(typeof renderSummary==='function'){ try{ renderSummary(); }catch(e){} }
       });
       subGrid.appendChild(card);
     });
+  }
+  function syncPosaBox(){
+    var box = document.getElementById('posaBox'); if(!box) return;
+    var isPosa = !!(state.material && (state.material.id==='parquet' || state.material.id==='spc'));
+    var wasHidden = box.hidden;
+    box.hidden = !(isPosa && state.colorA);
+    if(wasHidden && !box.hidden && !state.parquetPosa){ setTimeout(function(){ try{ box.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} }, 150); }
+    if(isPosa && state.colorA){
+      if(box.dataset.mat !== state.material.id || !document.getElementById('posaGrid').children.length){ box.dataset.mat = state.material.id; buildParquetPosaChoice(state.material); }
+    }
   }
   function buildGranigliaLayoutChoice(cat){
     subGrid.innerHTML = '';
@@ -4615,6 +4630,7 @@
     if(typeof syncGranaVisibility==='function') syncGranaVisibility();
     if(typeof updateRigheWarning==='function') updateRigheWarning();
     if(typeof syncFacadeExtrasSummary==='function') syncFacadeExtrasSummary();
+    if(typeof syncPosaBox==='function') syncPosaBox();
     var row=document.getElementById('colorChips'); row.innerHTML='';
     // Corten: il colore è fisso e già spiegato dal messaggio "cortenColorNote",
     // niente chip da mostrare o rimuovere.
@@ -4732,7 +4748,7 @@
   function renderFreeCodeBtn(list){
     var btn = document.getElementById('freeCodeBtn');
     var q = (colorSearchQuery||'').trim();
-    if(!q || isCortenActive()){ btn.style.display='none'; return; }
+    if(!q || isCortenActive() || (state.material && (state.material.id==='parquet' || state.material.id==='spc'))){ btn.style.display='none'; return; }
     var n = normCode(q);
     var exactInList = list.some(function(c){ return normCode(c.code)===n || normCode(c.name)===n; });
     if(exactInList){ btn.style.display='none'; return; }
@@ -4807,7 +4823,9 @@
 
     renderFamilyRow(fullList);
     var searchBox = document.getElementById('colorSearch');
-    searchBox.style.display = 'block';
+    var noCodes = state.material && (state.material.id==='parquet' || state.material.id==='spc');
+    searchBox.style.display = noCodes ? 'none' : 'block';
+    if(noCodes && colorSearchQuery){ colorSearchQuery=''; searchBox.value=''; }
 
     var list = fullList;
     var emptyEl = document.getElementById('clusterEmpty');
@@ -5175,7 +5193,7 @@
     if(!(state.category && state.category.id === 'monolith')){
       seq = seq.filter(function(id){ return id!=='panelResinaArea'; });
     }
-    if(!(state.category && (state.category.subs || state.category.id === 'imbiancatura' || state.category.id === 'graniglia_esterni' || state.category.id === 'parquet' || state.category.id === 'spc'))){
+    if(!(state.category && (state.category.subs || state.category.id === 'imbiancatura' || state.category.id === 'graniglia_esterni'))){
       seq = seq.filter(function(id){ return id!=='panelSub'; });
     }
     // Facciate esterne con grana: la superficie è per forza opaca, il passo
@@ -5204,7 +5222,7 @@
     var ok = true;
     if(currentPanel==='panelResinaArea') ok = !!state.resinaArea;
     else if(currentPanel==='panelSub') ok = !!state.material;
-    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!(state.material && (state.material.id==='parquet' || state.material.id==='spc')) || state.parquetPosa) && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
     else if(currentPanel==='panelPhoto') ok = !!photoImg;
     btn.disabled = !ok;
   }
@@ -5660,7 +5678,6 @@
       if(state.category.subs) buildSubGrid(state.category);
       else if(state.category.id==='imbiancatura') buildContextChoice(state.category);
       else if(state.category.id==='graniglia_esterni') buildGranigliaLayoutChoice(state.category);
-      else if(state.category.id==='parquet' || state.category.id==='spc') buildParquetPosaChoice(state.category);
     }
     if(state.category && state.category.id==='monolith') buildResinaAreaChoice();
     renderTemplateRow();
