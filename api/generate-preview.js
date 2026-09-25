@@ -30,15 +30,40 @@
 // 5. Nell'app, il bottone "Genera anteprima AI" andrà a chiamare quell'indirizzo
 //    (questa parte la collego io appena il backend è online: mandami l'URL).
 
+const { paymentsEnabled, currentAccount, supabaseRequest, PLAN_LIMITS } = require("./_auth-lib");
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
+  }
+
+  // Abbonamento: quando i pagamenti sono attivi (STRIPE_SECRET_KEY su Vercel)
+  // l'anteprima AI è riservata agli abbonati, entro le anteprime del piano.
+  let quotaAcc = null, quotaMonth = null, quotaUsed = 0;
+  if (paymentsEnabled()) {
+    quotaAcc = await currentAccount(req).catch(function () { return null; });
+    if (!quotaAcc) return res.status(401).json({ error: "Per creare l'anteprima accedi o registrati e attiva un abbonamento.", code: "login_required" });
+    if (!["active", "trialing"].includes(quotaAcc.subscription_status)) {
+      return res.status(402).json({ error: "Il tuo abbonamento non è attivo: attivalo per creare le anteprime.", code: "subscription_required" });
+    }
+    quotaMonth = new Date().toISOString().slice(0, 7);
+    quotaUsed = quotaAcc.usage_month === quotaMonth ? (quotaAcc.usage_count || 0) : 0;
+    const limit = PLAN_LIMITS[quotaAcc.tier] || 0;
+    if (quotaUsed >= limit) {
+      return res.status(429).json({ error: "Hai usato tutte le " + limit + " anteprime del tuo piano per questo mese. Passa a un piano superiore o attendi il mese prossimo.", code: "quota_exceeded" });
+    }
+  }
+  async function countUsage() {
+    if (!quotaAcc) return;
+    try {
+      await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(quotaAcc.id), { method: "PATCH", body: JSON.stringify({ usage_month: quotaMonth, usage_count: quotaUsed + 1 }) });
+    } catch (e) {}
   }
 
   // Riferimento colore per il prompt: include il codice esadecimale esatto quando
@@ -208,6 +233,15 @@ module.exports = async function handler(req, res) {
     ? ` Inoltre, rinnova TUTTO il manto di copertura del tetto visibile nella foto nel colore ${colorRef(colorTetto, colorTettoHex)}: il tetto deve apparire pulito e in ordine, senza muschio, macchie, ruggine, lamiere rotte o elementi mancanti, mantenendo la stessa forma, la stessa pendenza e lo stesso disegno delle tegole/lastre. Comignolo, grondaie e pluviali restano come sono, solo puliti.`
     : "";
 
+  // Imbiancatura interni: soffitto (plafone) ed effetto scatola.
+  const isInterniPittura = materialId === "imbiancatura" && context !== "esterno";
+  const plafoneNote = !isInterniPittura ? ""
+    : effettoScatola
+      ? ` EFFETTO SCATOLA: dipingi pareti E soffitto nello stesso identico colore ${colorRef(colorA, colorAHex)}, senza stacchi tra parete e soffitto, compresi eventuali travi, cornici e sporgenze del soffitto: l'ambiente deve risultare avvolgente e continuo, tutto in un unico colore. Porte, finestre, mobili e pavimento restano come sono.`
+      : colorPlafone
+        ? ` Dipingi il soffitto (plafone) nel colore ${colorRef(colorPlafone, colorPlafoneHex)}, con uno stacco netto e pulito sulla linea tra pareti e soffitto; le pareti restano nel loro colore indicato sopra.`
+        : " Il soffitto NON va dipinto: resta esattamente com'è nella foto, cambia solo il colore delle pareti.";
+
   // Cornici di porte e finestre: le fasce in rilievo intorno alle aperture
   // (cornici, archi, spallette, imbotti) in un colore diverso dalla facciata.
   const isCorniciStyled = materialId === "imbiancatura" && context === "esterno" && addCornici && colorCornici;
@@ -336,7 +370,7 @@ module.exports = async function handler(req, res) {
   // Per il Corten il colore non è scelto dal cliente (vedi isCortenStyled sopra),
   // quindi anche se arrivasse un colorAHex residuo non lo trattiamo come vincolo
   // esatto da rispettare: il Corten segue solo la sua texture/pattern.
-  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorTettoHex || colorCorniciHex || colorBalconiHex || colorSerramentiHex || colorRigheHex);
+  const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorPlafoneHex || colorTettoHex || colorCorniciHex || colorBalconiHex || colorSerramentiHex || colorRigheHex);
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
@@ -445,6 +479,7 @@ module.exports = async function handler(req, res) {
     davanzaliNote,
     marcapianoNote,
     sottotettoNote,
+    plafoneNote,
     tettoNote,
     corniciNote,
     serramentiNote,
@@ -510,6 +545,7 @@ module.exports = async function handler(req, res) {
       }
       const b64 = data && data.data && data.data[0] && data.data[0].b64_json;
       if (!b64) return res.status(502).json({ error: "Il modello non ha restituito un'immagine", details: data });
+      await countUsage();
       return res.status(200).json({ imageBase64: b64, mimeType: outMime });
     } catch (err) {
       return res.status(500).json({ error: "Errore imprevisto lato server", details: String(err && err.message ? err.message : err) });
@@ -593,6 +629,7 @@ module.exports = async function handler(req, res) {
       return res.status(502).json({ error: "Il modello non ha restituito un'immagine", details: data });
     }
 
+    await countUsage();
     return res.status(200).json({
       imageBase64: inline.data,
       mimeType: inline.mime_type || inline.mimeType || "image/png"
