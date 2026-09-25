@@ -668,6 +668,19 @@
     </div>
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
 
+    <div id="interniExtras" hidden>
+      <div class="section-label">Soffitto</div>
+      <button type="button" class="niche-toggle" id="plafoneToggle">
+        <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E9E4DA"/><polygon points="0,0 180,0 140,34 40,34" fill="#7FA3C8"/><polygon points="0,0 40,34 40,110 0,130" fill="#F1ECE2"/><polygon points="180,0 140,34 140,110 180,130" fill="#F1ECE2"/><rect x="40" y="34" width="100" height="76" fill="#F6F2EA"/><polygon points="0,130 40,110 140,110 180,130" fill="#B89B78"/></svg>
+        <span class="nt-text"><span class="nt-title">Colora il plafone (soffitto)</span><span class="nt-desc">Il soffitto in un colore a scelta, diverso dalle pareti</span></span>
+        <span class="nt-check"></span>
+      </button>
+      <button type="button" class="niche-toggle" id="scatolaToggle">
+        <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#6F8FA8"/><polygon points="0,0 180,0 140,34 40,34" fill="#6A8AA3"/><polygon points="0,0 40,34 40,110 0,130" fill="#5F7F98"/><polygon points="180,0 140,34 140,110 180,130" fill="#5F7F98"/><rect x="40" y="34" width="100" height="76" fill="#7394AD"/><polygon points="0,130 40,110 140,110 180,130" fill="#B89B78"/></svg>
+        <span class="nt-text"><span class="nt-title">Effetto scatola</span><span class="nt-desc">Pareti e soffitto nello stesso colore, per un ambiente avvolgente e continuo</span></span>
+        <span class="nt-check"></span>
+      </button>
+    </div>
     <details class="facade-extras" id="facadeExtras" style="display:none">
       <summary><span class="fx-title" data-i18n="facadeExtrasTitle">Personalizza altre parti della facciata</span><span class="fx-sub" id="facadeExtrasSub">Davanzali, marcapiano, sottotetto, tetto, cornici, serramenti, balconi, righe</span></summary>
       <div class="fx-body">
@@ -1090,6 +1103,7 @@
     corniciDesc: { it:"Le fasce in rilievo intorno a finestre e porte (cornici, archi, spallette) in un colore diverso dalla facciata", en:"The raised bands around windows and doors (surrounds, arches, reveals) in a color different from the facade" },
     clusterLabelTetto: { it:"Colore tetto", en:"Roof color" },
     clusterLabelCornici: { it:"Colore cornici porte e finestre", en:"Door and window surround color" },
+    pendingPlafone: { it:"+ Colore plafone da scegliere", en:"+ Ceiling color to choose" },
     pendingTetto: { it:"+ Colore tetto da scegliere", en:"+ Roof color to choose" },
     pendingCornici: { it:"+ Colore cornici da scegliere", en:"+ Surround color to choose" },
     summaryTetto: { it:"Tetto: ", en:"Roof: " },
@@ -3602,7 +3616,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addPlafone:false, effettoScatola:false, colorPlafone:null, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -3690,6 +3704,8 @@
   // Vero quando il cliente ha attivato il toggle "sottotetto in legno colore diverso"
   // (solo per Imbiancatura Esterno, come davanzali/marcapiano/righe).
   function needsSottotettoColor(){ return !!(state.addSottotetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  function isInterniPittura(){ return !!(state.material && state.material.id === 'imbiancatura' && state.context !== 'esterno'); }
+  function needsPlafoneColor(){ return !!(state.addPlafone && !state.effettoScatola && isInterniPittura()); }
   function needsTettoColor(){ return !!(state.addTetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   function needsCorniciColor(){ return !!(state.addCornici && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   // Vero quando il cliente ha attivato il toggle "balconi colore diverso"
@@ -3708,6 +3724,7 @@
   function phaseOrder(){
     var order = ['A'];
     if(needsSecondColor()) order.push('B');
+    if(needsPlafoneColor()) order.push('P');
     if(needsDavanzaliColor()) order.push('D');
     if(needsMarcapianoColor()) order.push('C');
     if(needsSottotettoColor()) order.push('E');
@@ -3724,6 +3741,7 @@
     if(p==='C') return state.colorC;
     if(p==='D') return state.colorDavanzali;
     if(p==='E') return state.colorSottotetto;
+    if(p==='P') return state.colorPlafone;
     if(p==='T') return state.colorTetto;
     if(p==='K') return state.colorCornici;
     if(p==='F') return state.colorBalconi;
@@ -3733,8 +3751,8 @@
   }
 
   function resetSelectionForNewCategory(){
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
-    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.marmoLayout = 'uno'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorPlafone=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
+    state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.marmoLayout = 'uno'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addPlafone = false; state.effettoScatola = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
     document.getElementById('colorSearch').value='';
     syncBoiserieStyleVisibility();
     syncEffettoVisibility();
@@ -3842,6 +3860,30 @@
     renderStep2UI();
   });
 
+  function syncInterniExtras(){
+    var box = document.getElementById('interniExtras'); if(!box) return;
+    var show = isInterniPittura();
+    box.hidden = !show;
+    if(!show){ state.addPlafone=false; state.effettoScatola=false; state.colorPlafone=null; }
+    document.getElementById('plafoneToggle').classList.toggle('active', !!state.addPlafone);
+    document.getElementById('scatolaToggle').classList.toggle('active', !!state.effettoScatola);
+  }
+  function afterInterniToggle(){
+    var order = phaseOrder(); pickPhase = order[0];
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    syncInterniExtras(); renderStep2UI();
+  }
+  document.getElementById('plafoneToggle').addEventListener('click', function(){
+    state.addPlafone = !state.addPlafone;
+    if(state.addPlafone) state.effettoScatola = false; else state.colorPlafone = null;
+    afterInterniToggle();
+  });
+  document.getElementById('scatolaToggle').addEventListener('click', function(){
+    state.effettoScatola = !state.effettoScatola;
+    if(state.effettoScatola){ state.addPlafone = false; state.colorPlafone = null; }
+    afterInterniToggle();
+  });
   ['tetto','cornici'].forEach(function(k){
     var el = document.getElementById(k+'Toggle'); if(!el) return;
     el.addEventListener('click', function(){
@@ -4171,7 +4213,7 @@
         state.context = opt.v;
         Array.prototype.forEach.call(subGrid.children, function(c){ c.classList.remove('selected'); });
         card.classList.add('selected');
-        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addTetto=false; state.addCornici=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
+        state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorPlafone=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addPlafone=false; state.effettoScatola=false; state.addTetto=false; state.addCornici=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
         var searchEl = document.getElementById('colorSearch'); if(searchEl) searchEl.value='';
         syncFacadeLayoutVisibility();
         syncNextStepEnabled();
@@ -4653,6 +4695,7 @@
     D: { it:'Davanzali: ', en:'Window sills: ' },
     E: { it:'Sottotetto: ', en:'Eave: ' },
     T: { it:'Tetto: ', en:'Roof: ' },
+    P: { it:'Plafone: ', en:'Ceiling: ' },
     K: { it:'Cornici: ', en:'Surrounds: ' },
     F: { it:'Balconi: ', en:'Balconies: ' },
     G: { it:'Serramenti: ', en:'Window frames: ' },
@@ -4663,8 +4706,8 @@
     // attivi: anche il chip del colore facciata deve avere un'etichetta,
     // altrimenti si confonde con gli extra.
     var isFacciataMono = phase==='A' && !needsSecondColor() && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsTettoColor() || needsCorniciColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor());
-    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='T' || phase==='K' || phase==='F' || phase==='G' || phase==='H' || isFacciataMono; // marcapiano, davanzali, sottotetto, balconi, serramenti e righe distinguono sempre l'etichetta
-    var labelText = isFacciataMono ? tr({it:'Facciata: ', en:'Facade: '}) : (showLabel ? tr(PHASE_CHIP_LABEL[phase]) : '');
+    var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='P' || phase==='T' || phase==='K' || phase==='F' || phase==='G' || phase==='H' || isFacciataMono; // marcapiano, davanzali, sottotetto, balconi, serramenti e righe distinguono sempre l'etichetta
+    var labelText = (phase==='A' && needsPlafoneColor()) ? tr({it:'Pareti: ', en:'Walls: '}) : isFacciataMono ? tr({it:'Facciata: ', en:'Facade: '}) : (showLabel ? tr(PHASE_CHIP_LABEL[phase]) : '');
     var chip=document.createElement('span'); chip.className='chip';
     chip.innerHTML='<span class="dot" style="'+(color.img ? 'background-image:url('+color.img+');background-size:cover;' : granaAppliesToPhase(phase) ? granaStyle(color.hex, 40) : texStyle(color.hex, color.tex || texKeyFor(phase), 60))+'"></span>'+labelText+color.name+'<button aria-label="'+ts('removeAria')+'">×</button>';
     chip.querySelector('button').addEventListener('click', function(){
@@ -4673,6 +4716,7 @@
       else if(phase==='D'){ state.colorDavanzali=null; }
       else if(phase==='E'){ state.colorSottotetto=null; }
       else if(phase==='T'){ state.colorTetto=null; }
+      else if(phase==='P'){ state.colorPlafone=null; }
       else if(phase==='K'){ state.colorCornici=null; }
       else if(phase==='F'){ state.colorBalconi=null; }
       else if(phase==='G'){ state.colorSerramenti=null; }
@@ -4692,6 +4736,7 @@
     if(typeof updateRigheWarning==='function') updateRigheWarning();
     if(typeof syncFacadeExtrasSummary==='function') syncFacadeExtrasSummary();
     if(typeof syncPosaBox==='function') syncPosaBox();
+    if(typeof syncInterniExtras==='function') syncInterniExtras();
     var row=document.getElementById('colorChips'); row.innerHTML='';
     // Corten: il colore è fisso e già spiegato dal messaggio "cortenColorNote",
     // niente chip da mostrare o rimuovere.
@@ -4708,6 +4753,9 @@
     }
     if(needsSottotettoColor()){
       if(state.colorSottotetto) addColorChip(row, 'E', state.colorSottotetto); else addPendingChip(row, 'pendingSottotetto');
+    }
+    if(needsPlafoneColor()){
+      if(state.colorPlafone) addColorChip(row, 'P', state.colorPlafone); else addPendingChip(row, 'pendingPlafone');
     }
     if(needsTettoColor()){
       if(state.colorTetto) addColorChip(row, 'T', state.colorTetto); else addPendingChip(row, 'pendingTetto');
@@ -4781,7 +4829,19 @@
     return null;
   }
   // Conversione NCS -> RGB approssimata, solo per mostrare un'anteprima.
+  // Riconosce un codice NCS scritto in qualsiasi modo ("0505 Y 50r", "S0505-Y50R",
+  // "ncs s 0505-y50r"...) e lo riscrive nella forma standard "S 0505-Y50R".
+  function normalizeNcs(raw){
+    var t = String(raw||'').toUpperCase().replace(/NCS/g,'').replace(/[\s\-_.\/]/g,'');
+    var m = t.match(/^S?(\d{2})(\d{2})(N|[YRBG](?:\d{2}[YRBG])?)$/);
+    if(!m) return null;
+    if(+m[1] + +m[2] > 100) return null;
+    if(m[3] !== 'N' && +m[2] === 0) return null;
+    if(m[3] === 'N' && +m[2] !== 0) return null;
+    return 'S ' + m[1] + m[2] + '-' + m[3];
+  }
   function ncsToHex(raw){
+    raw = normalizeNcs(raw) || raw;
     var m = String(raw||'').toUpperCase().replace(/\s+/g,' ').match(/^(?:NCS\s*)?(?:S\s*)?(\d{2})(\d{2})\s*-\s*(N|[YRBG](?:\d{2}[YRBG])?)$/);
     if(!m) return null;
     var s = +m[1]/100, c = +m[2]/100, hue = m[3];
@@ -4796,7 +4856,7 @@
     return '#' + rgb.map(function(v){ return ('0'+v.toString(16)).slice(-2); }).join('').toUpperCase();
   }
   function makeFreeColor(raw){
-    var code = String(raw||'').trim().replace(/\s+/g,' ');
+    var code = normalizeNcs(raw) || String(raw||'').trim().replace(/\s+/g,' ');
     var known = findColorByCode(code);
     if(known) return known;
     var approx = ncsToHex(code);
@@ -4845,6 +4905,10 @@
       label.textContent = ts('clusterLabelDavanzali');
     } else if(pickPhase==='E'){
       label.textContent = ts('clusterLabelSottotetto');
+    } else if(pickPhase==='A' && needsPlafoneColor()){
+      label.textContent = tr({it:'Colore pareti', en:'Wall color'});
+    } else if(pickPhase==='P'){
+      label.textContent = tr({it:'Colore plafone (soffitto)', en:'Ceiling color'});
     } else if(pickPhase==='T'){
       label.textContent = ts('clusterLabelTetto');
     } else if(pickPhase==='K'){
@@ -4913,6 +4977,13 @@
       list = list.filter(function(c){
         return String(c.code||'').toLowerCase().indexOf(q)>-1 || String(c.name||'').toLowerCase().indexOf(q)>-1 || (qn && normCode(c.code).indexOf(qn)>-1);
       });
+      // Codice NCS valido ma non presente nel campionario: lo mostriamo lo stesso
+      // come campione, con il colore calcolato dal codice.
+      var ncsCode = (typeof normalizeNcs==='function') ? normalizeNcs(colorSearchQuery) : null;
+      if(ncsCode && !list.some(function(c){ return normCode(c.code) === normCode(ncsCode); })){
+        var nc = makeFreeColor(ncsCode);
+        if(nc && nc.hex) list = [nc].concat(list);
+      }
     }
 
     emptyEl.textContent = ts('clusterEmptyNoMatch');
@@ -4974,6 +5045,7 @@
     else if(pickPhase==='D'){ state.colorDavanzali=c; }
     else if(pickPhase==='E'){ state.colorSottotetto=c; }
     else if(pickPhase==='T'){ state.colorTetto=c; }
+    else if(pickPhase==='P'){ state.colorPlafone=c; }
     else if(pickPhase==='K'){ state.colorCornici=c; }
     else if(pickPhase==='F'){ state.colorBalconi=c; }
     else if(pickPhase==='G'){ state.colorSerramenti=c; }
@@ -5030,7 +5102,7 @@
     var v = btn.dataset.v; state.context = v;
     Array.prototype.forEach.call(this.children, function(b){ b.classList.toggle('active', b===btn); });
     document.getElementById('contextHint').textContent = tr(CONTEXT_HINT[v]);
-    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addTetto=false; state.addCornici=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
+    state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorPlafone=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; state.addDavanzali=false; state.addMarcapiano=false; state.addSottotetto=false; state.addPlafone=false; state.effettoScatola=false; state.addTetto=false; state.addCornici=false; state.addBalconi=false; state.addSerramenti=false; state.addRighe=false; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery=''; state.facadeLayout='monocolore'; state.righeExtent='meta'; state.righeOrientamento='verticali'; state.righeZona='bassa'; state.righeSpessore='sottili';
     document.getElementById('colorSearch').value='';
     syncFacadeLayoutVisibility();
     renderStep2UI();
@@ -5147,6 +5219,8 @@
         colorA: state.colorA.name, colorAHex: apiHex(state.colorA), colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? apiHex(state.colorB) : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? apiHex(state.colorC) : null,
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? apiHex(state.colorDavanzali) : null,
         colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? apiHex(state.colorSottotetto) : null,
+        colorPlafone: (needsPlafoneColor() && state.colorPlafone) ? state.colorPlafone.name : null, colorPlafoneHex: (needsPlafoneColor() && state.colorPlafone) ? apiHex(state.colorPlafone) : null,
+        effettoScatola: !!(isInterniPittura() && state.effettoScatola),
         colorTetto: (needsTettoColor() && state.colorTetto) ? state.colorTetto.name : null, colorTettoHex: (needsTettoColor() && state.colorTetto) ? apiHex(state.colorTetto) : null,
         colorCornici: (needsCorniciColor() && state.colorCornici) ? state.colorCornici.name : null, colorCorniciHex: (needsCorniciColor() && state.colorCornici) ? apiHex(state.colorCornici) : null,
         colorBalconi: (needsBalconiColor() && state.colorBalconi) ? state.colorBalconi.name : null, colorBalconiHex: (needsBalconiColor() && state.colorBalconi) ? apiHex(state.colorBalconi) : null,
@@ -5339,7 +5413,7 @@
     var ok = true;
     if(currentPanel==='panelResinaArea') ok = !!state.resinaArea;
     else if(currentPanel==='panelSub') ok = !!state.material;
-    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!(state.material && (state.material.id==='parquet' || state.material.id==='spc')) || state.parquetPosa) && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!(state.material && (state.material.id==='parquet' || state.material.id==='spc')) || state.parquetPosa) && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsPlafoneColor() || state.colorPlafone) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
     else if(currentPanel==='panelPhoto') ok = !!photoImg;
     btn.disabled = !ok;
   }
@@ -5590,6 +5664,7 @@
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
     var marcapianoLine = (needsMarcapianoColor() && state.colorC) ? '<div class="line"><span class="sw" style="background:'+state.colorC.hex+'"></span><span>'+ts('summaryMarcapiano')+state.colorC.name+' ('+state.colorC.code+')</span></div>' : '';
     var sottotettoLine = (needsSottotettoColor() && state.colorSottotetto) ? '<div class="line"><span class="sw" style="background:'+state.colorSottotetto.hex+'"></span><span>'+ts('summarySottotetto')+state.colorSottotetto.name+' ('+state.colorSottotetto.code+')</span></div>' : '';
+    var plafoneLine = (needsPlafoneColor() && state.colorPlafone) ? '<div class="line"><span class="sw" style="background:'+state.colorPlafone.hex+'"></span><span>Plafone: '+state.colorPlafone.name+' ('+state.colorPlafone.code+')</span></div>' : (isInterniPittura() && state.effettoScatola ? '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>Effetto scatola: pareti e soffitto nello stesso colore</span></div>' : '');
     var tettoLine = (needsTettoColor() && state.colorTetto) ? '<div class="line"><span class="sw" style="background:'+state.colorTetto.hex+'"></span><span>'+ts('summaryTetto')+state.colorTetto.name+' ('+state.colorTetto.code+')</span></div>' : '';
     var corniciLine = (needsCorniciColor() && state.colorCornici) ? '<div class="line"><span class="sw" style="background:'+state.colorCornici.hex+'"></span><span>'+ts('summaryCornici')+state.colorCornici.name+' ('+state.colorCornici.code+')</span></div>' : '';
     var balconiLine = (needsBalconiColor() && state.colorBalconi) ? '<div class="line"><span class="sw" style="background:'+state.colorBalconi.hex+'"></span><span>'+ts('summaryBalconi')+state.colorBalconi.name+' ('+state.colorBalconi.code+')</span></div>' : '';
@@ -5598,7 +5673,7 @@
     box.innerHTML =
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span><b>'+LF(state.material,'name')+'</b></span></div>' +
       '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>'+colorLine+'</span></div>' +
-      contextLine + granaLine + facadeLine + posaLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + tettoLine + corniciLine + serramentiLine + balconiLine + righeLine +
+      contextLine + granaLine + facadeLine + posaLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + plafoneLine + tettoLine + corniciLine + serramentiLine + balconiLine + righeLine +
       (noFinitura() ? '' : '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>') +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
     document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
@@ -5660,6 +5735,8 @@
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+colorLabel(state.colorDavanzali));
     if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+colorLabel(state.colorC));
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+colorLabel(state.colorSottotetto));
+    if(needsPlafoneColor() && state.colorPlafone) lines.push("Plafone (soffitto): "+colorLabel(state.colorPlafone));
+    if(isInterniPittura() && state.effettoScatola) lines.push("Effetto scatola: pareti e soffitto nello stesso colore");
     if(needsTettoColor() && state.colorTetto) lines.push("Tetto: "+colorLabel(state.colorTetto));
     if(needsCorniciColor() && state.colorCornici) lines.push("Cornici porte e finestre: "+colorLabel(state.colorCornici));
     if(needsSerramentiColor() && state.colorSerramenti) lines.push("Serramenti: "+colorLabel(state.colorSerramenti));
