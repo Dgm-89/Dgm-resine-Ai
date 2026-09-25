@@ -221,6 +221,37 @@ async function stripeRequest(method, path, params) {
   return { ok: r.ok, status: r.status, data };
 }
 
+// Email (Resend). La conferma dell'email è obbligatoria solo quando su Vercel
+// c'è RESEND_API_KEY, così nessuno resta bloccato se le email non partono.
+function emailEnabled() { return Boolean((process.env.RESEND_API_KEY || "").trim()); }
+async function sendEmail(to, subject, html) {
+  const key = (process.env.RESEND_API_KEY || "").trim();
+  const from = (process.env.EMAIL_FROM || "Rendrum <onboarding@resend.dev>").trim();
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" },
+    body: JSON.stringify({ from, to: [to], subject, html }),
+  });
+  return r.ok;
+}
+function emailLayout(title, text, buttonLabel, url) {
+  return '<div style="font-family:Arial,sans-serif;max-width:520px;margin:0 auto;padding:24px;color:#1C1B18">'
+    + '<h2 style="margin:0 0 12px">' + title + '</h2>'
+    + '<p style="font-size:15px;line-height:1.5">' + text + '</p>'
+    + '<p style="margin:24px 0"><a href="' + url + '" style="background:#D9824B;color:#1A1006;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:8px;display:inline-block">' + buttonLabel + '</a></p>'
+    + '<p style="font-size:12px;color:#6B6558">Se il pulsante non funziona copia questo indirizzo nel browser:<br>' + url + '</p>'
+    + '<p style="font-size:12px;color:#6B6558">Rendrum S.r.l.s. · Gallarate (VA) · info@rendrum.com</p></div>';
+}
+function siteOrigin(req) {
+  return (req.headers["x-forwarded-proto"] || "https") + "://" + (req.headers["x-forwarded-host"] || req.headers.host);
+}
+function newToken() { return crypto.randomBytes(24).toString("hex"); }
+async function sendVerifyEmail(req, email, token) {
+  const url = siteOrigin(req) + "/api/auth-email?action=verify&token=" + token;
+  return sendEmail(email, "Conferma il tuo account Rendrum",
+    emailLayout("Benvenuto in Rendrum!", "Per attivare il tuo account conferma il tuo indirizzo email cliccando il pulsante qui sotto.", "Conferma email", url));
+}
+
 // Legge l'account della sessione corrente (o null).
 async function currentAccount(req) {
   const { configured } = getSupabaseConfig();
@@ -247,4 +278,10 @@ module.exports = {
   paymentsEnabled,
   stripeRequest,
   currentAccount,
+  emailEnabled,
+  sendEmail,
+  emailLayout,
+  siteOrigin,
+  newToken,
+  sendVerifyEmail,
 };
