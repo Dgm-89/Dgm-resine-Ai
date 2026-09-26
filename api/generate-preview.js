@@ -41,13 +41,13 @@ module.exports = async function handler(req, res) {
   // I testi che arrivano dal browser finiscono nel prompt dell'AI: niente a capo
   // e lunghezza limitata, così nessuno può usare l'app per chiedere altre immagini.
   if (req.body && typeof req.body === "object") {
-    const IMG_FIELDS = ["imageBase64", "boiserieStyleRefImage", "colorCardImage", "posaRefImage"];
+    const IMG_FIELDS = ["imageBase64", "boiserieStyleRefImage", "colorCardImage", "posaRefImage", "accentoRefImage"];
     Object.keys(req.body).forEach(function (k) {
       if (IMG_FIELDS.includes(k)) return;
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -294,6 +294,26 @@ module.exports = async function handler(req, res) {
         ? ` Dipingi il soffitto (plafone) nel colore ${colorRef(colorPlafone, colorPlafoneHex)}, con uno stacco netto e pulito sulla linea tra pareti e soffitto; le pareti restano nel loro colore indicato sopra.`
         : " Il soffitto NON va dipinto: resta esattamente com'è nella foto, cambia solo il colore delle pareti.";
 
+  // Parete d'accento (una sola parete diversa, segnata dal cliente sulla foto) e bordatura in alto.
+  const accentoRefClean = (isInterniPittura && typeof accentoRefImage === "string" && accentoRefImage.length < 2_000_000)
+    ? accentoRefImage.replace(/^data:image\/\w+;base64,/, "") : null;
+  const ACCENTO_DESC = {
+    colore: () => `dipinta in tinta unita nel colore ${colorRef(colorAccento, colorAccentoHex)}`,
+    corten: () => "rivestita con una finitura decorativa EFFETTO CORTEN: base ocra/ruggine con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, aspetto materico e opaco, pattern asimmetrico e naturale",
+    spatolato: () => `rivestita in resina SPATOLATA decorativa nel colore ${colorRef(colorAccento, colorAccentoHex)}, con le tipiche velature e passate di spatola ben visibili e leggere variazioni di tono`,
+    microcemento: () => `rivestita in MICROCEMENTO nel colore ${colorRef(colorAccento, colorAccentoHex)}, superficie continua senza fughe, leggermente nuvolata e materica`,
+    marmo: () => `rivestita con una finitura decorativa EFFETTO MARMO (marmorino) nel colore di fondo ${colorRef(colorAccento, colorAccentoHex)}, con venature naturali sottili e superficie liscia e setosa`,
+  };
+  const accentoNote = (isInterniPittura && accentoTipo && ACCENTO_DESC[accentoTipo])
+    ? ` PARETE D'ACCENTO: UNA SOLA parete della stanza è diversa dalle altre: è ${ACCENTO_DESC[accentoTipo]()}.` + (accentoRefClean
+      ? " Quale parete: ti è stata fornita un'immagine aggiuntiva (l'ULTIMA immagine) che è la stessa foto con un CERCHIO ROSSO disegnato sopra: la parete d'accento è ESATTAMENTE la parete su cui si trova il cerchio rosso, da angolo ad angolo e dal pavimento al soffitto. Il cerchio rosso è solo un'indicazione: NON disegnarlo nell'immagine finale."
+      : " Scegli come parete d'accento la parete principale di fondo, quella più visibile.") + " Tutte le altre pareti restano nel colore principale indicato; porte, finestre, prese e mobili davanti a quella parete restano identici e visibili."
+    : "";
+  const BORD = { rigino: "un RIGINO sottile di circa 1 cm", fascia: "una FASCIA di circa 3-5 cm", larga: "una FASCIA LARGA di circa 10 cm" };
+  const bordaturaNote = (isInterniPittura && !effettoScatola && BORD[bordatura])
+    ? ` BORDATURA IN ALTO (fascia di rispetto): lungo tutto il perimetro della stanza, subito sotto il soffitto, sulla parte più alta di OGNI parete (compresa l'eventuale parete d'accento), c'è ${BORD[bordatura]} ${colorBordatura ? "nel colore " + colorRef(colorBordatura, colorBordaturaHex) : "bianca (bianco puro)"}, dritta, orizzontale, di spessore costante e con stacco netto (come fatta con nastro carta), che separa il colore delle pareti dal soffitto. Proporzioni realistiche rispetto all'altezza della stanza (circa 2,7 m).`
+    : "";
+
   // Cornici di porte e finestre: le fasce in rilievo intorno alle aperture
   // (cornici, archi, spallette, imbotti) in un colore diverso dalla facciata.
   const isCorniciStyled = materialId === "imbiancatura" && context === "esterno" && addCornici && colorCornici;
@@ -538,6 +558,8 @@ module.exports = async function handler(req, res) {
     marcapianoNote,
     sottotettoNote,
     plafoneNote,
+    accentoNote,
+    bordaturaNote,
     tettoNote,
     corniciNote,
     serramentiNote,
@@ -573,6 +595,7 @@ module.exports = async function handler(req, res) {
     if (colorCardClean) images.push({ b64: colorCardClean, mime: "image/png" });
     if (boiserieStyleRefImageClean) images.push({ b64: boiserieStyleRefImageClean, mime: "image/jpeg" });
     if (posaRefClean) images.push({ b64: posaRefClean, mime: "image/jpeg" });
+    if (accentoRefClean) images.push({ b64: accentoRefClean, mime: "image/jpeg" });
     const send = (extra) => {
       const fd = new FormData();
       fd.append("model", model);
@@ -647,6 +670,9 @@ module.exports = async function handler(req, res) {
     }
     if (posaRefClean) {
       contentParts.push({ inline_data: { mime_type: "image/jpeg", data: posaRefClean } });
+    }
+    if (accentoRefClean) {
+      contentParts.push({ inline_data: { mime_type: "image/jpeg", data: accentoRefClean } });
     }
     if (boiserieStyleRefImageClean) {
       contentParts.push({
