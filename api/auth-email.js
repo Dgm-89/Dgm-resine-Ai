@@ -25,9 +25,11 @@ module.exports = async function handler(req, res) {
     if (action === "verify") {
       const token = String((req.query && req.query.token) || "");
       const acc = token.length > 20 ? await findBy("verify_token", token) : null;
-      if (!acc) { res.statusCode = 302; res.setHeader("Location", "/?verificato=scaduto"); return res.end(); }
+      // Il link di conferma vale 48 ore dall'ultimo invio.
+      const expired = acc && acc.verify_sent_at && (Date.now() - new Date(acc.verify_sent_at).getTime() > 48 * 3600000);
+      if (!acc || expired) { res.statusCode = 302; res.setHeader("Location", "/?verificato=scaduto"); return res.end(); }
       await update(acc.id, { email_verified: true, verify_token: null });
-      setSessionCookie(res, acc.id);
+      setSessionCookie(res, acc.id, acc.session_version);
       res.statusCode = 302; res.setHeader("Location", "/?verificato=1"); return res.end();
     }
     if (req.method !== "POST") return res.status(405).json({ error: "Usa una richiesta POST" });
@@ -36,9 +38,12 @@ module.exports = async function handler(req, res) {
     if (action === "resend") {
       if (!emailEnabled()) return res.status(200).json({ ok: true });
       const acc = email ? await findBy("email", email) : null;
-      if (acc && acc.email_verified === false) {
+      // Al massimo un invio al minuto per account.
+      const recent = acc && acc.verify_sent_at && (Date.now() - new Date(acc.verify_sent_at).getTime() < 60000);
+      if (acc && acc.email_verified === false && !recent) {
         const token = newToken();
         await update(acc.id, { verify_token: token });
+        await update(acc.id, { verify_sent_at: new Date().toISOString() }).catch(function () {});
         await sendVerifyEmail(req, email, token);
       }
       return res.status(200).json({ ok: true });
@@ -67,7 +72,10 @@ module.exports = async function handler(req, res) {
       }
       const { hash, salt } = hashPassword(password);
       await update(acc.id, { password_hash: hash, password_salt: salt, reset_token: null, reset_expires: null, email_verified: true });
-      setSessionCookie(res, acc.id);
+      // Nuova password: le sessioni aperte su altri dispositivi vengono chiuse.
+      const newVersion = (Number(acc.session_version) || 0) + 1;
+      const bumped = await update(acc.id, { session_version: newVersion }).catch(function () { return null; });
+      setSessionCookie(res, acc.id, bumped && bumped.ok ? newVersion : acc.session_version);
       return res.status(200).json({ ok: true, user: publicUser(Object.assign({}, acc, { email_verified: true })) });
     }
     return res.status(404).json({ error: "Azione sconosciuta" });
