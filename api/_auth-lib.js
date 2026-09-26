@@ -142,9 +142,9 @@ function verifySession(token) {
 const COOKIE_NAME = "dgm_session";
 const SESSION_DAYS = 30;
 
-function setSessionCookie(res, userId) {
+function setSessionCookie(res, userId, version) {
   const exp = Date.now() + SESSION_DAYS * 24 * 60 * 60 * 1000;
-  const token = signSession({ sub: userId, exp });
+  const token = signSession({ sub: userId, exp, v: version || 0 });
   const maxAge = SESSION_DAYS * 24 * 60 * 60;
   res.setHeader(
     "Set-Cookie",
@@ -260,7 +260,12 @@ async function currentAccount(req) {
   const session = token ? verifySession(token) : null;
   if (!session || !session.sub) return null;
   const found = await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(session.sub) + "&select=*", { method: "GET" });
-  return found.ok && Array.isArray(found.data) && found.data[0] ? found.data[0] : null;
+  const row = found.ok && Array.isArray(found.data) && found.data[0] ? found.data[0] : null;
+  return row && sessionMatches(session, row) ? row : null;
+}
+// Dopo un cambio password le sessioni vecchie (altri dispositivi) non valgono più.
+function sessionMatches(session, row) {
+  return (Number(row.session_version) || 0) === (Number(session.v) || 0);
 }
 
 module.exports = {
@@ -278,6 +283,7 @@ module.exports = {
   paymentsEnabled,
   stripeRequest,
   currentAccount,
+  sessionMatches,
   emailEnabled,
   sendEmail,
   emailLayout,
