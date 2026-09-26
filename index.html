@@ -6002,11 +6002,63 @@
       var m = /^data:(.+);base64,(.*)$/.exec(cv.toDataURL('image/jpeg', 0.92));
       return loadImg(cv.toDataURL('image/jpeg', 0.92)).then(function(i){ return { img:i, base64:m[2], mime:m[1] }; });
     }
+    // Rifinitura fotografica: dove l'AI NON doveva cambiare niente (mobili, finestre,
+    // oggetti, zone non trattate) rimettiamo i pixel della foto originale, con la sua
+    // nitidezza e la sua grana; sulle zone modificate aggiungiamo la stessa grana
+    // della foto, così il risultato sembra una foto vera e non un'immagine generata.
+    function refinePhoto(origB64, origMime, res){
+      return loadImg('data:' + origMime + ';base64,' + origB64).then(function(orig){
+        var W = orig.naturalWidth, H = orig.naturalHeight;
+        var A = document.createElement('canvas'); A.width = W; A.height = H; var ax = A.getContext('2d');
+        ax.imageSmoothingQuality = 'high'; ax.drawImage(res.img, 0, 0, W, H);
+        var O = document.createElement('canvas'); O.width = W; O.height = H; var ox = O.getContext('2d'); ox.drawImage(orig, 0, 0);
+        // maschera delle zone cambiate, calcolata in piccolo e sfumata
+        var s = Math.min(1, 256 / Math.max(W, H)), w = Math.max(8, Math.round(W*s)), h = Math.max(8, Math.round(H*s));
+        function small(src){ var c = document.createElement('canvas'); c.width = w; c.height = h; var g = c.getContext('2d'); try{ g.filter = 'blur(1.5px)'; }catch(e){} g.drawImage(src, 0, 0, w, h); return g.getImageData(0, 0, w, h).data; }
+        var sa = small(A), so = small(O), mask = new Float32Array(w*h), changed = 0;
+        for(var i = 0, p = 0; i < sa.length; i += 4, p++){
+          var d = (Math.abs(sa[i]-so[i]) + Math.abs(sa[i+1]-so[i+1]) + Math.abs(sa[i+2]-so[i+2])) / 3;
+          var m = Math.max(0, Math.min(1, (d - 7) / 8)); mask[p] = m; if(m > 0.5) changed++;
+        }
+        var frac = changed / (w*h);
+        if(frac < 0.03 || frac > 0.85) return res; // niente da rifinire o quasi tutto cambiato
+        // allarga un po' la maschera (le zone cambiate vincono ai bordi)
+        var m2 = new Float32Array(w*h);
+        for(var y = 0; y < h; y++) for(var x = 0; x < w; x++){ var mx = 0;
+          for(var dy = -2; dy <= 2; dy++) for(var dx = -2; dx <= 2; dx++){ var yy = y+dy, xx = x+dx; if(yy>=0&&yy<h&&xx>=0&&xx<w){ var v = mask[yy*w+xx]; if(v > mx) mx = v; } }
+          m2[y*w+x] = mx; }
+        var mc = document.createElement('canvas'); mc.width = w; mc.height = h; var mg = mc.getContext('2d'), md = mg.createImageData(w, h);
+        for(var q = 0; q < w*h; q++){ md.data[q*4] = md.data[q*4+1] = md.data[q*4+2] = 255; md.data[q*4+3] = Math.round(m2[q]*255); }
+        mg.putImageData(md, 0, 0);
+        var MB = document.createElement('canvas'); MB.width = W; MB.height = H; var mbx = MB.getContext('2d');
+        try{ mbx.filter = 'blur(' + Math.max(2, Math.round(3/s)) + 'px)'; }catch(e){}
+        mbx.drawImage(mc, 0, 0, W, H);
+        // stima della grana della foto originale (differenza tra foto e foto sfocata)
+        var od = ox.getImageData(0, 0, W, H), bl = document.createElement('canvas'); bl.width = W; bl.height = H; var bx = bl.getContext('2d');
+        try{ bx.filter = 'blur(1px)'; }catch(e){} bx.drawImage(O, 0, 0); var bd = bx.getImageData(0, 0, W, H).data;
+        var acc = 0, n = 0; for(var k = 0; k < od.data.length; k += 4*97){ acc += Math.abs(od.data[k+1] - bd[k+1]); n++; }
+        var grain = Math.min(6, (acc / Math.max(1, n)) * 0.9);
+        var ad = ax.getImageData(0, 0, W, H), mk = mbx.getImageData(0, 0, W, H).data, out = ad.data, seed = 12345;
+        for(var j = 0; j < out.length; j += 4){
+          var a = mk[j+3] / 255;
+          seed = (seed * 1103515245 + 12345) & 0x7fffffff; var nz = ((seed / 0x7fffffff) - 0.5) * 2 * grain * a;
+          out[j]   = od.data[j]   * (1-a) + (out[j]   + nz) * a;
+          out[j+1] = od.data[j+1] * (1-a) + (out[j+1] + nz) * a;
+          out[j+2] = od.data[j+2] * (1-a) + (out[j+2] + nz) * a;
+        }
+        ax.putImageData(ad, 0, 0);
+        var url = A.toDataURL('image/jpeg', 0.93), mm = /^data:(.+);base64,(.*)$/.exec(url);
+        return loadImg(url).then(function(i){ return { img:i, base64:mm[2], mime:mm[1] }; });
+      }).catch(function(){ return res; });
+    }
     function callAI(body){
       return padForAI(body.imageBase64, body.mimeType || 'image/jpeg').then(function(pad){
         var sendBody = Object.assign({}, body, { imageBase64: pad.b64, mimeType: pad.mime, paddedBands: !!pad.box });
         return callAIRaw(sendBody).then(function(result){
           return unpadFromAI(result.img, pad.box).then(function(cut){ return cut || result; });
+        }).then(function(res){
+          if(body.step === 'righe') return res;
+          return refinePhoto(body.imageBase64, body.mimeType || 'image/jpeg', res);
         });
       });
     }
