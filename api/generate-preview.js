@@ -41,13 +41,13 @@ module.exports = async function handler(req, res) {
   // I testi che arrivano dal browser finiscono nel prompt dell'AI: niente a capo
   // e lunghezza limitata, così nessuno può usare l'app per chiedere altre immagini.
   if (req.body && typeof req.body === "object") {
-    const IMG_FIELDS = ["imageBase64", "boiserieStyleRefImage", "colorCardImage", "posaRefImage", "accentoRefImage"];
+    const IMG_FIELDS = ["imageBase64", "boiserieStyleRefImage", "colorCardImage", "posaRefImage", "accentoRefImage", "styleRefImage"];
     Object.keys(req.body).forEach(function (k) {
       if (IMG_FIELDS.includes(k)) return;
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, styleRefImage, segni, colonne, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -307,7 +307,7 @@ module.exports = async function handler(req, res) {
   const accentoNote = (isInterniPittura && accentoTipo && ACCENTO_DESC[accentoTipo] && accentoRefClean !== undefined)
     ? ` PARETE D'ACCENTO: UNA SOLA parete della stanza è diversa dalle altre: è ${ACCENTO_DESC[accentoTipo]()}.` + (accentoRefClean
       ? " Quale parete: ti è stata fornita un'immagine aggiuntiva (l'ULTIMA immagine) che è la stessa foto con un CERCHIO ROSSO disegnato sopra: la parete d'accento è ESATTAMENTE la parete su cui si trova il cerchio rosso, da angolo ad angolo e dal pavimento al soffitto. Il cerchio rosso è solo un'indicazione: NON disegnarlo nell'immagine finale."
-      : " Scegli come parete d'accento la parete principale di fondo, quella più visibile.") + " Tutte le altre pareti restano nel colore principale indicato; porte, finestre, prese e mobili davanti a quella parete restano identici e visibili."
+      : (typeof styleRefImage === "string" && styleRefImage ? " Quale parete: è la STESSA parete decorata che si vede nell'immagine di riferimento di progetto (l'ultima immagine); se in questa inquadratura non è visibile, non decorare nessuna parete." : " Scegli come parete d'accento la parete principale di fondo, quella più visibile.")) + " Tutte le altre pareti restano nel colore principale indicato; porte, finestre, prese e mobili davanti a quella parete restano identici e visibili."
     : "";
   const twoColorFacadeFlag = facadeLayout === "due_colori";
   // Colonne, pilastri, travi: di default si colorano come le pareti.
@@ -329,6 +329,12 @@ module.exports = async function handler(req, res) {
     : [];
   const segniNote = segniList.length
     ? ` PARTI SEGNATE DAL CLIENTE: nell'ULTIMA immagine (la stessa foto con i segni) ci sono dei CERCHI BLU NUMERATI posti sopra singoli elementi o zone (colonne, pilastri, travi, nicchie, gradini, zoccolini, muretti o altre parti). Per ciascun elemento indicato dal cerchio, l'intero elemento (tutte le sue facce, da cima a fondo) va trattato così: ${segniList.join("; ")}. I cerchi numerati sono solo indicazioni: NON disegnarli nell'immagine finale.`
+    : "";
+  // Più angolazioni: il primo risultato fa da riferimento di progetto.
+  const styleRefClean = (typeof styleRefImage === "string" && styleRefImage.length < 4_000_000)
+    ? styleRefImage.replace(/^data:image\/\w+;base64,/, "") : null;
+  const styleRefNote = styleRefClean
+    ? " RIFERIMENTO DI PROGETTO (MOLTO IMPORTANTE): l'ULTIMA immagine fornita mostra LO STESSO AMBIENTE GIÀ RINNOVATO, fotografato da un'altra angolazione. La foto da modificare (la PRIMA) è una nuova inquadratura della stessa stanza/edificio. Applica ESATTAMENTE gli stessi materiali, colori, texture, dimensioni e direzione delle doghe/piastrelle, schema di posa, finitura, eventuale parete decorata, plafone e bordatura che vedi nel riferimento, in modo che le due foto sembrino scattate nello stesso ambiente finito. Dal riferimento prendi SOLO i materiali e i colori: inquadratura, prospettiva, mobili, oggetti e luce restano quelli della PRIMA immagine."
     : "";
   const BORD = { rigino: "un RIGINO sottile di circa 1 cm", fascia: "una FASCIA di circa 3-5 cm", larga: "una FASCIA LARGA di circa 10 cm" };
   const bordaturaNote = (isInterniPittura && !effettoScatola && BORD[bordatura])
@@ -591,6 +597,7 @@ module.exports = async function handler(req, res) {
     sottotettoNote,
     plafoneNote,
     accentoNote,
+    styleRefNote,
     colonneNote,
     segniNote,
     bordaturaNote,
@@ -631,6 +638,7 @@ module.exports = async function handler(req, res) {
     if (boiserieStyleRefImageClean) images.push({ b64: boiserieStyleRefImageClean, mime: "image/jpeg" });
     if (posaRefClean) images.push({ b64: posaRefClean, mime: "image/jpeg" });
     if (accentoRefClean) images.push({ b64: accentoRefClean, mime: "image/jpeg" });
+    if (styleRefClean) images.push({ b64: styleRefClean, mime: "image/jpeg" });
     const send = (extra) => {
       const fd = new FormData();
       fd.append("model", model);
@@ -708,6 +716,9 @@ module.exports = async function handler(req, res) {
     }
     if (accentoRefClean) {
       contentParts.push({ inline_data: { mime_type: "image/jpeg", data: accentoRefClean } });
+    }
+    if (styleRefClean) {
+      contentParts.push({ inline_data: { mime_type: "image/jpeg", data: styleRefClean } });
     }
     if (boiserieStyleRefImageClean) {
       contentParts.push({
