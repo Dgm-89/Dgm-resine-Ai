@@ -4873,15 +4873,17 @@
     im.src = MAT_TEX[k]; TEX_IMG[k] = im;
   });
   var TEX_COVER = { microcemento:1, parquet:1, spc_legno:1, pi_opaco:1, pi_cemento:1, pi_travertino:1, pi_marmo:1, pi_legno:1, pi_cotto:1 };
-  function tintedTex(hex, key){
-    var id = key + hex; if(TEX_CACHE[id]) return TEX_CACHE[id];
+  function tintedTex(hex, key, big){
+    var id = key + hex + (big ? '@big' : ''); if(TEX_CACHE[id]) return TEX_CACHE[id];
     var im = TEX_IMG[key]; if(!im || !im.complete || !im.naturalWidth) return null;
-    var S = TEX_COVER[key] ? 360 : 300;
+    // Piccola per la griglia; grande (nitida anche ingrandita) per l'anteprima del colore.
+    var S0 = TEX_COVER[key] ? 360 : 300, S = big ? (TEX_COVER[key] ? 1080 : 960) : S0;
     var cv = document.createElement('canvas'); cv.width = S; cv.height = S;
     var cx = cv.getContext('2d');
+    cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
     if(TEX_COVER[key]){ cx.drawImage(im, 0, 0, S, S); }
     else {
-      var tile = (MAT_TEX_SIZE[key] || 160) * 1.6;
+      var tile = (MAT_TEX_SIZE[key] || 160) * 1.6 * (S / S0);
       for(var y=0; y<S; y+=tile) for(var x=0; x<S; x+=tile) cx.drawImage(im, x, y, tile, tile);
     }
     var d = cx.getImageData(0, 0, S, S), px = d.data;
@@ -4898,18 +4900,18 @@
       px[i+3] = 255;
     }
     cx.putImageData(d, 0, 0);
-    var url = cv.toDataURL('image/jpeg', 0.9); TEX_CACHE[id] = url; return url;
+    var url = cv.toDataURL('image/jpeg', big ? 0.92 : 0.9); TEX_CACHE[id] = url; return url;
   }
-  function texStyle(hex, key, size){
+  function texStyle(hex, key, size, big){
     if(!key || !MAT_TEX[key]) return 'background:' + hex + ';';
-    var u = tintedTex(hex, key);
+    var u = tintedTex(hex, key, big);
     if(u) return 'background-color:' + hex + ';background-image:url(' + u + ');background-size:cover;background-position:center;';
     return 'background:' + hex + ';';
   }
-  function swatchBgStyle(c){
+  function swatchBgStyle(c, big){
     if(c.img) return 'background-image:url(' + c.img + ');background-size:cover;background-position:center;';
     if(granaAppliesToPhase(pickPhase)) return granaStyle(c.hex);
-    return texStyle(c.hex, c.tex || texKeyFor(pickPhase));
+    return texStyle(c.hex, c.tex || texKeyFor(pickPhase), null, big);
   }
   var PHASE_CHIP_LABEL = {
     A: { it:'Parte alta: ', en:'Upper part: ' },
@@ -5251,7 +5253,7 @@
   var cpmCandidate = null;
   function openColorPreview(c){
     cpmCandidate = c;
-    document.getElementById('cpmSwatch').setAttribute('style', swatchBgStyle(c));
+    document.getElementById('cpmSwatch').setAttribute('style', swatchBgStyle(c, true));
     document.getElementById('cpmName').textContent = c.name;
     document.getElementById('cpmCode').textContent = c.code && c.code!==c.name ? ts('codiceLabel')+c.code : '';
     var cpmNote = document.getElementById('cpmNote');
