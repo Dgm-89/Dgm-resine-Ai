@@ -37,7 +37,7 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
 
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -149,8 +149,8 @@ module.exports = async function handler(req, res) {
   const PARQUET_POSA_DESC = {
     cassero_regolare: "posa a cassero regolare: tavole lunghe in file parallele, con i giunti di testa sfalsati a passo costante (ogni fila spostata di metà tavola rispetto alla precedente)",
     cassero_irregolare: "posa a cassero irregolare (a correre): tavole in file parallele con i giunti di testa sfalsati in modo casuale, lunghezze delle tavole variabili",
-    spina_pesce: "posa a spina di pesce classica: listelli rettangolari corti con le teste tagliate dritte, incastrati a 90° uno contro l'altro in modo da formare un motivo a zig-zag continuo",
-    spina_ungherese: "posa a spina ungherese (chevron): listelli con le teste tagliate a 45°, accostati in punta in modo da formare file di frecce continue tutte nella stessa direzione, con le punte allineate lungo linee dritte",
+    spina_pesce: "posa a SPINA DI PESCE CLASSICA (herringbone): listelli rettangolari corti (proporzione circa 1:5) con le teste tagliate DRITTE a 90°; ogni listello è perpendicolare al vicino e la sua TESTA appoggia contro il FIANCO LUNGO del listello accanto, formando una scaletta a zig-zag a gradini. ATTENZIONE: NON è la spina ungherese/chevron: NON devono esserci tagli a 45°, NON devono esserci punte a freccia e NON deve esserci una linea di giunzione dritta e continua al centro delle file; le giunzioni tra le file sono a gradini sfalsati",
+    spina_ungherese: "posa a SPINA UNGHERESE (chevron): listelli con le teste tagliate a 45° (parallelogrammi), accostati testa contro testa in modo da formare file di frecce a V continue tutte nella stessa direzione, con le punte allineate lungo linee di giunzione dritte e continue; NON è la spina di pesce classica a gradini",
     quadri: "posa a quadri (mosaico/dama): quadrotti formati da gruppi di listelli paralleli, con la direzione dei listelli alternata di 90° da un quadrotto all'altro come una scacchiera",
     cassero: "posa a cassero (a correre): doghe lunghe parallele con i giunti di testa sfalsati in modo naturale",
     dritta: "posa dritta in linea: piastrelle rettangolari grandi (circa 60x120 cm) accostate su una griglia regolare con giunti allineati in entrambe le direzioni",
@@ -441,6 +441,12 @@ module.exports = async function handler(req, res) {
     : "";
   const exteriorPreservationNote = " REGOLA ASSOLUTA: non spostare, aggiungere o rimuovere nessun elemento della foto e non cambiare inquadratura o prospettiva. Tutto ciò che non è elencato nelle istruzioni resta identico all'originale; tutto ciò che è elencato (vedi riepilogo) va modificato OBBLIGATORIAMENTE, anche se si tratta di serramenti, persiane, porte, cornici, sottotetto o tetto.";
 
+  const posaRefClean = (typeof posaRefImage === "string" && posaRefImage.length < 1_500_000 && (materialId === "parquet" || materialId === "spc"))
+    ? posaRefImage.replace(/^data:image\/\w+;base64,/, "")
+    : null;
+  const posaRefNote = posaRefClean
+    ? " SCHEMA DI POSA DI RIFERIMENTO: ti sono state fornite DUE immagini. La PRIMA è la foto reale da modificare. La SECONDA è lo schema del pavimento visto DALL'ALTO, disegnato con la disposizione ESATTA dei listelli: copia fedelmente quella geometria (forma dei listelli, tagli delle teste, modo in cui si incastrano e direzione delle file) sul pavimento della prima foto, in prospettiva e alla scala giusta per la stanza (listelli di dimensioni reali). Dalla seconda immagine prendi SOLO la geometria della posa: luce, ombre e resto della stanza vengono dalla prima foto."
+    : "";
   const colorCardClean = (typeof colorCardImage === "string" && colorCardImage.length < 2_000_000)
     ? colorCardImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
@@ -486,6 +492,7 @@ module.exports = async function handler(req, res) {
     balconiNote,
     righeNote,
     boiserieStyleRefNote,
+    posaRefNote,
     zonesSummary,
     colorCardNote,
     colorFidelityNote,
@@ -513,6 +520,7 @@ module.exports = async function handler(req, res) {
     const images = [{ b64: imageBase64, mime: mimeType || "image/jpeg" }];
     if (colorCardClean) images.push({ b64: colorCardClean, mime: "image/png" });
     if (boiserieStyleRefImageClean) images.push({ b64: boiserieStyleRefImageClean, mime: "image/jpeg" });
+    if (posaRefClean) images.push({ b64: posaRefClean, mime: "image/jpeg" });
     const send = (extra) => {
       const fd = new FormData();
       fd.append("model", model);
@@ -579,6 +587,9 @@ module.exports = async function handler(req, res) {
     ];
     if (colorCardClean) {
       contentParts.push({ inline_data: { mime_type: "image/png", data: colorCardClean } });
+    }
+    if (posaRefClean) {
+      contentParts.push({ inline_data: { mime_type: "image/jpeg", data: posaRefClean } });
     }
     if (boiserieStyleRefImageClean) {
       contentParts.push({
