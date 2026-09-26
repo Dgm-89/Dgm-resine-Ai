@@ -551,14 +551,19 @@ module.exports = async function handler(req, res) {
         body: fd
       });
     };
+    // Se la connessione con OpenAI cade ("fetch failed"), riproviamo una volta.
+    const sendRetry = async (extra) => {
+      try { return await send(extra); }
+      catch (e) { console.error("openai fetch, riprovo", e && e.cause || e); await new Promise(r => setTimeout(r, 1500)); return send(extra); }
+    };
     try {
       let outMime = "image/jpeg";
-      let r = await send({ quality, input_fidelity: "high", size: "auto", output_format: "jpeg" });
+      let r = await sendRetry({ quality, input_fidelity: "high", size: "auto", output_format: "jpeg" });
       let txt = await r.text();
       // Se un parametro opzionale non è accettato dal modello, riproviamo con i soli essenziali.
       if (r.status === 400 && /input_fidelity|size|output_format|quality/i.test(txt)) {
         outMime = "image/png";
-        r = await send({ quality: /quality/i.test(txt) ? "high" : quality });
+        r = await sendRetry({ quality: /quality/i.test(txt) ? "high" : quality });
         txt = await r.text();
       }
       let data;
@@ -573,7 +578,7 @@ module.exports = async function handler(req, res) {
       await countUsage();
       return res.status(200).json({ imageBase64: b64, mimeType: outMime });
     } catch (err) {
-      return res.status(500).json({ error: "Errore imprevisto lato server", details: String(err && err.message ? err.message : err) });
+      console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
     }
   }
 
@@ -663,6 +668,6 @@ module.exports = async function handler(req, res) {
       mimeType: inline.mime_type || inline.mimeType || "image/png"
     });
   } catch (err) {
-    return res.status(500).json({ error: "Errore imprevisto lato server", details: String(err && err.message ? err.message : err) });
+    console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
   }
 }
