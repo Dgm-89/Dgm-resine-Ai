@@ -246,6 +246,21 @@
   .chip.pending{ border:1.5px dashed var(--accent); background:var(--accent-soft); color:var(--accent-ink); font-weight:600; }
   .chip.pending .dot{ border:1.5px dashed var(--accent-ink); background:none; }
 
+  .zone-wrap{ display:flex; gap:12px; align-items:flex-start; margin-bottom:14px; }
+  .zone-list{ flex:1; display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .zone-room{ flex:0 0 108px; }
+  .zone-room svg{ width:108px; height:auto; display:block; border-radius:8px; border:1px solid var(--line); }
+  .zone-row{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; padding:9px 10px; border-radius:10px; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); font-family:inherit; font-size:13.5px; cursor:pointer; }
+  .zone-row .zr-dot{ flex:none; width:26px; height:26px; border-radius:7px; border:1.5px dashed var(--ink-soft); background-size:cover; background-position:center; }
+  .zone-row .zr-dot.done{ border-style:solid; border-color:rgba(0,0,0,.15); }
+  .zone-row .zr-txt{ flex:1; min-width:0; line-height:1.25; }
+  .zone-row .zr-name{ font-weight:700; display:block; }
+  .zone-row .zr-val{ color:var(--ink-soft); font-size:12px; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .zone-row .zr-st{ flex:none; font-size:12px; font-weight:700; color:var(--ink-soft); }
+  .zone-row.active{ border-color:var(--accent); background:var(--accent-soft); box-shadow:0 0 0 2px var(--accent) inset; }
+  .zone-row.active .zr-st{ color:var(--accent); }
+  .zone-row.fixed{ cursor:default; opacity:.85; }
+  @media (max-width:360px){ .zone-room{ display:none; } }
   .swatch-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:16px 12px; margin-bottom:6px; }
   .swatch{ background:none; border:none; cursor:pointer; padding:0; text-align:center; display:flex; flex-direction:column; justify-content:flex-start; align-self:start; }
   .swatch .sw-color{ position:relative; display:block; width:100%; aspect-ratio:1; border-radius:12px; border:1.5px solid rgba(0,0,0,0.08); box-shadow: inset 0 -10px 16px rgba(0,0,0,0.10); }
@@ -725,10 +740,10 @@
           <button type="button" data-v="colore">Colore a scelta</button>
         </div>
       </div>
-      <div class="section-label">Parete d'accento</div>
+      <div class="section-label">Parete decorata</div>
       <button type="button" class="niche-toggle" id="accentoToggle">
         <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E9E4DA"/><polygon points="0,0 40,34 40,110 0,130" fill="#D8CFC0"/><polygon points="180,0 140,34 140,110 180,130" fill="#D8CFC0"/><rect x="40" y="34" width="100" height="76" fill="#A5602E"/><polygon points="0,0 180,0 140,34 40,34" fill="#F4F1EA"/></svg>
-        <span class="nt-text"><span class="nt-title">Una parete diversa</span><span class="nt-desc">Una parete in un altro colore o decorata (Corten, spatolato, microcemento, marmo)</span></span>
+        <span class="nt-text"><span class="nt-title">Una parete diversa dalle altre</span><span class="nt-desc">Una sola parete in un altro colore o decorata: Corten, spatolato, microcemento, marmo</span></span>
         <span class="nt-check"></span>
       </button>
       <div id="accentoOpts" hidden>
@@ -879,6 +894,10 @@
       <span class="nt-text"><span class="nt-title" data-i18n="cortenNoColorTitle">Il Corten ha già il suo colore</span><span class="nt-desc" data-i18n="cortenNoColorDesc">Base ocra/ruggine naturale, non serve scegliere un colore per questa finitura</span></span>
     </div>
 
+    <div id="zoneBox" hidden>
+      <div class="section-label" style="margin-top:4px">Cosa stai colorando</div>
+      <div class="zone-wrap"><div class="zone-list" id="zoneList"></div><div class="zone-room" id="zoneRoom"></div></div>
+    </div>
     <div class="chip-row" id="colorChips"></div>
     <input type="text" id="colorSearch" class="color-search" placeholder="Scrivi il codice colore (es. S 2030-Y90R, RAL 7016, B6.38.18)" data-i18n-ph="colorSearchPh" autocomplete="off" autocapitalize="characters" enterkeyhint="done" style="display:none">
     <button type="button" class="free-code-btn" id="freeCodeBtn" style="display:none"></button>
@@ -920,7 +939,7 @@
       </div>
     </div>
     <div id="accentoMarkBox" hidden style="margin:-4px 0 14px;padding:10px 12px;border:1.5px dashed var(--accent);border-radius:10px;font-size:13.5px;line-height:1.4">
-      <b>Parete d'accento:</b> <span id="accentoMarkText">tocca sulla foto la parete da decorare.</span>
+      <b>Parete decorata:</b> <span id="accentoMarkText">tocca sulla foto la parete da decorare.</span>
     </div>
     <div class="hero-hint" id="photoHint">Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica</div>
     <p class="ai-photo-note"><span data-i18n="aiPhotoNote">La foto viene elaborata da un servizio di intelligenza artificiale solo per creare l'anteprima.</span> <button type="button" class="privacy-link" data-open-privacy data-i18n="privacyShort">Privacy</button></p>
@@ -1168,7 +1187,7 @@
     corniciDesc: { it:"Le fasce in rilievo intorno a finestre e porte (cornici, archi, spallette) in un colore diverso dalla facciata", en:"The raised bands around windows and doors (surrounds, arches, reveals) in a color different from the facade" },
     clusterLabelTetto: { it:"Colore tetto", en:"Roof color" },
     clusterLabelCornici: { it:"Colore cornici porte e finestre", en:"Door and window surround color" },
-    pendingAccento: { it:"+ Colore parete d'accento da scegliere", en:"+ Accent wall color to choose" },
+    pendingAccento: { it:"+ Colore parete decorata da scegliere", en:"+ Feature wall color to choose" },
     pendingBordatura: { it:"+ Colore bordatura da scegliere", en:"+ Border color to choose" },
     pendingPlafone: { it:"+ Colore plafone da scegliere", en:"+ Ceiling color to choose" },
     pendingTetto: { it:"+ Colore tetto da scegliere", en:"+ Roof color to choose" },
@@ -5197,7 +5216,7 @@
     E: { it:'Sottotetto: ', en:'Eave: ' },
     T: { it:'Tetto: ', en:'Roof: ' },
     P: { it:'Plafone: ', en:'Ceiling: ' },
-    X: { it:'Parete d\'accento: ', en:'Accent wall: ' },
+    X: { it:'Parete decorata: ', en:'Feature wall: ' },
     Y: { it:'Bordatura: ', en:'Border: ' },
     K: { it:'Cornici: ', en:'Surrounds: ' },
     F: { it:'Balconi: ', en:'Balconies: ' },
@@ -5237,6 +5256,7 @@
     row.appendChild(chip);
   }
   function renderChips(){
+    if(typeof renderZoneList==='function') try{ renderZoneList(); }catch(e){}
     if(typeof syncGranaVisibility==='function') syncGranaVisibility();
     if(typeof updateRigheWarning==='function') updateRigheWarning();
     if(typeof syncFacadeExtrasSummary==='function') syncFacadeExtrasSummary();
@@ -5424,7 +5444,7 @@
     } else if(pickPhase==='E'){
       label.textContent = ts('clusterLabelSottotetto');
     } else if(pickPhase==='X'){
-      label.textContent = tr({it:"Colore parete d'accento", en:'Accent wall color'}) + (state.accentoTipo && state.accentoTipo!=='colore' ? ' (' + state.accentoTipo + ')' : '');
+      label.textContent = tr({it:'Colore parete decorata', en:'Feature wall color'}) + (state.accentoTipo && state.accentoTipo!=='colore' ? ' (' + state.accentoTipo + ')' : '');
     } else if(pickPhase==='Y'){
       label.textContent = tr({it:'Colore bordatura', en:'Border color'});
     } else if(pickPhase==='A' && (needsPlafoneColor() || needsAccentoColor() || needsBordaturaColor())){
@@ -5591,6 +5611,72 @@
     renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled();
   });
 
+  // Elenco delle zone da colorare (tipo checklist): la riga attiva è evidenziata,
+  // toccando una riga si sceglie/cambia quel colore. Per gli interni c'è anche un
+  // disegnino della stanza che si colora man mano.
+  function zoneName(ph){
+    if(ph==='A'){
+      if(isInterniPittura()) return tr({it:'Pareti', en:'Walls'});
+      if(state.material && state.material.id==='imbiancatura' && state.context==='esterno') return needsSecondColor() ? tr({it:'Parte alta facciata', en:'Upper facade'}) : tr({it:'Facciata', en:'Facade'});
+      return tr({it:'Colore', en:'Color'});
+    }
+    if(ph==='B' && !(state.material && state.material.id==='imbiancatura')) return tr({it:'Secondo colore', en:'Second color'});
+    if(ph==='B') return tr({it:'Parte bassa facciata', en:'Lower facade'});
+    return tr(PHASE_CHIP_LABEL[ph]||{it:ph,en:ph}).replace(/:\s*$/,'');
+  }
+  function zoneColorStyle(c){
+    if(!c) return '';
+    if(c.img) return 'background-image:url('+c.img+');';
+    return 'background:'+c.hex+';';
+  }
+  function renderZoneList(){
+    var box = document.getElementById('zoneBox'); if(!box) return;
+    var order = phaseOrder();
+    var fixed = [];
+    if(accentoActive() && state.accentoTipo==='corten') fixed.push({name:tr({it:'Parete decorata',en:'Feature wall'}), val:'Corten · '+tr({it:'colore già incluso',en:'color included'}), style:'background:#A5602E;'});
+    if(bordaturaActive() && !needsBordaturaColor()) fixed.push({name:tr({it:'Bordatura in alto',en:'Top border'}), val:tr({it:'Bianca',en:'White'}), style:'background:#FFFFFF;'});
+    var show = order.length > 1 || fixed.length > 0;
+    box.hidden = !show;
+    document.getElementById('colorChips').style.display = show ? 'none' : '';
+    if(!show) return;
+    var list = document.getElementById('zoneList'); list.innerHTML = '';
+    order.forEach(function(ph){
+      var c = colorForPhase(ph), active = ph === pickPhase;
+      var b = document.createElement('button'); b.type='button'; b.className='zone-row' + (active ? ' active' : '');
+      var extra = (ph==='X' && state.accentoTipo && state.accentoTipo!=='colore') ? ' ('+state.accentoTipo+')' : '';
+      b.innerHTML = '<span class="zr-dot'+(c?' done':'')+'" style="'+zoneColorStyle(c)+'"></span><span class="zr-txt"><span class="zr-name"></span><span class="zr-val"></span></span><span class="zr-st"></span>';
+      b.querySelector('.zr-name').textContent = zoneName(ph) + extra;
+      b.querySelector('.zr-val').textContent = c ? (c.name + (c.code && c.code!==c.name ? ' · '+c.code : '')) : tr({it:'da scegliere',en:'to choose'});
+      b.querySelector('.zr-st').textContent = active ? tr({it:'◀ scegli ora',en:'◀ choose now'}) : (c ? tr({it:'✓ cambia',en:'✓ change'}) : '');
+      b.addEventListener('click', function(){ pickPhase = ph; renderStep2UI(); var cl=document.getElementById('clusterLabel'); if(cl) try{ cl.scrollIntoView({behavior:'smooth', block:'start'}); }catch(e){} });
+      list.appendChild(b);
+    });
+    fixed.forEach(function(f){
+      var d = document.createElement('div'); d.className='zone-row fixed';
+      d.innerHTML = '<span class="zr-dot done" style="'+f.style+'"></span><span class="zr-txt"><span class="zr-name"></span><span class="zr-val"></span></span><span class="zr-st">✓</span>';
+      d.querySelector('.zr-name').textContent = f.name; d.querySelector('.zr-val').textContent = f.val;
+      list.appendChild(d);
+    });
+    var room = document.getElementById('zoneRoom');
+    if(isInterniPittura()){
+      var hx = function(c, def){ return c && c.hex ? c.hex : def; };
+      var wall = hx(state.colorA, '#E9E4DA');
+      var ceil = state.effettoScatola ? wall : (needsPlafoneColor() ? hx(state.colorPlafone, '#FFFFFF') : '#FAFAF7');
+      var acc = accentoActive() ? (state.accentoTipo==='corten' ? '#A5602E' : hx(state.colorAccento, wall)) : wall;
+      var band = bordaturaActive() ? (needsBordaturaColor() ? hx(state.colorBordatura, '#FFFFFF') : '#FFFFFF') : null;
+      var hl = function(ph){ return ph===pickPhase ? ' stroke="#E68A4C" stroke-width="3"' : ' stroke="rgba(0,0,0,.12)" stroke-width="1"'; };
+      var svg = '<svg viewBox="0 0 180 150" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="150" fill="#DDD6C8"/>'
+        + '<polygon points="0,0 180,0 140,34 40,34" fill="'+ceil+'"'+hl('P')+'/>'
+        + '<polygon points="0,0 40,34 40,118 0,150" fill="'+wall+'"'+hl('A')+'/>'
+        + '<polygon points="180,0 140,34 140,118 180,150" fill="'+wall+'"'+hl('A')+'/>'
+        + '<rect x="40" y="34" width="100" height="84" fill="'+acc+'"'+hl(accentoActive() ? (needsAccentoColor() ? 'X' : '-') : 'A')+'/>'
+        + (accentoActive() && state.accentoTipo==='corten' ? '<ellipse cx="70" cy="60" rx="14" ry="7" fill="#7A3F1C" opacity=".45"/><ellipse cx="110" cy="92" rx="18" ry="8" fill="#6B3516" opacity=".4"/>' : '')
+        + (band ? '<polygon points="0,0 40,34 40,38 0,6" fill="'+band+'"'+hl('Y')+'/><polygon points="180,0 140,34 140,38 180,6" fill="'+band+'"'+hl('Y')+'/><rect x="40" y="34" width="100" height="4" fill="'+band+'"'+hl('Y')+'/>' : '')
+        + '<polygon points="0,150 40,118 140,118 180,150" fill="#B9A58A"/></svg>';
+      room.innerHTML = svg; room.style.display = '';
+    } else { room.innerHTML = ''; room.style.display = 'none'; }
+  }
+  function missingColors(){ var n=0; phaseOrder().forEach(function(ph){ if(!colorForPhase(ph)) n++; }); return n; }
   function renderStep2UI(){ renderChips(); renderCluster(); updateAllPreviews(); syncNextStepEnabled(); }
 
   document.getElementById('marmoLayoutControl').addEventListener('click', function(e){
@@ -5956,6 +6042,8 @@
     else if(currentPanel==='panelColor') ok = !!(state.colorA && (!(state.material && (state.material.id==='parquet' || state.material.id==='spc' || state.material.id==='laminato')) || state.parquetPosa) && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsPlafoneColor() || state.colorPlafone) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
     else if(currentPanel==='panelPhoto') ok = !!photoImg && (!accentoActive() || !!state.accentoPoint);
     btn.disabled = !ok;
+    var miss = (currentPanel==='panelColor' && !ok && typeof missingColors==='function' && phaseOrder().length > 1) ? missingColors() : 0;
+    btn.textContent = miss > 1 ? tr({it:'Mancano '+miss+' colori', en:miss+' colors missing'}) : miss === 1 ? tr({it:'Manca 1 colore', en:'1 color missing'}) : ts('btnContinua');
   }
 
   function updateProgress(id, seq){
@@ -6276,7 +6364,7 @@
     if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+colorLabel(state.colorC));
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+colorLabel(state.colorSottotetto));
     if(needsPlafoneColor() && state.colorPlafone) lines.push("Plafone (soffitto): "+colorLabel(state.colorPlafone));
-    if(accentoActive()) lines.push("Parete d'accento: "+(state.accentoTipo==='corten' ? 'Corten' : ((state.accentoTipo && state.accentoTipo!=='colore' ? state.accentoTipo+' ' : '') + (state.colorAccento ? colorLabel(state.colorAccento) : ''))));
+    if(accentoActive()) lines.push("Parete decorata: "+(state.accentoTipo==='corten' ? 'Corten' : ((state.accentoTipo && state.accentoTipo!=='colore' ? state.accentoTipo+' ' : '') + (state.colorAccento ? colorLabel(state.colorAccento) : ''))));
     if(bordaturaActive()) lines.push("Bordatura in alto: "+({rigino:'rigino ~1 cm', fascia:'fascia 3-5 cm', larga:'fascia larga ~10 cm'})[state.bordaturaLarg||'rigino']+", "+(needsBordaturaColor() && state.colorBordatura ? colorLabel(state.colorBordatura) : 'bianca'));
     if(isInterniPittura() && state.effettoScatola) lines.push("Effetto scatola: pareti e soffitto nello stesso colore");
     if(needsTettoColor() && state.colorTetto) lines.push("Tetto: "+colorLabel(state.colorTetto));
