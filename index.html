@@ -985,6 +985,11 @@
     </div>
     <div class="hero-hint" id="heroHint" data-i18n="heroHint">Genera l'anteprima AI per vedere il risultato fotorealistico</div>
 
+    <div id="queueBox" style="margin:0 0 12px;padding:10px 12px;border:1.5px dashed var(--accent);border-radius:12px">
+      <div id="queueList" style="font-size:13.5px;line-height:1.5;margin-bottom:6px"></div>
+      <button type="button" id="queueAddBtn" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;padding:0;cursor:pointer;font-family:inherit">＋ Aggiungi un'altra lavorazione prima di generare</button>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:3px">Es. pavimento + pareti + soffitto: le generiamo tutte insieme, una dopo l'altra.</div>
+    </div>
     <button class="ai-btn" id="aiGenerateBtn" disabled data-i18n="aiGenerateBtn">Genera anteprima AI fotorealistica</button>
     <div class="ai-progress" id="aiProgress" hidden><div class="ai-progress-fill" id="aiProgressFill"></div></div>
     <div class="ai-progress-msg" id="aiProgressMsg" hidden></div>
@@ -5084,6 +5089,7 @@
   // swipe reale PRIMA (foto originale) / DOPO (immagine generata dall'AI),
   // in stile "storie", invece del vecchio cursore a tendina.
   function renderHeroPreview(){
+    try{ renderQueue(); }catch(e){}
     var dgmB=document.querySelector('.dgm-badge'); if(dgmB) dgmB.style.display = aiResultImage ? '' : 'none';
     if(!photoImg) return;
     drawCover(document.getElementById('canvasBefore'), photoImg);
@@ -5113,7 +5119,7 @@
     swipeHintTimer = setTimeout(function(){ heroSwipeHint.style.display='none'; }, 3200);
   }
 
-  function updateAllPreviews(){ if(photoImg) renderHeroPreview(); }
+  function updateAllPreviews(){ if(photoImg) renderHeroPreview(); try{ renderQueue(); }catch(e){} }
 
   window.addEventListener('resize', updateAllPreviews);
 
@@ -5920,10 +5926,16 @@
   }
 
   document.getElementById('aiGenerateBtn').addEventListener('click', function(){
+    // Avvio di una catena di lavorazioni: si parte dalla prima in coda.
+    if(genQueue.length && !chainRun){
+      chainRun = genQueue.concat([{ snap: Object.assign({}, state), title: layerTitle() }]);
+      genQueue = []; chainIdx = 0;
+      restoreSnap(chainRun[0].snap);
+    }
     if(!state.photoBase64 || !state.colorA) return;
     var btn = this; var statusEl = document.getElementById('aiStatus');
     btn.disabled = true; statusEl.classList.remove('error');
-    statusEl.textContent = ts('aiStatusGenerating');
+    statusEl.textContent = ts('aiStatusGenerating') + (chainRun ? ' — lavorazione ' + (chainIdx+1) + ' di ' + chainRun.length + ': ' + layerTitle() : '');
     startAiProgress();
     // Foto di riferimento dello stile di boiserie scelto (una delle 10 miniature già
     // presenti nella griglia .boiserie-grid): la inviamo al backend, insieme alla foto
@@ -6132,6 +6144,19 @@
         aiResultImageMime = result.mime;
         document.getElementById('pdfBox').hidden = false;
         document.getElementById('layerBox').hidden = false; renderLayerBox();
+        if(chainRun){
+          if(chainIdx < chainRun.length - 1){
+            // salva questa lavorazione come strato e passa alla successiva sulla foto appena ottenuta
+            layers.push({ title: layerTitle(), lines: pdfChoiceLines(), stateSnap: Object.assign({}, state), basePhoto: { img: photoImg, b64: state.photoBase64, mime: state.photoMime }, result: { img: result.img, b64: result.base64, mime: result.mime } });
+            if(!layerOriginal) layerOriginal = layers[0].basePhoto;
+            var base = { img: result.img, b64: result.base64, mime: result.mime };
+            chainIdx++;
+            restoreSnap(chainRun[chainIdx].snap);
+            photoImg = base.img; state.photoBase64 = base.b64; state.photoMime = base.mime;
+            aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+            setTimeout(function(){ document.getElementById('aiGenerateBtn').disabled = false; document.getElementById('aiGenerateBtn').click(); }, 300);
+          } else { chainRun = null; renderQueue(); renderLayerBox(); }
+        }
         renderHeroPreview();
         statusEl.textContent = ts('aiStatusDone');
         stopAiProgress(true);
@@ -6142,11 +6167,35 @@
         statusEl.classList.add('error');
         statusEl.textContent = ts('aiStatusErrorPrefix') + err.message + ts('aiStatusErrorSuffix');
         stopAiProgress(false);
+        if(chainRun){ statusEl.textContent += ' (lavorazione ' + (chainIdx+1) + ' di ' + chainRun.length + ')'; chainRun = null; }
       })
       .finally(function(){ btn.disabled = false; });
   });
 
 
+
+
+  // ---------- Coda di lavorazioni scelte prima di generare ----------
+  var genQueue = [], chainRun = null, chainIdx = 0;
+  function restoreSnap(snap){ Object.keys(state).forEach(function(k){ if(!(k in snap)) delete state[k]; }); Object.assign(state, snap); }
+  function renderQueue(){
+    var box = document.getElementById('queueBox'); if(!box) return;
+    box.hidden = !!aiResultImage || !state.material;
+    var items = genQueue.map(function(q){ return q.title; });
+    if(state.material) items.push(layerTitle());
+    document.getElementById('queueList').innerHTML = items.length > 1
+      ? '<b>Verranno generate in ordine:</b><br>' + items.map(function(t, i){ return (i+1) + '. ' + t; }).join('<br>')
+      : '';
+    var gb = document.getElementById('aiGenerateBtn');
+    if(gb && !aiResultImage) gb.textContent = items.length > 1 ? 'Genera tutte (' + items.length + ' lavorazioni)' : ts('aiGenerateBtn');
+  }
+  document.getElementById('queueAddBtn').addEventListener('click', function(){
+    if(!state.material || !state.colorA){ return; }
+    genQueue.push({ snap: Object.assign({}, state), title: layerTitle() });
+    state.category = null; state.material = null;
+    syncLayerBanner();
+    goTo(currentSeq()[0]);
+  });
 
   // ---------- Più lavorazioni sulla stessa foto (a strati) ----------
   // Ogni strato: la lavorazione fatta, le sue scelte e la foto risultante.
@@ -6182,8 +6231,9 @@
   });
   function syncLayerBanner(){
     var b = document.getElementById('layerBanner'); if(!b) return;
-    b.hidden = layers.length === 0;
-    if(layers.length) document.getElementById('layerBannerText').textContent = 'Stai aggiungendo la lavorazione n. ' + (layers.length + 1) + ' sulla stessa foto (già fatto: ' + layers.map(function(l){ return l.title; }).join(', ') + ').';
+    var prev = layers.map(function(l){ return l.title; }).concat(genQueue.map(function(q){ return q.title; }));
+    b.hidden = prev.length === 0;
+    if(prev.length) document.getElementById('layerBannerText').textContent = 'Stai aggiungendo la lavorazione n. ' + (prev.length + 1) + ' sulla stessa foto (' + (genQueue.length ? 'già scelte' : 'già fatte') + ': ' + prev.join(', ') + ').';
   }
 
   // ---------- Scheda PDF per il cliente ----------
