@@ -1,21 +1,14 @@
 {
-  "name": "Rendrum — Preventivo",
-  "short_name": "Rendrum",
+  "name": "Rendrum_AI",
+  "short_name": "Rendrum_AI",
+  "description": "Vedi il lavoro finito sulla tua casa prima di iniziare.",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
-  "background_color": "#F7F6F3",
-  "theme_color": "#1A1A1A",
+  "background_color": "#0F0D0B",
+  "theme_color": "#0F0D0B",
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
