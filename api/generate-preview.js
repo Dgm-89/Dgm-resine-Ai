@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -178,6 +178,17 @@ module.exports = async function handler(req, res) {
     const lineDesc = SPC_LINES[spcLine] || SPC_LINES.bloom;
     MATERIAL_TEXTURE.spc = lineDesc + "; deve essere chiaramente riconoscibile " + (spcLine === "illume" ? "come pavimento a piastre" : "come pavimento in legno a doghe anche se il colore è molto scuro, NON un pavimento uniforme, NON piastrelle, NON resina o cemento") + ", posato su tutto il pavimento";
   }
+  if (materialId === "laminato") {
+    const coll = collezione ? " Quick-Step collezione " + collezione : " Quick-Step";
+    MATERIAL_TEXTURE.laminato = spcLine === "lamtile"
+      ? "pavimento in LAMINATO" + coll + " effetto PIETRA/CEMENTO in pannelli rettangolari grandi a incastro, stampa decorativa realistica nel colore indicato, bordi con microbisello che rendono visibile ogni pannello, superficie opaca, posato su tutto il pavimento"
+      : spcLine === "lamspina"
+        ? "pavimento in LAMINATO" + coll + " effetto LEGNO a SPINA DI PESCE classica: listelli corti con teste dritte a 90°, stampa legno con venature visibili nel colore indicato, microbisello, superficie opaca, posato su tutto il pavimento"
+        : "pavimento in LAMINATO" + coll + " effetto LEGNO a DOGHE lunghe (circa 19-24 cm × 138-205 cm), stampa legno ad alta definizione con venature e nodi ben visibili nel colore indicato, bordi con microbisello che rendono visibile ogni doga, superficie opaca con leggera goffratura; deve essere riconoscibile come pavimento in legno a doghe, NON uniforme, NON piastrelle, posato su tutto il pavimento";
+  }
+  if (materialId === "parquet" && collezione) {
+    MATERIAL_TEXTURE.parquet = (MATERIAL_TEXTURE.parquet || "parquet in legno") + ", parquet prefinito Quick-Step collezione " + collezione + " in rovere con finitura extra opaca, venature e nodi naturali visibili";
+  }
   const baseTextureDesc = materialId === "decorazioni"
     ? boiserieDesc
     : isGranaStyled
@@ -197,7 +208,7 @@ module.exports = async function handler(req, res) {
     dritta: "posa dritta in linea: piastrelle rettangolari grandi (circa 60x120 cm) accostate su una griglia regolare con giunti allineati in entrambe le direzioni",
     fascia_bindello: "posa con fascia e bindello: campo centrale in listelli paralleli, incorniciato lungo tutto il perimetro della stanza da una fascia di listelli posati in senso perpendicolare e da un sottile bindello (listello di bordo) che corre parallelo ai muri, con gli angoli tagliati a 45°"
   };
-  const posaAddon = ((materialId === "parquet" || materialId === "spc") && PARQUET_POSA_DESC[parquetPosa])
+  const posaAddon = ((materialId === "parquet" || materialId === "spc" || materialId === "laminato") && PARQUET_POSA_DESC[parquetPosa])
     ? `. SCHEMA DI POSA OBBLIGATORIO: ${PARQUET_POSA_DESC[parquetPosa]}; il disegno della posa deve essere chiaramente riconoscibile su tutto il pavimento e seguire la prospettiva della stanza, e la superficie ha il colore indicato${materialId === "spc" ? " con la stampa decorativa realistica (venature del legno oppure disegno di pietra, cemento o marmo)" : " con venature naturali"}`
     : "";
   const textureDesc = baseTextureDesc + effettoAddon + posaAddon;
@@ -205,7 +216,7 @@ module.exports = async function handler(req, res) {
   // Monolith Pietra e Terrazzo si posano SOLO a pavimento (non a parete): lo
   // diciamo esplicitamente all'AI così non applica la lavorazione anche ai muri
   // inquadrati nella foto.
-  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "spc", "piastrelle", "graniglia_esterni"];
+  const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "spc", "laminato", "piastrelle", "graniglia_esterni"];
   const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId);
 
   // Per la categoria "Resine" (monolith), l'utente ora sceglie esplicitamente DOVE
@@ -482,7 +493,7 @@ module.exports = async function handler(req, res) {
     : "";
   const exteriorPreservationNote = " REGOLA ASSOLUTA: non spostare, aggiungere o rimuovere nessun elemento della foto e non cambiare inquadratura o prospettiva. Tutto ciò che non è elencato nelle istruzioni resta identico all'originale; tutto ciò che è elencato (vedi riepilogo) va modificato OBBLIGATORIAMENTE, anche se si tratta di serramenti, persiane, porte, cornici, sottotetto o tetto.";
 
-  const posaRefClean = (typeof posaRefImage === "string" && posaRefImage.length < 1_500_000 && (materialId === "parquet" || materialId === "spc"))
+  const posaRefClean = (typeof posaRefImage === "string" && posaRefImage.length < 1_500_000 && (materialId === "parquet" || materialId === "spc" || materialId === "laminato"))
     ? posaRefImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
   const posaRefNote = posaRefClean
