@@ -949,7 +949,7 @@
       <b>Parete decorata:</b> <span id="accentoMarkText">tocca sulla foto la parete da decorare.</span>
     </div>
     <div id="marksBox" hidden style="margin:-4px 0 14px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.4">
-      <button type="button" id="marksOpen" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;padding:0;cursor:pointer;font-family:inherit">＋ Segna altre parti sulla foto (colonne, travi…)</button>
+      <button type="button" id="marksOpen" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;padding:0;cursor:pointer;font-family:inherit">＋ Segna altre parti sulla foto</button>
       <div id="marksPanel" hidden>
         <div style="margin:6px 0 6px">1) Scegli come colorarla, 2) tocca la parte sulla foto:</div>
         <div class="seg-control" id="marksTargetControl" style="flex-wrap:wrap"></div>
@@ -4830,10 +4830,19 @@
   renderTemplateRow();
 
   var MARK_COLORS = ['#2F80ED','#27AE60','#9B51E0','#F2994A','#00A3A3'];
+  function marksAvailable(){ return !!state.material; }
   function markTargets(){
-    var t = [{v:'pareti', it:'Come le pareti'}];
-    if(needsPlafoneColor()) t.push({v:'plafone', it:'Come il plafone'});
-    if(accentoActive()) t.push({v:'decorata', it:'Come la parete decorata'});
+    var t = [];
+    if(isInterniPittura()){
+      t.push({v:'pareti', it:'Come le pareti'});
+      if(needsPlafoneColor()) t.push({v:'plafone', it:'Come il plafone'});
+      if(accentoActive()) t.push({v:'decorata', it:'Come la parete decorata'});
+    } else if(state.material && state.material.id==='imbiancatura'){
+      t.push({v:'facciata', it: needsSecondColor() ? 'Come la parte alta' : 'Come la facciata'});
+      if(needsSecondColor()) t.push({v:'parte_bassa', it:'Come la parte bassa'});
+    } else {
+      t.push({v:'includi', it:'Applica anche qui'});
+    }
     t.push({v:'invariato', it:'Lascia com\'è'});
     return t;
   }
@@ -4845,7 +4854,7 @@
   }
   function renderMarksUI(){
     var box = document.getElementById('marksBox');
-    var show = isInterniPittura() && !!photoImg;
+    var show = marksAvailable() && !!photoImg;
     box.hidden = !show;
     state.marks = state.marks || [];
     var layer = document.getElementById('marksLayer'); layer.innerHTML = '';
@@ -4869,7 +4878,8 @@
     });
     var panelOpen = !!state.marksMode;
     document.getElementById('marksPanel').hidden = !panelOpen;
-    document.getElementById('marksOpen').textContent = panelOpen ? (state.marks.length ? 'Segni sulla foto ('+state.marks.length+'/5) — chiudi' : 'Chiudi') : ('＋ Segna altre parti sulla foto (colonne, travi…)' + (state.marks.length ? ' · '+state.marks.length+' segnate' : ''));
+    var hintParts = isInterniPittura() ? 'colonne, travi…' : (state.material && state.material.id==='imbiancatura') ? 'muretti, comignoli, pilastri…' : 'gradini, zoccolini, zone da escludere…';
+    document.getElementById('marksOpen').textContent = panelOpen ? (state.marks.length ? 'Segni sulla foto ('+state.marks.length+'/5) — chiudi' : 'Chiudi') : ('＋ Segna altre parti sulla foto ('+hintParts+')' + (state.marks.length ? ' · '+state.marks.length+' segnate' : ''));
   }
   document.getElementById('marksOpen').addEventListener('click', function(){ state.marksMode = !state.marksMode; renderMarksUI(); });
   document.getElementById('marksTargetControl').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; state.markTarget=b.dataset.v; renderMarksUI(); });
@@ -4888,7 +4898,7 @@
   document.getElementById('heroPhoto').addEventListener('click', function(e){
     if(!photoImg || e.target.closest('label,button,input')) return;
     var wantAccento = accentoActive() && (!state.accentoPoint || !state.marksMode);
-    var wantMark = isInterniPittura() && state.marksMode;
+    var wantMark = marksAvailable() && state.marksMode;
     if(!wantAccento && !wantMark) return;
     var r = this.getBoundingClientRect(), g = heroGeom();
     var x = (e.clientX - r.left - g.ox)/(g.nw*g.sc), y = (e.clientY - r.top - g.oy)/(g.nh*g.sc);
@@ -4906,7 +4916,7 @@
   // Foto con il segno sulla parete d'accento, mandata all'AI come riferimento.
   function buildAccentoRefImage(){
     try{
-      var hasAcc = accentoActive() && !!state.accentoPoint, marks = (isInterniPittura() && state.marks) ? state.marks : [];
+      var hasAcc = accentoActive() && !!state.accentoPoint, marks = (marksAvailable() && state.marks) ? state.marks : [];
       if(!photoImg || (!hasAcc && !marks.length)) return null;
       var nw = photoImg.naturalWidth || photoImg.width, nh = photoImg.naturalHeight || photoImg.height, k = Math.min(1, 1024/Math.max(nw,nh));
       var cv = document.createElement('canvas'); cv.width = Math.round(nw*k); cv.height = Math.round(nh*k);
@@ -5933,7 +5943,7 @@
         accentoTipo: accentoActive() ? (state.accentoTipo || 'colore') : null,
         colorAccento: (needsAccentoColor() && state.colorAccento) ? state.colorAccento.name : null, colorAccentoHex: (needsAccentoColor() && state.colorAccento) ? apiHex(state.colorAccento) : null,
         accentoRefImage: buildAccentoRefImage(),
-        segni: (isInterniPittura() && state.marks && state.marks.length) ? state.marks.map(function(m, i){ return { n: i+1, target: m.target }; }) : null,
+        segni: (marksAvailable() && state.marks && state.marks.length) ? state.marks.map(function(m, i){ return { n: i+1, target: m.target }; }) : null,
         colonne: isInterniPittura() ? colonneOn() : null,
         bordatura: bordaturaActive() ? (state.bordaturaLarg || 'rigino') : null,
         colorBordatura: needsBordaturaColor() && state.colorBordatura ? state.colorBordatura.name : null, colorBordaturaHex: (needsBordaturaColor() && state.colorBordatura) ? apiHex(state.colorBordatura) : null,
@@ -6451,7 +6461,7 @@
     if(needsPlafoneColor() && state.colorPlafone) lines.push("Plafone (soffitto): "+colorLabel(state.colorPlafone));
     if(accentoActive()) lines.push("Parete decorata: "+(state.accentoTipo==='corten' ? 'Corten' : ((state.accentoTipo && state.accentoTipo!=='colore' ? state.accentoTipo+' ' : '') + (state.colorAccento ? colorLabel(state.colorAccento) : ''))));
     if(isInterniPittura()) lines.push("Colonne, travi e sporgenze: "+(colonneOn() ? "colorate come le pareti" : "lasciate come sono"));
-    if(isInterniPittura() && state.marks && state.marks.length) lines.push("Parti segnate sulla foto: "+state.marks.map(function(m,i){ return (i+1)+" = "+markTargetLabel(m.target); }).join("; "));
+    if(marksAvailable() && state.marks && state.marks.length) lines.push("Parti segnate sulla foto: "+state.marks.map(function(m,i){ return (i+1)+" = "+markTargetLabel(m.target); }).join("; "));
     if(bordaturaActive()) lines.push("Bordatura in alto: "+({rigino:'rigino ~1 cm', fascia:'fascia 3-5 cm', larga:'fascia larga ~10 cm'})[state.bordaturaLarg||'rigino']+", "+(needsBordaturaColor() && state.colorBordatura ? colorLabel(state.colorBordatura) : 'bianca'));
     if(isInterniPittura() && state.effettoScatola) lines.push("Effetto scatola: pareti e soffitto nello stesso colore");
     if(needsTettoColor() && state.colorTetto) lines.push("Tetto: "+colorLabel(state.colorTetto));
