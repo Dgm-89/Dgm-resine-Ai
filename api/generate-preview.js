@@ -464,6 +464,17 @@ module.exports = async function handler(req, res) {
   // quindi anche se arrivasse un colorAHex residuo non lo trattiamo come vincolo
   // esatto da rispettare: il Corten segue solo la sua texture/pattern.
   const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorPlafoneHex || colorTettoHex || colorCorniciHex || colorBalconiHex || colorSerramentiHex || colorRigheHex);
+  // FOTOREALISMO E LUCE: il risultato deve sembrare una foto vera scattata dopo il
+  // lavoro, non un rendering. La luce della foto originale "comanda" sui nuovi materiali.
+  const realismNote = [
+    " FOTOREALISMO E LUCE (molto importante): il risultato deve sembrare una FOTOGRAFIA REALE della stessa stanza/edificio scattata con la stessa fotocamera subito dopo il lavoro, NON un rendering 3D, NON un'immagine digitale.",
+    "Conserva la luce ESATTA della foto originale: stessa direzione e intensità, stessa temperatura colore (luce calda, fredda o mista), stessa esposizione, stesso bilanciamento del bianco.",
+    "Le nuove superfici devono ricevere quella luce in modo fisicamente credibile: zone più chiare vicino a finestre e lampade, gradienti morbidi di luce sulle pareti, angoli e spigoli leggermente più scuri (occlusione ambientale), ombre di contatto sotto mobili, battiscopa e oggetti, ombre portate identiche a quelle originali.",
+    "Il colore richiesto è quello della vernice/materiale vista in luce neutra: in foto deve apparire come apparirebbe davvero sotto QUESTA luce (più scuro in ombra, più chiaro in luce, con la stessa dominante di colore delle altre superfici), MAI come una campitura piatta e uniforme.",
+    "Riflessi: rispetta la finitura; le superfici opache non riflettono, le satinate hanno riflessi morbidi e sfumati, le lucide riflettono finestre, luci e mobili in modo coerente con la prospettiva.",
+    "Materiali con microdettagli realistici (grana, leggere irregolarità, venature, fughe e bordi coerenti con la scala reale), bordi netti dove due materiali si incontrano, nessuna sbavatura.",
+    "Mantieni la stessa nitidezza, profondità di campo, grana/rumore e compressione della foto originale: non renderla più pulita, più nitida, più satura o più contrastata dell'originale. Niente effetti HDR, niente glow, niente colori 'plastici'."
+  ].join(" ");
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
     : "";
@@ -593,6 +604,7 @@ module.exports = async function handler(req, res) {
     zonesSummary,
     colorCardNote,
     colorFidelityNote,
+    realismNote,
     isExteriorFacade ? exteriorPreservationNote : globalPreservationNote,
     paddedBands ? "NOTA SUL FORMATO: ai bordi della foto ci sono bande sfocate aggiunte solo per adattare il formato: lasciale come sono e NON ingrandire, spostare o ritagliare la foto al centro, che deve restare esattamente nella stessa posizione e dimensione." : ""
   ].join(" ");
