@@ -291,7 +291,7 @@ module.exports = async function handler(req, res) {
     : effettoScatola
       ? ` EFFETTO SCATOLA: dipingi pareti E soffitto nello stesso identico colore ${colorRef(colorA, colorAHex)}, senza stacchi tra parete e soffitto, compresi eventuali travi, cornici e sporgenze del soffitto: l'ambiente deve risultare avvolgente e continuo, tutto in un unico colore. Porte, finestre, mobili e pavimento restano come sono.`
       : colorPlafone
-        ? ` Dipingi il soffitto (plafone) nel colore ${colorRef(colorPlafone, colorPlafoneHex)}, con uno stacco netto e pulito sulla linea tra pareti e soffitto; le pareti restano nel loro colore indicato sopra.`
+        ? ` Dipingi il soffitto (plafone) nel colore ${colorRef(colorPlafone, colorPlafoneHex)}. Il passaggio tra soffitto e pareti è semplicemente il punto dove finisce una vernice e inizia l'altra, come nella realtà: NON disegnare nessuna linea, riga, bordo, contorno o fascia di colore diverso (né più chiara, né più scura, né più satura) lungo lo spigolo tra soffitto e pareti${bordatura ? ", a parte la bordatura descritta più avanti" : ""}. Il soffitto riceve la luce della stanza: è più chiaro vicino alla finestra e più scuro negli angoli e lontano dalla luce, con sfumature morbide, e l'eventuale lampada o faretto proietta un leggero alone; NON deve essere una campitura piatta e uniforme. Le pareti restano nel loro colore indicato sopra.`
         : " Il soffitto NON va dipinto: resta esattamente com'è nella foto, cambia solo il colore delle pareti.";
 
   // Parete d'accento (una sola parete diversa, segnata dal cliente sulla foto) e bordatura in alto.
@@ -472,7 +472,7 @@ module.exports = async function handler(req, res) {
     "Le nuove superfici devono ricevere quella luce in modo fisicamente credibile: zone più chiare vicino a finestre e lampade, gradienti morbidi di luce sulle pareti, angoli e spigoli leggermente più scuri (occlusione ambientale), ombre di contatto sotto mobili, battiscopa e oggetti, ombre portate identiche a quelle originali.",
     "Il colore richiesto è quello della vernice/materiale vista in luce neutra: in foto deve apparire come apparirebbe davvero sotto QUESTA luce (più scuro in ombra, più chiaro in luce, con la stessa dominante di colore delle altre superfici), MAI come una campitura piatta e uniforme.",
     "Riflessi: rispetta la finitura; le superfici opache non riflettono, le satinate hanno riflessi morbidi e sfumati, le lucide riflettono finestre, luci e mobili in modo coerente con la prospettiva.",
-    "Materiali con microdettagli realistici (grana, leggere irregolarità, venature, fughe e bordi coerenti con la scala reale), bordi netti dove due materiali si incontrano, nessuna sbavatura.",
+    "Materiali con microdettagli realistici (grana, leggere irregolarità, venature, fughe e bordi coerenti con la scala reale). Dove due colori o materiali si incontrano il passaggio è netto ma NATURALE: non aggiungere mai linee, contorni, righe luminose o bordi colorati lungo spigoli e angoli, e non cambiare il colore delle superfici che non sono state richieste (una parete bianca resta dello stesso bianco dell'originale).",
     "Mantieni la stessa nitidezza, profondità di campo, grana/rumore e compressione della foto originale: non renderla più pulita, più nitida, più satura o più contrastata dell'originale. Niente effetti HDR, niente glow, niente colori 'plastici'."
   ].join(" ");
   const colorFidelityNote = hasAnyHex
