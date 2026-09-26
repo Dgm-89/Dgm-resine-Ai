@@ -7,7 +7,7 @@
 // che NON è un errore: succede per la maggior parte dei visitatori (privati
 // o professionisti non ancora loggati).
 
-const { getSupabaseConfig, supabaseRequest, readSessionCookie, verifySession, publicUser } = require("./_auth-lib");
+const { getSupabaseConfig, supabaseRequest, readSessionCookie, verifySession, publicUser, sessionMatches } = require("./_auth-lib");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "GET") {
@@ -32,6 +32,7 @@ module.exports = async function handler(req, res) {
       { method: "GET" }
     );
     const row = found.ok && Array.isArray(found.data) && found.data[0] ? found.data[0] : null;
+    if (!row || !sessionMatches(session, row)) return res.status(200).json({ user: null });
     return res.status(200).json({ user: publicUser(row) });
   } catch (err) {
     return res.status(200).json({ user: null });
