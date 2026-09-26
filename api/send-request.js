@@ -54,13 +54,17 @@
 // Fino a quel momento, l'indirizzo di test "onboarding@resend.dev" resta
 // perfettamente funzionante e non richiede alcuna azione.
 
+const { currentAccount } = require("./_auth-lib");
+
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
+  // Solo chi ha un account può mandare richieste: il server non è un servizio email aperto.
+  const acc = await currentAccount(req).catch(function () { return null; });
+  if (!acc) return res.status(401).json({ error: "Accedi per inviare la richiesta." });
 
   const {
-    toEmail,
     subject,
     textSummary,
     replyTo,
@@ -70,9 +74,15 @@ module.exports = async function handler(req, res) {
     customerPhotoMime
   } = req.body || {};
 
-  if (!toEmail || !textSummary) {
-    return res.status(400).json({ error: "Dati mancanti: servono almeno toEmail e textSummary" });
+  // Il destinatario lo decide SOLO il server (variabile REQUEST_TO su Vercel).
+  const toEmail = (process.env.REQUEST_TO || "info@dgmresine.com").trim();
+  if (!textSummary || typeof textSummary !== "string") {
+    return res.status(400).json({ error: "Richiesta vuota." });
   }
+  if (textSummary.length > 6000) return res.status(400).json({ error: "Testo troppo lungo." });
+  const tooBig = function (v) { return typeof v === "string" && v.length > 3_000_000; };
+  if (tooBig(imageBase64) || tooBig(customerPhotoBase64)) return res.status(413).json({ error: "Foto troppo pesante." });
+  const textWithAccount = textSummary + "\n\n— Inviata dall'account Rendrum: " + acc.email;
 
   // Le immagini non sono strettamente obbligatorie (l'email ha comunque senso
   // anche solo con il testo), ma segnaliamo nei log del server quando arrivano
@@ -112,7 +122,7 @@ module.exports = async function handler(req, res) {
   }
 
   const htmlBody = "<div style=\"font-family:sans-serif; font-size:14px; line-height:1.6; color:#111;\">"
-    + escapeHtml(textSummary).replace(/\n/g, "<br>")
+    + escapeHtml(textWithAccount).replace(/\n/g, "<br>")
     + "</div>";
 
   const attachments = [
@@ -124,7 +134,8 @@ module.exports = async function handler(req, res) {
   // così chi riceve la richiesta può premere "Rispondi" nella propria casella di
   // posta e scrivere direttamente al cliente, invece che all'indirizzo di test
   // Resend usato come mittente.
-  const replyToClean = (typeof replyTo === "string" && replyTo.trim()) ? replyTo.trim() : null;
+  const replyToClean = (typeof replyTo === "string" && /^[^\s@<>,;]+@[^\s@<>,;]+\.[^\s@<>,;]+$/.test(replyTo.trim())) ? replyTo.trim() : null;
+  const subjectClean = String(subject || "Nuova richiesta preventivo").replace(/[\r\n]+/g, " ").slice(0, 150);
 
   try {
     const response = await fetch("https://api.resend.com/emails", {
@@ -136,9 +147,9 @@ module.exports = async function handler(req, res) {
       body: JSON.stringify({
         // NOTA: indirizzo temporaneo di test Resend, finché non viene verificato
         // un dominio proprio (vedi commento in cima al file)
-        from: "DGM Resine App <onboarding@resend.dev>",
+        from: (process.env.EMAIL_FROM || "Rendrum <onboarding@resend.dev>").trim(),
         to: [toEmail],
-        subject: subject || "Nuova richiesta preventivo — DGM Resine",
+        subject: subjectClean,
         html: htmlBody,
         attachments: attachments,
         ...(replyToClean ? { reply_to: [replyToClean] } : {})
@@ -152,24 +163,18 @@ module.exports = async function handler(req, res) {
     } catch (parseErr) {
       // Risposta non JSON da Resend: restituiamo comunque il testo grezzo
       // così l'errore resta debuggabile invece di fallire in modo silenzioso.
-      return res.status(502).json({
-        error: "Risposta non valida dal servizio email",
-        details: rawText.slice(0, 500)
-      });
+      console.error("send-request resend", rawText.slice(0, 500));
+      return res.status(502).json({ error: "Invio non riuscito, riprova tra poco." });
     }
 
     if (!response.ok) {
-      return res.status(response.status || 502).json({
-        error: "Errore dal servizio email (Resend)",
-        details: data
-      });
+      console.error("send-request resend", data);
+      return res.status(502).json({ error: "Invio non riuscito, riprova tra poco." });
     }
 
     return res.status(200).json({ ok: true });
   } catch (err) {
-    return res.status(500).json({
-      error: "Errore imprevisto lato server durante l'invio dell'email",
-      details: String(err && err.message ? err.message : err)
-    });
+    console.error("send-request", err);
+    return res.status(500).json({ error: "Invio non riuscito, riprova tra poco." });
   }
 }
