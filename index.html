@@ -988,6 +988,14 @@
     <div class="ai-progress" id="aiProgress" hidden><div class="ai-progress-fill" id="aiProgressFill"></div></div>
     <div class="ai-progress-msg" id="aiProgressMsg" hidden></div>
     <div class="ai-status" id="aiStatus"></div>
+    <div id="pdfBox" hidden style="margin-top:14px;padding:12px;border:1.5px solid var(--line);border-radius:12px">
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:4px">Scheda PDF per il cliente</div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px;line-height:1.4">Prima e dopo, materiali e colori scelti con i codici, e i tuoi contatti. Puoi aggiungere prezzo e tempi.</div>
+      <div class="field" style="margin-bottom:8px"><label for="pdfClient" style="font-size:12.5px">Cliente (facoltativo)</label><input id="pdfClient" type="text" placeholder="Es. Sig. Rossi – Via Roma 10, Gallarate"></div>
+      <div class="field" style="margin-bottom:10px"><label for="pdfNote" style="font-size:12.5px">Note / preventivo (facoltativo)</label><textarea id="pdfNote" rows="3" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px;font:inherit;font-size:14px" placeholder="Es. 45 mq · 3.200 € + IVA · inizio lavori entro 2 settimane"></textarea></div>
+      <button type="button" class="ai-btn" id="pdfBtn" style="margin:0">Scarica scheda PDF</button>
+      <div id="pdfStatus" style="font-size:13px;margin-top:6px"></div>
+    </div>
   </section>
 
   <!-- 7: DATI CLIENTE -->
@@ -6115,6 +6123,7 @@
         aiResultImage = result.img;
         aiResultImageBase64 = result.base64;
         aiResultImageMime = result.mime;
+        document.getElementById('pdfBox').hidden = false;
         renderHeroPreview();
         statusEl.textContent = ts('aiStatusDone');
         stopAiProgress(true);
@@ -6126,6 +6135,97 @@
         statusEl.textContent = ts('aiStatusErrorPrefix') + err.message + ts('aiStatusErrorSuffix');
         stopAiProgress(false);
       })
+      .finally(function(){ btn.disabled = false; });
+  });
+
+
+  // ---------- Scheda PDF per il cliente ----------
+  function loadJsPdf(){
+    if(window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+    return new Promise(function(res, rej){
+      var sc = document.createElement('script'); sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      sc.onload = function(){ window.jspdf && window.jspdf.jsPDF ? res(window.jspdf.jsPDF) : rej(new Error('jsPDF')); };
+      sc.onerror = function(){ rej(new Error('Impossibile caricare il generatore PDF')); };
+      document.head.appendChild(sc);
+    });
+  }
+  function imgToJpeg(img, maxW){
+    var w = img.naturalWidth || img.width, h = img.naturalHeight || img.height, k = Math.min(1, maxW / w);
+    var c = document.createElement('canvas'); c.width = Math.round(w*k); c.height = Math.round(h*k);
+    var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+    return { url: c.toDataURL('image/jpeg', 0.9), w: c.width, h: c.height };
+  }
+  function loadImgCors(src){
+    return new Promise(function(res){ if(!src) return res(null); var i = new Image(); i.crossOrigin = 'anonymous'; i.onload = function(){ res(i); }; i.onerror = function(){ res(null); }; i.src = src; });
+  }
+  function pdfChoiceLines(){
+    var skip = /^(Richiesta preventivo|Tipo cliente|Nome:|Telefono:|Email:|Mq indicativi|Città|Note:)/;
+    return buildMessage().split('\n').filter(function(l){ return l && !skip.test(l); });
+  }
+  document.getElementById('pdfBtn').addEventListener('click', function(){
+    if(!aiResultImage || !photoImg) return;
+    var btn = this, st = document.getElementById('pdfStatus');
+    btn.disabled = true; st.style.color = ''; st.textContent = 'Preparo la scheda…';
+    var acc = (typeof proAccount !== 'undefined' && proAccount) ? proAccount : null;
+    var isPro = !!(acc && acc.accountType !== 'privato');
+    var brandImg = document.querySelector('.brand-logo');
+    Promise.all([loadJsPdf(), loadImgCors(isPro && acc.logoUrl ? acc.logoUrl : null)]).then(function(r){
+      var jsPDF = r[0], proLogo = r[1];
+      var doc = new jsPDF({ unit:'mm', format:'a4' }), W = 210, M = 14, y = M;
+      var ink = [28,27,24], soft = [110,104,92], accent = [184,95,39];
+      // intestazione
+      var logo = proLogo || (brandImg && brandImg.complete ? brandImg : null);
+      if(logo){ try{ var li = imgToJpeg(logo, 300), lh = 16, lw = Math.min(50, lh * li.w / li.h); doc.addImage(li.url, 'JPEG', M, y, lw, lh); }catch(e){} }
+      doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(15);
+      var title = isPro ? (acc.companyName || 'Scheda lavoro') : 'Rendrum';
+      doc.text(title, W - M, y + 6, { align:'right' });
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, soft);
+      var contact = []; if(isPro){ if(acc.phone) contact.push('Tel. ' + acc.phone); if(acc.email) contact.push(acc.email); if(acc.piva) contact.push('P.IVA ' + acc.piva); } else contact.push('rendrum.com');
+      doc.text(contact.join('  ·  '), W - M, y + 12, { align:'right' });
+      y += 22; doc.setDrawColor.apply(doc, accent); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 7;
+      doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(13);
+      doc.text('Anteprima lavoro: ' + (state.material ? state.material.name : ''), M, y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, soft);
+      var d = new Date(); doc.text(('0'+d.getDate()).slice(-2) + '/' + ('0'+(d.getMonth()+1)).slice(-2) + '/' + d.getFullYear(), W - M, y, { align:'right' });
+      var client = document.getElementById('pdfClient').value.trim();
+      if(client){ y += 5; doc.text('Cliente: ' + client, M, y); }
+      y += 5;
+      // prima / dopo
+      var bw = (W - 2*M - 6) / 2, b1 = imgToJpeg(photoImg, 1100), b2 = imgToJpeg(aiResultImage, 1100);
+      var bh = Math.min(bw * b1.h / b1.w, 95);
+      function box(im, x, label){ var ww = bh * im.w / im.h, xx = x, hh = bh; if(ww > bw){ ww = bw; hh = bw * im.h / im.w; } xx = x + (bw - ww)/2;
+        doc.addImage(im.url, 'JPEG', xx, y, ww, hh); doc.setFillColor(28,27,24); doc.roundedRect(xx + 2, y + 2, 16, 5.5, 1, 1, 'F');
+        doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.text(label, xx + 10, y + 5.8, { align:'center' }); }
+      box(b1, M, 'PRIMA'); box(b2, M + bw + 6, 'DOPO');
+      y += bh + 9;
+      // scelte
+      doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Materiali e colori scelti', M, y); y += 5.5;
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+      pdfChoiceLines().forEach(function(l){
+        var i = l.indexOf(':'), k = i > 0 ? l.slice(0, i+1) : '', v = i > 0 ? l.slice(i+1).trim() : l;
+        var wrapped = doc.splitTextToSize(v, W - 2*M - 52);
+        if(y + wrapped.length*4.6 > 270){ doc.addPage(); y = M; }
+        doc.setTextColor.apply(doc, soft); doc.text(k, M, y);
+        doc.setTextColor.apply(doc, ink); doc.text(wrapped, M + 52, y); y += wrapped.length * 4.6 + 1;
+      });
+      // note / preventivo
+      var note = document.getElementById('pdfNote').value.trim();
+      if(note){
+        y += 3; if(y > 240){ doc.addPage(); y = M; }
+        doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor.apply(doc, ink); doc.text('Note e preventivo', M, y); y += 5.5;
+        doc.setFont('helvetica','normal'); doc.setFontSize(10);
+        var nl = doc.splitTextToSize(note, W - 2*M - 6);
+        doc.setFillColor(246,230,218); doc.roundedRect(M, y - 4, W - 2*M, nl.length*5 + 5, 2, 2, 'F');
+        doc.text(nl, M + 3, y + 0.5); y += nl.length * 5 + 6;
+      }
+      // piè di pagina
+      doc.setFontSize(7.5); doc.setTextColor.apply(doc, soft);
+      doc.text("Anteprima realizzata con intelligenza artificiale sulla foto dell'ambiente: colori e materiali sono indicativi, il risultato reale può variare.", W/2, 287, { align:'center' });
+      doc.text('Creata con Rendrum · rendrum.com', W/2, 291, { align:'center' });
+      var fname = 'Rendrum_' + (state.material ? state.material.name.replace(/[^A-Za-z0-9]+/g,'_') : 'scheda') + '_' + d.getFullYear() + ('0'+(d.getMonth()+1)).slice(-2) + ('0'+d.getDate()).slice(-2) + '.pdf';
+      doc.save(fname);
+      st.textContent = 'Scheda scaricata ✓';
+    }).catch(function(e){ st.style.color = '#C0392B'; st.textContent = 'Non sono riuscito a creare il PDF: ' + (e && e.message || 'errore') + '.'; })
       .finally(function(){ btn.disabled = false; });
   });
 
