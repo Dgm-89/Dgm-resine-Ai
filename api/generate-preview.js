@@ -31,6 +31,7 @@
 //    (questa parte la collego io appena il backend è online: mandami l'URL).
 
 const { paymentsEnabled, currentAccount, supabaseRequest, PLAN_LIMITS } = require("./_auth-lib");
+const PLANS_LIMIT = (tier) => PLAN_LIMITS[tier] || 0;
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -43,28 +44,44 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
   }
 
-  // Abbonamento: quando i pagamenti sono attivi (STRIPE_SECRET_KEY su Vercel)
-  // l'anteprima AI è riservata agli abbonati, entro le anteprime del piano.
-  let quotaAcc = null, quotaMonth = null, quotaUsed = 0;
+  // Accesso: per generare serve SEMPRE un account (le anteprime costano).
+  // Con i pagamenti attivi servono anche abbonamento attivo e anteprime rimaste nel mese.
+  let quotaAcc = null, quotaMonth = null, reserved = false, refunded = false;
+  quotaAcc = await currentAccount(req).catch(function () { return null; });
+  if (!quotaAcc) return res.status(401).json({ error: "Per creare l'anteprima accedi o registrati.", code: "login_required" });
   if (paymentsEnabled()) {
-    quotaAcc = await currentAccount(req).catch(function () { return null; });
-    if (!quotaAcc) return res.status(401).json({ error: "Per creare l'anteprima accedi o registrati e attiva un abbonamento.", code: "login_required" });
     if (!["active", "trialing"].includes(quotaAcc.subscription_status)) {
       return res.status(402).json({ error: "Il tuo abbonamento non è attivo: attivalo per creare le anteprime.", code: "subscription_required" });
     }
     quotaMonth = new Date().toISOString().slice(0, 7);
-    quotaUsed = quotaAcc.usage_month === quotaMonth ? (quotaAcc.usage_count || 0) : 0;
-    const limit = PLAN_LIMITS[quotaAcc.tier] || 0;
-    if (quotaUsed >= limit) {
-      return res.status(429).json({ error: "Hai usato tutte le " + limit + " anteprime del tuo piano per questo mese. Passa a un piano superiore o attendi il mese prossimo.", code: "quota_exceeded" });
+    const limit = PLANS_LIMIT(quotaAcc.tier);
+    // Prenotazione atomica dell'anteprima nel database (funzione use_preview):
+    // anche 50 richieste in parallelo non possono superare il limite.
+    const rpc = await supabaseRequest("/rpc/use_preview", { method: "POST", body: JSON.stringify({ p_id: quotaAcc.id, p_month: quotaMonth, p_limit: limit }) }).catch(function () { return { ok: false }; });
+    if (rpc.ok) {
+      if (rpc.data === null || rpc.data === undefined) {
+        return res.status(429).json({ error: "Hai usato tutte le " + limit + " anteprime del tuo piano per questo mese. Passa a un piano superiore o attendi il mese prossimo.", code: "quota_exceeded" });
+      }
+      reserved = true;
+    } else {
+      // Funzione SQL non ancora creata: controllo semplice come prima.
+      const used = quotaAcc.usage_month === quotaMonth ? (quotaAcc.usage_count || 0) : 0;
+      if (used >= limit) return res.status(429).json({ error: "Hai usato tutte le " + limit + " anteprime del tuo piano per questo mese. Passa a un piano superiore o attendi il mese prossimo.", code: "quota_exceeded" });
+      await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(quotaAcc.id), { method: "PATCH", body: JSON.stringify({ usage_month: quotaMonth, usage_count: used + 1 }) }).catch(function () {});
+      reserved = true;
     }
+    // Se la generazione poi fallisce, l'anteprima viene restituita.
+    const origJson = res.json.bind(res);
+    res.json = function (payload) {
+      if (reserved && !refunded && res.statusCode >= 400) {
+        refunded = true;
+        return supabaseRequest("/rpc/release_preview", { method: "POST", body: JSON.stringify({ p_id: quotaAcc.id, p_month: quotaMonth }) })
+          .catch(function () {}).then(function () { return origJson(payload); });
+      }
+      return origJson(payload);
+    };
   }
-  async function countUsage() {
-    if (!quotaAcc) return;
-    try {
-      await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(quotaAcc.id), { method: "PATCH", body: JSON.stringify({ usage_month: quotaMonth, usage_count: quotaUsed + 1 }) });
-    } catch (e) {}
-  }
+  async function countUsage() { /* già conteggiata all'inizio */ }
 
   // Riferimento colore per il prompt: include il codice esadecimale esatto quando
   // disponibile, così l'AI ha un target numerico preciso invece di dover indovinare
