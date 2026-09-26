@@ -40,20 +40,13 @@
 // con un errore chiaro invece di andare in crash.
 
 const crypto = require("crypto");
-const { getSupabaseConfig, supabaseRequest, readSessionCookie, verifySession } = require("./_auth-lib");
+const { getSupabaseConfig, supabaseRequest, readSessionCookie, verifySession, currentAccount } = require("./_auth-lib");
 
 // Verifica che la richiesta arrivi da un professionista con sessione valida.
 // Restituisce la riga account (con id) oppure null se non autenticato.
 async function requireProSession(req) {
-  const token = readSessionCookie(req);
-  const session = token ? verifySession(token) : null;
-  if (!session || !session.sub) return null;
-  const found = await supabaseRequest(
-    "/pro_accounts?id=eq." + encodeURIComponent(session.sub) + "&select=id,tier",
-    { method: "GET" }
-  );
-  if (!found.ok || !Array.isArray(found.data) || !found.data[0]) return null;
-  return found.data[0];
+  const acc = await currentAccount(req).catch(function () { return null; });
+  return acc ? { id: acc.id, tier: acc.tier } : null;
 }
 
 // Carica una foto (arrivata dal frontend come data URL base64) su Supabase
@@ -64,8 +57,16 @@ async function uploadPhoto(dataUrl, folder) {
   if (!dataUrl || typeof dataUrl !== "string") return null;
   const match = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
   if (!match) return null;
-  const mime = match[1];
+  const mime = match[1].toLowerCase();
   const base64 = match[2];
+  // Solo foto vere (JPG, PNG, WebP), massimo 6 MB.
+  if (!["image/jpeg", "image/png", "image/webp"].includes(mime)) return null;
+  if (base64.length > 8_000_000) return null;
+  const head = Buffer.from(base64.slice(0, 32), "base64");
+  const isJpg = head[0] === 0xFF && head[1] === 0xD8;
+  const isPng = head[0] === 0x89 && head[1] === 0x50 && head[2] === 0x4E && head[3] === 0x47;
+  const isWebp = head.slice(0, 4).toString() === "RIFF" && head.slice(8, 12).toString() === "WEBP";
+  if (!(isJpg || isPng || isWebp)) return null;
   const ext = mime.split("/")[1] || "jpg";
   const fileName = crypto.randomBytes(12).toString("hex") + "." + ext;
   const path = folder + "/" + fileName;
