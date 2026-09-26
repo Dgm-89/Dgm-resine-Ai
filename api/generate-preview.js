@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -309,6 +309,23 @@ module.exports = async function handler(req, res) {
       ? " Quale parete: ti è stata fornita un'immagine aggiuntiva (l'ULTIMA immagine) che è la stessa foto con un CERCHIO ROSSO disegnato sopra: la parete d'accento è ESATTAMENTE la parete su cui si trova il cerchio rosso, da angolo ad angolo e dal pavimento al soffitto. Il cerchio rosso è solo un'indicazione: NON disegnarlo nell'immagine finale."
       : " Scegli come parete d'accento la parete principale di fondo, quella più visibile.") + " Tutte le altre pareti restano nel colore principale indicato; porte, finestre, prese e mobili davanti a quella parete restano identici e visibili."
     : "";
+  // Colonne, pilastri, travi: di default si colorano come le pareti.
+  const colonneNote = !isInterniPittura ? ""
+    : colonne === false
+      ? " COLONNE, PILASTRI, TRAVI E SPORGENZE: lasciali ESATTAMENTE come sono nella foto (stesso colore e materiale), dipingi solo le superfici piane delle pareti."
+      : " COLONNE, PILASTRI, LESENE, TRAVI A VISTA, NICCHIE, SPORGENZE IN CARTONGESSO E SPALLETTE di porte e finestre fanno parte delle pareti: dipingili dello STESSO colore delle pareti, su tutte le loro facce, senza lasciare zone del colore originale.";
+  const SEGNO_TARGET = {
+    pareti: () => `dipingila dello stesso colore delle pareti ${colorRef(colorA, colorAHex)}`,
+    plafone: () => colorPlafone ? `dipingila dello stesso colore del plafone ${colorRef(colorPlafone, colorPlafoneHex)}` : "dipingila come il soffitto",
+    decorata: () => accentoTipo && ACCENTO_DESC[accentoTipo] ? `trattala come la parete decorata: ${ACCENTO_DESC[accentoTipo]()}` : `dipingila dello stesso colore delle pareti ${colorRef(colorA, colorAHex)}`,
+    invariato: () => "NON modificarla: deve restare identica alla foto originale (stesso colore e materiale)",
+  };
+  const segniList = (isInterniPittura && Array.isArray(segni) && accentoRefClean)
+    ? segni.slice(0, 5).filter(x => x && SEGNO_TARGET[x.target]).map(x => `segno ${Number(x.n) || 0}: ${SEGNO_TARGET[x.target]()}`)
+    : [];
+  const segniNote = segniList.length
+    ? ` PARTI SEGNATE DAL CLIENTE: nell'ULTIMA immagine (la foto con i segni) ci sono dei CERCHI BLU NUMERATI posti sopra singoli elementi (colonne, pilastri, travi, nicchie o altre sporgenze). Per ciascun elemento indicato dal cerchio, l'intero elemento (tutte le sue facce, da cima a fondo) va trattato così: ${segniList.join("; ")}. I cerchi numerati sono solo indicazioni: NON disegnarli nell'immagine finale.`
+    : "";
   const BORD = { rigino: "un RIGINO sottile di circa 1 cm", fascia: "una FASCIA di circa 3-5 cm", larga: "una FASCIA LARGA di circa 10 cm" };
   const bordaturaNote = (isInterniPittura && !effettoScatola && BORD[bordatura])
     ? ` BORDATURA IN ALTO (fascia di rispetto): lungo tutto il perimetro della stanza, subito sotto il soffitto, sulla parte più alta di OGNI parete (compresa l'eventuale parete d'accento), c'è ${BORD[bordatura]} ${colorBordatura ? "nel colore " + colorRef(colorBordatura, colorBordaturaHex) : "bianca (bianco puro)"}, dritta, orizzontale, di spessore costante e con stacco netto (come fatta con nastro carta), che separa il colore delle pareti dal soffitto. Proporzioni realistiche rispetto all'altezza della stanza (circa 2,7 m).`
@@ -559,6 +576,8 @@ module.exports = async function handler(req, res) {
     sottotettoNote,
     plafoneNote,
     accentoNote,
+    colonneNote,
+    segniNote,
     bordaturaNote,
     tettoNote,
     corniciNote,
