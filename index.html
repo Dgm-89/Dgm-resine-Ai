@@ -5034,6 +5034,38 @@
     if(u) return 'background-color:' + hex + ';background-image:url(' + u + ');background-size:cover;background-position:center;';
     return 'background:' + hex + ';';
   }
+  var GRAN_ZOOM_CACHE = {};
+  function granZoomTex(src, cb){
+    if(GRAN_ZOOM_CACHE[src]) return cb(GRAN_ZOOM_CACHE[src]);
+    var im = new Image();
+    im.onload = function(){
+      try{
+        // Tessitura casuale: tanti pezzetti del campione a grandezza naturale, ruotati
+        // e sfumati ai bordi, sparsi a caso (niente effetto specchio o griglia).
+        var S = 900, P = 110, m = Math.min(im.width, im.height), sx = (im.width - m)/2, sy = (im.height - m)/2;
+        var base = document.createElement('canvas'); base.width = base.height = 180;
+        base.getContext('2d').drawImage(im, sx, sy, m, m, 0, 0, 180, 180);
+        var cv = document.createElement('canvas'); cv.width = S; cv.height = S;
+        var cx = cv.getContext('2d');
+        cx.fillStyle = cx.createPattern(base, 'repeat'); cx.fillRect(0, 0, S, S);
+        var patch = document.createElement('canvas'); patch.width = patch.height = P;
+        var pg = patch.getContext('2d'), seed = 11;
+        function rnd(){ seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+        for(var n = 0; n < 260; n++){
+          pg.globalCompositeOperation = 'source-over'; pg.clearRect(0, 0, P, P);
+          pg.drawImage(base, Math.floor(rnd()*(180-P)), Math.floor(rnd()*(180-P)), P, P, 0, 0, P, P);
+          var gr = pg.createRadialGradient(P/2, P/2, P*0.22, P/2, P/2, P*0.5);
+          gr.addColorStop(0, 'rgba(0,0,0,1)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+          pg.globalCompositeOperation = 'destination-in'; pg.fillStyle = gr; pg.fillRect(0, 0, P, P);
+          cx.save(); cx.translate(rnd()*S, rnd()*S); cx.rotate(Math.floor(rnd()*4) * Math.PI/2);
+          cx.drawImage(patch, -P/2, -P/2); cx.restore();
+        }
+        GRAN_ZOOM_CACHE[src] = cv.toDataURL('image/jpeg', 0.9); cb(GRAN_ZOOM_CACHE[src]);
+      }catch(e){ cb(null); }
+    };
+    im.onerror = function(){ cb(null); };
+    im.src = src;
+  }
   function swatchBgStyle(c, big){
     if(c.img) return 'background-image:url(' + c.img + ');background-size:cover;background-position:center;';
     if(granaAppliesToPhase(pickPhase)) return granaStyle(c.hex);
@@ -5383,6 +5415,11 @@
   function openColorPreview(c){
     cpmCandidate = c;
     document.getElementById('cpmSwatch').setAttribute('style', swatchBgStyle(c, true));
+    // Graniglie: la foto del campione è piccola; ingrandita si sfocava. La ripetiamo
+    // a grandezza naturale (specchiata, senza giunte) così i sassolini restano nitidi.
+    if(c.img && state.material && state.material.id === 'graniglia_esterni'){
+      granZoomTex(c.img, function(u){ if(u) document.getElementById('cpmSwatch').setAttribute('style', 'background-image:url(' + u + ');background-size:cover;background-position:center;'); });
+    }
     document.getElementById('cpmName').textContent = c.name;
     document.getElementById('cpmCode').textContent = c.code && c.code!==c.name ? ts('codiceLabel')+c.code : '';
     var cpmNote = document.getElementById('cpmNote');
