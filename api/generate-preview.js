@@ -295,7 +295,7 @@ module.exports = async function handler(req, res) {
         : " Il soffitto NON va dipinto: resta esattamente com'è nella foto, cambia solo il colore delle pareti.";
 
   // Parete d'accento (una sola parete diversa, segnata dal cliente sulla foto) e bordatura in alto.
-  const accentoRefClean = (isInterniPittura && typeof accentoRefImage === "string" && accentoRefImage.length < 2_000_000)
+  const accentoRefClean = (typeof accentoRefImage === "string" && accentoRefImage.length < 2_000_000)
     ? accentoRefImage.replace(/^data:image\/\w+;base64,/, "") : null;
   const ACCENTO_DESC = {
     colore: () => `dipinta in tinta unita nel colore ${colorRef(colorAccento, colorAccentoHex)}`,
@@ -304,11 +304,12 @@ module.exports = async function handler(req, res) {
     microcemento: () => `rivestita in MICROCEMENTO nel colore ${colorRef(colorAccento, colorAccentoHex)}, superficie continua senza fughe, leggermente nuvolata e materica`,
     marmo: () => `rivestita con una finitura decorativa EFFETTO MARMO (marmorino) nel colore di fondo ${colorRef(colorAccento, colorAccentoHex)}, con venature naturali sottili e superficie liscia e setosa`,
   };
-  const accentoNote = (isInterniPittura && accentoTipo && ACCENTO_DESC[accentoTipo])
+  const accentoNote = (isInterniPittura && accentoTipo && ACCENTO_DESC[accentoTipo] && accentoRefClean !== undefined)
     ? ` PARETE D'ACCENTO: UNA SOLA parete della stanza è diversa dalle altre: è ${ACCENTO_DESC[accentoTipo]()}.` + (accentoRefClean
       ? " Quale parete: ti è stata fornita un'immagine aggiuntiva (l'ULTIMA immagine) che è la stessa foto con un CERCHIO ROSSO disegnato sopra: la parete d'accento è ESATTAMENTE la parete su cui si trova il cerchio rosso, da angolo ad angolo e dal pavimento al soffitto. Il cerchio rosso è solo un'indicazione: NON disegnarlo nell'immagine finale."
       : " Scegli come parete d'accento la parete principale di fondo, quella più visibile.") + " Tutte le altre pareti restano nel colore principale indicato; porte, finestre, prese e mobili davanti a quella parete restano identici e visibili."
     : "";
+  const twoColorFacadeFlag = facadeLayout === "due_colori";
   // Colonne, pilastri, travi: di default si colorano come le pareti.
   const colonneNote = !isInterniPittura ? ""
     : colonne === false
@@ -319,12 +320,15 @@ module.exports = async function handler(req, res) {
     plafone: () => colorPlafone ? `dipingila dello stesso colore del plafone ${colorRef(colorPlafone, colorPlafoneHex)}` : "dipingila come il soffitto",
     decorata: () => accentoTipo && ACCENTO_DESC[accentoTipo] ? `trattala come la parete decorata: ${ACCENTO_DESC[accentoTipo]()}` : `dipingila dello stesso colore delle pareti ${colorRef(colorA, colorAHex)}`,
     invariato: () => "NON modificarla: deve restare identica alla foto originale (stesso colore e materiale)",
+    includi: () => `applica ANCHE su questo elemento la stessa lavorazione richiesta (${textureDesc}), con lo stesso colore ${colorRef(colorA, colorAHex)}`,
+    facciata: () => `dipingila dello stesso colore ${colorRef(colorA, colorAHex)}` + (twoColorFacadeFlag ? " della parte alta della facciata" : " della facciata"),
+    parte_bassa: () => `dipingila dello stesso colore ${colorRef(colorB, colorBHex)} della parte bassa della facciata`,
   };
-  const segniList = (isInterniPittura && Array.isArray(segni) && accentoRefClean)
+  const segniList = (Array.isArray(segni) && accentoRefClean)
     ? segni.slice(0, 5).filter(x => x && SEGNO_TARGET[x.target]).map(x => `segno ${Number(x.n) || 0}: ${SEGNO_TARGET[x.target]()}`)
     : [];
   const segniNote = segniList.length
-    ? ` PARTI SEGNATE DAL CLIENTE: nell'ULTIMA immagine (la foto con i segni) ci sono dei CERCHI BLU NUMERATI posti sopra singoli elementi (colonne, pilastri, travi, nicchie o altre sporgenze). Per ciascun elemento indicato dal cerchio, l'intero elemento (tutte le sue facce, da cima a fondo) va trattato così: ${segniList.join("; ")}. I cerchi numerati sono solo indicazioni: NON disegnarli nell'immagine finale.`
+    ? ` PARTI SEGNATE DAL CLIENTE: nell'ULTIMA immagine (la stessa foto con i segni) ci sono dei CERCHI BLU NUMERATI posti sopra singoli elementi o zone (colonne, pilastri, travi, nicchie, gradini, zoccolini, muretti o altre parti). Per ciascun elemento indicato dal cerchio, l'intero elemento (tutte le sue facce, da cima a fondo) va trattato così: ${segniList.join("; ")}. I cerchi numerati sono solo indicazioni: NON disegnarli nell'immagine finale.`
     : "";
   const BORD = { rigino: "un RIGINO sottile di circa 1 cm", fascia: "una FASCIA di circa 3-5 cm", larga: "una FASCIA LARGA di circa 10 cm" };
   const bordaturaNote = (isInterniPittura && !effettoScatola && BORD[bordatura])
