@@ -669,6 +669,7 @@
 
   <!-- 1: CATEGORIA -->
   <section class="panel" id="panel1">
+    <div id="layerBanner" hidden style="margin:0 0 14px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:13.5px;line-height:1.4">📐 <span id="layerBannerText"></span> Scegli la prossima lavorazione (es. pareti, soffitto).</div>
     <h1 class="title" data-i18n="panel1Title">Cosa vuoi realizzare?</h1>
     <div class="material-grid" id="materialGrid"></div>
   </section>
@@ -988,6 +989,12 @@
     <div class="ai-progress" id="aiProgress" hidden><div class="ai-progress-fill" id="aiProgressFill"></div></div>
     <div class="ai-progress-msg" id="aiProgressMsg" hidden></div>
     <div class="ai-status" id="aiStatus"></div>
+    <div id="layerBox" hidden style="margin-top:14px;padding:12px;border:1.5px dashed var(--accent);border-radius:12px;text-align:center">
+      <div id="layerDone" style="font-size:13px;color:var(--ink-soft);margin-bottom:8px;text-align:left"></div>
+      <button type="button" class="ai-btn" id="layerAddBtn" style="margin:0">＋ Aggiungi un'altra lavorazione su questa foto</button>
+      <div style="font-size:12.5px;color:var(--ink-soft);margin-top:6px">Es. hai fatto il pavimento? Ora scegli le pareti: partiamo da questa foto.</div>
+      <button type="button" id="layerUndoBtn" hidden style="margin-top:8px;background:none;border:none;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:13px">↩ Togli l'ultima lavorazione</button>
+    </div>
     <div id="pdfBox" hidden style="margin-top:14px;padding:12px;border:1.5px solid var(--line);border-radius:12px">
       <div style="font-weight:700;font-size:14.5px;margin-bottom:4px">Scheda PDF per il cliente</div>
       <div style="font-size:13px;color:var(--ink-soft);margin-bottom:8px;line-height:1.4">Prima e dopo, materiali e colori scelti con i codici, e i tuoi contatti. Puoi aggiungere prezzo e tempi.</div>
@@ -6124,6 +6131,7 @@
         aiResultImageBase64 = result.base64;
         aiResultImageMime = result.mime;
         document.getElementById('pdfBox').hidden = false;
+        document.getElementById('layerBox').hidden = false; renderLayerBox();
         renderHeroPreview();
         statusEl.textContent = ts('aiStatusDone');
         stopAiProgress(true);
@@ -6138,6 +6146,45 @@
       .finally(function(){ btn.disabled = false; });
   });
 
+
+
+  // ---------- Più lavorazioni sulla stessa foto (a strati) ----------
+  // Ogni strato: la lavorazione fatta, le sue scelte e la foto risultante.
+  // La lavorazione successiva parte dalla foto già modificata.
+  var layers = [], layerOriginal = null;
+  function layerTitle(){ return state.material ? state.material.name + (state.material.id==='imbiancatura' ? (state.context==='esterno' ? ' esterni' : ' interni') : '') : ''; }
+  function renderLayerBox(){
+    var done = document.getElementById('layerDone');
+    var all = layers.map(function(l){ return l.title; }).concat(state.material ? [layerTitle()] : []);
+    done.innerHTML = all.length > 1 ? '<b>Lavorazioni su questa foto:</b> ' + all.map(function(t, i){ return (i+1) + '. ' + t; }).join(' · ') : '';
+    document.getElementById('layerUndoBtn').hidden = layers.length === 0;
+  }
+  document.getElementById('layerAddBtn').addEventListener('click', function(){
+    if(!aiResultImage || !aiResultImageBase64) return;
+    if(!layerOriginal) layerOriginal = { img: photoImg, b64: state.photoBase64, mime: state.photoMime };
+    layers.push({ title: layerTitle(), lines: pdfChoiceLines(), stateSnap: Object.assign({}, state), basePhoto: { img: photoImg, b64: state.photoBase64, mime: state.photoMime }, result: { img: aiResultImage, b64: aiResultImageBase64, mime: aiResultImageMime } });
+    // la nuova base è il risultato appena ottenuto
+    photoImg = aiResultImage; state.photoBase64 = aiResultImageBase64; state.photoMime = aiResultImageMime;
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    state.category = null; state.material = null;
+    try{ showHeroLoaded(); }catch(e){}
+    document.getElementById('pdfBox').hidden = true; document.getElementById('layerBox').hidden = true;
+    syncLayerBanner();
+    goTo(currentSeq()[0]);
+  });
+  document.getElementById('layerUndoBtn').addEventListener('click', function(){
+    var last = layers.pop(); if(!last) return;
+    photoImg = last.basePhoto.img; state.photoBase64 = last.basePhoto.b64; state.photoMime = last.basePhoto.mime;
+    aiResultImage = last.result.img; aiResultImageBase64 = last.result.b64; aiResultImageMime = last.result.mime;
+    if(last.stateSnap){ Object.keys(state).forEach(function(k){ if(!(k in last.stateSnap)) delete state[k]; }); Object.assign(state, last.stateSnap); }
+    if(!layers.length) layerOriginal = null;
+    renderHeroPreview(); renderLayerBox(); syncLayerBanner();
+  });
+  function syncLayerBanner(){
+    var b = document.getElementById('layerBanner'); if(!b) return;
+    b.hidden = layers.length === 0;
+    if(layers.length) document.getElementById('layerBannerText').textContent = 'Stai aggiungendo la lavorazione n. ' + (layers.length + 1) + ' sulla stessa foto (già fatto: ' + layers.map(function(l){ return l.title; }).join(', ') + ').';
+  }
 
   // ---------- Scheda PDF per il cliente ----------
   function loadJsPdf(){
@@ -6168,6 +6215,7 @@
   document.getElementById('pdfBtn').addEventListener('click', function(){
     if(!aiResultImage || !photoImg) return;
     var btn = this, st = document.getElementById('pdfStatus');
+    var beforeImg = layerOriginal ? layerOriginal.img : photoImg;
     btn.disabled = true; st.style.color = ''; st.textContent = 'Preparo la scheda…';
     var acc = (typeof proAccount !== 'undefined' && proAccount) ? proAccount : null;
     var isPro = !!(acc && acc.accountType !== 'privato');
@@ -6187,14 +6235,14 @@
       doc.text(contact.join('  ·  '), W - M, y + 12, { align:'right' });
       y += 22; doc.setDrawColor.apply(doc, accent); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 7;
       doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(13);
-      doc.text('Anteprima lavoro: ' + (state.material ? state.material.name : ''), M, y);
+      doc.text('Anteprima lavoro: ' + layers.map(function(l){ return l.title; }).concat([layerTitle()]).join(' + '), M, y);
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, soft);
       var d = new Date(); doc.text(('0'+d.getDate()).slice(-2) + '/' + ('0'+(d.getMonth()+1)).slice(-2) + '/' + d.getFullYear(), W - M, y, { align:'right' });
       var client = document.getElementById('pdfClient').value.trim();
       if(client){ y += 5; doc.text('Cliente: ' + client, M, y); }
       y += 5;
       // prima / dopo
-      var bw = (W - 2*M - 6) / 2, b1 = imgToJpeg(photoImg, 1100), b2 = imgToJpeg(aiResultImage, 1100);
+      var bw = (W - 2*M - 6) / 2, b1 = imgToJpeg(beforeImg, 1100), b2 = imgToJpeg(aiResultImage, 1100);
       var bh = Math.min(bw * b1.h / b1.w, 125);
       function box(im, x, label){ var ww = bh * im.w / im.h, xx = x, hh = bh; if(ww > bw){ ww = bw; hh = bw * im.h / im.w; } xx = x + (bw - ww)/2;
         doc.addImage(im.url, 'JPEG', xx, y, ww, hh); doc.setFillColor(28,27,24); doc.roundedRect(xx + 2, y + 2, 16, 5.5, 1, 1, 'F');
@@ -6205,7 +6253,12 @@
       doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Materiali e colori scelti', M, y); y += 5.5;
       doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
       var sw = {}; ['colorA','colorB','colorC','colorPlafone','colorAccento','colorBordatura','colorDavanzali','colorSottotetto','colorTetto','colorCornici','colorSerramenti','colorBalconi','colorRighe'].forEach(function(k){ var c = state[k]; if(c && c.hex){ if(c.code) sw[c.code] = c.hex; if(c.name) sw[c.name] = c.hex; } });
-      pdfChoiceLines().forEach(function(l){
+      var allLines = [];
+      layers.forEach(function(L, n){ allLines.push('§' + (n+1) + '. ' + L.title); allLines = allLines.concat(L.lines); });
+      if(layers.length) allLines.push('§' + (layers.length+1) + '. ' + layerTitle());
+      allLines = allLines.concat(pdfChoiceLines());
+      allLines.forEach(function(l){
+        if(l.charAt(0) === '§'){ y += 1.5; doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.setTextColor.apply(doc, accent); doc.text(l.slice(1), M, y); doc.setFont('helvetica','normal'); doc.setFontSize(9.5); y += 5.2; return; }
         var i = l.indexOf(':'), k = i > 0 ? l.slice(0, i+1) : '', v = i > 0 ? l.slice(i+1).trim() : l;
         var hex = null; Object.keys(sw).forEach(function(key){ if(!hex && key && v.indexOf(key) > -1) hex = sw[key]; });
         var tx = M + 52 + (hex ? 7 : 0);
@@ -6629,6 +6682,11 @@
     if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+colorLabel(state.colorBalconi));
     if(needsRigheColor() && state.colorRighe) lines.push("Righe ("+righeDescriptionText('it')+"): "+colorLabel(state.colorRighe));
     if(!noFinitura()) lines.push("Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1));
+    if(typeof layers !== 'undefined' && layers.length){
+      var prev = ["", "Lavorazioni precedenti sulla stessa foto:"];
+      layers.forEach(function(L, n){ prev.push((n+1)+". "+L.title+" — "+L.lines.filter(function(x){ return !/^Lavorazione:/.test(x); }).join("; ")); });
+      lines = lines.concat(prev, [""]);
+    }
     lines.push(
       "Nome: "+name, "Telefono: "+phone
     );
