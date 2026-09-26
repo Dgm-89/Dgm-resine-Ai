@@ -712,6 +712,12 @@
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
 
     <div id="interniExtras" hidden>
+      <div class="section-label">Colonne e sporgenze</div>
+      <button type="button" class="niche-toggle active" id="colonneToggle">
+        <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#C9B79C"/><rect x="0" y="0" width="180" height="18" fill="#F4F1EA"/><rect x="70" y="18" width="30" height="112" fill="#B9A588"/><rect x="100" y="18" width="8" height="112" fill="#A8947A"/><rect x="0" y="18" width="180" height="10" fill="#B9A588"/></svg>
+        <span class="nt-text"><span class="nt-title">Colora anche colonne e travi</span><span class="nt-desc">Colonne, pilastri, travi, nicchie e sporgenze dello stesso colore delle pareti</span></span>
+        <span class="nt-check"></span>
+      </button>
       <div class="section-label">Soffitto</div>
       <button type="button" class="niche-toggle" id="plafoneToggle">
         <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E9E4DA"/><polygon points="0,0 180,0 140,34 40,34" fill="#7FA3C8"/><polygon points="0,0 40,34 40,110 0,130" fill="#F1ECE2"/><polygon points="180,0 140,34 140,110 180,130" fill="#F1ECE2"/><rect x="40" y="34" width="100" height="76" fill="#F6F2EA"/><polygon points="0,130 40,110 140,110 180,130" fill="#B89B78"/></svg>
@@ -928,6 +934,7 @@
     <h1 class="title" data-i18n="panelPhotoTitle">Carica la foto del tuo ambiente</h1>
     <div class="hero" id="heroPhoto">
       <img id="photoPreviewImg" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" alt="Foto caricata" data-i18n-alt="photoUploadedAlt">
+      <span id="marksLayer" style="position:absolute;inset:0;pointer-events:none;z-index:3"></span>
       <span id="accentoPin" hidden style="position:absolute;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:3px solid #fff;background:rgba(230,138,76,.85);box-shadow:0 0 0 3px rgba(230,138,76,.5),0 2px 8px rgba(0,0,0,.4);pointer-events:none;z-index:3"></span>
       <div class="hero-empty" id="heroEmptyPhoto">
         <span class="icon"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span>
@@ -940,6 +947,14 @@
     </div>
     <div id="accentoMarkBox" hidden style="margin:-4px 0 14px;padding:10px 12px;border:1.5px dashed var(--accent);border-radius:10px;font-size:13.5px;line-height:1.4">
       <b>Parete decorata:</b> <span id="accentoMarkText">tocca sulla foto la parete da decorare.</span>
+    </div>
+    <div id="marksBox" hidden style="margin:-4px 0 14px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.4">
+      <button type="button" id="marksOpen" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;padding:0;cursor:pointer;font-family:inherit">＋ Segna altre parti sulla foto (colonne, travi…)</button>
+      <div id="marksPanel" hidden>
+        <div style="margin:6px 0 6px">1) Scegli come colorarla, 2) tocca la parte sulla foto:</div>
+        <div class="seg-control" id="marksTargetControl" style="flex-wrap:wrap"></div>
+        <div id="marksList" style="display:flex;flex-direction:column;gap:4px;margin-top:6px"></div>
+      </div>
     </div>
     <div class="hero-hint" id="photoHint">Carica una foto reale del tuo ambiente: la useremo nel prossimo passo per generare l'anteprima AI fotorealistica</div>
     <p class="ai-photo-note"><span data-i18n="aiPhotoNote">La foto viene elaborata da un servizio di intelligenza artificiale solo per creare l'anteprima.</span> <button type="button" class="privacy-link" data-open-privacy data-i18n="privacyShort">Privacy</button></p>
@@ -4025,6 +4040,7 @@
   // (solo per Imbiancatura Esterno, come davanzali/marcapiano/righe).
   function needsSottotettoColor(){ return !!(state.addSottotetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   function isInterniPittura(){ return !!(state.material && state.material.id === 'imbiancatura' && state.context !== 'esterno'); }
+  function colonneOn(){ return state.colonne !== false; }
   function accentoActive(){ return !!(state.addAccento && isInterniPittura()); }
   function needsAccentoColor(){ return !!(accentoActive() && state.accentoTipo !== 'corten'); }
   function bordaturaActive(){ return !!(state.addBordatura && !state.effettoScatola && isInterniPittura()); }
@@ -4194,6 +4210,7 @@
     box.hidden = !show;
     if(!show){ state.addPlafone=false; state.effettoScatola=false; state.colorPlafone=null; state.addAccento=false; state.colorAccento=null; state.addBordatura=false; state.colorBordatura=null; state.accentoPoint=null; }
     document.getElementById('plafoneToggle').classList.toggle('active', !!state.addPlafone);
+    document.getElementById('colonneToggle').classList.toggle('active', colonneOn());
     var bt = document.getElementById('bordaturaToggle');
     bt.classList.toggle('active', !!state.addBordatura); bt.disabled = !!state.effettoScatola; bt.style.opacity = state.effettoScatola ? '0.45' : '';
     document.getElementById('bordaturaOpts').hidden = !bordaturaActive();
@@ -4219,6 +4236,10 @@
     state.effettoScatola = !state.effettoScatola;
     if(state.effettoScatola){ state.addPlafone = false; state.colorPlafone = null; state.addBordatura = false; state.colorBordatura = null; }
     afterInterniToggle();
+  });
+  document.getElementById('colonneToggle').addEventListener('click', function(){
+    state.colonne = !colonneOn(); this.classList.toggle('active', colonneOn());
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
   });
   document.getElementById('bordaturaToggle').addEventListener('click', function(){
     if(state.effettoScatola) return;
@@ -4808,6 +4829,50 @@
   }
   renderTemplateRow();
 
+  var MARK_COLORS = ['#2F80ED','#27AE60','#9B51E0','#F2994A','#00A3A3'];
+  function markTargets(){
+    var t = [{v:'pareti', it:'Come le pareti'}];
+    if(needsPlafoneColor()) t.push({v:'plafone', it:'Come il plafone'});
+    if(accentoActive()) t.push({v:'decorata', it:'Come la parete decorata'});
+    t.push({v:'invariato', it:'Lascia com\'è'});
+    return t;
+  }
+  function markTargetLabel(v){ var f = markTargets().filter(function(t){ return t.v===v; })[0]; return f ? f.it : v; }
+  function heroGeom(){
+    var hero = document.getElementById('heroPhoto'), W = hero.clientWidth, H = hero.clientHeight;
+    var nw = photoImg.naturalWidth || photoImg.width, nh = photoImg.naturalHeight || photoImg.height, sc = Math.max(W/nw, H/nh);
+    return { nw:nw, nh:nh, sc:sc, ox:(W - nw*sc)/2, oy:(H - nh*sc)/2 };
+  }
+  function renderMarksUI(){
+    var box = document.getElementById('marksBox');
+    var show = isInterniPittura() && !!photoImg;
+    box.hidden = !show;
+    state.marks = state.marks || [];
+    var layer = document.getElementById('marksLayer'); layer.innerHTML = '';
+    if(!show){ return; }
+    var tc = document.getElementById('marksTargetControl'); tc.innerHTML = '';
+    var targets = markTargets(); if(!targets.some(function(t){ return t.v===state.markTarget; })) state.markTarget = targets[0].v;
+    targets.forEach(function(t){ var b=document.createElement('button'); b.type='button'; b.textContent=t.it; b.dataset.v=t.v; if(t.v===state.markTarget) b.className='active'; tc.appendChild(b); });
+    var list = document.getElementById('marksList'); list.innerHTML = '';
+    var g = heroGeom();
+    state.marks.forEach(function(m, i){
+      var col = MARK_COLORS[i % MARK_COLORS.length];
+      var pin = document.createElement('span');
+      pin.style.cssText = 'position:absolute;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;border:3px solid #fff;background:'+col+';color:#fff;font:700 13px/22px sans-serif;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.4)';
+      pin.style.left = (g.ox + m.x*g.nw*g.sc)+'px'; pin.style.top = (g.oy + m.y*g.nh*g.sc)+'px'; pin.textContent = (i+1);
+      layer.appendChild(pin);
+      var row = document.createElement('div'); row.style.cssText='display:flex;align-items:center;gap:8px';
+      row.innerHTML = '<span style="flex:none;width:20px;height:20px;border-radius:50%;background:'+col+';color:#fff;font:700 11px/20px sans-serif;text-align:center">'+(i+1)+'</span><span style="flex:1"></span><button type="button" style="background:none;border:none;color:var(--ink-soft);cursor:pointer;font-size:13px;text-decoration:underline;font-family:inherit">togli</button>';
+      row.children[1].textContent = markTargetLabel(m.target);
+      row.querySelector('button').addEventListener('click', function(){ state.marks.splice(i,1); aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; renderMarksUI(); });
+      list.appendChild(row);
+    });
+    var panelOpen = !!state.marksMode;
+    document.getElementById('marksPanel').hidden = !panelOpen;
+    document.getElementById('marksOpen').textContent = panelOpen ? (state.marks.length ? 'Segni sulla foto ('+state.marks.length+'/5) — chiudi' : 'Chiudi') : ('＋ Segna altre parti sulla foto (colonne, travi…)' + (state.marks.length ? ' · '+state.marks.length+' segnate' : ''));
+  }
+  document.getElementById('marksOpen').addEventListener('click', function(){ state.marksMode = !state.marksMode; renderMarksUI(); });
+  document.getElementById('marksTargetControl').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; state.markTarget=b.dataset.v; renderMarksUI(); });
   function syncAccentoMark(){
     var box = document.getElementById('accentoMarkBox'), pin = document.getElementById('accentoPin');
     var on = accentoActive() && !!photoImg;
@@ -4815,39 +4880,57 @@
     if(!on || !state.accentoPoint){ pin.hidden = true; }
     document.getElementById('accentoMarkText').textContent = !photoImg ? "carica la foto, poi tocca la parete da decorare." : (state.accentoPoint ? "segnata ✓ (tocca di nuovo per spostare il segno)." : "tocca sulla foto la parete da decorare.");
     if(on && state.accentoPoint){
-      var hero = document.getElementById('heroPhoto'), W = hero.clientWidth, H = hero.clientHeight;
-      var nw = photoImg.naturalWidth || photoImg.width, nh = photoImg.naturalHeight || photoImg.height, sc = Math.max(W/nw, H/nh);
-      var ox = (W - nw*sc)/2, oy = (H - nh*sc)/2;
-      pin.style.left = (ox + state.accentoPoint.x*nw*sc) + 'px'; pin.style.top = (oy + state.accentoPoint.y*nh*sc) + 'px'; pin.hidden = false;
+      var g = heroGeom();
+      pin.style.left = (g.ox + state.accentoPoint.x*g.nw*g.sc) + 'px'; pin.style.top = (g.oy + state.accentoPoint.y*g.nh*g.sc) + 'px'; pin.hidden = false;
     }
+    if(typeof renderMarksUI==='function') renderMarksUI();
   }
   document.getElementById('heroPhoto').addEventListener('click', function(e){
-    if(!accentoActive() || !photoImg || e.target.closest('label,button,input')) return;
-    var hero = this, r = hero.getBoundingClientRect(), W = r.width, H = r.height;
-    var nw = photoImg.naturalWidth || photoImg.width, nh = photoImg.naturalHeight || photoImg.height, sc = Math.max(W/nw, H/nh);
-    var ox = (W - nw*sc)/2, oy = (H - nh*sc)/2;
-    var x = (e.clientX - r.left - ox)/(nw*sc), y = (e.clientY - r.top - oy)/(nh*sc);
+    if(!photoImg || e.target.closest('label,button,input')) return;
+    var wantAccento = accentoActive() && (!state.accentoPoint || !state.marksMode);
+    var wantMark = isInterniPittura() && state.marksMode;
+    if(!wantAccento && !wantMark) return;
+    var r = this.getBoundingClientRect(), g = heroGeom();
+    var x = (e.clientX - r.left - g.ox)/(g.nw*g.sc), y = (e.clientY - r.top - g.oy)/(g.nh*g.sc);
     if(x<0||x>1||y<0||y>1) return;
-    state.accentoPoint = { x:x, y:y }; aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    if(wantMark && !(accentoActive() && !state.accentoPoint)){
+      state.marks = state.marks || [];
+      if(state.marks.length >= 5) return;
+      state.marks.push({ x:x, y:y, target: state.markTarget || 'pareti' });
+    } else {
+      state.accentoPoint = { x:x, y:y };
+    }
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
     syncAccentoMark(); syncNextStepEnabled();
   });
   // Foto con il segno sulla parete d'accento, mandata all'AI come riferimento.
   function buildAccentoRefImage(){
     try{
-      if(!accentoActive() || !state.accentoPoint || !photoImg) return null;
+      var hasAcc = accentoActive() && !!state.accentoPoint, marks = (isInterniPittura() && state.marks) ? state.marks : [];
+      if(!photoImg || (!hasAcc && !marks.length)) return null;
       var nw = photoImg.naturalWidth || photoImg.width, nh = photoImg.naturalHeight || photoImg.height, k = Math.min(1, 1024/Math.max(nw,nh));
       var cv = document.createElement('canvas'); cv.width = Math.round(nw*k); cv.height = Math.round(nh*k);
       var g = cv.getContext('2d'); g.drawImage(photoImg, 0, 0, cv.width, cv.height);
-      var x = state.accentoPoint.x*cv.width, y = state.accentoPoint.y*cv.height, R = Math.max(18, cv.width*0.035);
-      g.lineWidth = Math.max(4, R*0.25); g.strokeStyle = '#FF3B30'; g.fillStyle = 'rgba(255,59,48,0.35)';
-      g.beginPath(); g.arc(x, y, R, 0, Math.PI*2); g.fill(); g.stroke();
-      g.beginPath(); g.arc(x, y, R*1.8, 0, Math.PI*2); g.stroke();
+      var R = Math.max(18, cv.width*0.035);
+      if(hasAcc){
+        var x = state.accentoPoint.x*cv.width, y = state.accentoPoint.y*cv.height;
+        g.lineWidth = Math.max(4, R*0.25); g.strokeStyle = '#FF3B30'; g.fillStyle = 'rgba(255,59,48,0.35)';
+        g.beginPath(); g.arc(x, y, R, 0, Math.PI*2); g.fill(); g.stroke();
+        g.beginPath(); g.arc(x, y, R*1.8, 0, Math.PI*2); g.stroke();
+      }
+      marks.forEach(function(m, i){
+        var x = m.x*cv.width, y = m.y*cv.height, r = R*0.8;
+        g.fillStyle = '#1E6FFF'; g.strokeStyle = '#FFFFFF'; g.lineWidth = Math.max(3, r*0.18);
+        g.beginPath(); g.arc(x, y, r, 0, Math.PI*2); g.fill(); g.stroke();
+        g.fillStyle = '#FFFFFF'; g.font = 'bold '+Math.round(r*1.1)+'px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.fillText(String(i+1), x, y+1);
+      });
       return cv.toDataURL('image/jpeg', 0.85);
     }catch(e){ return null; }
   }
   function showHeroLoaded(){
     document.getElementById('heroEmptyPhoto').style.display = 'none';
-    state.accentoPoint = null; setTimeout(function(){ if(typeof syncAccentoMark==='function') syncAccentoMark(); }, 50);
+    state.accentoPoint = null; state.marks = []; state.marksMode = false; setTimeout(function(){ if(typeof syncAccentoMark==='function') syncAccentoMark(); }, 50);
     var prev = document.getElementById('photoPreviewImg');
     prev.src = photoImg.src; prev.style.display = 'block';
     document.getElementById('templateSection').style.display = 'none';
@@ -5850,6 +5933,8 @@
         accentoTipo: accentoActive() ? (state.accentoTipo || 'colore') : null,
         colorAccento: (needsAccentoColor() && state.colorAccento) ? state.colorAccento.name : null, colorAccentoHex: (needsAccentoColor() && state.colorAccento) ? apiHex(state.colorAccento) : null,
         accentoRefImage: buildAccentoRefImage(),
+        segni: (isInterniPittura() && state.marks && state.marks.length) ? state.marks.map(function(m, i){ return { n: i+1, target: m.target }; }) : null,
+        colonne: isInterniPittura() ? colonneOn() : null,
         bordatura: bordaturaActive() ? (state.bordaturaLarg || 'rigino') : null,
         colorBordatura: needsBordaturaColor() && state.colorBordatura ? state.colorBordatura.name : null, colorBordaturaHex: (needsBordaturaColor() && state.colorBordatura) ? apiHex(state.colorBordatura) : null,
         posaRefImage: posaRefImage,
@@ -6365,6 +6450,8 @@
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+colorLabel(state.colorSottotetto));
     if(needsPlafoneColor() && state.colorPlafone) lines.push("Plafone (soffitto): "+colorLabel(state.colorPlafone));
     if(accentoActive()) lines.push("Parete decorata: "+(state.accentoTipo==='corten' ? 'Corten' : ((state.accentoTipo && state.accentoTipo!=='colore' ? state.accentoTipo+' ' : '') + (state.colorAccento ? colorLabel(state.colorAccento) : ''))));
+    if(isInterniPittura()) lines.push("Colonne, travi e sporgenze: "+(colonneOn() ? "colorate come le pareti" : "lasciate come sono"));
+    if(isInterniPittura() && state.marks && state.marks.length) lines.push("Parti segnate sulla foto: "+state.marks.map(function(m,i){ return (i+1)+" = "+markTargetLabel(m.target); }).join("; "));
     if(bordaturaActive()) lines.push("Bordatura in alto: "+({rigino:'rigino ~1 cm', fascia:'fascia 3-5 cm', larga:'fascia larga ~10 cm'})[state.bordaturaLarg||'rigino']+", "+(needsBordaturaColor() && state.colorBordatura ? colorLabel(state.colorBordatura) : 'bianca'));
     if(isInterniPittura() && state.effettoScatola) lines.push("Effetto scatola: pareti e soffitto nello stesso colore");
     if(needsTettoColor() && state.colorTetto) lines.push("Tetto: "+colorLabel(state.colorTetto));
