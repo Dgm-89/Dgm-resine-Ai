@@ -103,9 +103,10 @@ module.exports = async function handler(req, res) {
     // Con le email attive l'account resta bloccato finché non si conferma l'email.
     if (emailEnabled()) {
       const sent = await sendVerifyEmail(req, email, verifyToken);
+      await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(newUser.id), { method: "PATCH", body: JSON.stringify({ verify_sent_at: new Date().toISOString() }) }).catch(function () {});
       return res.status(200).json({ ok: true, needsVerification: true, emailSent: sent, email: email });
     }
-    setSessionCookie(res, newUser.id);
+    setSessionCookie(res, newUser.id, newUser.session_version);
     return res.status(200).json({ ok: true, user: publicUser(newUser) });
   } catch (err) {
     return res.status(500).json({ error: "Errore imprevisto durante la registrazione. Riprova." });
