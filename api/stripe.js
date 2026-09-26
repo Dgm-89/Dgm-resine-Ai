@@ -13,6 +13,13 @@ async function checkout(req, res) {
   try {
     const acc = await currentAccount(req);
     if (!acc) return res.status(401).json({ error: "Accedi o registrati prima di attivare l'abbonamento." });
+    // Abbonamento già attivo: niente secondo pagamento, si apre la gestione abbonamento.
+    if (acc.stripe_customer_id && ["active", "trialing", "past_due"].includes(acc.subscription_status)) {
+      const o = (req.headers["x-forwarded-proto"] || "https") + "://" + (req.headers["x-forwarded-host"] || req.headers.host);
+      const pr = await stripeRequest("POST", "/billing_portal/sessions", { customer: acc.stripe_customer_id, return_url: o + "/" });
+      if (pr.ok && pr.data && pr.data.url) return res.status(200).json({ url: pr.data.url, portal: true });
+      return res.status(409).json({ error: "Hai già un abbonamento attivo: gestiscilo dal pulsante Abbonamento." });
+    }
     const body = req.body || {};
     const tier = PLANS[body.tier] ? body.tier : (PLANS[acc.tier] ? acc.tier : "basic");
     const plan = PLANS[tier];
@@ -43,12 +50,14 @@ async function checkout(req, res) {
 
     const r = await stripeRequest("POST", "/checkout/sessions", params);
     if (!r.ok || !r.data || !r.data.url) {
-      return res.status(502).json({ error: "Stripe non ha creato la pagina di pagamento.", details: r.data && r.data.error ? r.data.error.message : r.data });
+      console.error("stripe checkout", r.data);
+      return res.status(502).json({ error: "Stripe non ha creato la pagina di pagamento. Riprova tra poco." });
     }
-    if (tier !== acc.tier) await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(acc.id), { method: "PATCH", body: JSON.stringify({ tier }) });
+    // Il piano NON si cambia qui: lo scrive solo il webhook quando Stripe conferma il pagamento.
     return res.status(200).json({ url: r.data.url });
   } catch (err) {
-    return res.status(500).json({ error: "Errore imprevisto", details: String(err && err.message || err) });
+    console.error(err);
+    return res.status(500).json({ error: "Errore imprevisto. Riprova tra poco." });
   }
 }
 
@@ -65,10 +74,11 @@ async function portal(req, res) {
     if (!acc.stripe_customer_id) return res.status(400).json({ error: "Non hai ancora un abbonamento attivo." });
     const origin = (req.headers["x-forwarded-proto"] || "https") + "://" + (req.headers["x-forwarded-host"] || req.headers.host);
     const r = await stripeRequest("POST", "/billing_portal/sessions", { customer: acc.stripe_customer_id, return_url: origin + "/" });
-    if (!r.ok || !r.data || !r.data.url) return res.status(502).json({ error: "Impossibile aprire la gestione abbonamento.", details: r.data && r.data.error ? r.data.error.message : r.data });
+    if (!r.ok || !r.data || !r.data.url) { console.error("stripe portal", r.data); return res.status(502).json({ error: "Impossibile aprire la gestione abbonamento. Riprova tra poco." }); }
     return res.status(200).json({ url: r.data.url });
   } catch (err) {
-    return res.status(500).json({ error: "Errore imprevisto", details: String(err && err.message || err) });
+    console.error(err);
+    return res.status(500).json({ error: "Errore imprevisto. Riprova tra poco." });
   }
 }
 
@@ -92,27 +102,48 @@ async function webhook(req, res) {
     if (!ev.ok || !ev.data) return res.status(400).json({ error: "evento non trovato su Stripe" });
     const type = ev.data.type, obj = ev.data.data && ev.data.data.object ? ev.data.data.object : {};
 
+    // Da quale abbonamento arriva l'evento?
+    let subId = null, fallbackAccount = null;
     if (type === "checkout.session.completed" && obj.mode === "subscription") {
-      const accountId = obj.client_reference_id || (obj.metadata && obj.metadata.account_id);
-      const tier = obj.metadata && PLANS[obj.metadata.tier] ? obj.metadata.tier : undefined;
-      if (accountId) await updateAccount("id=eq." + encodeURIComponent(accountId), {
-        stripe_customer_id: obj.customer, stripe_subscription_id: obj.subscription,
-        subscription_status: "active", tier,
-      });
-    } else if (type === "customer.subscription.updated" || type === "customer.subscription.deleted" || type === "customer.subscription.created") {
-      const status = type === "customer.subscription.deleted" ? "canceled" : obj.status; // active, trialing, past_due, unpaid, canceled…
-      const tier = obj.metadata && PLANS[obj.metadata.tier] ? obj.metadata.tier : undefined;
-      const periodEnd = obj.current_period_end || (obj.items && obj.items.data && obj.items.data[0] && obj.items.data[0].current_period_end);
-      await updateAccount("stripe_customer_id=eq." + encodeURIComponent(obj.customer), {
-        subscription_status: status, stripe_subscription_id: obj.id, tier,
-        current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : undefined,
-      });
-    } else if (type === "invoice.payment_failed") {
-      await updateAccount("stripe_customer_id=eq." + encodeURIComponent(obj.customer), { subscription_status: "past_due" });
+      subId = obj.subscription; fallbackAccount = obj.client_reference_id || (obj.metadata && obj.metadata.account_id);
+    } else if (type.indexOf("customer.subscription.") === 0) {
+      subId = obj.id;
+    } else if (type === "invoice.payment_failed" || type === "invoice.paid") {
+      subId = obj.subscription || (obj.parent && obj.parent.subscription_details && obj.parent.subscription_details.subscription) || null;
     }
+    if (!subId) return res.status(200).json({ ignored: true });
+
+    // Non ci fidiamo dell'evento (può arrivare in ritardo o fuori ordine):
+    // leggiamo da Stripe lo stato ATTUALE dell'abbonamento.
+    const sr = await stripeRequest("GET", "/subscriptions/" + encodeURIComponent(subId));
+    if (!sr.ok || !sr.data) return res.status(500).json({ error: "abbonamento non leggibile" });
+    const sub = sr.data;
+    const meta = sub.metadata || {};
+    const accountId = meta.account_id || fallbackAccount;
+    const filter = accountId ? "id=eq." + encodeURIComponent(accountId) : "stripe_customer_id=eq." + encodeURIComponent(sub.customer);
+    const found = await supabaseRequest("/pro_accounts?" + filter + "&select=id,stripe_subscription_id,subscription_status", { method: "GET" });
+    const acc = found.ok && Array.isArray(found.data) ? found.data[0] : null;
+    if (!acc) return res.status(200).json({ ignored: "account non trovato" });
+
+    const liveStatuses = ["active", "trialing"];
+    // Se l'account ha già un ALTRO abbonamento attivo, un abbonamento chiuso non lo spegne.
+    if (acc.stripe_subscription_id && acc.stripe_subscription_id !== sub.id && liveStatuses.includes(acc.subscription_status) && !liveStatuses.includes(sub.status)) {
+      return res.status(200).json({ ignored: "altro abbonamento attivo" });
+    }
+    const item = sub.items && sub.items.data && sub.items.data[0];
+    const periodEnd = sub.current_period_end || (item && item.current_period_end);
+    const fields = {
+      stripe_customer_id: sub.customer,
+      stripe_subscription_id: sub.id,
+      subscription_status: sub.status === "incomplete_expired" ? "canceled" : sub.status,
+      current_period_end: periodEnd ? new Date(periodEnd * 1000).toISOString() : null,
+    };
+    if (PLANS[meta.tier] && liveStatuses.includes(sub.status)) fields.tier = meta.tier;
+    await updateAccount("id=eq." + encodeURIComponent(acc.id), fields);
     return res.status(200).json({ received: true });
   } catch (err) {
-    return res.status(500).json({ error: String(err && err.message || err) });
+    console.error("webhook", err);
+    return res.status(500).json({ error: "errore webhook" });
   }
 }
 
