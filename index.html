@@ -988,6 +988,14 @@
     <div class="ai-progress" id="aiProgress" hidden><div class="ai-progress-fill" id="aiProgressFill"></div></div>
     <div class="ai-progress-msg" id="aiProgressMsg" hidden></div>
     <div class="ai-status" id="aiStatus"></div>
+    <div id="mvBox" hidden style="margin-top:14px;padding:12px;border:1.5px solid var(--line);border-radius:12px">
+      <div style="font-weight:700;font-size:14.5px;margin-bottom:4px">Stessa stanza da un'altra angolazione</div>
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:10px;line-height:1.4">Carica un'altra foto dello stesso ambiente: useremo gli stessi materiali e colori dell'anteprima qui sopra, così le immagini sono coerenti tra loro. Ogni foto conta come un'anteprima.</div>
+      <label class="hero-btn primary" for="mvInput" style="display:inline-block;cursor:pointer">＋ Aggiungi angolazione</label>
+      <input type="file" id="mvInput" accept="image/*" style="display:none">
+      <div id="mvStatus" style="font-size:13px;margin-top:8px"></div>
+      <div id="mvGallery" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px"></div>
+    </div>
   </section>
 
   <!-- 7: DATI CLIENTE -->
@@ -6062,6 +6070,7 @@
         });
       });
     }
+    window.__rendrumCallAI = callAI;
     function callAIRaw(body){
       return fetch(AI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
       .then(function(r){
@@ -6115,6 +6124,9 @@
         aiResultImage = result.img;
         aiResultImageBase64 = result.base64;
         aiResultImageMime = result.mime;
+        mvLastPayload = payload; mvPrimary = { base64: result.base64, mime: result.mime };
+        document.getElementById('mvGallery').innerHTML = ''; document.getElementById('mvStatus').textContent = '';
+        document.getElementById('mvBox').hidden = false;
         renderHeroPreview();
         statusEl.textContent = ts('aiStatusDone');
         stopAiProgress(true);
@@ -6127,6 +6139,46 @@
         stopAiProgress(false);
       })
       .finally(function(){ btn.disabled = false; });
+  });
+
+  // ---------- Più angolazioni della stessa stanza ----------
+  var mvLastPayload = null, mvPrimary = null;
+  function mvResize(file){
+    return new Promise(function(res, rej){
+      var rd = new FileReader();
+      rd.onload = function(){ var im = new Image(); im.onload = function(){
+        var k = Math.min(1, 1600 / Math.max(im.width, im.height)), c = document.createElement('canvas');
+        c.width = Math.round(im.width*k); c.height = Math.round(im.height*k); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        var m = /^data:(.+);base64,(.*)$/.exec(c.toDataURL('image/jpeg', 0.85)); res({ mime:m[1], b64:m[2] });
+      }; im.onerror = rej; im.src = rd.result; };
+      rd.onerror = rej; rd.readAsDataURL(file);
+    });
+  }
+  document.getElementById('mvInput').addEventListener('change', function(){
+    var f = this.files && this.files[0]; this.value = '';
+    if(!f || !mvLastPayload || !mvPrimary) return;
+    var st = document.getElementById('mvStatus'), gal = document.getElementById('mvGallery');
+    st.style.color = ''; st.textContent = 'Sto creando l\'anteprima di questa angolazione…';
+    var slot = document.createElement('div'); slot.style.cssText = 'aspect-ratio:4/3;border-radius:8px;background:var(--surface);border:1px dashed var(--line);display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink-soft)'; slot.textContent = 'in corso…'; gal.appendChild(slot);
+    mvResize(f).then(function(ph){
+      var body = Object.assign({}, mvLastPayload, {
+        imageBase64: ph.b64, mimeType: ph.mime,
+        styleRefImage: 'data:' + mvPrimary.mime + ';base64,' + mvPrimary.base64,
+        accentoRefImage: null, segni: null
+      });
+      return window.__rendrumCallAI(body);
+    }).then(function(r){
+      slot.innerHTML = ''; slot.style.cssText = 'border-radius:8px;overflow:hidden;cursor:zoom-in';
+      var im = document.createElement('img'); im.src = 'data:' + r.mime + ';base64,' + r.base64; im.style.cssText = 'width:100%;display:block';
+      im.addEventListener('click', function(){ var w = window.open(); if(w){ w.document.write('<img src="'+im.src+'" style="max-width:100%">'); } });
+      slot.appendChild(im);
+      st.textContent = 'Fatto ✓ Puoi aggiungere altre angolazioni.';
+      if(typeof proCheckSession === 'function') proCheckSession();
+    }).catch(function(err){
+      slot.remove(); st.style.color = '#C0392B';
+      st.textContent = 'Non è riuscita: ' + ((err && err.message) || 'errore') + '. Riprova.';
+      if(err && err.code === 'login_required'){ proAuthOpen(); }
+    });
   });
 
   // ---------- navigation a passi ----------
