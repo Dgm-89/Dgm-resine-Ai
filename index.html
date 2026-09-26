@@ -4406,6 +4406,67 @@
     dritta: { name:"Dritta / in linea", nameEn:"Straight grid", desc:"Piastrelle grandi (30x60 o 60x120) effetto pietra o cemento su griglia regolare.", descEn:"Large tiles (30x60 or 60x120) stone or concrete look on a regular grid.", bg:"linear-gradient(135deg,#8E8C86,#4A4845)", icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="3" width="18" height="18" rx="1.5"/><path d="M3 12h18M12 3v18"/></svg>' }
   };
   function posaStyleFor(id){ return id==='spc' ? SPC_POSA_STYLE : PARQUET_POSA_STYLE; }
+  // Schema di posa visto dall'alto, disegnato con esattezza e inviato all'AI come
+  // riferimento geometrico (l'AI copia la disposizione dei listelli, non la luce).
+  function buildPosaRefImage(posa, hex){
+    try{
+      var S=768, cv=document.createElement('canvas'); cv.width=S; cv.height=S;
+      var g=cv.getContext('2d'); if(!g) return null;
+      var base=/^#?[0-9a-f]{6}$/i.test(hex||'')?hex.replace('#',''):'b08a5c';
+      var R=parseInt(base.slice(0,2),16),G=parseInt(base.slice(2,4),16),B=parseInt(base.slice(4,6),16);
+      var seed=7; function rnd(){ seed=(seed*16807)%2147483647; return seed/2147483647; }
+      function tone(){ var k=0.86+rnd()*0.26; return 'rgb('+Math.min(255,R*k|0)+','+Math.min(255,G*k|0)+','+Math.min(255,B*k|0)+')'; }
+      var joint='rgba('+(R*0.45|0)+','+(G*0.45|0)+','+(B*0.45|0)+',0.95)';
+      g.fillStyle='rgb('+R+','+G+','+B+')'; g.fillRect(0,0,S,S);
+      function poly(pts, grainDir){
+        function trace(){ g.beginPath(); g.moveTo(pts[0][0],pts[0][1]); for(var i=1;i<pts.length;i++) g.lineTo(pts[i][0],pts[i][1]); g.closePath(); }
+        trace(); g.fillStyle=tone(); g.fill();
+        if(grainDir){ g.save(); g.clip(); g.strokeStyle='rgba(0,0,0,0.05)'; g.lineWidth=1;
+          var cx=0,cy=0; pts.forEach(function(p){cx+=p[0];cy+=p[1];}); cx/=pts.length; cy/=pts.length;
+          for(var k=-6;k<=6;k++){ var o=k*4+rnd()*3; g.beginPath(); g.moveTo(cx-grainDir[0]*400-grainDir[1]*o, cy-grainDir[1]*400+grainDir[0]*o); g.lineTo(cx+grainDir[0]*400-grainDir[1]*o, cy+grainDir[1]*400+grainDir[0]*o); g.stroke(); }
+          g.restore(); }
+        trace(); g.strokeStyle=joint; g.lineWidth=2; g.stroke();
+      }
+      function rect(x,y,w,h){ poly([[x,y],[x+w,y],[x+w,y+h],[x,y+h]], w>=h?[1,0]:[0,1]); }
+      if(posa==='spina_pesce'){
+        // listelli rettangolari 1:5, teste dritte a 90°, ruotati di 45°
+        var w=34, L=170; g.save(); g.translate(S/2,S/2); g.rotate(Math.PI/4);
+        for(var i=-40;i<=40;i++) for(var j=-8;j<=8;j++){
+          var ox=i*w+j*L, oy=i*w-j*L; if(Math.abs(ox)>900||Math.abs(oy)>900) continue;
+          rect(ox,oy,L,w); rect(ox,oy+w,w,L);
+        }
+        g.restore();
+      } else if(posa==='spina_ungherese'){
+        var C=110, h=40;
+        for(var x0=-C; x0<S+C; x0+=2*C) for(var y=-3*C; y<S+3*C; y+=h){
+          poly([[x0,y],[x0+C,y-C],[x0+C,y-C+h],[x0,y+h]],[0.707,-0.707]);
+          poly([[x0+C,y-C],[x0+2*C,y],[x0+2*C,y+h],[x0+C,y-C+h]],[0.707,0.707]);
+        }
+      } else if(posa==='quadri'){
+        var Q=128, n=4, st=Q/n;
+        for(var qy=0; qy<S; qy+=Q) for(var qx=0; qx<S; qx+=Q){
+          var hor=((qx/Q)+(qy/Q))%2===0;
+          for(var k=0;k<n;k++){ if(hor) rect(qx,qy+k*st,Q,st); else rect(qx+k*st,qy,st,Q); }
+        }
+      } else if(posa==='dritta'){
+        var tw=256, th=128; for(var yy=0; yy<S; yy+=th) for(var xx=0; xx<S; xx+=tw) rect(xx,yy,tw,th);
+      } else if(posa==='fascia_bindello'){
+        var b=120, bi=10, ww=36, LL=220, r=0;
+        for(var y2=b+bi; y2<S-b-bi; y2+=ww, r++){ var off=-(r*LL/2)%LL; for(var x2=b+bi+off; x2<S-b-bi; x2+=LL){ var xs=Math.max(x2,b+bi), xe=Math.min(x2+LL,S-b-bi); rect(xs,y2,xe-xs,Math.min(ww,S-b-bi-y2)); } }
+        g.fillStyle=joint; g.fillRect(b,b,S-2*b,bi); g.fillRect(b,S-b-bi,S-2*b,bi); g.fillRect(b,b,bi,S-2*b); g.fillRect(S-b-bi,b,bi,S-2*b);
+        for(var t=0;t<S;t+=ww){ rect(t,0,ww,b); rect(t,S-b,ww,b); }
+        for(var t2=b;t2<S-b;t2+=ww){ rect(0,t2,b,ww); rect(S-b,t2,b,ww); }
+      } else {
+        // cassero regolare / irregolare / cassero SPC
+        var pw=48, reg=(posa==='cassero_regolare'), PL=300, row=0;
+        for(var y3=0; y3<S; y3+=pw, row++){
+          var x3 = reg ? -((row%2)*PL/2) : -rnd()*PL;
+          while(x3<S){ var len = reg ? PL : (160+rnd()*260); rect(x3,y3,len,pw); x3+=len; }
+        }
+      }
+      return cv.toDataURL('image/jpeg',0.85);
+    }catch(e){ return null; }
+  }
   function buildParquetPosaChoice(cat){
     var STY = posaStyleFor(cat.id);
     if(!STY[state.parquetPosa]) state.parquetPosa = null;
@@ -5374,6 +5435,7 @@
     // il prefisso "data:image/...;base64," prima di passarla a Gemini.
     var colorCardImage = (state.material.id === 'imbiancatura' && state.context === 'esterno') ? buildColorCardDataUrl() : null;
     var boiserieStyleRefImage = null;
+    var posaRefImage = ((state.material.id === 'parquet' || state.material.id === 'spc') && state.parquetPosa) ? buildPosaRefImage(state.parquetPosa, state.colorA && state.colorA.hex) : null;
     if(state.material.id === 'decorazioni' && state.boiserieStyle){
       var refImgEl = document.querySelector('.boiserie-grid button[data-v="' + state.boiserieStyle + '"] img');
       if(refImgEl && refImgEl.getAttribute('src')) boiserieStyleRefImage = refImgEl.getAttribute('src');
@@ -5395,6 +5457,7 @@
         boiserieHeight: state.boiserieStyle === 'pannello' ? state.boiserieHeight : null,
         boiserieStyleRefImage: boiserieStyleRefImage,
         colorCardImage: colorCardImage,
+        posaRefImage: posaRefImage,
         righeSpessore: needsRigheColor() ? state.righeSpessore : null,
         resinaArea: (state.category && (state.category.id === 'monolith' || state.category.id === 'microcemento')) ? state.resinaArea : null,
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
