@@ -6160,7 +6160,10 @@
   }
   function pdfChoiceLines(){
     var skip = /^(Richiesta preventivo|Tipo cliente|Nome:|Telefono:|Email:|Mq indicativi|Città|Note:)/;
-    return buildMessage().split('\n').filter(function(l){ return l && !skip.test(l); });
+    return buildMessage().split('\n').filter(function(l){ return l && !skip.test(l); }).map(function(l){
+      if(/^Colore:/.test(l) && isInterniPittura()) return l.replace(/^Colore:/, 'Pareti:');
+      return l;
+    });
   }
   document.getElementById('pdfBtn').addEventListener('click', function(){
     if(!aiResultImage || !photoImg) return;
@@ -6192,7 +6195,7 @@
       y += 5;
       // prima / dopo
       var bw = (W - 2*M - 6) / 2, b1 = imgToJpeg(photoImg, 1100), b2 = imgToJpeg(aiResultImage, 1100);
-      var bh = Math.min(bw * b1.h / b1.w, 95);
+      var bh = Math.min(bw * b1.h / b1.w, 125);
       function box(im, x, label){ var ww = bh * im.w / im.h, xx = x, hh = bh; if(ww > bw){ ww = bw; hh = bw * im.h / im.w; } xx = x + (bw - ww)/2;
         doc.addImage(im.url, 'JPEG', xx, y, ww, hh); doc.setFillColor(28,27,24); doc.roundedRect(xx + 2, y + 2, 16, 5.5, 1, 1, 'F');
         doc.setTextColor(255,255,255); doc.setFontSize(7.5); doc.setFont('helvetica','bold'); doc.text(label, xx + 10, y + 5.8, { align:'center' }); }
@@ -6201,12 +6204,16 @@
       // scelte
       doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text('Materiali e colori scelti', M, y); y += 5.5;
       doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+      var sw = {}; ['colorA','colorB','colorC','colorPlafone','colorAccento','colorBordatura','colorDavanzali','colorSottotetto','colorTetto','colorCornici','colorSerramenti','colorBalconi','colorRighe'].forEach(function(k){ var c = state[k]; if(c && c.hex){ if(c.code) sw[c.code] = c.hex; if(c.name) sw[c.name] = c.hex; } });
       pdfChoiceLines().forEach(function(l){
         var i = l.indexOf(':'), k = i > 0 ? l.slice(0, i+1) : '', v = i > 0 ? l.slice(i+1).trim() : l;
-        var wrapped = doc.splitTextToSize(v, W - 2*M - 52);
-        if(y + wrapped.length*4.6 > 270){ doc.addPage(); y = M; }
+        var hex = null; Object.keys(sw).forEach(function(key){ if(!hex && key && v.indexOf(key) > -1) hex = sw[key]; });
+        var tx = M + 52 + (hex ? 7 : 0);
+        var wrapped = doc.splitTextToSize(v, W - M - tx);
+        if(y + wrapped.length*5.2 > 270){ doc.addPage(); y = M; }
         doc.setTextColor.apply(doc, soft); doc.text(k, M, y);
-        doc.setTextColor.apply(doc, ink); doc.text(wrapped, M + 52, y); y += wrapped.length * 4.6 + 1;
+        if(hex){ var h = hex.replace('#',''); doc.setFillColor(parseInt(h.substr(0,2),16), parseInt(h.substr(2,2),16), parseInt(h.substr(4,2),16)); doc.setDrawColor(200,200,200); doc.setLineWidth(0.2); doc.roundedRect(M + 52, y - 3.4, 5, 4.2, 0.8, 0.8, 'FD'); }
+        doc.setTextColor.apply(doc, ink); doc.text(wrapped, tx, y); y += wrapped.length * 5.2 + 0.8;
       });
       // note / preventivo
       var note = document.getElementById('pdfNote').value.trim();
