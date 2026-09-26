@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -166,6 +166,18 @@ module.exports = async function handler(req, res) {
     grossa: "rasatura/rivestimento a spessore per esterni a grana grossa: superficie opaca e marcatamente ruvida, granelli minerali grandi (circa 1,5-2 mm) fitti e irregolari con piccoli pori tra loro, rilievo tridimensionale ben visibile con ombre nette tra i granelli, aspetto di intonachino/rivestimento rustico reale; NON liscia"
   };
   const isGranaStyled = materialId === "imbiancatura" && context === "esterno" && GRANA_TEXTURE[grana];
+  // SPC: nel catalogo Rendrum i colori SPC sono tutti effetto LEGNO (doghe);
+  // solo la posa "dritta" è in piastroni effetto pietra/cemento.
+  if (materialId === "spc") {
+    const SPC_LINES = {
+      bloom: "pavimento SPC Quick-Step Alpha Vinyl collezione Bloom: DOGHE EFFETTO LEGNO di 20,9 cm di larghezza e 149,4 cm di lunghezza, stampa legno ad alta definizione con venature ben visibili nel colore indicato, microbisello su tutti i lati che rende visibile ogni singola doga, superficie opaca-satinata con leggera goffratura a registro",
+      blos: "pavimento SPC Quick-Step Alpha Vinyl collezione Blos: DOGHE EFFETTO LEGNO di 18,9 cm di larghezza e 125,1 cm di lunghezza, stampa legno ad alta definizione con venature ben visibili nel colore indicato, microbisello su tutti i lati che rende visibile ogni singola doga, superficie opaca-satinata",
+      ciro: "pavimento SPC Quick-Step Alpha Vinyl collezione Ciro: LISTELLI EFFETTO LEGNO di 12,6 × 63 cm posati A SPINA DI PESCE CLASSICA, stampa legno con venature visibili nel colore indicato, microbisello su tutti i lati, superficie opaca-satinata",
+      illume: "pavimento SPC Quick-Step Alpha Vinyl collezione Illume: PIASTRE rettangolari di 42,8 × 85,6 cm con stampa EFFETTO CEMENTO/pietra morbida e leggermente nuvolata nel colore indicato, microbisello su tutti i lati che rende visibile ogni piastra, superficie opaca, senza fughe stuccate",
+    };
+    const lineDesc = SPC_LINES[spcLine] || SPC_LINES.bloom;
+    MATERIAL_TEXTURE.spc = lineDesc + "; deve essere chiaramente riconoscibile " + (spcLine === "illume" ? "come pavimento a piastre" : "come pavimento in legno a doghe anche se il colore è molto scuro, NON un pavimento uniforme, NON piastrelle, NON resina o cemento") + ", posato su tutto il pavimento";
+  }
   const baseTextureDesc = materialId === "decorazioni"
     ? boiserieDesc
     : isGranaStyled
@@ -179,6 +191,9 @@ module.exports = async function handler(req, res) {
     spina_ungherese: "posa a SPINA UNGHERESE (chevron): listelli con le teste tagliate a 45° (parallelogrammi), accostati testa contro testa in modo da formare file di frecce a V continue tutte nella stessa direzione, con le punte allineate lungo linee di giunzione dritte e continue; NON è la spina di pesce classica a gradini",
     quadri: "posa a quadri (mosaico/dama): quadrotti formati da gruppi di listelli paralleli, con la direzione dei listelli alternata di 90° da un quadrotto all'altro come una scacchiera",
     cassero: "posa a cassero (a correre): doghe lunghe parallele con i giunti di testa sfalsati in modo naturale",
+    correre: "posa a correre (tolda di nave): doghe lunghe parallele con i giunti di testa sfalsati in modo naturale e casuale, mai allineati tra file vicine",
+    sfalsata: "piastre rettangolari posate in file parallele, ogni fila sfalsata di metà lunghezza rispetto alla precedente",
+    griglia: "piastre rettangolari posate a griglia con tutti i giunti allineati in entrambe le direzioni",
     dritta: "posa dritta in linea: piastrelle rettangolari grandi (circa 60x120 cm) accostate su una griglia regolare con giunti allineati in entrambe le direzioni",
     fascia_bindello: "posa con fascia e bindello: campo centrale in listelli paralleli, incorniciato lungo tutto il perimetro della stanza da una fascia di listelli posati in senso perpendicolare e da un sottile bindello (listello di bordo) che corre parallelo ai muri, con gli angoli tagliati a 45°"
   };
