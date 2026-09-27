@@ -495,6 +495,16 @@
   .q-li{ display:flex; justify-content:space-between; gap:8px; border:1px solid var(--line); border-radius:8px; padding:7px 10px; margin-bottom:6px; font-size:13px; color:var(--ink); }
   .q-li button{ border:none; background:none; color:var(--ink-soft); cursor:pointer; }
   @media (max-width:480px){ .q-row3{ grid-template-columns:1fr 1fr; } .q-row3 .field:last-child{ grid-column:1 / -1; } }
+  .ql-row{ border:1.5px solid var(--line); border-radius:10px; margin-bottom:8px; overflow:hidden; }
+  .ql-head{ display:flex; align-items:center; gap:10px; width:100%; background:none; border:none; padding:10px 12px; text-align:left; cursor:pointer; font-family:inherit; color:var(--ink); }
+  .ql-head .ql-t{ flex:1; min-width:0; font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .ql-head .ql-p{ flex:none; font-size:13px; font-weight:800; }
+  .ql-head .ql-p.miss{ color:#C0392B; font-weight:700; font-size:12px; }
+  .ql-lav{ display:inline-block; font-size:10.5px; font-weight:700; padding:2px 7px; border-radius:999px; background:var(--accent-soft); color:var(--ink); margin-right:6px; }
+  .ql-body{ display:none; padding:4px 12px 10px; }
+  .ql-row.open .ql-body{ display:block; }
+  .ql-body .field{ margin-bottom:10px; }
+  .ql-tools{ display:flex; gap:14px; justify-content:flex-end; }
   .pp-back-link{ border:none; background:none; color:var(--ink-soft); font-size:12px; cursor:pointer; font-family:inherit; padding:0; margin-bottom:14px; text-decoration:underline; }
   .pp-error{ font-size:12px; color:#C0392B; margin-top:-6px; margin-bottom:14px; min-height:14px; }
   .pp-delete-btn{ width:100%; border:1.5px solid #C0392B; background:none; color:#C0392B; border-radius:10px; padding:11px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-top:10px; }
@@ -678,7 +688,8 @@
       </div>
       <div class="pp-list" id="qList"></div>
       <button type="button" class="pp-new-btn" id="qNewBtn">+ Nuovo preventivo</button>
-      <button type="button" class="pp-profile-btn" id="qSettingsBtn">⚙︎ Dati impresa, banca, condizioni e listino</button>
+      <button type="button" class="pp-profile-btn" id="qListinoBtn">📋 Il mio listino prezzi</button>
+      <button type="button" class="pp-profile-btn" id="qSettingsBtn">⚙︎ Dati impresa, banca e condizioni</button>
     </div>
 
     <!-- Preventivi: editor -->
@@ -714,6 +725,7 @@
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
         <button type="button" class="q-add" id="qVoceAdd">＋ Aggiungi voce</button>
         <div class="field" style="margin:0;flex:1;min-width:180px"><select id="qFromListino"></select></div>
+        <button type="button" class="q-link" id="qEdListino">Listino</button>
       </div>
 
       <div class="pf-sec">Importi</div>
@@ -765,6 +777,23 @@
       </div>
     </div>
 
+    <!-- Preventivi: listino prezzi -->
+    <div class="pro-projects-view" id="ppViewListino">
+      <button type="button" class="pp-back-link" id="qlBack">← Indietro</button>
+      <div class="pro-projects-title">Il mio listino prezzi</div>
+      <div class="pro-projects-sub">Le tue lavorazioni con prezzo (€/mq, €/ml, a corpo…) e descrizione. Le ritrovi con un tocco in ogni preventivo, e quando crei un preventivo da un'anteprima Rendrum il prezzo si inserisce da solo.</div>
+      <div class="field"><label>Mostra</label><select id="qlFilter"></select></div>
+      <div id="qlList"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px">
+        <button type="button" class="q-add" id="qlAdd">＋ Nuova voce</button>
+        <button type="button" class="q-add" id="qlStd">＋ Aggiungi le voci standard Rendrum</button>
+      </div>
+      <div class="pf-hint">Le voci standard hanno descrizioni già scritte in modo professionale: mettici i tuoi prezzi e modifica i testi come preferisci.</div>
+      <div class="pp-error" id="qlErr" style="margin-top:12px"></div>
+      <div class="pf-hint" id="qlMsg" style="color:var(--ink)"></div>
+      <button type="button" class="pro-auth-submit" id="qlSave">Salva listino</button>
+    </div>
+
     <!-- Preventivi: impostazioni -->
     <div class="pro-projects-view" id="ppViewQSettings">
       <button type="button" class="pp-back-link" id="qSetBack">← Indietro</button>
@@ -806,10 +835,7 @@
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="q-add" id="qSetCondAdd">＋ Clausola</button><button type="button" class="q-link" id="qSetCondReset">Ripristina i testi Rendrum</button></div>
       </details>
 
-      <details style="margin-top:4px">
-        <summary class="pf-sec q-sec-sum">Listino voci ▸</summary>
-        <div id="qSetListino"></div>
-      </details>
+      <div style="margin-top:10px"><button type="button" class="q-link" id="qSetListinoBtn">📋 Apri il listino prezzi</button></div>
 
       <div class="pp-error" id="qSetErr" style="margin-top:14px"></div>
       <div class="pf-hint" id="qSetMsg" style="color:var(--ink)"></div>
@@ -7463,8 +7489,8 @@
     document.getElementById('ppViewList').classList.toggle('active', view === 'list');
     document.getElementById('ppViewForm').classList.toggle('active', view === 'form');
     document.getElementById('ppViewProfile').classList.toggle('active', view === 'profile');
-    ['quotes','quote','qsettings'].forEach(function(v){ document.getElementById({ quotes:'ppViewQuotes', quote:'ppViewQuote', qsettings:'ppViewQSettings' }[v]).classList.toggle('active', view === v); });
-    if(['quote','qsettings'].indexOf(view) < 0) document.querySelector('#proProjectsModal .pro-projects-card').classList.remove('wide');
+    ['quotes','quote','qsettings','listino'].forEach(function(v){ document.getElementById({ quotes:'ppViewQuotes', quote:'ppViewQuote', qsettings:'ppViewQSettings', listino:'ppViewListino' }[v]).classList.toggle('active', view === v); });
+    if(['quote','qsettings','listino'].indexOf(view) < 0) document.querySelector('#proProjectsModal .pro-projects-card').classList.remove('wide');
   }
 
   function ppOpen(){
@@ -8172,19 +8198,31 @@
       q.lavorazione = (state.material && state.material.id) || '';
       q.condizioni.forEach(function(c){ if(c.key === 'finiture') c.testo = Q_FINITURE[qFinKey(q.lavorazione)]; });
       q.oggetto = titles.length ? 'Offerta per la realizzazione di: ' + titles.join(' + ') : '';
+      var mqv = qParse((document.getElementById('fMq') || {}).value || '');
+      qs._missingPrices = [];
       q.voci = titles.length ? titles.map(function(t, i){
         var lines = i < layers.length ? layers[i].lines : pdfChoiceLines();
-        return { titolo: t, descrizione: lines.filter(function(l){ return !/^Lavorazione:/.test(l); }).join('\n'), qta:1, um:'a corpo', prezzo:0 };
+        var snap = i < layers.length ? (layers[i].stateSnap || {}) : state;
+        var matId = snap.material && snap.material.id || '';
+        var scelte = lines.filter(function(l){ return !/^Lavorazione:/.test(l); }).join('\n');
+        var it = qListinoMatch(matId, snap.context);
+        if(it){
+          return { titolo: it.titolo, descrizione: (it.descrizione ? it.descrizione + '\n' : '') + scelte, qta: (it.um === 'mq' && mqv) ? mqv : 1, um: it.um, prezzo: it.prezzo, lavorazione: matId };
+        }
+        qs._missingPrices.push(t);
+        return { titolo: t, descrizione: scelte, qta: mqv || 1, um: mqv ? 'mq' : 'a corpo', prezzo:0, lavorazione: matId };
       }) : q.voci;
       var nome = (document.getElementById('fName') || {}).value || '', city = (document.getElementById('fCity') || {}).value || '';
       var tel = (document.getElementById('fPhone') || {}).value || '', mail = (document.getElementById('fEmail') || {}).value || '';
       var mq = (document.getElementById('fMq') || {}).value || '';
       q.cliente.nome = nome.trim(); q.cliente.telefono = tel.trim(); q.cliente.email = mail.trim();
       if(city) q.cantiere.indirizzo = city.trim();
-      if(mq && q.voci.length === 1){ q.voci[0].qta = qParse(mq) || 1; q.voci[0].um = 'mq'; }
       if(q.cliente.nome) q.intro = Q_INTRO.replace('{cliente}', q.cliente.nome);
       if(pv){ q.anteprima = { attiva:true, righe: righe }; qs._pv = pv; } else qs._pv = null;
-    }).then(function(){ qs.newPreview = qs._pv || null; qRenderPreviewBox(); });
+    }).then(function(){
+      qs.newPreview = qs._pv || null; qRenderPreviewBox();
+      if(qs._missingPrices && qs._missingPrices.length) document.getElementById('qEdMsg').innerHTML = '💡 Nel tuo listino non c\'è ancora un prezzo per: <b>' + qEsc(qs._missingPrices.join(', ')) + '</b>. Inseriscilo qui sotto, poi tocca "☆ Listino" sulla voce: la prossima volta si compila da solo.';
+    });
   }
 
   // ----- editor -----
@@ -8263,17 +8301,23 @@
   }
   function qRenderListinoSel(){
     var sel = document.getElementById('qFromListino'), L = qs.settings.listino || [];
-    sel.innerHTML = '<option value="">＋ Aggiungi dal listino…</option>' + L.map(function(v, i){ return '<option value="' + i + '">' + qEsc(v.titolo) + (v.prezzo ? ' — ' + qEsc(qpEur(v.prezzo)) + '/' + qEsc(v.um) : '') + '</option>'; }).join('');
+    var html = '<option value="">＋ Aggiungi dal listino…</option>';
+    Q_LAV.slice(1).concat([Q_LAV[0]]).forEach(function(l){
+      var items = L.map(function(v, i){ return [v, i]; }).filter(function(x){ return (x[0].lavorazione || '') === l[0]; });
+      if(!items.length) return;
+      html += '<optgroup label="' + qEsc(l[0] ? l[1] : 'Altre voci') + '">' + items.map(function(x){ return '<option value="' + x[1] + '">' + qEsc(x[0].titolo) + (x[0].prezzo ? ' — ' + qEsc(qpEur(x[0].prezzo)) + (x[0].um === 'a corpo' || x[0].um === 'forfait' ? ' ' + qEsc(x[0].um) : '/' + qEsc(x[0].um)) : ' — prezzo da inserire') + '</option>'; }).join('') + '</optgroup>';
+    });
+    sel.innerHTML = html;
     sel.hidden = !L.length;
   }
   function qAddToListino(v, btn){
     if(!v.titolo){ btn.textContent = 'Serve il titolo'; setTimeout(function(){ btn.textContent = '☆ Listino'; }, 1500); return; }
     var s = qs.settings; s.listino = (s.listino || []).filter(function(x){ return x.titolo !== v.titolo; });
-    s.listino.push({ titolo:v.titolo, descrizione:v.descrizione, qta:1, um:v.um, prezzo:v.prezzo });
+    s.listino.push({ titolo:v.titolo, descrizione:v.descrizione, qta:1, um:v.um, prezzo:v.prezzo, lavorazione: v.lavorazione || qs.cur.lavorazione || '' });
     btn.disabled = true;
-    qApi('settings', 'POST', s).then(function(x){
+    qApi('listino', 'POST', { listino: s.listino }).then(function(x){
       btn.disabled = false;
-      if(x.ok){ qs.settings.listino = x.d.settings.listino; btn.textContent = '★ Salvata'; qRenderListinoSel(); }
+      if(x.ok){ qs.settings.listino = x.d.listino; btn.textContent = '★ Salvata'; qRenderListinoSel(); }
       else btn.textContent = 'Errore';
       setTimeout(function(){ btn.textContent = '☆ Listino'; }, 1800);
     }).catch(function(){ btn.disabled = false; });
@@ -8343,7 +8387,7 @@
     if((q.oggetto || '').trim().length < 3) m.push('oggetto');
     var voci = q.voci.filter(function(v){ return v.titolo || v.descrizione || v.prezzo; });
     if(!voci.length) m.push('almeno una voce');
-    q.voci.forEach(function(v, i){ if((v.descrizione || v.prezzo) && !v.titolo) m.push('titolo della voce ' + (i+1)); if(v.titolo && !v.qta) m.push('quantità della voce ' + (i+1)); });
+    q.voci.forEach(function(v, i){ if((v.descrizione || v.prezzo) && !v.titolo) m.push('titolo della voce ' + (i+1)); if(v.titolo && !v.qta) m.push('quantità della voce ' + (i+1)); if(v.titolo && !v.prezzo) m.push('prezzo della voce ' + (i+1)); });
     var sum = q.rate.reduce(function(s, r){ return s + (Number(r.pct) || 0); }, 0);
     if(!q.rate.length || Math.abs(sum - 100) > 0.01) m.push('rate di pagamento (100%)');
     if(Number(q.iva.aliquota) === 0 && !(q.iva.nota || '').trim()) m.push("motivo dell'IVA a 0%");
@@ -8412,7 +8456,6 @@
       qSetCond = qClone(s.condizioni);
       qRenderCond('qSetCondBox', qSetCond);
       qRenderSetRate(s.rate);
-      qRenderSetListino();
       document.getElementById('qSetErr').textContent = ''; document.getElementById('qSetMsg').textContent = '';
       qCard(true); ppShowView('qsettings'); qScrollTop();
     }).catch(function(e){ var el = document.getElementById('qListErr'); if(el) el.textContent = e.message; });
@@ -8423,16 +8466,6 @@
     var sel = document.getElementById('qSetRatePreset');
     var key = Object.keys(Q_RATE_PRESETS).filter(function(k){ return JSON.stringify(Q_RATE_PRESETS[k]) === JSON.stringify(qSetRateList); })[0];
     sel.value = key || '50/50';
-  }
-  function qRenderSetListino(){
-    var box = document.getElementById('qSetListino'), L = qs.settings.listino || [];
-    box.innerHTML = L.length ? '' : '<div class="pf-hint">Il listino è vuoto. Nel preventivo usa "☆ Listino" su una voce per salvarla qui e riusarla.</div>';
-    L.forEach(function(v, i){
-      var d = document.createElement('div'); d.className = 'q-li';
-      d.innerHTML = '<span>' + qEsc(v.titolo) + (v.prezzo ? ' — ' + qEsc(qpEur(v.prezzo)) + '/' + qEsc(v.um) : '') + '</span><button type="button" title="Togli">✕</button>';
-      d.querySelector('button').addEventListener('click', function(){ qs.settings.listino.splice(i, 1); qRenderSetListino(); });
-      box.appendChild(d);
-    });
   }
   function qSaveSettings(){
     var err = document.getElementById('qSetErr'), msg = document.getElementById('qSetMsg'), btn = document.getElementById('qSetSave');
@@ -8467,6 +8500,122 @@
   document.getElementById('qNewBtn').addEventListener('click', function(){ qNew(null); });
   document.getElementById('qSettingsBtn').addEventListener('click', qOpenSettings);
   document.getElementById('qPivaGo').addEventListener('click', qOpenSettings);
+  // ----- listino prezzi -----
+  var Q_STD = [
+    ['monolith','Pavimento in resina spatolata','Preparazione del supporto mediante carteggiatura e aspirazione delle polveri, stesura di primer consolidante, rasatura di livellamento con rete in fibra di vetro ove necessario, applicazione di due mani di resina spatolata nel colore ed effetto scelti, finitura protettiva poliuretanica (opaca o lucida).','mq'],
+    ['monolith','Rivestimento pareti in resina','Preparazione e rasatura delle pareti, primer di aggrappo, applicazione di due mani di resina a spatola nel colore ed effetto scelti, finitura protettiva idrorepellente.','mq'],
+    ['monolith','Bagno in resina (pavimento, rivestimento e doccia)','Realizzazione di pavimento e rivestimento in resina compresa area doccia. Fornitura e posa di sistema impermeabilizzante specifico nella zona doccia e nelle aree a contatto diretto con l\'acqua, a protezione del supporto da infiltrazioni. Successiva applicazione di ciclo resinato per pavimenti e rivestimenti verticali, con finitura superficiale.','a corpo'],
+    ['microcemento','Pavimento in microcemento','Pulizia e preparazione del supporto, primer di aggrappo, rete in fibra di vetro, due mani di microcemento di fondo e due mani di finitura nel colore scelto, protettivo poliuretanico bicomponente.','mq'],
+    ['microcemento','Rivestimento pareti in microcemento','Preparazione delle pareti, primer, due mani di microcemento di fondo e due di finitura nel colore scelto, protettivo idrorepellente.','mq'],
+    ['scale','Rivestimento gradini in resina','Preparazione di alzata e pedata, primer, applicazione di resina spatolata nel colore scelto con rinforzo degli spigoli, finitura protettiva antiscivolo. Prezzo per singolo gradino.','pz'],
+    ['imbiancatura','Tinteggiatura pareti e soffitti interni','Protezione di pavimenti e arredi, stuccatura di piccole imperfezioni, carteggiatura, una mano di fissativo e due mani di idropittura traspirante nel colore scelto.','mq'],
+    ['imbiancatura','Tinteggiatura facciata esterna','Lavaggio e pulizia della superficie, ripristino di piccole crepe, una mano di fissativo e due mani di pittura per esterni (silossanica o al quarzo) nel colore scelto. Ponteggi esclusi se non indicati.','mq'],
+    ['resina_haccp','Pavimento in resina HACCP','Preparazione meccanica del supporto (pallinatura o levigatura), primer epossidico, rivestimento in resina epossidica/poliuretano-cemento nello spessore indicato, finitura antiscivolo idonea agli ambienti alimentari secondo HACCP.','mq'],
+    ['resina_haccp','Sguscia sanitaria perimetrale','Raccordo arrotondato parete-pavimento in resina, per facilitare pulizia e igiene secondo HACCP.','ml'],
+    ['spc','Fornitura e posa pavimento SPC','Fornitura di pavimento SPC a incastro nel decoro scelto, materassino fonoassorbente, posa flottante con tagli e raccordi. Battiscopa e profili esclusi se non indicati.','mq'],
+    ['laminato','Fornitura e posa pavimento in laminato','Fornitura di pavimento in laminato a incastro nel decoro scelto, materassino isolante, posa flottante con tagli e raccordi. Battiscopa e profili esclusi se non indicati.','mq'],
+    ['parquet','Fornitura e posa parquet','Fornitura di parquet nell\'essenza, formato e finitura scelti, posa incollata o flottante secondo lo schema scelto (dritta, spina di pesce, ecc.), tagli e raccordi.','mq'],
+    ['piastrelle','Posa pavimento in piastrelle','Posa di piastrelle in gres porcellanato con collante cementizio, fughe nel colore scelto, tagli e rifiniture. Fornitura delle piastrelle esclusa se non indicata.','mq'],
+    ['graniglia_esterni','Pavimentazione in graniglia per esterni','Preparazione del sottofondo, stesura di graniglia di sasso naturale legata con resina poliuretanica trasparente nello spessore indicato, superficie drenante nel colore scelto.','mq'],
+    ['','Rimozione pavimento esistente e smaltimento','Demolizione del pavimento esistente, carico, trasporto e smaltimento in discarica autorizzata.','mq'],
+    ['','Rasatura e livellamento del sottofondo','Rasatura autolivellante per correggere dislivelli e imperfezioni del supporto prima della posa.','mq'],
+    ['','Battiscopa','Fornitura e posa di battiscopa coordinato.','ml'],
+    ['','Protezione ambienti e pulizia finale','Protezione di arredi e superfici non interessate dai lavori e pulizia a fine cantiere.','a corpo']
+  ];
+  var ql = { list: [], open: -1, filter: '*', from: 'quotes' };
+  function qListinoMatch(id, context){
+    var L = (qs.settings && qs.settings.listino || []).filter(function(v){ return v.lavorazione === id && v.prezzo > 0; });
+    if(!L.length) return null;
+    if(id === 'imbiancatura'){
+      var ext = L.filter(function(v){ return /esterno|esterna|facciat/i.test(v.titolo); }), int = L.filter(function(v){ return !/esterno|esterna|facciat/i.test(v.titolo); });
+      if(context === 'esterno' && ext.length) return ext[0];
+      if(context !== 'esterno' && int.length) return int[0];
+    }
+    return L[0];
+  }
+  function qlLavName(id){ var f = Q_LAV.filter(function(l){ return l[0] === id; })[0]; return id && f ? f[1] : 'Altre voci'; }
+  function qOpenListino(from){
+    qLoadSettings().then(function(s){
+      ql.list = qClone(s.listino || []); ql.open = -1; ql.from = from || 'quotes';
+      var f = document.getElementById('qlFilter');
+      f.innerHTML = '<option value="*">Tutte le lavorazioni</option>' + Q_LAV.map(function(l){ return '<option value="' + l[0] + '">' + qEsc(l[0] ? l[1] : 'Altre voci') + '</option>'; }).join('');
+      f.value = ql.filter = '*';
+      document.getElementById('qlErr').textContent = ''; document.getElementById('qlMsg').textContent = '';
+      qlRender(); qCard(true); ppShowView('listino'); qScrollTop();
+    }).catch(function(e){ var el = document.getElementById('qListErr'); if(el) el.textContent = e.message; });
+  }
+  function qlRender(){
+    var box = document.getElementById('qlList'); box.innerHTML = '';
+    var shown = 0;
+    ql.list.forEach(function(v, i){
+      if(ql.filter !== '*' && (v.lavorazione || '') !== ql.filter) return;
+      shown++;
+      var d = document.createElement('div'); d.className = 'ql-row' + (ql.open === i ? ' open' : '');
+      var price = v.prezzo ? qpEur(v.prezzo) + (v.um === 'a corpo' || v.um === 'forfait' ? ' ' + v.um : '/' + v.um) : 'prezzo da inserire';
+      d.innerHTML = '<button type="button" class="ql-head"><span class="ql-t"><span class="ql-lav">' + qEsc(qlLavName(v.lavorazione || '')) + '</span>' + qEsc(v.titolo || 'Nuova voce') + '</span><span class="ql-p' + (v.prezzo ? '' : ' miss') + '">' + qEsc(price) + '</span></button>'
+        + '<div class="ql-body">'
+        + '<div class="field"><label>Lavorazione</label><select data-f="lavorazione">' + Q_LAV.map(function(l){ return '<option value="' + l[0] + '">' + qEsc(l[0] ? l[1] : 'Altre voci') + '</option>'; }).join('') + '</select></div>'
+        + '<div class="field"><label>Titolo della voce *</label><input type="text" maxlength="160" data-f="titolo"></div>'
+        + '<div class="field"><label>Descrizione (come apparirà nel preventivo)</label><textarea rows="4" maxlength="3000" data-f="descrizione"></textarea></div>'
+        + '<div class="row2"><div class="field"><label>Unità di misura</label><select data-f="um">' + Q_UNITS.map(function(u){ return '<option>' + u + '</option>'; }).join('') + '</select></div>'
+        + '<div class="field"><label>Prezzo € (IVA esclusa) *</label><input type="text" inputmode="decimal" data-f="prezzo" data-n="1" placeholder="0,00"></div></div>'
+        + '<div class="ql-tools"><button type="button" class="q-link" data-a="dup">Duplica</button><button type="button" class="q-link" data-a="del" style="color:#C0392B">Elimina</button></div>'
+        + '</div>';
+      d.querySelector('.ql-head').addEventListener('click', function(){ ql.open = ql.open === i ? -1 : i; qlRender(); });
+      d.querySelectorAll('[data-f]').forEach(function(el){
+        var f = el.dataset.f; el.value = el.dataset.n ? qFmtIn(v[f]) : (v[f] || (f === 'um' ? 'a corpo' : ''));
+        el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function(){
+          v[f] = el.dataset.n ? qParse(el.value) : el.value;
+          var h = d.querySelector('.ql-head');
+          h.querySelector('.ql-t').innerHTML = '<span class="ql-lav">' + qEsc(qlLavName(v.lavorazione || '')) + '</span>' + qEsc(v.titolo || 'Nuova voce');
+          var pp = h.querySelector('.ql-p'); pp.textContent = v.prezzo ? qpEur(v.prezzo) + (v.um === 'a corpo' || v.um === 'forfait' ? ' ' + v.um : '/' + v.um) : 'prezzo da inserire'; pp.classList.toggle('miss', !v.prezzo);
+        });
+      });
+      d.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', function(){
+        if(b.dataset.a === 'del'){ ql.list.splice(i, 1); ql.open = -1; }
+        else { ql.list.splice(i + 1, 0, qClone(v)); ql.list[i + 1].titolo += ' (copia)'; ql.open = i + 1; }
+        qlRender();
+      }); });
+      box.appendChild(d);
+    });
+    if(!shown) box.innerHTML = '<div class="pp-empty">Nessuna voce' + (ql.filter !== '*' ? ' per questa lavorazione' : '') + '. Aggiungi le voci standard Rendrum o creane una nuova.</div>';
+  }
+  function qlSave(){
+    var err = document.getElementById('qlErr'), msg = document.getElementById('qlMsg'), btn = document.getElementById('qlSave');
+    err.textContent = ''; msg.textContent = '';
+    var bad = ql.list.map(function(v, i){ return !(v.titolo || '').trim() ? i : -1; }).filter(function(i){ return i >= 0; });
+    if(bad.length){ ql.open = bad[0]; ql.filter = '*'; document.getElementById('qlFilter').value = '*'; qlRender(); err.textContent = 'Ogni voce deve avere un titolo.'; return; }
+    btn.disabled = true;
+    qApi('listino', 'POST', { listino: ql.list }).then(function(x){
+      if(!x.ok){ err.textContent = (x.d && x.d.error) || 'Salvataggio non riuscito.'; return; }
+      qs.settings.listino = x.d.listino; ql.list = qClone(x.d.listino); ql.open = -1; qlRender();
+      var miss = ql.list.filter(function(v){ return !v.prezzo; }).length;
+      msg.textContent = '✓ Listino salvato' + (miss ? ' · ' + miss + (miss === 1 ? ' voce senza prezzo' : ' voci senza prezzo') + ': non verranno usate in automatico finché non metti il prezzo.' : '.');
+      if(qs.cur) qRenderListinoSel();
+    }).catch(function(){ err.textContent = 'Connessione non riuscita.'; }).finally(function(){ btn.disabled = false; });
+  }
+  document.getElementById('qListinoBtn').addEventListener('click', function(){ qOpenListino('quotes'); });
+  document.getElementById('qSetListinoBtn').addEventListener('click', function(){ qOpenListino('settings'); });
+  document.getElementById('qEdListino').addEventListener('click', function(){ qOpenListino('quote'); });
+  document.getElementById('qlBack').addEventListener('click', function(){
+    if(ql.from === 'quote' && qs.cur){ qRenderListinoSel(); qCard(true); ppShowView('quote'); }
+    else if(ql.from === 'settings') qOpenSettings();
+    else qOpenList();
+  });
+  document.getElementById('qlFilter').addEventListener('change', function(){ ql.filter = this.value; ql.open = -1; qlRender(); });
+  document.getElementById('qlAdd').addEventListener('click', function(){
+    ql.list.unshift({ titolo:'', descrizione:'', qta:1, um:'mq', prezzo:0, lavorazione: ql.filter === '*' ? '' : ql.filter });
+    ql.open = 0; qlRender(); qScrollTop();
+  });
+  document.getElementById('qlStd').addEventListener('click', function(){
+    var have = {}; ql.list.forEach(function(v){ have[(v.lavorazione || '') + '|' + v.titolo] = 1; });
+    var add = Q_STD.filter(function(t){ return (ql.filter === '*' || t[0] === ql.filter) && !have[t[0] + '|' + t[1]]; })
+      .map(function(t){ return { lavorazione:t[0], titolo:t[1], descrizione:t[2], um:t[3], qta:1, prezzo:0 }; });
+    ql.list = ql.list.concat(add); ql.open = -1; qlRender();
+    document.getElementById('qlMsg').textContent = add.length ? 'Aggiunte ' + add.length + ' voci: inserisci i tuoi prezzi e premi "Salva listino".' : 'Le voci standard sono già nel tuo listino.';
+  });
+  document.getElementById('qlSave').addEventListener('click', qlSave);
+
   document.getElementById('qBackQuotes').addEventListener('click', qOpenList);
   document.getElementById('qSetBack').addEventListener('click', function(){ if(qs._fromQuote && qs.cur){ qCard(true); ppShowView('quote'); } else qOpenList(); });
   document.getElementById('qSetSave').addEventListener('click', qSaveSettings);
@@ -8476,7 +8625,7 @@
   document.getElementById('qFromListino').addEventListener('change', function(){
     var v = (qs.settings.listino || [])[+this.value]; this.value = ''; if(!v) return;
     var L = qs.cur.voci; if(L.length === 1 && !L[0].titolo && !L[0].descrizione && !L[0].prezzo) L.pop();
-    L.push({ titolo:v.titolo, descrizione:v.descrizione, qta:1, um:v.um, prezzo:v.prezzo }); qRenderVoci();
+    L.push({ titolo:v.titolo, descrizione:v.descrizione, qta:1, um:v.um, prezzo:v.prezzo, lavorazione:v.lavorazione || '' }); qRenderVoci();
   });
   document.querySelectorAll('#qRatePresets button').forEach(function(b){ b.addEventListener('click', function(){ qs.cur.rate = qClone(Q_RATE_PRESETS[b.dataset.p]); qRenderRate(); }); });
   document.getElementById('qRataAdd').addEventListener('click', function(){ qs.cur.rate.push({ descrizione:'', scadenza:'', pct:0 }); qRenderRate(); });
