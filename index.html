@@ -505,6 +505,28 @@
   .ql-row.open .ql-body{ display:block; }
   .ql-body .field{ margin-bottom:10px; }
   .ql-tools{ display:flex; gap:14px; justify-content:flex-end; }
+  .pro-bar .pb-badge{ display:inline-block; min-width:18px; padding:1px 5px; border-radius:999px; background:#C0392B; color:#fff; font-size:11px; line-height:16px; text-align:center; }
+  .tf-art{ display:flex; gap:10px; border:1.5px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px; cursor:pointer; align-items:flex-start; }
+  .tf-art.on{ border-color:var(--accent); background:var(--accent-soft); }
+  .tf-art img.tf-logo{ width:48px; height:48px; object-fit:contain; border-radius:8px; background:#fff; border:1px solid var(--line); flex:none; }
+  .tf-art .tf-info{ flex:1; min-width:0; }
+  .tf-art .tf-name{ font-weight:800; font-size:14px; color:var(--ink); }
+  .tf-art .tf-city{ font-size:12px; color:var(--ink-soft); }
+  .tf-art .tf-bio{ font-size:12.5px; color:var(--ink); margin-top:4px; line-height:1.35; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .tf-art .tf-gal{ display:flex; gap:4px; margin-top:6px; }
+  .tf-art .tf-gal img{ width:56px; height:56px; object-fit:cover; border-radius:6px; }
+  .tf-art input{ margin-top:4px; width:20px; height:20px; flex:none; }
+  .tf-card{ border:1.5px solid var(--line); border-radius:12px; padding:10px; margin-bottom:10px; }
+  .tf-card-top{ display:flex; gap:10px; align-items:center; margin-bottom:8px; }
+  .tf-card-top img{ width:64px; height:48px; object-fit:cover; border-radius:6px; flex:none; }
+  .tf-row{ display:flex; justify-content:space-between; gap:8px; align-items:center; padding:7px 0; border-top:1px solid var(--line); font-size:13px; color:var(--ink); flex-wrap:wrap; }
+  .tf-row .tf-acts{ display:flex; gap:10px; }
+  .q-chip.q-nuova{ background:#C0392B; color:#fff; } .q-chip.q-preventivo_inviato{ background:var(--accent); color:var(--accent-ink); } .q-chip.q-in_attesa{ background:var(--line); }
+  .ld-grid{ display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-size:13.5px; color:var(--ink); margin-bottom:10px; }
+  .ld-grid span:nth-child(odd){ color:var(--ink-soft); }
+  .ld-grid a, .tf-row a{ color:var(--accent); font-weight:700; }
+  .ld-imgs{ display:grid; grid-template-columns:1fr 1fr; gap:6px; margin-bottom:10px; }
+  .ld-imgs img{ width:100%; border-radius:8px; border:1px solid var(--line); }
   .pp-back-link{ border:none; background:none; color:var(--ink-soft); font-size:12px; cursor:pointer; font-family:inherit; padding:0; margin-bottom:14px; text-decoration:underline; }
   .pp-error{ font-size:12px; color:#C0392B; margin-top:-6px; margin-bottom:14px; min-height:14px; }
   .pp-delete-btn{ width:100%; border:1.5px solid #C0392B; background:none; color:#C0392B; border-radius:10px; padding:11px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-top:10px; }
@@ -587,11 +609,13 @@
     </div>
     <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
   </div>
-  <nav class="pro-bar" id="proBar" hidden aria-label="Area professionisti">
+  <nav class="pro-bar" id="proBar" hidden aria-label="La mia area">
     <button type="button" class="primary" id="pbNew"><span>📐 <span class="pb-long">Nuova a</span><span class="pb-short">A</span>nteprima</span></button>
     <button type="button" id="pbProjects"><span>📁 Progetti</span></button>
-    <button type="button" id="pbQuotes"><span>📄 Preventivi</span></button>
-    <button type="button" id="pbProfile"><span>🧰 Profilo<span class="pb-long"> artigiano</span></span></button>
+    <button type="button" id="pbLeads" data-pro="1"><span>📥 Richieste <span class="pb-badge" id="pbLeadsBadge" hidden>0</span></span></button>
+    <button type="button" id="pbMyReq" data-priv="1"><span>📨 Richieste e preventivi</span></button>
+    <button type="button" id="pbQuotes" data-pro="1"><span>📄 Preventivi</span></button>
+    <button type="button" id="pbProfile" data-pro="1"><span>🧰 Profilo<span class="pb-long"> artigiano</span></span></button>
   </nav>
 </header>
 
@@ -671,6 +695,7 @@
       <div class="pp-list" id="ppList"></div>
       <div class="pp-empty" id="ppEmpty" style="display:none" data-i18n="proProjectsEmpty">Non hai ancora salvato nessun progetto.</div>
       <button type="button" class="pp-new-btn" id="ppNewBtn" data-i18n="proProjectsNewBtn">+ Nuovo progetto</button>
+      <button type="button" class="pp-profile-btn" id="ppMyReqBtn" hidden>📨 Le mie richieste e i preventivi ricevuti</button>
       <button type="button" class="pp-profile-btn" id="ppQuotesBtn" hidden>📄 I miei preventivi</button>
       <button type="button" class="pp-profile-btn" id="ppProfileBtn" hidden>🧰 Il mio profilo artigiano</button>
     </div>
@@ -767,6 +792,7 @@
 
       <div class="pp-error" id="qEdErr" style="margin-top:14px"></div>
       <div class="pf-hint" id="qEdMsg" style="color:var(--ink)"></div>
+      <button type="button" class="pp-new-btn" id="qSendLead" hidden style="margin-top:12px">📤 Invia il preventivo al cliente</button>
       <div class="q-actions">
         <button type="button" class="pro-auth-submit" id="qSaveBtn" style="background:none;color:var(--ink);border:1.5px solid var(--accent)">Salva</button>
         <button type="button" class="pro-auth-submit" id="qPdfBtn">Salva e scarica PDF</button>
@@ -774,6 +800,82 @@
       <div style="display:flex;justify-content:space-between;margin-top:12px">
         <button type="button" class="q-link" id="qDupBtn" hidden>Duplica</button>
         <button type="button" class="q-link" id="qDeleteBtn" hidden style="color:#C0392B">Elimina preventivo</button>
+      </div>
+    </div>
+
+
+    <!-- Trova il tuo artigiano: richiesta del cliente -->
+    <div class="pro-projects-view" id="ppViewFind">
+      <button type="button" class="pp-back-link" id="tfBack">← Chiudi</button>
+      <div class="pro-projects-title">Trova il tuo artigiano</div>
+      <div class="pro-projects-sub">Invia la tua anteprima agli artigiani della tua zona che fanno questo lavoro: ti rispondono con un preventivo qui nell'app. Tutti i campi sono obbligatori, così gli artigiani possono darti un prezzo preciso.</div>
+      <div id="tfStep1">
+        <div id="tfPrevBox" class="ld-imgs" hidden><img id="tfPrima" alt=""><img id="tfDopo" alt=""></div>
+        <div class="field"><label>Lavoro *</label><select id="tfLav"></select></div>
+        <div class="row2">
+          <div class="field"><label>Provincia *</label><select id="tfProv"></select></div>
+          <div class="field"><label>Comune *</label><input id="tfComune" type="text" maxlength="80" placeholder="Es. Gallarate"></div>
+        </div>
+        <div class="field"><label>Tipo di immobile *</label><select id="tfTipo"></select></div>
+        <div class="field"><label>Situazione attuale *</label><select id="tfStato"></select></div>
+        <div class="row2">
+          <div class="field"><label>Metri quadri (circa) *</label><input id="tfMq" type="text" inputmode="decimal" placeholder="Es. 45"></div>
+          <div class="field"><label>Quando vuoi iniziare *</label><select id="tfQuando"></select></div>
+        </div>
+        <div class="field"><label>Budget indicativo *</label><select id="tfBudget"></select></div>
+        <div class="field"><label>Descrivi il lavoro *</label><textarea id="tfDesc" rows="3" maxlength="1500" placeholder="Es. Soggiorno e cucina, pavimento in piastrelle da rimuovere, casa abitata: preferisco lavori in una settimana."></textarea></div>
+        <div class="row2">
+          <div class="field"><label>Nome e cognome *</label><input id="tfNome" type="text" maxlength="120"></div>
+          <div class="field"><label>Telefono *</label><input id="tfTel" type="tel" maxlength="30"></div>
+        </div>
+        <div class="pf-hint" id="tfEmailHint"></div>
+        <label class="pf-check" style="align-items:flex-start"><input type="checkbox" id="tfPrivacy"> <span>Ho letto l'<button type="button" class="privacy-link" data-open-privacy>informativa privacy</button> *</span></label>
+        <label class="pf-check" style="align-items:flex-start"><input type="checkbox" id="tfShare"> <span>Acconsento a inviare questi dati e le foto agli artigiani che sceglierò, per ricevere un preventivo *</span></label>
+        <div class="pp-error" id="tfErr1" style="margin-top:10px"></div>
+        <button type="button" class="pro-auth-submit" id="tfSearch">Cerca artigiani nella mia zona</button>
+      </div>
+      <div id="tfStep2" hidden>
+        <div class="pf-sec" id="tfCount"></div>
+        <div class="pf-hint">Scegli fino a 3 artigiani: riceveranno la tua richiesta con foto e dettagli.</div>
+        <div id="tfList"></div>
+        <div class="pp-error" id="tfErr2" style="margin-top:10px"></div>
+        <button type="button" class="pro-auth-submit" id="tfSend">Invia la richiesta</button>
+        <button type="button" class="q-link" id="tfEdit" style="margin-top:10px">← Modifica i dati</button>
+      </div>
+      <div id="tfDone" hidden style="text-align:center;padding:14px 4px">
+        <div style="font-size:40px">✅</div>
+        <div class="pro-projects-title" id="tfDoneTitle" style="padding:0"></div>
+        <div class="pro-projects-sub" id="tfDoneText"></div>
+        <button type="button" class="pp-new-btn" id="tfGoMine">Vai a "Le mie richieste"</button>
+      </div>
+    </div>
+
+    <!-- Cliente: le mie richieste e preventivi ricevuti -->
+    <div class="pro-projects-view" id="ppViewMyReq">
+      <button type="button" class="pp-back-link" id="mrBack">← Chiudi</button>
+      <div class="pro-projects-title">Le mie richieste</div>
+      <div class="pro-projects-sub">Gli artigiani a cui hai chiesto un preventivo e le loro risposte. Puoi scaricare ogni preventivo e accettarlo da qui.</div>
+      <div class="pp-error" id="mrErr"></div>
+      <div id="mrList"></div>
+    </div>
+
+    <!-- Professionista: richieste ricevute -->
+    <div class="pro-projects-view" id="ppViewLeads">
+      <button type="button" class="pp-back-link" id="ldBack">← Chiudi</button>
+      <div class="pro-projects-title">Richieste dei clienti</div>
+      <div class="pro-projects-sub">Clienti della tua zona che hanno scelto te da "Trova il tuo artigiano". Rispondi con un preventivo: lo ricevono direttamente nell'app.</div>
+      <div class="pp-error" id="ldErr"></div>
+      <div class="pp-list" id="ldList"></div>
+    </div>
+    <div class="pro-projects-view" id="ppViewLead">
+      <button type="button" class="pp-back-link" id="ldBack2">← Torna alle richieste</button>
+      <div class="pro-projects-title" id="ldTitle"></div>
+      <div id="ldBody"></div>
+      <div class="pp-error" id="ldErr2" style="margin-top:10px"></div>
+      <button type="button" class="pro-auth-submit" id="ldQuoteBtn">📄 Crea il preventivo per questo cliente</button>
+      <div style="display:flex;justify-content:space-between;margin-top:12px">
+        <button type="button" class="q-link" id="ldOpenQuote" hidden>Apri il preventivo inviato</button>
+        <button type="button" class="q-link" id="ldDecline" style="color:#C0392B">Non mi interessa</button>
       </div>
     </div>
 
@@ -1299,6 +1401,7 @@
       <div class="field" style="margin-bottom:8px"><label for="pdfClient" style="font-size:12.5px">Cliente (facoltativo)</label><input id="pdfClient" type="text" placeholder="Es. Sig. Rossi – Via Roma 10, Gallarate"></div>
       <div class="field" style="margin-bottom:10px"><label for="pdfNote" style="font-size:12.5px">Note / preventivo (facoltativo)</label><textarea id="pdfNote" rows="3" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px;font:inherit;font-size:14px" placeholder="Es. 45 mq · 3.200 € + IVA · inizio lavori entro 2 settimane"></textarea></div>
       <button type="button" class="ai-btn" id="pdfBtn" style="margin:0">Scarica scheda PDF</button>
+      <button type="button" class="ai-btn" id="tfBtn" hidden style="margin:8px 0 0">🔎 Trova un artigiano per questo lavoro</button>
       <button type="button" class="ai-btn" id="qFromPreviewBtn" hidden style="margin:8px 0 0;background:none;color:var(--ink);border:1.5px solid var(--accent)">📄 Crea un preventivo con questa anteprima</button>
       <div id="pdfStatus" style="font-size:13px;margin-top:6px"></div>
     </div>
@@ -6438,6 +6541,7 @@
         aiResultImageMime = result.mime;
         document.getElementById('pdfBox').hidden = false;
         document.getElementById('qFromPreviewBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
+        document.getElementById('tfBtn').hidden = !!(proAccount && proAccount.accountType !== 'privato');
         document.getElementById('layerBox').hidden = false; renderLayerBox();
         if(chainRun){
           if(chainIdx < chainRun.length - 1){
@@ -7256,7 +7360,14 @@
     var openBtn = document.getElementById('proAuthOpen');
     var badge = document.getElementById('proBadge');
     var pbar = document.getElementById('proBar');
-    if(pbar) pbar.hidden = !(proAccount && proAccount.accountType !== 'privato');
+    if(pbar){
+      var isProAcc = !!(proAccount && proAccount.accountType !== 'privato');
+      pbar.hidden = !proAccount;
+      pbar.querySelectorAll('[data-pro]').forEach(function(b){ b.hidden = !isProAcc; });
+      pbar.querySelectorAll('[data-priv]').forEach(function(b){ b.hidden = isProAcc; });
+      if(isProAcc && typeof ldRefreshBadge === 'function') ldRefreshBadge();
+      if(proAccount && typeof tfPending !== 'undefined' && tfPending){ tfPending = false; setTimeout(function(){ tfOpen(); }, 300); }
+    }
     if(proAccount){
       openBtn.style.display = 'none';
       document.body.classList.add('pro-logged');
@@ -7450,7 +7561,12 @@
   (function(){
     var q = new URLSearchParams(location.search);
     var v = q.get('verificato'), rt = q.get('reset');
-    if(!v && !rt){ proCheckSession(); return; }
+    if(!v && !rt){
+      var vai = q.get('vai');
+      if(vai){ history.replaceState(null, '', location.pathname); }
+      proCheckSession(function(){ if(vai === 'richieste') setTimeout(function(){ if(proAccount) (proAccount.accountType === 'privato' ? mrOpen() : ldOpen()); else proAuthOpen(); }, 400); });
+      return;
+    }
     history.replaceState(null, '', location.pathname);
     if(rt){
       paResetToken = rt;
@@ -7489,7 +7605,7 @@
     document.getElementById('ppViewList').classList.toggle('active', view === 'list');
     document.getElementById('ppViewForm').classList.toggle('active', view === 'form');
     document.getElementById('ppViewProfile').classList.toggle('active', view === 'profile');
-    ['quotes','quote','qsettings','listino'].forEach(function(v){ document.getElementById({ quotes:'ppViewQuotes', quote:'ppViewQuote', qsettings:'ppViewQSettings', listino:'ppViewListino' }[v]).classList.toggle('active', view === v); });
+    ['quotes','quote','qsettings','listino','find','myreq','leads','lead'].forEach(function(v){ document.getElementById({ quotes:'ppViewQuotes', quote:'ppViewQuote', qsettings:'ppViewQSettings', listino:'ppViewListino', find:'ppViewFind', myreq:'ppViewMyReq', leads:'ppViewLeads', lead:'ppViewLead' }[v]).classList.toggle('active', view === v); });
     if(['quote','qsettings','listino'].indexOf(view) < 0) document.querySelector('#proProjectsModal .pro-projects-card').classList.remove('wide');
   }
 
@@ -7497,6 +7613,7 @@
     document.getElementById('proProjectsModal').classList.add('open');
     document.getElementById('ppProfileBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
     document.getElementById('ppQuotesBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
+    document.getElementById('ppMyReqBtn').hidden = !(proAccount && proAccount.accountType === 'privato');
     ppShowView('list');
     ppLoadProjects();
   }
@@ -8164,7 +8281,7 @@
     var err = document.getElementById('qListErr'); if(err) err.textContent = '';
     return qLoadSettings().then(function(s){
       if(!vatCheck((s.impresa || {}).paese || 'IT', (s.impresa || {}).piva).ok){ qCard(false); ppShowView('quotes'); qPivaGate(); throw new Error('Per creare preventivi serve la partita IVA della tua impresa.'); }
-      qs.cur = qBlank(s); qs.curId = null; qs.meta = null; qs.newPreview = null; qs.introAuto = true;
+      qs.cur = qBlank(s); qs.curId = null; qs.meta = null; qs.newPreview = null; qs.introAuto = true; qs.leadId = null;
       if(prefill) prefill(qs.cur);
       qRenderEditor(); qCard(true); ppShowView('quote'); qScrollTop();
     }).catch(function(e){ if(err) err.textContent = e.message; });
@@ -8173,6 +8290,7 @@
     Promise.all([qLoadSettings(), qApi('get', 'GET', null, '&id=' + encodeURIComponent(id))]).then(function(r){
       var x = r[1]; if(!x.ok) throw new Error((x.d && x.d.error) || 'Preventivo non trovato.');
       qs.cur = x.d.quote; qs.curId = x.d.id; qs.meta = { number:x.d.number, year:x.d.year }; qs.newPreview = null;
+      qs.leadId = qs._openLead || null; qs._openLead = null;
       qs.introAuto = qs.cur.intro === Q_INTRO.replace('{cliente}', qs.cur.cliente.nome || 'Cliente');
       ['cliente','cantiere','iva','pagamento','anteprima'].forEach(function(k){ qs.cur[k] = qs.cur[k] || {}; });
       qs.cur.voci = qs.cur.voci || []; qs.cur.rate = qs.cur.rate || []; qs.cur.condizioni = qs.cur.condizioni || [];
@@ -8251,6 +8369,7 @@
     document.getElementById('qEdErr').textContent = ''; document.getElementById('qEdMsg').textContent = '';
     document.getElementById('qDeleteBtn').hidden = !qs.curId; document.getElementById('qDupBtn').hidden = !qs.curId;
     qs.delArm = false; document.getElementById('qDeleteBtn').textContent = 'Elimina preventivo';
+    document.getElementById('qSendLead').hidden = !(qs.leadId && qs.curId);
     var miss = qImpresaMissing(s);
     document.getElementById('qImpresaWarn').innerHTML = miss.length ? '⚠︎ Per il PDF completa i dati della tua impresa: ' + qEsc(miss.join(', ')) + '. <button type="button" class="q-link" id="qGoSettings2">Completa ora</button>' : '';
     var g2 = document.getElementById('qGoSettings2'); if(g2) g2.addEventListener('click', qOpenSettings);
@@ -8409,6 +8528,7 @@
       if(keepPv && qs.cur.anteprima && qs.cur.anteprima.dopo) qs._pvLocal = keepPv; // immagini già in memoria per il PDF
       document.getElementById('qEdTitle').textContent = 'Preventivo n. ' + ('00'+qs.meta.number).slice(-3) + '/' + qs.meta.year;
       document.getElementById('qDeleteBtn').hidden = false; document.getElementById('qDupBtn').hidden = false;
+      document.getElementById('qSendLead').hidden = !qs.leadId;
       return x.d;
     });
   }
@@ -8500,6 +8620,245 @@
   document.getElementById('qNewBtn').addEventListener('click', function(){ qNew(null); });
   document.getElementById('qSettingsBtn').addEventListener('click', qOpenSettings);
   document.getElementById('qPivaGo').addEventListener('click', qOpenSettings);
+  // ---------- Trova il tuo artigiano (cliente) ----------
+  var TF_OPT = {"TIPI": ["Appartamento", "Casa indipendente / villa", "Negozio / ufficio", "Capannone / industriale", "Locale alimentare / ristorazione", "Condominio (parti comuni)"], "STATI": ["Da rinnovare: c'è un pavimento/rivestimento da rimuovere", "Da rinnovare: posa sopra l'esistente", "Grezzo / nuova costruzione", "Solo pareti / tinteggiatura"], "QUANDO": ["Entro 1 mese", "Tra 1 e 3 mesi", "Tra 3 e 6 mesi", "Oltre 6 mesi"], "BUDGET": ["Fino a 2.000 €", "2.000 – 5.000 €", "5.000 – 10.000 €", "10.000 – 25.000 €", "Oltre 25.000 €"]};
+  var LD_STATUS = { nuova:'Nuova', vista:'Vista', preventivo_inviato:'Preventivo inviato', accettata:'Accettata ✓', rifiutata:'Non disponibile', in_attesa:'In attesa di artigiani' };
+  var tfPending = false, tf = { lavs:[], pv:null, sel:{}, artisans:[] };
+  function lApi(action, method, body, extra){
+    return fetch('/api/leads?action=' + action + (extra || ''), { method: method || 'GET', credentials:'same-origin', headers: body ? { 'Content-Type':'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, status:r.status, d:d }; }); });
+  }
+  function tfFill(id, list, ph){ document.getElementById(id).innerHTML = '<option value="">' + ph + '</option>' + list.map(function(x){ return '<option>' + qEsc(x) + '</option>'; }).join(''); }
+  function tfOpen(){
+    if(!proAccount){ tfPending = true; state.userType = state.userType || 'privato'; proAuthOpen(); return; }
+    if(proAccount.accountType !== 'privato') return;
+    // lavorazioni dell'anteprima (anche più strati)
+    var lavs = [];
+    try{ layers.forEach(function(L){ var m = L.stateSnap && L.stateSnap.material; if(m && lavs.every(function(x){ return x[0] !== m.id; })) lavs.push([m.id, L.title, L.lines]); }); }catch(e){}
+    if(state.material && lavs.every(function(x){ return x[0] !== state.material.id; })) lavs.push([state.material.id, layerTitle(), pdfChoiceLines()]);
+    tf.lavs = lavs;
+    document.getElementById('tfLav').innerHTML = lavs.length ? lavs.map(function(l, i){ return '<option value="' + i + '">' + qEsc(l[1]) + '</option>'; }).join('') : '<option value="">Fai prima un\'anteprima</option>';
+    var ps = document.getElementById('tfProv');
+    ps.innerHTML = '<option value="">Scegli…</option>' + RENDRUM_GEO.IT.regions.map(function(r){ return '<optgroup label="' + qEsc(r.name) + '">' + r.provinces.map(function(p){ return '<option value="' + p[0] + '">' + qEsc(p[1]) + ' (' + p[0] + ')</option>'; }).join('') + '</optgroup>'; }).join('');
+    tfFill('tfTipo', TF_OPT.TIPI, 'Scegli…'); tfFill('tfStato', TF_OPT.STATI, 'Scegli…'); tfFill('tfQuando', TF_OPT.QUANDO, 'Scegli…'); tfFill('tfBudget', TF_OPT.BUDGET, 'Scegli…');
+    var f = function(id){ return document.getElementById(id); };
+    if(f('fCity') && f('fCity').value && !f('tfComune').value) f('tfComune').value = f('fCity').value;
+    if(f('fMq') && f('fMq').value && !f('tfMq').value) f('tfMq').value = f('fMq').value;
+    if(!f('tfNome').value) f('tfNome').value = (f('fName') && f('fName').value) || proAccount.companyName || '';
+    if(!f('tfTel').value) f('tfTel').value = (f('fPhone') && f('fPhone').value) || proAccount.phone || '';
+    f('tfEmailHint').textContent = 'Gli artigiani ti risponderanno anche all\'email del tuo account: ' + (proAccount.email || '') + '.';
+    tf.pv = null;
+    try{
+      var before = (typeof layerOriginal !== 'undefined' && layerOriginal) ? layerOriginal.img : photoImg;
+      if(aiResultImage){ tf.pv = { dopo: imgToJpeg(aiResultImage, 1400).url, prima: before ? imgToJpeg(before, 1400).url : null }; }
+    }catch(e){ tf.pv = null; }
+    f('tfPrevBox').hidden = !tf.pv; if(tf.pv){ f('tfDopo').src = tf.pv.dopo; f('tfPrima').src = tf.pv.prima || tf.pv.dopo; }
+    f('tfStep1').hidden = false; f('tfStep2').hidden = true; f('tfDone').hidden = true; f('tfErr1').textContent = '';
+    document.getElementById('proProjectsModal').classList.add('open'); qCard(false); ppShowView('find'); qScrollTop();
+  }
+  function tfData(){
+    var f = function(id){ return document.getElementById(id); }, l = tf.lavs[+f('tfLav').value];
+    return { lavorazione: l ? l[0] : '', scelte: l ? l[2] : [], provincia: f('tfProv').value, comune: f('tfComune').value.trim(), tipo: f('tfTipo').value, stato: f('tfStato').value,
+      mq: f('tfMq').value.trim(), quando: f('tfQuando').value, budget: f('tfBudget').value, descrizione: f('tfDesc').value.trim(), nome: f('tfNome').value.trim(), telefono: f('tfTel').value.trim(),
+      privacy: f('tfPrivacy').checked, condividi: f('tfShare').checked };
+  }
+  function tfCheck(d){
+    var m = [];
+    if(!d.lavorazione) m.push('lavoro (fai prima un\'anteprima)'); if(!d.provincia) m.push('provincia'); if(d.comune.length < 2) m.push('comune');
+    if(!d.tipo) m.push('tipo di immobile'); if(!d.stato) m.push('situazione attuale'); if(!(qParse(d.mq) > 0)) m.push('metri quadri');
+    if(!d.quando) m.push('quando iniziare'); if(!d.budget) m.push('budget'); if(d.descrizione.length < 20) m.push('descrizione (almeno 20 caratteri)');
+    if(d.nome.length < 3) m.push('nome e cognome'); if(d.telefono.replace(/\D/g,'').length < 8) m.push('telefono');
+    if(!d.privacy || !d.condividi) m.push('i due consensi');
+    return m;
+  }
+  function tfSearch(){
+    var d = tfData(), m = tfCheck(d), err = document.getElementById('tfErr1');
+    if(m.length){ err.textContent = 'Completa: ' + m.join(', ') + '.'; return; }
+    err.textContent = ''; var btn = document.getElementById('tfSearch'); btn.disabled = true; btn.textContent = 'Cerco…';
+    fetch('/api/pro-profile?action=list&country=IT&province=' + encodeURIComponent(d.provincia) + '&lav=' + encodeURIComponent(d.lavorazione))
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(x){ return { ok:r.ok, d:x }; }); })
+      .then(function(x){
+        if(!x.ok){ err.textContent = (x.d && x.d.error) || 'Ricerca non riuscita.'; return; }
+        tf.artisans = x.d.artisans || []; tf.sel = {};
+        tfRenderArtisans(); document.getElementById('tfStep1').hidden = true; document.getElementById('tfStep2').hidden = false; qScrollTop();
+      }).catch(function(){ err.textContent = 'Connessione non riuscita.'; })
+      .finally(function(){ btn.disabled = false; btn.textContent = 'Cerca artigiani nella mia zona'; });
+  }
+  function tfRenderArtisans(){
+    var box = document.getElementById('tfList'), n = tf.artisans.length, send = document.getElementById('tfSend');
+    document.getElementById('tfCount').textContent = n ? (n === 1 ? '1 artigiano nella tua zona' : n + ' artigiani nella tua zona') : 'Nessun artigiano disponibile, per ora';
+    box.innerHTML = '';
+    if(!n){
+      box.innerHTML = '<div class="pf-hint" style="font-size:13.5px;color:var(--ink)">Non ci sono ancora artigiani iscritti per questo lavoro nella tua provincia. Invia comunque la richiesta: <b>appena se ne iscrive uno ti avvisiamo</b> e gliela giriamo.</div>';
+      send.textContent = 'Avvisami quando c\'è un artigiano'; return;
+    }
+    send.textContent = 'Invia la richiesta';
+    tf.artisans.forEach(function(a){
+      var d = document.createElement('label'); d.className = 'tf-art' + (tf.sel[a.id] ? ' on' : '');
+      d.innerHTML = '<input type="checkbox"' + (tf.sel[a.id] ? ' checked' : '') + '>' + (a.logoUrl ? '<img class="tf-logo" alt="">' : '')
+        + '<div class="tf-info"><div class="tf-name">' + qEsc(a.companyName) + '</div><div class="tf-city">' + qEsc(a.city || '') + '</div><div class="tf-bio">' + qEsc(a.bio || '') + '</div><div class="tf-gal"></div></div>';
+      if(a.logoUrl) d.querySelector('.tf-logo').src = a.logoUrl;
+      (a.gallery || []).slice(0, 4).forEach(function(u){ var im = document.createElement('img'); im.src = u; im.alt = ''; d.querySelector('.tf-gal').appendChild(im); });
+      d.querySelector('input').addEventListener('change', function(){
+        if(this.checked && Object.keys(tf.sel).length >= 3){ this.checked = false; document.getElementById('tfErr2').textContent = 'Puoi scegliere al massimo 3 artigiani.'; return; }
+        document.getElementById('tfErr2').textContent = '';
+        if(this.checked) tf.sel[a.id] = 1; else delete tf.sel[a.id]; d.classList.toggle('on', this.checked);
+      });
+      box.appendChild(d);
+    });
+  }
+  function tfSend(){
+    var d = tfData(), err = document.getElementById('tfErr2'), btn = document.getElementById('tfSend');
+    d.artisans = Object.keys(tf.sel);
+    if(tf.artisans.length && !d.artisans.length){ err.textContent = 'Scegli almeno un artigiano.'; return; }
+    if(tf.pv){ d.prima = tf.pv.prima; d.dopo = tf.pv.dopo; }
+    btn.disabled = true; err.textContent = '';
+    lApi('create', 'POST', d).then(function(x){
+      if(!x.ok){ err.textContent = (x.d && x.d.error) || (x.status === 413 ? 'Foto troppo pesanti.' : 'Invio non riuscito. Riprova.'); return; }
+      document.getElementById('tfStep2').hidden = true; document.getElementById('tfDone').hidden = false;
+      document.getElementById('tfDoneTitle').textContent = x.d.waitlist ? 'Ti avviseremo noi' : 'Richiesta inviata!';
+      document.getElementById('tfDoneText').textContent = x.d.waitlist ? 'Appena un artigiano per questo lavoro si iscrive nella tua provincia, gli inviamo la tua richiesta e ti avvisiamo per email.'
+        : (x.d.sent === 1 ? 'L\'artigiano ha ricevuto' : 'Gli ' + x.d.sent + ' artigiani hanno ricevuto') + ' foto e dettagli. Riceverai i preventivi qui nell\'app e per email.';
+      qScrollTop();
+    }).catch(function(){ err.textContent = 'Connessione non riuscita.'; }).finally(function(){ btn.disabled = false; });
+  }
+
+  // ---------- Cliente: le mie richieste ----------
+  function mrOpen(){
+    document.getElementById('proProjectsModal').classList.add('open'); qCard(false); ppShowView('myreq'); qScrollTop();
+    var box = document.getElementById('mrList'); box.innerHTML = '<div class="pp-empty">Caricamento…</div>'; document.getElementById('mrErr').textContent = '';
+    lApi('mine').then(function(x){
+      if(!x.ok){ box.innerHTML = ''; document.getElementById('mrErr').textContent = (x.d && x.d.error) || 'Non riesco a caricare le richieste.'; return; }
+      var reqs = x.d.requests || [];
+      if(!reqs.length){ box.innerHTML = '<div class="pp-empty">Non hai ancora inviato richieste. Fai un\'anteprima e tocca "Trova un artigiano per questo lavoro".</div>'; return; }
+      box.innerHTML = '';
+      reqs.forEach(function(g){
+        var c = document.createElement('div'); c.className = 'tf-card';
+        c.innerHTML = '<div class="tf-card-top">' + (g.dopo ? '<img alt="">' : '') + '<div><div class="pp-card-name">' + qEsc(g.lavorazioneNome || '') + ' · ' + qEsc(g.comune || '') + ' (' + qEsc(g.provincia) + ')</div><div class="pp-card-meta">' + qEsc((g.mq || '') + ' m² · inviata il ' + new Date(g.createdAt).toLocaleDateString('it-IT')) + '</div></div></div>';
+        if(g.dopo) c.querySelector('img').src = g.dopo;
+        g.artisans.forEach(function(a){
+          var r = document.createElement('div'); r.className = 'tf-row';
+          var left = '<div><b>' + qEsc(a.name || 'Artigiani della zona') + '</b>' + (a.quote ? ' · ' + qEsc(qpEur(a.quote.total)) : '') + '<br><span class="q-chip q-' + qEsc(a.status) + '">' + qEsc(a.status === 'preventivo_inviato' ? 'Preventivo ricevuto' : (LD_STATUS[a.status] || a.status)) + '</span>' + (a.phone ? ' <a href="tel:' + qEsc(a.phone) + '" style="font-size:12.5px">📞 ' + qEsc(a.phone) + '</a>' : '') + '</div>';
+          r.innerHTML = left + (a.quote ? '<div class="tf-acts"><button type="button" class="q-link" data-a="pdf">📄 PDF</button>' + (a.status !== 'accettata' ? '<button type="button" class="q-link" data-a="ok">✓ Accetta</button>' : '') + '</div>' : '');
+          var pb = r.querySelector('[data-a="pdf"]'); if(pb) pb.addEventListener('click', function(){ mrPdf(a.leadId, pb); });
+          var ob = r.querySelector('[data-a="ok"]'); if(ob) ob.addEventListener('click', function(){
+            if(!ob.dataset.arm){ ob.dataset.arm = 1; ob.textContent = 'Tocca di nuovo per accettare'; setTimeout(function(){ delete ob.dataset.arm; ob.textContent = '✓ Accetta'; }, 4000); return; }
+            ob.disabled = true;
+            lApi('accept', 'POST', { id: a.leadId }).then(function(y){ if(y.ok) mrOpen(); else { ob.disabled = false; document.getElementById('mrErr').textContent = (y.d && y.d.error) || 'Non riuscito.'; } });
+          });
+          c.appendChild(r);
+        });
+        box.appendChild(c);
+      });
+    }).catch(function(){ box.innerHTML = ''; document.getElementById('mrErr').textContent = 'Connessione non riuscita.'; });
+  }
+  function mrPdf(leadId, btn){
+    btn.disabled = true; var old = btn.textContent; btn.textContent = 'Preparo…';
+    lApi('quote', 'GET', null, '&id=' + encodeURIComponent(leadId)).then(function(x){
+      if(!x.ok) throw new Error((x.d && x.d.error) || 'Preventivo non disponibile');
+      var a = x.d.quote.anteprima || {};
+      return Promise.all([loadJsPdf(), x.d.logoUrl ? qImgFromUrl(x.d.logoUrl) : null, a.attiva && a.prima ? qImgFromUrl(a.prima) : null, a.attiva && a.dopo ? qImgFromUrl(a.dopo) : null]).then(function(r){
+        var doc = qpBuildPdf(r[0], x.d.quote, { number:x.d.number, year:x.d.year, impresa:x.d.impresa, banca:x.d.banca, logo:r[1], prima:r[2], dopo:r[3] });
+        doc.save('Preventivo_' + ('00'+x.d.number).slice(-3) + '-' + x.d.year + '_' + String(x.d.impresa.ragioneSociale || '').replace(/[^A-Za-z0-9]+/g,'_') + '.pdf');
+      });
+    }).catch(function(e){ document.getElementById('mrErr').textContent = e.message || 'Errore'; })
+      .finally(function(){ btn.disabled = false; btn.textContent = old; });
+  }
+
+  // ---------- Professionista: richieste ricevute ----------
+  var ld = { cur:null };
+  function ldRefreshBadge(){
+    lApi('pro-list').then(function(x){ var b = document.getElementById('pbLeadsBadge'); if(!b || !x.ok) return; var n = x.d.nuove || 0; b.hidden = !n; b.textContent = n; }).catch(function(){});
+  }
+  function ldOpen(){
+    document.getElementById('proProjectsModal').classList.add('open'); qCard(false); ppShowView('leads'); qScrollTop();
+    var box = document.getElementById('ldList'); box.innerHTML = '<div class="pp-empty">Caricamento…</div>'; document.getElementById('ldErr').textContent = '';
+    lApi('pro-list').then(function(x){
+      if(!x.ok){ box.innerHTML = ''; document.getElementById('ldErr').textContent = (x.d && x.d.error) || 'Non riesco a caricare le richieste.'; return; }
+      var L = x.d.leads || []; var b = document.getElementById('pbLeadsBadge'); b.hidden = !x.d.nuove; b.textContent = x.d.nuove;
+      if(!L.length){ box.innerHTML = '<div class="pp-empty">Nessuna richiesta per ora. Completa il tuo profilo artigiano con zone, lavorazioni e foto: i clienti della tua zona ti troveranno lì.</div>'; return; }
+      box.innerHTML = '';
+      L.forEach(function(l){
+        var c = document.createElement('button'); c.type = 'button'; c.className = 'pp-card q-card';
+        c.innerHTML = '<div class="pp-card-info"><div class="pp-card-name">' + qEsc(l.lavorazioneNome) + ' · ' + qEsc(l.comune || '') + ' (' + qEsc(l.provincia) + ')</div><div class="pp-card-meta">' + qEsc((l.mq || '') + ' m² · ' + (l.quando || '') + ' · ' + (l.budget || '')) + '</div></div>'
+          + '<div class="q-card-right"><div class="pp-card-meta">' + new Date(l.createdAt).toLocaleDateString('it-IT') + '</div><span class="q-chip q-' + qEsc(l.status) + '">' + qEsc(LD_STATUS[l.status] || l.status) + '</span></div>';
+        c.addEventListener('click', function(){ ldDetail(l.id); });
+        box.appendChild(c);
+      });
+    }).catch(function(){ box.innerHTML = ''; document.getElementById('ldErr').textContent = 'Connessione non riuscita.'; });
+  }
+  function ldDetail(id){
+    ppShowView('lead'); qScrollTop();
+    var body = document.getElementById('ldBody'); body.innerHTML = '<div class="pp-empty">Caricamento…</div>'; document.getElementById('ldErr2').textContent = '';
+    lApi('pro-get', 'GET', null, '&id=' + encodeURIComponent(id)).then(function(x){
+      if(!x.ok){ body.innerHTML = ''; document.getElementById('ldErr2').textContent = (x.d && x.d.error) || 'Richiesta non trovata.'; return; }
+      var l = ld.cur = x.d.lead;
+      document.getElementById('ldTitle').textContent = l.lavorazioneNome + ' · ' + (l.comune || '') + ' (' + l.provincia + ')';
+      var rows = [['Stato', LD_STATUS[l.status] || l.status], ['Cliente', l.nome], ['Telefono', '<a href="tel:' + qEsc(l.telefono) + '">' + qEsc(l.telefono) + '</a>'], ['Email', '<a href="mailto:' + qEsc(l.email) + '">' + qEsc(l.email) + '</a>'],
+        ['Immobile', qEsc(l.tipo)], ['Situazione', qEsc(l.stato)], ['Metri quadri', qEsc(l.mq + ' m²')], ['Inizio', qEsc(l.quando)], ['Budget', qEsc(l.budget)]];
+      body.innerHTML = (l.dopo ? '<div class="ld-imgs">' + (l.prima ? '<img alt="Prima">' : '') + '<img alt="Dopo"></div>' : '')
+        + '<div class="ld-grid">' + rows.map(function(r){ return '<span>' + r[0] + '</span><span>' + (r[0] === 'Telefono' || r[0] === 'Email' ? r[1] : (r[0] === 'Stato' || r[0] === 'Cliente' ? qEsc(r[1]) : r[1])) + '</span>'; }).join('') + '</div>'
+        + '<div class="pf-sec">Descrizione del cliente</div><div class="pf-hint" style="color:var(--ink);font-size:13.5px">' + qEsc(l.descrizione) + '</div>'
+        + (l.scelte && l.scelte.length ? '<div class="pf-sec">Scelte nell\'anteprima</div><div class="pf-hint" style="color:var(--ink);font-size:13px">' + l.scelte.map(qEsc).join('<br>') + '</div>' : '');
+      var imgs = body.querySelectorAll('.ld-imgs img'); if(l.prima && imgs.length === 2){ imgs[0].src = l.prima; imgs[1].src = l.dopo; } else if(imgs.length){ imgs[0].src = l.dopo; }
+      var done = l.status === 'accettata';
+      document.getElementById('ldQuoteBtn').hidden = done;
+      document.getElementById('ldQuoteBtn').textContent = l.quoteId ? '📄 Modifica e reinvia il preventivo' : '📄 Crea il preventivo per questo cliente';
+      document.getElementById('ldOpenQuote').hidden = !l.quoteId;
+      document.getElementById('ldDecline').hidden = done || l.status === 'rifiutata';
+      document.getElementById('ldDecline').textContent = 'Non mi interessa'; delete document.getElementById('ldDecline').dataset.arm;
+      ldRefreshBadge();
+    }).catch(function(){ body.innerHTML = ''; document.getElementById('ldErr2').textContent = 'Connessione non riuscita.'; });
+  }
+  function ldQuote(){
+    var l = ld.cur; if(!l) return;
+    if(l.quoteId){ qs._openLead = l.id; qEdit(l.quoteId); return; }
+    qNew(function(q){
+      qs.leadId = l.id;
+      q.cliente.nome = l.nome; q.cliente.telefono = l.telefono; q.cliente.email = l.email;
+      q.cantiere.indirizzo = (l.comune || '') + ' (' + l.provincia + ')'; q.cantiere.descrizione = (l.tipo || '') + ' - circa ' + l.mq + ' m²';
+      q.lavorazione = l.lavorazione;
+      q.condizioni.forEach(function(c){ if(c.key === 'finiture') c.testo = Q_FINITURE[qFinKey(l.lavorazione)]; });
+      q.oggetto = 'Offerta per la realizzazione di: ' + l.lavorazioneNome;
+      q.intro = Q_INTRO.replace('{cliente}', l.nome); qs.introAuto = true;
+      var it = qListinoMatch(l.lavorazione, /tinteggiatura|pareti/i.test(l.stato) ? '' : '');
+      var scelte = (l.scelte || []).filter(function(s){ return !/^Lavorazione:/.test(s); }).join('\n');
+      q.voci = [it ? { titolo: it.titolo, descrizione: (it.descrizione ? it.descrizione + '\n' : '') + scelte, qta: it.um === 'mq' ? (+l.mq || 1) : 1, um: it.um, prezzo: it.prezzo, lavorazione: l.lavorazione }
+        : { titolo: l.lavorazioneNome, descrizione: scelte, qta: +l.mq || 1, um: 'mq', prezzo: 0, lavorazione: l.lavorazione }];
+      if(l.dopo) q.anteprima = { attiva: true, prima: l.prima || null, dopo: l.dopo, righe: l.scelte || [] };
+    }).then(function(){
+      qs.leadId = l.id; qRenderPreviewBox();
+      document.getElementById('qEdMsg').textContent = 'Controlla prezzi e quantità, salva e poi tocca "Invia il preventivo al cliente".';
+    });
+  }
+  document.getElementById('tfBtn').addEventListener('click', tfOpen);
+  document.getElementById('tfBack').addEventListener('click', ppClose);
+  document.getElementById('tfSearch').addEventListener('click', tfSearch);
+  document.getElementById('tfEdit').addEventListener('click', function(){ document.getElementById('tfStep1').hidden = false; document.getElementById('tfStep2').hidden = true; });
+  document.getElementById('tfSend').addEventListener('click', tfSend);
+  document.getElementById('tfGoMine').addEventListener('click', mrOpen);
+  document.getElementById('mrBack').addEventListener('click', ppClose);
+  document.getElementById('ppMyReqBtn').addEventListener('click', mrOpen);
+  document.getElementById('pbMyReq').addEventListener('click', mrOpen);
+  document.getElementById('pbLeads').addEventListener('click', ldOpen);
+  document.getElementById('ldBack').addEventListener('click', ppClose);
+  document.getElementById('ldBack2').addEventListener('click', ldOpen);
+  document.getElementById('ldQuoteBtn').addEventListener('click', ldQuote);
+  document.getElementById('ldOpenQuote').addEventListener('click', function(){ if(ld.cur && ld.cur.quoteId){ qs._openLead = ld.cur.id; qEdit(ld.cur.quoteId); } });
+  document.getElementById('ldDecline').addEventListener('click', function(){
+    var b = this; if(!ld.cur) return;
+    if(!b.dataset.arm){ b.dataset.arm = 1; b.textContent = 'Tocca di nuovo per confermare'; return; }
+    lApi('pro-decline', 'POST', { id: ld.cur.id }).then(function(x){ if(x.ok) ldOpen(); else document.getElementById('ldErr2').textContent = (x.d && x.d.error) || 'Non riuscito.'; });
+  });
+  document.getElementById('qSendLead').addEventListener('click', function(){
+    var b = this, msg = document.getElementById('qEdMsg'), err = document.getElementById('qEdErr');
+    if(!qs.leadId) return;
+    b.disabled = true; msg.textContent = 'Salvo e invio…';
+    qSave().then(function(){ return lApi('pro-send', 'POST', { id: qs.leadId, quoteId: qs.curId }); })
+      .then(function(x){ if(!x) return; if(x.ok){ msg.textContent = '✓ Preventivo inviato: il cliente lo trova nell\'app e riceve un\'email.'; } else { err.textContent = (x.d && x.d.error) || 'Invio non riuscito.'; msg.textContent = ''; } })
+      .catch(function(){ msg.textContent = ''; }).finally(function(){ b.disabled = false; });
+  });
+
   // ----- listino prezzi -----
   var Q_STD = [
     ['monolith','Pavimento in resina spatolata','Preparazione del supporto mediante carteggiatura e aspirazione delle polveri, stesura di primer consolidante, rasatura di livellamento con rete in fibra di vetro ove necessario, applicazione di due mani di resina spatolata nel colore ed effetto scelti, finitura protettiva poliuretanica (opaca o lucida).','mq'],
