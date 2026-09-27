@@ -47,6 +47,7 @@ function cleanVoce(v) {
     qta: num(v.qta, 0, 1e6, 2),
     um: UNITS.includes(v.um) ? v.um : "a corpo",
     prezzo: num(v.prezzo, 0, 1e8, 2),
+    lavorazione: str(v.lavorazione, 40).replace(/[^a-z_]/g, ""),
   };
 }
 function cleanRate(list) {
@@ -126,7 +127,7 @@ function cleanSettings(b) {
     specifiche: str(b.specifiche, 2000),
     validitaGiorni: num(b.validitaGiorni, 1, 365, 0) || 30,
     numeroPartenza: num(b.numeroPartenza, 0, 999999, 0),
-    listino: arr(b.listino, 200).map(cleanVoce).filter(v => v.titolo),
+    listino: arr(b.listino, 300).map(cleanVoce).filter(v => v.titolo),
   };
 }
 
@@ -152,6 +153,16 @@ module.exports = async function handler(req, res) {
       const u = await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(acc.id), { method: "PATCH", body: JSON.stringify({ quote_settings: s }) });
       if (!u.ok) { console.error("quotes settings", u.data); return res.status(502).json({ error: "Salvataggio non riuscito. Riprova." }); }
       return res.status(200).json({ ok: true, settings: s });
+    }
+
+    // Listino prezzi: si può preparare anche prima di inserire la partita IVA.
+    if (action === "listino") {
+      if (req.method !== "POST") return res.status(405).json({ error: "Usa POST" });
+      const listino = arr((req.body || {}).listino, 300).map(cleanVoce).filter(v => v.titolo);
+      const cur = Object.assign({}, acc.quote_settings || {}, { listino });
+      const u = await supabaseRequest("/pro_accounts?id=eq." + encodeURIComponent(acc.id), { method: "PATCH", body: JSON.stringify({ quote_settings: cur }) });
+      if (!u.ok) { console.error("quotes listino", u.data); return res.status(502).json({ error: "Salvataggio non riuscito. Riprova." }); }
+      return res.status(200).json({ ok: true, listino });
     }
 
     if (action === "list") {
