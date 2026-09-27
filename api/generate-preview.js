@@ -41,13 +41,13 @@ module.exports = async function handler(req, res) {
   // I testi che arrivano dal browser finiscono nel prompt dell'AI: niente a capo
   // e lunghezza limitata, così nessuno può usare l'app per chiedere altre immagini.
   if (req.body && typeof req.body === "object") {
-    const IMG_FIELDS = ["imageBase64", "boiserieStyleRefImage", "colorCardImage", "posaRefImage", "accentoRefImage"];
+    const IMG_FIELDS = ["imageBase64", "boiserieStyleRefImage", "colorCardImage", "posaRefImage", "accentoRefImage", "materialSampleImage"];
     Object.keys(req.body).forEach(function (k) {
       if (IMG_FIELDS.includes(k)) return;
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -552,6 +552,15 @@ module.exports = async function handler(req, res) {
   const posaRefNote = posaRefClean
     ? " SCHEMA DI POSA DI RIFERIMENTO: ti sono state fornite DUE immagini. La PRIMA è la foto reale da modificare. La SECONDA è lo schema del pavimento visto DALL'ALTO, disegnato con la disposizione ESATTA dei listelli: copia fedelmente quella geometria (forma dei listelli, tagli delle teste, modo in cui si incastrano e direzione delle file) sul pavimento della prima foto, in prospettiva e alla scala giusta per la stanza (listelli di dimensioni reali). Dalla seconda immagine prendi SOLO la geometria della posa: luce, ombre e resto della stanza vengono dalla prima foto."
     : "";
+  // CAMPIONE VIRTUALE (resina spatolata, scale, microcemento): texture reale
+  // ricolorata nel colore scelto. Nel prompt è descritto per contenuto e non per
+  // posizione, perché altre note parlano dell'"ULTIMA immagine".
+  const sampleClean = (typeof materialSampleImage === "string" && materialSampleImage.length < 1_500_000 && /^(monolith_spatolato|scale|microcemento)$/.test(String(materialId || "")))
+    ? materialSampleImage.replace(/^data:image\/\w+;base64,/, "")
+    : null;
+  const sampleNote = sampleClean
+    ? ` CAMPIONE DEL MATERIALE: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO ravvicinato del materiale (solo una superficie piena, senza stanza né oggetti). È un campione reale di ${materialId === "microcemento" ? "microcemento" : "resina spatolata"} nel colore esatto scelto dal cliente${colorAHex ? " (" + colorAHex + ")" : ""}. Sulla superficie da trattare riproduci la STESSA texture del campione (segni ad arco della spatola, nuvolature, leggere variazioni di tono, grana) e lo STESSO colore medio, adattati alla prospettiva, alla luce della foto e alla scala reale (i segni della spatola sono ampi 20-40 cm, non piccoli e ripetuti). La luce e i riflessi della stanza modificano il colore in modo naturale, ma la tinta di base deve restare quella del campione: non schiarirla, non scurirla e non cambiarne la tonalità. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine, non incollarlo come riquadro e non ripetere il suo disegno come una piastrella.`
+    : "";
   const colorCardClean = (typeof colorCardImage === "string" && colorCardImage.length < 2_000_000)
     ? colorCardImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
@@ -614,6 +623,7 @@ module.exports = async function handler(req, res) {
     righeNote,
     boiserieStyleRefNote,
     posaRefNote,
+    sampleNote,
     zonesSummary,
     colorCardNote,
     colorFidelityNote,
@@ -643,6 +653,7 @@ module.exports = async function handler(req, res) {
     if (colorCardClean) images.push({ b64: colorCardClean, mime: "image/png" });
     if (boiserieStyleRefImageClean) images.push({ b64: boiserieStyleRefImageClean, mime: "image/jpeg" });
     if (posaRefClean) images.push({ b64: posaRefClean, mime: "image/jpeg" });
+    if (sampleClean) images.push({ b64: sampleClean, mime: "image/jpeg" });
     if (accentoRefClean) images.push({ b64: accentoRefClean, mime: "image/jpeg" });
     const send = (extra) => {
       const fd = new FormData();
@@ -718,6 +729,9 @@ module.exports = async function handler(req, res) {
     }
     if (posaRefClean) {
       contentParts.push({ inline_data: { mime_type: "image/jpeg", data: posaRefClean } });
+    }
+    if (sampleClean) {
+      contentParts.push({ inline_data: { mime_type: "image/jpeg", data: sampleClean } });
     }
     if (accentoRefClean) {
       contentParts.push({ inline_data: { mime_type: "image/jpeg", data: accentoRefClean } });
