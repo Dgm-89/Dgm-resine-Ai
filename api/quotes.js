@@ -71,7 +71,7 @@ function totals(q) {
 
 function cleanQuote(b, acc) {
   const { url } = getSupabaseConfig();
-  const own = [url + "/storage/v1/object/public/project-photos/" + acc.id + "/", url + "/storage/v1/object/public/project-photos/quotes/" + acc.id + "/"];
+  const own = [url + "/storage/v1/object/public/project-photos/" + acc.id + "/", url + "/storage/v1/object/public/project-photos/quotes/" + acc.id + "/", url + "/storage/v1/object/public/project-photos/leads/"];
   const okUrl = u => typeof u === "string" && own.some(p => u.startsWith(p)) ? u : null;
   const c = b.cliente || {}, k = b.cantiere || {}, a = b.anteprima || {}, pg = b.pagamento || {}, iv = b.iva || {};
   const q = {
