@@ -6675,14 +6675,14 @@
       var ink = [28,27,24], soft = [110,104,92], accent = [184,95,39];
       // intestazione
       var logo = proLogo || (brandImg && brandImg.complete ? brandImg : null);
-      if(logo){ try{ var li = imgToJpeg(logo, 300), lh = 16, lw = Math.min(50, lh * li.w / li.h); doc.addImage(li.url, 'JPEG', M, y, lw, lh); }catch(e){} }
+      if(logo){ try{ var li = imgToJpeg(logo, 1000), lh = 24, lw = lh * li.w / li.h; if(lw > 70){ lw = 70; lh = lw * li.h / li.w; } doc.addImage(li.url, 'JPEG', M, y + (24 - lh) / 2, lw, lh); }catch(e){} }
       doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(15);
       var title = isPro ? (acc.companyName || 'Scheda lavoro') : 'Rendrum';
       doc.text(title, W - M, y + 6, { align:'right' });
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, soft);
       var contact = []; if(isPro){ if(acc.phone) contact.push('Tel. ' + acc.phone); if(acc.email) contact.push(acc.email); if(acc.piva) contact.push('P.IVA ' + acc.piva); } else contact.push('rendrum.com');
       doc.text(contact.join('  ·  '), W - M, y + 12, { align:'right' });
-      y += 22; doc.setDrawColor.apply(doc, accent); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 7;
+      y += 28; doc.setDrawColor.apply(doc, accent); doc.setLineWidth(0.6); doc.line(M, y, W - M, y); y += 7;
       doc.setTextColor.apply(doc, ink); doc.setFont('helvetica','bold'); doc.setFontSize(13);
       doc.text('Anteprima lavoro: ' + layers.map(function(l){ return l.title; }).concat([layerTitle()]).join(' + '), M, y);
       doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor.apply(doc, soft);
@@ -7871,9 +7871,10 @@
 
     function header(){
       if(meta.logo){
-        var lh = 22, lw = lh * meta.logo.w / meta.logo.h;
-        if(lw > 60){ lw = 60; lh = lw * meta.logo.h / meta.logo.w; }
-        try{ doc.addImage(meta.logo.url, 'JPEG', M, 22 + (22 - lh) / 2, lw, lh); }catch(e){}
+        // riquadro logo: alto fino a 30 mm, largo fino a 80 mm, proporzioni sempre rispettate
+        var lh = 30, lw = lh * meta.logo.w / meta.logo.h;
+        if(lw > 80){ lw = 80; lh = lw * meta.logo.h / meta.logo.w; }
+        try{ doc.addImage(meta.logo.url, 'JPEG', M, 16 + (30 - lh) / 2, lw, lh); }catch(e){}
       } else {
         var nm = split(imp.ragioneSociale || '', 'bold', 18, 85);
         txt(M, 34, nm.slice(0, 2).join('\n'), 'bold', 18);
@@ -8546,7 +8547,7 @@
       var logoUrl = qs.account && qs.account.logoUrl || (proAccount && proAccount.logoUrl) || null;
       return Promise.all([
         loadJsPdf(),
-        logoUrl ? loadImgCors(logoUrl).then(function(im){ if(!im) return null; var j = imgToJpeg(im, 600); return { url:j.url, w:j.w, h:j.h }; }) : null,
+        logoUrl ? loadImgCors(logoUrl).then(function(im){ if(!im) return null; var j = imgToJpeg(im, 1000); return { url:j.url, w:j.w, h:j.h }; }) : null,
         a.attiva ? (loc && loc.prima ? loc.prima : (a.prima ? qImgFromUrl(a.prima) : null)) : null,
         a.attiva ? (loc && loc.dopo ? loc.dopo : (a.dopo ? qImgFromUrl(a.dopo) : null)) : null
       ]);
