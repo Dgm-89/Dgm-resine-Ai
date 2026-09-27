@@ -6445,7 +6445,11 @@
           var m = Math.max(0, Math.min(1, (d - 7) / 8)); mask[p] = m; if(m > 0.5) changed++;
         }
         var frac = changed / (w*h);
-        if(frac < 0.03 || frac > 0.85) return res; // niente da rifinire o quasi tutto cambiato
+        // Si rifinisce solo quando il lavoro tocca una parte piccola della foto (es. colonne, davanzali).
+        // Su superfici grandi (pavimento, pareti) il colore nuovo può somigliare a quello vecchio in
+        // alcune zone: in quel caso si rischierebbe di rimettere pezzi della foto originale (angoli
+        // non finiti, nastri, macchie). Meglio lasciare il risultato dell'AI intero.
+        if(frac < 0.03 || frac > 0.25) return res;
         // allarga un po' la maschera (le zone cambiate vincono ai bordi)
         var m2 = new Float32Array(w*h);
         for(var y = 0; y < h; y++) for(var x = 0; x < w; x++){ var mx = 0;
