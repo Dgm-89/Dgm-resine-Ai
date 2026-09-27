@@ -120,11 +120,11 @@ module.exports = async function handler(req, res) {
   // di materiali diversi rischiano di venire fuori quasi identiche, cambia solo
   // il colore piatto.
   const MATERIAL_TEXTURE = {
-    monolith_spatolato: "resina spatolata monocomponente, superficie continua, compatta e uniforme, con leggerissime tracce direzionali lasciate dalla spatolatura a mano ancora visibili in controluce, finitura satinata, senza fughe né giunti",
+    monolith_spatolato: "resina spatolata monocomponente stesa a mano, superficie continua e compatta con i tipici segni ad arco della spatola ben riconoscibili (ampi, morbidi e irregolari, più evidenti dove la luce radente li colpisce) e leggere nuvolature di tono, come una vera resina spatolata artigianale e non un colore piatto, finitura satinata, senza fughe né giunti",
     monolith_marmo: "resina spatolata effetto marmo, superficie liscia con venature marmoree naturali, sfumature di tono e piccole nuvolature che ricordano il marmo lucidato, senza fughe",
     monolith_pietra: "resina spatolata effetto pietra, superficie con graniglie minerali colorate ben visibili e distribuite in modo uniforme sulla superficie, texture granulare simile a un terrazzo fine, non liscia e piatta",
     monolith_terrazzo: "resina effetto terrazzo, superficie con graniglie/scaglie di dimensioni miste e colori diversi ben visibili incorporate nella resina, tipico effetto terrazzo veneziano, texture chiaramente granulare",
-    scale: "resina spatolata effetto liscio (stessa finitura Resina Spatolata) applicata su gradini e alzate di una scala, superficie continua e uniforme con leggerissime tracce direzionali di spatolatura, finitura satinata, senza fughe",
+    scale: "resina spatolata (stessa finitura Resina Spatolata) applicata su gradini e alzate di una scala, superficie continua con i segni ad arco della spatola riconoscibili e leggere nuvolature di tono, finitura satinata, senza fughe",
     microcemento: "microcemento applicato a spatola/frattazzo, superficie con evidenti segni di lavorazione circolari e radiali lasciati dal frattazzo ancora percepibili, leggere variazioni di tono naturali (non un colore perfettamente piatto), finitura satinata-opaca, non liscia e piatta come la resina",
     imbiancatura: "pittura murale opaca stesa in modo uniforme sulla parete, finitura pittorica classica, nessuna texture materica particolare",
     decorazioni: "boiserie in legno applicata a parete",
