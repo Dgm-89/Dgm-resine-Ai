@@ -120,7 +120,7 @@ module.exports = async function handler(req, res) {
   // di materiali diversi rischiano di venire fuori quasi identiche, cambia solo
   // il colore piatto.
   const MATERIAL_TEXTURE = {
-    monolith_spatolato: "resina spatolata monocomponente color chiaro/avorio, superficie continua, compatta e uniforme, con leggerissime tracce direzionali lasciate dalla spatolatura a mano ancora visibili in controluce, finitura satinata, senza fughe né giunti",
+    monolith_spatolato: "resina spatolata monocomponente, superficie continua, compatta e uniforme, con leggerissime tracce direzionali lasciate dalla spatolatura a mano ancora visibili in controluce, finitura satinata, senza fughe né giunti",
     monolith_marmo: "resina spatolata effetto marmo, superficie liscia con venature marmoree naturali, sfumature di tono e piccole nuvolature che ricordano il marmo lucidato, senza fughe",
     monolith_pietra: "resina spatolata effetto pietra, superficie con graniglie minerali colorate ben visibili e distribuite in modo uniforme sulla superficie, texture granulare simile a un terrazzo fine, non liscia e piatta",
     monolith_terrazzo: "resina effetto terrazzo, superficie con graniglie/scaglie di dimensioni miste e colori diversi ben visibili incorporate nella resina, tipico effetto terrazzo veneziano, texture chiaramente granulare",
@@ -472,7 +472,7 @@ module.exports = async function handler(req, res) {
     "Le nuove superfici devono ricevere quella luce in modo fisicamente credibile: zone più chiare vicino a finestre e lampade, gradienti morbidi di luce sulle pareti, angoli e spigoli leggermente più scuri (occlusione ambientale), ombre di contatto sotto mobili, battiscopa e oggetti, ombre portate identiche a quelle originali.",
     "Il colore richiesto è quello della vernice/materiale vista in luce neutra: in foto deve apparire come apparirebbe davvero sotto QUESTA luce (più scuro in ombra, più chiaro in luce, con la stessa dominante di colore delle altre superfici), MAI come una campitura piatta e uniforme.",
     "Riflessi: rispetta la finitura; le superfici opache non riflettono, le satinate hanno riflessi morbidi e sfumati, le lucide riflettono finestre, luci e mobili in modo coerente con la prospettiva.",
-    "Materiali con microdettagli realistici (grana, leggere irregolarità, venature, fughe e bordi coerenti con la scala reale). Dove due colori o materiali si incontrano il passaggio è netto ma NATURALE: non aggiungere mai linee, contorni, righe luminose o bordi colorati lungo spigoli e angoli, e non cambiare il colore delle superfici che non sono state richieste (una parete bianca resta dello stesso bianco dell'originale).",
+    "Materiali con microdettagli realistici (grana, leggere irregolarità, venature coerenti con la scala reale; fughe e giunti SOLO nei materiali che li hanno davvero, come piastrelle, parquet, laminato e SPC). Dove due colori o materiali si incontrano il passaggio è netto ma NATURALE: non aggiungere mai linee, contorni, righe luminose o bordi colorati lungo spigoli e angoli, e non cambiare il colore delle superfici che non sono state richieste (una parete bianca resta dello stesso bianco dell'originale).",
     "LUCI COLORATE E RIFLESSI ESISTENTI: le luci colorate già presenti nella foto (aloni rossi, arancioni o blu di insegne, neon, schermi, lampade colorate, luce calda dei faretti) e le dominanti di colore che proiettano sulle superfici NON richieste devono restare IDENTICHE: non 'ripulire' e non neutralizzare le pareti, il soffitto o gli oggetti che non fanno parte della lavorazione. Anche sulle superfici nuove quelle luci colorate si riflettono nello stesso punto e con la stessa intensità.",
     "Mantieni la stessa nitidezza, profondità di campo, grana/rumore e compressione della foto originale: non renderla più pulita, più nitida, più satura o più contrastata dell'originale. Niente effetti HDR, niente glow, niente colori 'plastici'."
   ].join(" ");
@@ -575,11 +575,23 @@ module.exports = async function handler(req, res) {
     "REGOLA ASSOLUTA: a parte le strisce, l'immagine deve restare IDENTICA a quella ricevuta: stessi colori della parte alta e della parte bassa, stesso sottotetto, stessi serramenti, stessa luce, stessa inquadratura. Non ridipingere e non schiarire o scurire nessuna zona."
   ].filter(Boolean).join(" ");
 
+  // Superfici continue (resine, microcemento, scale, HACCP, graniglia, pittura):
+  // l'AI non deve inventare linee, nastri, giunti o disegni, né trasformare i
+  // segni di cantiere della foto in decorazioni.
+  const isContinuous = /^(monolith|microcemento|scale|resina_haccp|graniglia_esterni|imbiancatura)/.test(String(materialId || ""));
+  const hasRequestedLines = Boolean(bordaturaNote || segniNote || righeNote || accentoNote);
+  const continuityNote = isContinuous
+    ? " SUPERFICIE CONTINUA (regola vincolante): la nuova lavorazione è un'unica superficie continua e omogenea, senza interruzioni. NON aggiungere linee, strisce, righe chiare o scure, nastri, giunti, fughe, riquadri, bordi, triangoli, bande o disegni geometrici di alcun tipo sulla superficie trattata"
+      + (hasRequestedLines ? ", a parte quelli richiesti esplicitamente in queste istruzioni" : "")
+      + ". I segni di cantiere presenti nella foto originale sulla superficie da trattare (nastro adesivo, tracce di gesso o matita, macchie, crepe, polvere, rappezzi, zone di colore diverso del massetto o dell'intonaco) NON vanno riprodotti né trasformati in decorazioni: sotto la nuova lavorazione spariscono completamente. Sono ammesse solo le lievi variazioni di tono e i segni di lavorazione tipici del materiale descritto."
+    : "";
+
   const prompt = isRigheStep ? righeStepPrompt : [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
     isFacadeStyled ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
     finitura ? `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).` : "",
+    continuityNote,
     isExteriorFacade
       ? facadeKeepSentence
       : isFloorOnly
