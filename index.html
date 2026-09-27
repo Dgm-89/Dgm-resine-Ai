@@ -53,8 +53,16 @@
 
   header{
     position:sticky; top:0; z-index:20; background:var(--surface); border-bottom:1px solid var(--line);
-    padding: calc(14px + env(safe-area-inset-top,0px)) 20px 14px; display:flex; align-items:center; justify-content:space-between;
+    padding: calc(14px + env(safe-area-inset-top,0px)) 20px 14px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
   }
+  .pro-bar{ flex-basis:100%; display:flex; gap:6px; margin-top:10px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .pro-bar::-webkit-scrollbar{ display:none; }
+  .pro-bar[hidden]{ display:none; }
+  .pro-bar button{ flex:none; display:flex; align-items:center; gap:6px; border:1.5px solid var(--line); background:none; color:var(--ink); border-radius:999px; padding:7px 13px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
+  .pro-bar button:hover{ border-color:var(--accent); }
+  .pro-bar button.primary{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .pro-bar .pb-short{ display:none; }
+  @media (max-width:480px){ .pro-bar{ gap:5px; } .pro-bar button{ padding:6px 9px; font-size:12.5px; } .pro-bar .pb-long{ display:none; } .pro-bar .pb-short{ display:inline; } }
   .brand{ display:flex; align-items:center; gap:10px; }
   #splashScreen{ position:fixed; inset:0; z-index:9999; background:var(--logo-bg); display:flex; align-items:center; justify-content:center; transition:opacity .5s ease, visibility .5s ease; }
   #splashScreen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
@@ -426,6 +434,67 @@
   .pp-form-photos .pp-photo-box{ flex:1; text-align:center; }
   .pp-form-photos img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:8px; border:1px solid var(--line); }
   .pp-form-photos .pp-photo-label{ font-size:10px; color:var(--ink-soft); margin-top:4px; font-weight:600; }
+  .pp-profile-btn{ width:100%; border:1.5px solid var(--accent); border-radius:10px; padding:12px; background:none; color:var(--ink); font-weight:700; font-size:14px; cursor:pointer; font-family:inherit; margin-top:10px; }
+  .pf-sec{ font-size:13.5px; font-weight:800; color:var(--ink); margin:18px 0 6px; }
+  .pf-hint{ font-size:12px; color:var(--ink-soft); margin:-2px 0 8px; line-height:1.4; }
+  .pf-count{ font-size:11.5px; color:var(--ink-soft); text-align:right; margin-top:-8px; margin-bottom:10px; }
+  .pf-count.bad{ color:#C0392B; }
+  .pf-reg{ border:1.5px solid var(--line); border-radius:10px; margin-bottom:6px; overflow:hidden; }
+  .pf-reg-head{ display:flex; align-items:center; gap:8px; padding:9px 10px; cursor:pointer; font-size:13.5px; font-weight:600; color:var(--ink); background:var(--surface); border:none; width:100%; font-family:inherit; text-align:left; }
+  .pf-reg-head .pf-n{ margin-left:auto; font-size:11.5px; font-weight:700; color:var(--accent); }
+  .pf-reg-body{ display:none; padding:4px 10px 10px; }
+  .pf-reg.open .pf-reg-body{ display:block; }
+  .pf-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .pf-chip{ border:1.5px solid var(--line); border-radius:999px; padding:5px 10px; font-size:12.5px; background:none; color:var(--ink); cursor:pointer; font-family:inherit; }
+  .pf-chip.on{ background:var(--accent); border-color:var(--accent); color:var(--accent-ink); }
+  .pf-all{ font-size:12px; color:var(--accent); background:none; border:none; padding:0 0 8px; cursor:pointer; font-family:inherit; font-weight:700; }
+  .pf-gal{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:8px; }
+  .pf-gal div{ position:relative; aspect-ratio:1; border-radius:8px; overflow:hidden; border:1px solid var(--line); }
+  .pf-gal img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .pf-gal button{ position:absolute; top:3px; right:3px; width:22px; height:22px; border-radius:50%; border:none; background:rgba(0,0,0,0.65); color:#fff; font-size:12px; cursor:pointer; line-height:22px; padding:0; }
+  .pf-add{ display:inline-block; border:1.5px dashed var(--accent); border-radius:10px; padding:9px 12px; font-size:13px; font-weight:700; color:var(--ink); cursor:pointer; }
+  .pf-logo{ display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .pf-logo img{ width:56px; height:56px; object-fit:contain; border-radius:8px; border:1px solid var(--line); background:#fff; }
+  .pf-check{ display:flex; align-items:center; gap:8px; font-size:13.5px; color:var(--ink); padding:4px 0; }
+  .pro-projects-card.wide{ max-width:640px; }
+  .field select{ width:100%; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); padding:11px 10px; border-radius:8px; font-family:inherit; }
+  .q-card{ align-items:center; }
+  .q-card-right{ text-align:right; flex:none; }
+  .q-card-tot{ font-size:13px; font-weight:800; color:var(--ink); }
+  .q-chip{ display:inline-block; margin-top:3px; font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--accent-soft); color:var(--ink); }
+  .q-chip.q-accettato{ background:#2E7D32; color:#fff; } .q-chip.q-rifiutato{ background:#8A8A8A; color:#fff; } .q-chip.q-inviato{ background:var(--accent); color:var(--accent-ink); }
+  .q-link{ background:none; border:none; padding:0; color:var(--accent); font-weight:700; text-decoration:underline; cursor:pointer; font-family:inherit; font-size:inherit; }
+  .q-voce, .q-cond{ border:1.5px solid var(--line); border-radius:10px; padding:10px 10px 4px; margin-bottom:10px; }
+  .q-voce .field{ margin-bottom:10px; }
+  .q-voce-head{ display:flex; align-items:center; justify-content:space-between; font-size:13px; color:var(--ink); margin-bottom:8px; }
+  .q-tools button{ border:1px solid var(--line); background:none; color:var(--ink); border-radius:6px; padding:3px 7px; font-size:12px; cursor:pointer; margin-left:4px; font-family:inherit; }
+  .q-tools button:disabled{ opacity:0.35; cursor:default; }
+  .q-row3{ display:grid; grid-template-columns:1fr 1.1fr 1.3fr; gap:8px; }
+  .q-voce-tot{ text-align:right; font-size:12.5px; color:var(--ink-soft); margin:-4px 0 8px; }
+  .q-voce-tot b{ color:var(--ink); }
+  .q-rata{ display:grid; grid-template-columns:16px 1fr 58px 12px 24px; grid-template-areas:"n d p s x" ". w w w w"; gap:6px; align-items:center; margin-bottom:10px; font-size:13px; color:var(--ink); }
+  .q-rata .q-rn{ grid-area:n; } .q-rata [data-f="descrizione"]{ grid-area:d; } .q-rata [data-f="scadenza"]{ grid-area:w; } .q-rata .q-pct{ grid-area:p; } .q-rata > span:not(.q-rn){ grid-area:s; } .q-rata button{ grid-area:x; }
+  .q-rata input{ width:100%; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); padding:8px; border-radius:8px; font-family:inherit; min-width:0; }
+  .q-rata button{ border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:13px; }
+  .q-rn{ font-weight:700; color:var(--ink-soft); }
+  .q-seg{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+  .q-seg button{ border:1.5px solid var(--line); background:none; color:var(--ink); border-radius:999px; padding:6px 11px; font-size:12.5px; cursor:pointer; font-family:inherit; }
+  .q-cond input, .q-cond textarea{ width:100%; border:1.5px solid var(--line); background:var(--surface); color:var(--ink); padding:8px; border-radius:8px; font-family:inherit; margin-bottom:6px; box-sizing:border-box; }
+  .q-cond-t{ font-weight:700; }
+  .q-small{ font-size:12px !important; color:var(--ink-soft) !important; }
+  .q-tot{ border:1.5px solid var(--line); border-radius:10px; padding:10px 12px; margin:6px 0 4px; font-size:13.5px; color:var(--ink); }
+  .q-tot div{ display:flex; justify-content:space-between; padding:2px 0; }
+  .q-tot div span:first-child{ color:var(--ink-soft); }
+  .q-tot .q-tot-big{ border-top:1.5px solid var(--line); margin-top:6px; padding-top:8px; font-size:17px; font-weight:800; }
+  .q-tot .q-tot-big span:first-child{ color:var(--ink); }
+  .q-add{ border:1.5px dashed var(--accent); background:none; color:var(--ink); border-radius:10px; padding:9px 12px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; }
+  .q-actions{ display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px; }
+  .q-actions .pro-auth-submit{ margin:0; }
+  .q-sec-sum{ cursor:pointer; list-style:none; }
+  .q-sec-sum::-webkit-details-marker{ display:none; }
+  .q-li{ display:flex; justify-content:space-between; gap:8px; border:1px solid var(--line); border-radius:8px; padding:7px 10px; margin-bottom:6px; font-size:13px; color:var(--ink); }
+  .q-li button{ border:none; background:none; color:var(--ink-soft); cursor:pointer; }
+  @media (max-width:480px){ .q-row3{ grid-template-columns:1fr 1fr; } .q-row3 .field:last-child{ grid-column:1 / -1; } }
   .pp-back-link{ border:none; background:none; color:var(--ink-soft); font-size:12px; cursor:pointer; font-family:inherit; padding:0; margin-bottom:14px; text-decoration:underline; }
   .pp-error{ font-size:12px; color:#C0392B; margin-top:-6px; margin-bottom:14px; min-height:14px; }
   .pp-delete-btn{ width:100%; border:1.5px solid #C0392B; background:none; color:#C0392B; border-radius:10px; padding:11px; font-weight:700; font-size:13px; cursor:pointer; font-family:inherit; margin-top:10px; }
@@ -508,6 +577,12 @@
     </div>
     <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
   </div>
+  <nav class="pro-bar" id="proBar" hidden aria-label="Area professionisti">
+    <button type="button" class="primary" id="pbNew"><span>📐 <span class="pb-long">Nuova a</span><span class="pb-short">A</span>nteprima</span></button>
+    <button type="button" id="pbProjects"><span>📁 Progetti</span></button>
+    <button type="button" id="pbQuotes"><span>📄 Preventivi</span></button>
+    <button type="button" id="pbProfile"><span>🧰 Profilo<span class="pb-long"> artigiano</span></span></button>
+  </nav>
 </header>
 
 <!-- Area professionisti: login/registrazione con scelta piano Basic/Medium/Pro -->
@@ -586,6 +661,198 @@
       <div class="pp-list" id="ppList"></div>
       <div class="pp-empty" id="ppEmpty" style="display:none" data-i18n="proProjectsEmpty">Non hai ancora salvato nessun progetto.</div>
       <button type="button" class="pp-new-btn" id="ppNewBtn" data-i18n="proProjectsNewBtn">+ Nuovo progetto</button>
+      <button type="button" class="pp-profile-btn" id="ppQuotesBtn" hidden>📄 I miei preventivi</button>
+      <button type="button" class="pp-profile-btn" id="ppProfileBtn" hidden>🧰 Il mio profilo artigiano</button>
+    </div>
+
+
+    <!-- Preventivi: elenco -->
+    <div class="pro-projects-view" id="ppViewQuotes">
+      <button type="button" class="pp-back-link" id="qBackList">← Torna ai progetti</button>
+      <div class="pro-projects-title">I miei preventivi</div>
+      <div class="pro-projects-sub">Preventivi numerati, con condizioni e firme, pronti in PDF. Restano salvati qui.</div>
+      <div class="pp-error" id="qListErr"></div>
+      <div id="qPivaGate" hidden style="border:1.5px solid var(--accent);border-radius:12px;padding:12px;margin-bottom:12px;font-size:13.5px;line-height:1.45;color:var(--ink)">
+        <b>Serve la partita IVA della tua impresa.</b><br>I preventivi Rendrum sono documenti commerciali: per crearli inserisci una partita IVA valida (italiana o estera) nei dati della tua impresa.
+        <button type="button" class="pp-new-btn" id="qPivaGo" style="margin-top:10px">Inserisci la partita IVA</button>
+      </div>
+      <div class="pp-list" id="qList"></div>
+      <button type="button" class="pp-new-btn" id="qNewBtn">+ Nuovo preventivo</button>
+      <button type="button" class="pp-profile-btn" id="qSettingsBtn">⚙︎ Dati impresa, banca, condizioni e listino</button>
+    </div>
+
+    <!-- Preventivi: editor -->
+    <div class="pro-projects-view" id="ppViewQuote">
+      <button type="button" class="pp-back-link" id="qBackQuotes">← Torna ai preventivi</button>
+      <div class="pro-projects-title" id="qEdTitle">Nuovo preventivo</div>
+      <div class="pf-hint" id="qImpresaWarn" style="color:#B85F27"></div>
+      <div class="row2">
+        <div class="field"><label for="qData">Data</label><input id="qData" type="date" data-q="data"></div>
+        <div class="field"><label for="qStatus">Stato</label><select id="qStatus" data-q="status"><option value="bozza">Bozza</option><option value="inviato">Inviato</option><option value="accettato">Accettato</option><option value="rifiutato">Rifiutato</option></select></div>
+      </div>
+
+      <div class="pf-sec">Cliente</div>
+      <div class="field"><label>Nome e cognome o ragione sociale *</label><input type="text" maxlength="120" data-q="cliente.nome" placeholder="Es. Sig.ra Anna Bianchi"></div>
+      <div class="field"><label>Indirizzo</label><input type="text" maxlength="200" data-q="cliente.indirizzo" placeholder="Via, CAP, comune (provincia)"></div>
+      <div class="row2">
+        <div class="field"><label>Telefono</label><input type="tel" maxlength="40" data-q="cliente.telefono"></div>
+        <div class="field"><label>Email</label><input type="email" maxlength="120" data-q="cliente.email"></div>
+      </div>
+      <div class="field"><label>Codice fiscale / P.IVA</label><input type="text" maxlength="30" data-q="cliente.cfPiva"></div>
+
+      <div class="pf-sec">Cantiere</div>
+      <div class="field"><label>Indirizzo del cantiere</label><input type="text" maxlength="200" data-q="cantiere.indirizzo" placeholder="Se diverso da quello del cliente"></div>
+      <div class="field"><label>Descrizione</label><input type="text" maxlength="200" data-q="cantiere.descrizione" placeholder="Es. Bagno piano primo - circa 18 mq"></div>
+
+      <div class="pf-sec">Oggetto</div>
+      <div class="field"><label>Oggetto *</label><input type="text" maxlength="200" data-q="oggetto" placeholder="Es. Offerta per la realizzazione di pavimento in resina"></div>
+      <div class="field"><label>Lavorazione principale</label><select id="qLav" data-q="lavorazione"></select></div>
+      <div class="field"><label>Testo di apertura</label><textarea rows="3" maxlength="800" data-q="intro"></textarea></div>
+
+      <div class="pf-sec">Voci del preventivo *</div>
+      <div id="qVoci"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:6px">
+        <button type="button" class="q-add" id="qVoceAdd">＋ Aggiungi voce</button>
+        <div class="field" style="margin:0;flex:1;min-width:180px"><select id="qFromListino"></select></div>
+      </div>
+
+      <div class="pf-sec">Importi</div>
+      <div class="row2">
+        <div class="field"><label>Aliquota IVA</label><select data-q="iva.aliquota"><option value="22">22%</option><option value="10">10%</option><option value="4">4%</option><option value="0">0% (esente / reverse charge)</option></select></div>
+        <div class="field"><label>Sconto %</label><input type="text" inputmode="decimal" data-q="scontoPct" data-num="1" placeholder="0"></div>
+      </div>
+      <div class="field"><label>Dicitura IVA</label><input type="text" id="qIvaNota" maxlength="200" data-q="iva.nota"></div>
+      <div class="q-tot" id="qTot"></div>
+
+      <div class="pf-sec">Specifiche e tempistiche</div>
+      <div class="field"><textarea rows="3" maxlength="2000" data-q="specifiche" placeholder="Es. Tinta e finitura da definire prima dell'avvio. Durata stimata: 6 giorni lavorativi."></textarea></div>
+
+      <div class="pf-sec">Condizioni di pagamento *</div>
+      <div class="q-seg" id="qRatePresets"><button type="button" data-p="50/50">50 / 50</button><button type="button" data-p="30/40/30">30 / 40 / 30</button><button type="button" data-p="100% fine lavori">100% a fine lavori</button></div>
+      <div id="qRate"></div>
+      <button type="button" class="q-add" id="qRataAdd" style="padding:6px 10px;font-size:12.5px">＋ Rata</button>
+      <div class="pf-hint" id="qRateSum" style="margin-top:6px"></div>
+      <div class="row2" style="margin-top:6px">
+        <div class="field"><label>Modalità</label><select data-q="pagamento.metodo"><option value="bonifico">Bonifico bancario</option><option value="altro">Altro</option></select></div>
+        <div class="field"><label>Validità offerta (giorni)</label><input type="text" inputmode="numeric" data-q="validitaGiorni" data-num="1"></div>
+      </div>
+      <div class="pf-hint" id="qPayBank"></div>
+      <div class="field" id="qPayAltro" hidden><label>Modalità di pagamento *</label><input type="text" maxlength="400" data-q="pagamento.testo" placeholder="Es. Assegno bancario intestato a …"></div>
+      <div class="field"><label>Nota sotto i pagamenti</label><textarea rows="2" maxlength="400" data-q="pagamento.nota"></textarea></div>
+
+      <details class="q-details" style="margin-top:4px">
+        <summary class="pf-sec q-sec-sum">Condizioni generali (<span id="qCondCount">0</span>) ▸</summary>
+        <div class="pf-hint">Stampate nella seconda pagina, con le firme. Le modifiche valgono solo per questo preventivo; quelle standard le cambi in "Dati impresa".</div>
+        <div id="qCond"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="q-add" id="qCondAdd">＋ Clausola</button><button type="button" class="q-link" id="qCondReset">Ripristina le mie condizioni standard</button></div>
+      </details>
+
+      <div id="qPrevBox" hidden style="margin-top:14px">
+        <div class="pf-sec">Anteprima Rendrum</div>
+        <label class="pf-check" style="align-items:flex-start"><input type="checkbox" id="qPrevOn"> <span>Aggiungi una pagina con l'anteprima prima/dopo e i materiali scelti</span></label>
+        <img id="qPrevImg" alt="" style="width:100%;max-width:260px;border-radius:8px;border:1px solid var(--line);margin-top:6px">
+      </div>
+
+      <div class="pp-error" id="qEdErr" style="margin-top:14px"></div>
+      <div class="pf-hint" id="qEdMsg" style="color:var(--ink)"></div>
+      <div class="q-actions">
+        <button type="button" class="pro-auth-submit" id="qSaveBtn" style="background:none;color:var(--ink);border:1.5px solid var(--accent)">Salva</button>
+        <button type="button" class="pro-auth-submit" id="qPdfBtn">Salva e scarica PDF</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px">
+        <button type="button" class="q-link" id="qDupBtn" hidden>Duplica</button>
+        <button type="button" class="q-link" id="qDeleteBtn" hidden style="color:#C0392B">Elimina preventivo</button>
+      </div>
+    </div>
+
+    <!-- Preventivi: impostazioni -->
+    <div class="pro-projects-view" id="ppViewQSettings">
+      <button type="button" class="pp-back-link" id="qSetBack">← Indietro</button>
+      <div class="pro-projects-title">Dati per i preventivi</div>
+      <div class="pro-projects-sub">Li inserisci una volta e compaiono su ogni preventivo. Il logo è quello del tuo profilo artigiano.</div>
+      <div class="pf-sec">La tua impresa *</div>
+      <div class="pf-hint">Il generatore di preventivi è riservato alle imprese: serve una partita IVA valida, italiana o estera.</div>
+      <div class="field"><label>Paese della partita IVA *</label><select data-s="impresa.paese" id="qSetPaese"></select></div>
+      <div class="field"><label>Ragione sociale *</label><input type="text" maxlength="120" data-s="impresa.ragioneSociale"></div>
+      <div class="field"><label>Indirizzo della sede *</label><input type="text" maxlength="200" data-s="impresa.indirizzo" placeholder="Via, civico - CAP comune (provincia)"></div>
+      <div class="row2">
+        <div class="field"><label>Partita IVA / VAT *</label><input type="text" maxlength="30" data-s="impresa.piva" id="qSetPiva" autocapitalize="characters"></div>
+        <div class="field"><label>Codice fiscale</label><input type="text" maxlength="20" data-s="impresa.cf"></div>
+      </div>
+      <div class="row2">
+        <div class="field"><label>Telefono *</label><input type="tel" maxlength="40" data-s="impresa.telefono"></div>
+        <div class="field"><label>Email *</label><input type="email" maxlength="120" data-s="impresa.email"></div>
+      </div>
+      <div class="field"><label>Sito web</label><input type="text" maxlength="120" data-s="impresa.sito" placeholder="www.tuosito.it"></div>
+
+      <div class="pf-sec">Banca (per il bonifico)</div>
+      <div class="field"><label>Intestatario del conto</label><input type="text" maxlength="120" data-s="banca.intestatario"></div>
+      <div class="field"><label>Banca e filiale</label><input type="text" maxlength="120" data-s="banca.banca"></div>
+      <div class="field"><label>IBAN</label><input type="text" maxlength="40" data-s="banca.iban" placeholder="IT00 X000 0000 0000 0000 0000 000" style="text-transform:uppercase"></div>
+
+      <div class="pf-sec">Numerazione e valori standard</div>
+      <div class="row2">
+        <div class="field"><label>Prossimo numero di quest'anno</label><input type="text" inputmode="numeric" data-s="numeroPartenza" data-num="1" placeholder="Es. 57"></div>
+        <div class="field"><label>Validità offerta (giorni)</label><input type="text" inputmode="numeric" data-s="validitaGiorni" data-num="1"></div>
+      </div>
+      <div class="pf-hint" style="margin-top:-8px">Se usi già una numerazione, scrivi da quale numero ripartire: Rendrum continuerà da lì.</div>
+      <div class="field"><label>Rate standard</label><select id="qSetRatePreset"><option value="50/50">50% acconto / 50% saldo</option><option value="30/40/30">30% / 40% / 30%</option><option value="100% fine lavori">100% a fine lavori</option></select></div>
+      <div class="field"><label>Specifiche e tempistiche standard</label><textarea rows="3" maxlength="2000" data-s="specifiche"></textarea></div>
+
+      <details>
+        <summary class="pf-sec q-sec-sum">Condizioni generali standard (<span id="qSetCondBoxCount">0</span>) ▸</summary>
+        <div class="pf-hint">La clausola sulle finiture si adatta da sola alla lavorazione del preventivo. Testi di esempio: falli verificare dal tuo consulente.</div>
+        <div id="qSetCondBox"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="q-add" id="qSetCondAdd">＋ Clausola</button><button type="button" class="q-link" id="qSetCondReset">Ripristina i testi Rendrum</button></div>
+      </details>
+
+      <details style="margin-top:4px">
+        <summary class="pf-sec q-sec-sum">Listino voci ▸</summary>
+        <div id="qSetListino"></div>
+      </details>
+
+      <div class="pp-error" id="qSetErr" style="margin-top:14px"></div>
+      <div class="pf-hint" id="qSetMsg" style="color:var(--ink)"></div>
+      <button type="button" class="pro-auth-submit" id="qSetSave">Salva dati</button>
+    </div>
+
+    <!-- Vista profilo artigiano (Trova il tuo artigiano) -->
+    <div class="pro-projects-view" id="ppViewProfile">
+      <button type="button" class="pp-back-link" id="pfBackBtn">← Torna ai progetti</button>
+      <div class="pro-projects-title">Il mio profilo artigiano</div>
+      <div class="pro-projects-sub">È la scheda che vedono i clienti in "Trova il tuo artigiano". Più è completa, più i contatti che ricevi sono giusti per te. I campi con * sono obbligatori.</div>
+      <div id="pfStatusTop" style="font-size:12.5px;margin-bottom:10px"></div>
+
+      <div class="pf-sec">Chi sei</div>
+      <div class="field"><label for="pfCompany">Nome dell'attività *</label><input id="pfCompany" type="text" maxlength="120" placeholder="Es. Rossi Pavimenti"></div>
+      <div class="pf-logo"><img id="pfLogoImg" alt="" hidden><label class="pf-add" for="pfLogoInput">Carica logo (o una tua foto) *</label><input type="file" id="pfLogoInput" accept="image/jpeg,image/png,image/webp" style="display:none"></div>
+      <div class="field"><label for="pfBio">Descrizione della tua attività *</label><textarea id="pfBio" rows="4" maxlength="1500" placeholder="Es. Da 15 anni posiamo resine e microcemento in case e negozi. Sopralluogo gratuito, squadra di 4 persone, garanzia 10 anni."></textarea></div>
+      <div class="pf-count" id="pfBioCount">0 / almeno 60 caratteri</div>
+      <div class="row2">
+        <div class="field"><label for="pfCity">Comune della sede *</label><input id="pfCity" type="text" maxlength="80" placeholder="Es. Gallarate"></div>
+        <div class="field"><label for="pfPhone">Telefono *</label><input id="pfPhone" type="tel" maxlength="30" placeholder="Es. 333 1234567"></div>
+      </div>
+      <div class="field"><label for="pfWebsite">Sito web o pagina social (se ce l'hai)</label><input id="pfWebsite" type="url" maxlength="200" placeholder="https://"></div>
+
+      <div class="pf-sec">Dove lavori *</div>
+      <div class="pf-hint">Apri la tua regione e tocca le province in cui vai a lavorare. Ti arriveranno solo richieste da lì.</div>
+      <div id="pfZones"></div>
+      <div class="pf-hint" id="pfZonesSum" style="margin-top:6px"></div>
+
+      <div class="pf-sec">Cosa fai *</div>
+      <div class="pf-hint">Riceverai richieste solo per le lavorazioni che selezioni.</div>
+      <div id="pfLav"></div>
+
+      <div class="pf-sec">I tuoi lavori * <span style="font-weight:600;color:var(--ink-soft);font-size:12px">(da 3 a 8 foto)</span></div>
+      <div class="pf-hint">Foto vere di lavori finiti: sono la prima cosa che guarda il cliente.</div>
+      <div class="pf-gal" id="pfGallery"></div>
+      <label class="pf-add" for="pfPhotoInput" id="pfPhotoAdd">＋ Aggiungi foto</label><input type="file" id="pfPhotoInput" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
+
+      <div class="pf-sec">Visibilità</div>
+      <label class="pf-check"><input type="checkbox" id="pfVisible" checked> Mostra il mio profilo ai clienti</label>
+
+      <div class="pp-error" id="pfError" style="margin-top:12px"></div>
+      <button type="button" class="pro-auth-submit" id="pfSaveBtn">Salva profilo</button>
     </div>
 
     <!-- Vista form (crea o modifica) -->
@@ -1006,6 +1273,7 @@
       <div class="field" style="margin-bottom:8px"><label for="pdfClient" style="font-size:12.5px">Cliente (facoltativo)</label><input id="pdfClient" type="text" placeholder="Es. Sig. Rossi – Via Roma 10, Gallarate"></div>
       <div class="field" style="margin-bottom:10px"><label for="pdfNote" style="font-size:12.5px">Note / preventivo (facoltativo)</label><textarea id="pdfNote" rows="3" style="width:100%;box-sizing:border-box;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px;font:inherit;font-size:14px" placeholder="Es. 45 mq · 3.200 € + IVA · inizio lavori entro 2 settimane"></textarea></div>
       <button type="button" class="ai-btn" id="pdfBtn" style="margin:0">Scarica scheda PDF</button>
+      <button type="button" class="ai-btn" id="qFromPreviewBtn" hidden style="margin:8px 0 0;background:none;color:var(--ink);border:1.5px solid var(--accent)">📄 Crea un preventivo con questa anteprima</button>
       <div id="pdfStatus" style="font-size:13px;margin-top:6px"></div>
     </div>
   </section>
@@ -6143,6 +6411,7 @@
         aiResultImageBase64 = result.base64;
         aiResultImageMime = result.mime;
         document.getElementById('pdfBox').hidden = false;
+        document.getElementById('qFromPreviewBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
         document.getElementById('layerBox').hidden = false; renderLayerBox();
         if(chainRun){
           if(chainIdx < chainRun.length - 1){
@@ -6960,6 +7229,8 @@
     document.body.classList.remove('pro-logged');
     var openBtn = document.getElementById('proAuthOpen');
     var badge = document.getElementById('proBadge');
+    var pbar = document.getElementById('proBar');
+    if(pbar) pbar.hidden = !(proAccount && proAccount.accountType !== 'privato');
     if(proAccount){
       openBtn.style.display = 'none';
       document.body.classList.add('pro-logged');
@@ -7191,10 +7462,15 @@
   function ppShowView(view){
     document.getElementById('ppViewList').classList.toggle('active', view === 'list');
     document.getElementById('ppViewForm').classList.toggle('active', view === 'form');
+    document.getElementById('ppViewProfile').classList.toggle('active', view === 'profile');
+    ['quotes','quote','qsettings'].forEach(function(v){ document.getElementById({ quotes:'ppViewQuotes', quote:'ppViewQuote', qsettings:'ppViewQSettings' }[v]).classList.toggle('active', view === v); });
+    if(['quote','qsettings'].indexOf(view) < 0) document.querySelector('#proProjectsModal .pro-projects-card').classList.remove('wide');
   }
 
   function ppOpen(){
     document.getElementById('proProjectsModal').classList.add('open');
+    document.getElementById('ppProfileBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
+    document.getElementById('ppQuotesBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
     ppShowView('list');
     ppLoadProjects();
   }
@@ -7272,7 +7548,972 @@
     ppShowView('form');
   }
 
+
+  // ---------- Profilo artigiano (Trova il tuo artigiano) ----------
+  // Paese -> Regione (ISO 3166-2) -> Provincia. Stesso elenco del server (api/_geo.js).
+  var RENDRUM_GEO = {"IT": {"name": "Italia", "regions": [{"code": "IT-65", "name": "Abruzzo", "provinces": [["AQ", "L'Aquila"], ["CH", "Chieti"], ["PE", "Pescara"], ["TE", "Teramo"]]}, {"code": "IT-77", "name": "Basilicata", "provinces": [["MT", "Matera"], ["PZ", "Potenza"]]}, {"code": "IT-78", "name": "Calabria", "provinces": [["CZ", "Catanzaro"], ["CS", "Cosenza"], ["KR", "Crotone"], ["RC", "Reggio Calabria"], ["VV", "Vibo Valentia"]]}, {"code": "IT-72", "name": "Campania", "provinces": [["AV", "Avellino"], ["BN", "Benevento"], ["CE", "Caserta"], ["NA", "Napoli"], ["SA", "Salerno"]]}, {"code": "IT-45", "name": "Emilia-Romagna", "provinces": [["BO", "Bologna"], ["FE", "Ferrara"], ["FC", "Forlì-Cesena"], ["MO", "Modena"], ["PR", "Parma"], ["PC", "Piacenza"], ["RA", "Ravenna"], ["RE", "Reggio Emilia"], ["RN", "Rimini"]]}, {"code": "IT-36", "name": "Friuli-Venezia Giulia", "provinces": [["GO", "Gorizia"], ["PN", "Pordenone"], ["TS", "Trieste"], ["UD", "Udine"]]}, {"code": "IT-62", "name": "Lazio", "provinces": [["FR", "Frosinone"], ["LT", "Latina"], ["RI", "Rieti"], ["RM", "Roma"], ["VT", "Viterbo"]]}, {"code": "IT-42", "name": "Liguria", "provinces": [["GE", "Genova"], ["IM", "Imperia"], ["SP", "La Spezia"], ["SV", "Savona"]]}, {"code": "IT-25", "name": "Lombardia", "provinces": [["BG", "Bergamo"], ["BS", "Brescia"], ["CO", "Como"], ["CR", "Cremona"], ["LC", "Lecco"], ["LO", "Lodi"], ["MN", "Mantova"], ["MI", "Milano"], ["MB", "Monza e Brianza"], ["PV", "Pavia"], ["SO", "Sondrio"], ["VA", "Varese"]]}, {"code": "IT-57", "name": "Marche", "provinces": [["AN", "Ancona"], ["AP", "Ascoli Piceno"], ["FM", "Fermo"], ["MC", "Macerata"], ["PU", "Pesaro e Urbino"]]}, {"code": "IT-67", "name": "Molise", "provinces": [["CB", "Campobasso"], ["IS", "Isernia"]]}, {"code": "IT-21", "name": "Piemonte", "provinces": [["AL", "Alessandria"], ["AT", "Asti"], ["BI", "Biella"], ["CN", "Cuneo"], ["NO", "Novara"], ["TO", "Torino"], ["VB", "Verbano-Cusio-Ossola"], ["VC", "Vercelli"]]}, {"code": "IT-75", "name": "Puglia", "provinces": [["BA", "Bari"], ["BT", "Barletta-Andria-Trani"], ["BR", "Brindisi"], ["FG", "Foggia"], ["LE", "Lecce"], ["TA", "Taranto"]]}, {"code": "IT-88", "name": "Sardegna", "provinces": [["CA", "Cagliari"], ["NU", "Nuoro"], ["OR", "Oristano"], ["SS", "Sassari"], ["SU", "Sud Sardegna"]]}, {"code": "IT-82", "name": "Sicilia", "provinces": [["AG", "Agrigento"], ["CL", "Caltanissetta"], ["CT", "Catania"], ["EN", "Enna"], ["ME", "Messina"], ["PA", "Palermo"], ["RG", "Ragusa"], ["SR", "Siracusa"], ["TP", "Trapani"]]}, {"code": "IT-52", "name": "Toscana", "provinces": [["AR", "Arezzo"], ["FI", "Firenze"], ["GR", "Grosseto"], ["LI", "Livorno"], ["LU", "Lucca"], ["MS", "Massa-Carrara"], ["PI", "Pisa"], ["PT", "Pistoia"], ["PO", "Prato"], ["SI", "Siena"]]}, {"code": "IT-32", "name": "Trentino-Alto Adige", "provinces": [["BZ", "Bolzano"], ["TN", "Trento"]]}, {"code": "IT-55", "name": "Umbria", "provinces": [["PG", "Perugia"], ["TR", "Terni"]]}, {"code": "IT-23", "name": "Valle d'Aosta", "provinces": [["AO", "Aosta"]]}, {"code": "IT-34", "name": "Veneto", "provinces": [["BL", "Belluno"], ["PD", "Padova"], ["RO", "Rovigo"], ["TV", "Treviso"], ["VE", "Venezia"], ["VR", "Verona"], ["VI", "Vicenza"]]}]}};
+  var PF_LAV = [['monolith','Resine'],['microcemento','Microcemento'],['scale','Scale'],['imbiancatura','Imbiancatura'],['resina_haccp','Resina industriale HACCP'],['spc','SPC'],['laminato','Laminato'],['parquet','Parquet'],['piastrelle','Piastrelle'],['graniglia_esterni','Graniglia per esterni']];
+  var pf = { country:'IT', provinces:{}, lav:{}, gallery:[], newPhotos:[], logoUrl:null, newLogo:null };
+  function pfResize(file, maxSide, q){
+    return new Promise(function(res, rej){
+      var rd = new FileReader();
+      rd.onload = function(){ var im = new Image(); im.onload = function(){
+        var k = Math.min(1, maxSide / Math.max(im.width, im.height)), c = document.createElement('canvas');
+        c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+        var g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0,0,c.width,c.height); g.drawImage(im, 0, 0, c.width, c.height);
+        res(c.toDataURL('image/jpeg', q));
+      }; im.onerror = function(){ rej(new Error('Foto non leggibile')); }; im.src = rd.result; };
+      rd.onerror = rej; rd.readAsDataURL(file);
+    });
+  }
+  function pfRenderZones(){
+    var box = document.getElementById('pfZones'), open = {};
+    box.querySelectorAll('.pf-reg.open').forEach(function(el){ open[el.dataset.code] = 1; });
+    box.innerHTML = '';
+    var tot = 0, regs = 0;
+    RENDRUM_GEO[pf.country].regions.forEach(function(r){
+      var n = r.provinces.filter(function(p){ return pf.provinces[p[0]]; }).length;
+      tot += n; if(n) regs++;
+      var el = document.createElement('div'); el.className = 'pf-reg' + (open[r.code] ? ' open' : ''); el.dataset.code = r.code;
+      el.innerHTML = '<button type="button" class="pf-reg-head"><span>' + (open[r.code] ? '▾' : '▸') + '</span>' + ppEscapeHtml(r.name) + '<span class="pf-n">' + (n ? n + '/' + r.provinces.length : '') + '</span></button>'
+        + '<div class="pf-reg-body"><button type="button" class="pf-all">' + (n === r.provinces.length ? 'Togli tutta la regione' : 'Tutta la regione') + '</button><div class="pf-chips">'
+        + r.provinces.map(function(p){ return '<button type="button" class="pf-chip' + (pf.provinces[p[0]] ? ' on' : '') + '" data-p="' + p[0] + '">' + ppEscapeHtml(p[1]) + ' (' + p[0] + ')</button>'; }).join('')
+        + '</div></div>';
+      el.querySelector('.pf-reg-head').addEventListener('click', function(){ el.classList.toggle('open'); pfRenderZones(); });
+      el.querySelector('.pf-all').addEventListener('click', function(){ var all = n === r.provinces.length; r.provinces.forEach(function(p){ if(all) delete pf.provinces[p[0]]; else pf.provinces[p[0]] = 1; }); pfRenderZones(); });
+      el.querySelectorAll('.pf-chip').forEach(function(ch){ ch.addEventListener('click', function(){ var c = ch.dataset.p; if(pf.provinces[c]) delete pf.provinces[c]; else pf.provinces[c] = 1; pfRenderZones(); }); });
+      box.appendChild(el);
+    });
+    document.getElementById('pfZonesSum').textContent = tot ? ('Selezionate: ' + tot + (tot === 1 ? ' provincia' : ' province') + ' in ' + regs + (regs === 1 ? ' regione' : ' regioni') + '.') : 'Nessuna provincia selezionata.';
+  }
+  function pfRenderLav(){
+    var box = document.getElementById('pfLav'); box.innerHTML = '';
+    PF_LAV.forEach(function(l){
+      var lab = document.createElement('label'); lab.className = 'pf-check';
+      lab.innerHTML = '<input type="checkbox"' + (pf.lav[l[0]] ? ' checked' : '') + '> ' + ppEscapeHtml(l[1]);
+      lab.querySelector('input').addEventListener('change', function(){ if(this.checked) pf.lav[l[0]] = 1; else delete pf.lav[l[0]]; });
+      box.appendChild(lab);
+    });
+  }
+  function pfRenderGallery(){
+    var box = document.getElementById('pfGallery'); box.innerHTML = '';
+    var items = pf.gallery.map(function(u, i){ return { src:u, kind:'g', i:i }; }).concat(pf.newPhotos.map(function(u, i){ return { src:u, kind:'n', i:i }; }));
+    items.forEach(function(it){
+      var d = document.createElement('div'); d.innerHTML = '<img alt=""><button type="button" aria-label="Togli">✕</button>';
+      d.querySelector('img').src = it.src;
+      d.querySelector('button').addEventListener('click', function(){ (it.kind === 'g' ? pf.gallery : pf.newPhotos).splice(it.i, 1); pfRenderGallery(); });
+      box.appendChild(d);
+    });
+    document.getElementById('pfPhotoAdd').style.display = items.length >= 8 ? 'none' : '';
+  }
+  function pfRenderLogo(){ var im = document.getElementById('pfLogoImg'), src = pf.newLogo || pf.logoUrl; im.hidden = !src; if(src) im.src = src; }
+  function pfBioCount(){ var n = document.getElementById('pfBio').value.trim().length, el = document.getElementById('pfBioCount'); el.textContent = n + (n < 60 ? ' / almeno 60 caratteri' : ' caratteri ✓'); el.classList.toggle('bad', n > 0 && n < 60); }
+  function pfFill(p){
+    p = p || {};
+    document.getElementById('pfCompany').value = p.companyName || '';
+    document.getElementById('pfBio').value = p.bio || '';
+    document.getElementById('pfCity').value = p.city || '';
+    document.getElementById('pfPhone').value = p.phone || '';
+    document.getElementById('pfWebsite').value = p.website || '';
+    document.getElementById('pfVisible').checked = p.visible !== false;
+    pf.country = RENDRUM_GEO[p.country] ? p.country : 'IT';
+    pf.provinces = {}; (p.provinces || []).forEach(function(c){ pf.provinces[c] = 1; });
+    pf.lav = {}; (p.lavorazioni || []).forEach(function(c){ pf.lav[c] = 1; });
+    pf.gallery = (p.gallery || []).slice(); pf.newPhotos = []; pf.logoUrl = p.logoUrl || null; pf.newLogo = null;
+    pfRenderZones(); pfRenderLav(); pfRenderGallery(); pfRenderLogo(); pfBioCount();
+  }
+  function pfOpen(){
+    document.getElementById('pfError').textContent = '';
+    var top = document.getElementById('pfStatusTop'); top.style.color = ''; top.textContent = 'Caricamento…';
+    ppShowView('profile'); pfFill(null);
+    fetch('/api/pro-profile?action=me', { credentials:'same-origin' })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, d:d }; }); })
+      .then(function(x){
+        if(!x.ok){ top.style.color = '#C0392B'; top.textContent = (x.d && x.d.error) || 'Profilo non disponibile.'; return; }
+        pfFill(x.d.profile);
+        var p = x.d.profile || {};
+        var complete = p.bio && p.bio.length >= 60 && (p.provinces || []).length && (p.lavorazioni || []).length && (p.gallery || []).length >= 3;
+        top.style.color = complete ? '' : '#B85F27';
+        top.textContent = complete ? (p.visible ? '✓ Il tuo profilo è visibile ai clienti.' : 'Il tuo profilo è completo ma nascosto.') : 'Profilo da completare: finché non è completo i clienti non ti trovano.';
+      })
+      .catch(function(){ top.style.color = '#C0392B'; top.textContent = 'Connessione non riuscita. Riprova.'; });
+  }
+  document.getElementById('ppProfileBtn').addEventListener('click', pfOpen);
+  document.getElementById('pfBackBtn').addEventListener('click', function(){ ppShowView('list'); ppLoadProjects(); });
+  document.getElementById('pfBio').addEventListener('input', pfBioCount);
+  document.getElementById('pfLogoInput').addEventListener('change', function(){
+    var f = this.files && this.files[0]; this.value = ''; if(!f) return;
+    pfResize(f, 600, 0.9).then(function(u){ pf.newLogo = u; pfRenderLogo(); }).catch(function(e){ document.getElementById('pfError').textContent = e.message; });
+  });
+  document.getElementById('pfPhotoInput').addEventListener('change', function(){
+    var files = Array.prototype.slice.call(this.files || []); this.value = '';
+    var room = 8 - pf.gallery.length - pf.newPhotos.length;
+    if(files.length > room) document.getElementById('pfError').textContent = 'Massimo 8 foto: ne ho aggiunte ' + Math.max(0, room) + '.';
+    Promise.all(files.slice(0, Math.max(0, room)).map(function(f){ return pfResize(f, 1280, 0.8).catch(function(){ return null; }); }))
+      .then(function(list){ list.forEach(function(u){ if(u) pf.newPhotos.push(u); }); pfRenderGallery(); });
+  });
+  document.getElementById('pfSaveBtn').addEventListener('click', function(){
+    var err = document.getElementById('pfError'), btn = this; err.textContent = '';
+    var body = {
+      companyName: document.getElementById('pfCompany').value.trim(),
+      bio: document.getElementById('pfBio').value.trim(),
+      city: document.getElementById('pfCity').value.trim(),
+      phone: document.getElementById('pfPhone').value.trim(),
+      website: document.getElementById('pfWebsite').value.trim(),
+      country: pf.country,
+      provinces: Object.keys(pf.provinces),
+      lavorazioni: Object.keys(pf.lav),
+      gallery: pf.gallery, newPhotos: pf.newPhotos, newLogo: pf.newLogo,
+      visible: document.getElementById('pfVisible').checked
+    };
+    body.regions = RENDRUM_GEO[pf.country].regions.filter(function(r){ return r.provinces.some(function(p){ return pf.provinces[p[0]]; }); }).map(function(r){ return r.code; });
+    var miss = [];
+    if(body.companyName.length < 2) miss.push("nome dell'attività");
+    if(!pf.logoUrl && !pf.newLogo) miss.push('logo');
+    if(body.bio.length < 60) miss.push('descrizione (almeno 60 caratteri)');
+    if(body.city.length < 2) miss.push('comune della sede');
+    if(body.phone.replace(/\D/g,'').length < 6) miss.push('telefono');
+    if(body.website && !/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(body.website)) miss.push('sito web valido (deve iniziare con https://)');
+    if(!body.provinces.length) miss.push('province in cui lavori');
+    if(!body.lavorazioni.length) miss.push('lavorazioni che fai');
+    if(pf.gallery.length + pf.newPhotos.length < 3) miss.push('almeno 3 foto dei tuoi lavori');
+    if(miss.length){ err.textContent = 'Completa: ' + miss.join(', ') + '.'; return; }
+    btn.disabled = true; btn.textContent = pf.newPhotos.length ? 'Carico le foto…' : 'Salvo…';
+    fetch('/api/pro-profile?action=save', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, status:r.status, d:d }; }); })
+      .then(function(x){
+        if(!x.ok){
+          if(x.d && x.d.gallery){ pf.gallery = x.d.gallery; pf.newPhotos = []; pfRenderGallery(); }
+          err.textContent = (x.d && x.d.error) || (x.status === 413 ? 'Foto troppo pesanti: caricane meno alla volta.' : 'Salvataggio non riuscito. Riprova.');
+          return;
+        }
+        pfFill(x.d.profile);
+        if(proAccount){ proAccount.companyName = x.d.profile.companyName; proAccount.phone = x.d.profile.phone; proAccount.logoUrl = x.d.profile.logoUrl; }
+        var top = document.getElementById('pfStatusTop'); top.style.color = '';
+        top.textContent = x.d.profile.visible ? '✓ Profilo salvato: ora i clienti della tua zona possono trovarti.' : '✓ Profilo salvato (nascosto ai clienti).';
+        document.getElementById('proProjectsModal').querySelector('.pro-projects-card').scrollTop = 0;
+      })
+      .catch(function(){ err.textContent = 'Connessione non riuscita. Riprova.'; })
+      .finally(function(){ btn.disabled = false; btn.textContent = 'Salva profilo'; });
+  });
+
+  // ---------- PDF preventivo (impaginazione approvata) ----------
+  // q = preventivo, meta = { number, year, impresa, banca, logo:{url,w,h}|null, prima, dopo }
+  function qpEur(v){
+    var n = Math.round((Number(v) || 0) * 100) / 100, neg = n < 0; n = Math.abs(n);
+    var p = n.toFixed(2).split('.'), i = p[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    return (neg ? '- ' : '') + '€ ' + i + ',' + p[1];
+  }
+  function qpNum(v){ var s = (Math.round((Number(v) || 0) * 100) / 100).toString().split('.'); return s[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.') + (s[1] ? ',' + s[1] : ''); }
+  function qpDate(iso){ var m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso || ''); return m ? m[3] + '/' + m[2] + '/' + m[1] : ''; }
+  function qpNumero(meta){ return ('00' + meta.number).slice(-3) + '/' + meta.year; }
+  function qpTotals(q){
+    var r = function(x){ return Math.round(x * 100) / 100; };
+    var lordo = r((q.voci || []).reduce(function(s, v){ return s + r((Number(v.qta) || 0) * (Number(v.prezzo) || 0)); }, 0));
+    var sconto = r(lordo * (Number(q.scontoPct) || 0) / 100), imp = r(lordo - sconto), iva = r(imp * (Number(q.iva && q.iva.aliquota) || 0) / 100);
+    return { imponibileLordo: lordo, sconto: sconto, imponibile: imp, iva: iva, totale: r(imp + iva) };
+  }
+  function qpBuildPdf(jsPDF, q, meta){
+    var doc = new jsPDF({ unit:'mm', format:'a4' });
+    var W = 210, M = 16, BOTTOM = 276;
+    var INK = [28,28,28], SOFT = [107,107,107], LINE = [140,140,140], FILL = [237,240,237], BODY = [70,70,70];
+    var imp = meta.impresa || {}, bk = meta.banca || {}, t = qpTotals(q);
+    var numero = qpNumero(meta), dataTxt = qpDate(q.data);
+    var y = 0;
+    function font(style, size, rgb){ doc.setFont('helvetica', style || 'normal'); doc.setFontSize(size || 9); doc.setTextColor.apply(doc, rgb || INK); }
+    function txt(x, yy, s, style, size, rgb, align){ font(style, size, rgb); doc.text(String(s), x, yy, align ? { align: align } : undefined); }
+    function hline(yy, x1, x2, w, rgb){ doc.setDrawColor.apply(doc, rgb || LINE); doc.setLineWidth(w || 0.2); doc.line(x1 == null ? M : x1, yy, x2 == null ? W - M : x2, yy); }
+    function split(s, style, size, width){ font(style, size); return doc.splitTextToSize(String(s || ''), width); }
+    function paragraphs(s, style, size, width){ var out = []; String(s || '').split(/\n/).forEach(function(p){ if(p.trim()) out = out.concat(split(p.trim(), style, size, width)); }); return out; }
+
+    function header(){
+      if(meta.logo){
+        var lh = 22, lw = lh * meta.logo.w / meta.logo.h;
+        if(lw > 60){ lw = 60; lh = lw * meta.logo.h / meta.logo.w; }
+        try{ doc.addImage(meta.logo.url, 'JPEG', M, 22 + (22 - lh) / 2, lw, lh); }catch(e){}
+      } else {
+        var nm = split(imp.ragioneSociale || '', 'bold', 18, 85);
+        txt(M, 34, nm.slice(0, 2).join('\n'), 'bold', 18);
+      }
+      var r = W - M, yy = 24;
+      txt(r, yy, imp.ragioneSociale || '', 'bold', 8.5, INK, 'right'); yy += 4.5;
+      if(imp.indirizzo){ txt(r, yy, imp.indirizzo, 'normal', 7.8, SOFT, 'right'); yy += 4; }
+      var fisc = []; if(imp.piva) fisc.push(((imp.paese || 'IT') === 'IT' ? 'P.IVA ' : 'VAT ') + imp.piva); if(imp.cf) fisc.push('C.F. ' + imp.cf);
+      if(fisc.length){ txt(r, yy, fisc.join(' - '), 'normal', 7.8, SOFT, 'right'); yy += 4; }
+      var con = []; if(imp.telefono) con.push('Tel. ' + imp.telefono); if(imp.email) con.push(imp.email);
+      if(con.length){ txt(r, yy, con.join(' - '), 'normal', 7.8, SOFT, 'right'); yy += 4; }
+      var s2 = 'nr. ' + numero + ' del ' + dataTxt;
+      font('normal', 9); var w2 = doc.getTextWidth(s2);
+      txt(r, 44, s2, 'normal', 9, INK, 'right');
+      txt(r - w2 - 1, 44, 'PREVENTIVO', 'bold', 10, INK, 'right');
+      hline(50, null, null, 0.6);
+      y = 57;
+    }
+    function newPage(){ doc.addPage(); header(); }
+    function need(h){ if(y + h > BOTTOM){ newPage(); return true; } return false; }
+    function label(x, yy, s){ txt(x, yy, s, 'normal', 6.5, SOFT); }
+
+    // ===== PAGINA 1 =====
+    header();
+    var c = q.cliente || {}, k = q.cantiere || {}, hasK = !!(k.indirizzo || k.descrizione);
+    var colW = hasK ? (W - 2*M) / 2 - 6 : W - 2*M, x2 = W/2 + 4;
+    label(M, y, 'DESTINATARIO'); if(hasK) label(x2, y, 'CANTIERE');
+    var yl = y + 5, yr = y + 5;
+    txt(M, yl, split(c.nome, 'bold', 9.5, colW)[0] || '', 'bold', 9.5); yl += 4.5;
+    [c.indirizzo, [c.telefono ? 'Tel. ' + c.telefono : '', c.email].filter(Boolean).join(' - '), c.cfPiva ? 'C.F./P.IVA ' + c.cfPiva : ''].forEach(function(s){
+      if(!s) return; split(s, 'normal', 8.5, colW).forEach(function(l){ txt(M, yl, l, 'normal', 8.5, SOFT); yl += 4; });
+    });
+    if(hasK){
+      if(k.indirizzo){ split(k.indirizzo, 'normal', 9, colW).forEach(function(l){ txt(x2, yr, l, 'normal', 9); yr += 4.5; }); }
+      if(k.descrizione){ split(k.descrizione, 'normal', 8.5, colW).forEach(function(l){ txt(x2, yr, l, 'normal', 8.5, SOFT); yr += 4; }); }
+    }
+    y = Math.max(yl, yr) + 3;
+    // Oggetto
+    font('bold', 8.8); var ow = doc.getTextWidth('OGGETTO: ');
+    var ol = split(q.oggetto, 'bold', 8.8, W - 2*M - ow);
+    txt(M, y, 'OGGETTO:', 'bold', 8.8); ol.forEach(function(l, i){ txt(M + ow, y + i * 4.3, l, 'bold', 8.8); }); y += ol.length * 4.3 + 0.7;
+    if(q.intro){ paragraphs(q.intro, 'normal', 8.5, W - 2*M).forEach(function(l){ txt(M, y, l, 'normal', 8.5, [64,64,64]); y += 4.1; }); }
+    y += 3;
+    // Tabella voci
+    var cQ = W - M - 62, cU = W - M - 52, cP = W - M - 27, cI = W - M - 2, dW = W - 2*M - 72;
+    function tableHead(){
+      hline(y, null, null, 0.8, INK);
+      txt(M + 2, y + 4.3, 'DESCRIZIONE', 'bold', 6.5); txt(cQ, y + 4.3, 'Q.TÀ', 'bold', 6.5, INK, 'right');
+      txt(cU, y + 4.3, 'U.M.', 'bold', 6.5, INK, 'center'); txt(cP, y + 4.3, 'PREZZO', 'bold', 6.5, INK, 'right'); txt(cI, y + 4.3, 'IMPORTO', 'bold', 6.5, INK, 'right');
+      y += 6.5; hline(y, null, null, 0.8, INK);
+    }
+    need(20); tableHead();
+    (q.voci || []).forEach(function(v, i){
+      var tl = split(v.titolo, 'bold', 9.3, dW), dl = paragraphs(v.descrizione, 'normal', 8.3, dW);
+      var h = 2 + tl.length * 4.3 + dl.length * 3.9 + 3;
+      if(y + h > BOTTOM){ newPage(); tableHead(); }
+      if(i % 2 === 0){ doc.setFillColor.apply(doc, FILL); doc.rect(M, y, W - 2*M, h, 'F'); }
+      var yy = y + 5;
+      tl.forEach(function(l){ txt(M + 2, yy, l, 'bold', 9.3); yy += 4.3; });
+      yy += 0; dl.forEach(function(l){ txt(M + 2, yy, l, 'normal', 8.3, [77,77,77]); yy += 3.9; });
+      txt(cQ, y + 5, qpNum(v.qta), 'normal', 8.5, INK, 'right'); txt(cU, y + 5, v.um || '', 'normal', 8.5, INK, 'center');
+      txt(cP, y + 5, qpEur(v.prezzo), 'normal', 8.5, INK, 'right'); txt(cI, y + 5, qpEur(Math.round((Number(v.qta)||0) * (Number(v.prezzo)||0) * 100) / 100), 'bold', 8.5, INK, 'right');
+      y += h; hline(y, null, null, 0.3);
+    });
+    // Specifiche
+    var spec = paragraphs(q.specifiche, 'normal', 8.5, W - 2*M);
+    if(spec.length){
+      y += 6; need(6 + Math.min(spec.length, 4) * 4.3);
+      label(M, y, 'SPECIFICHE E TEMPISTICHE'); y += 5;
+      spec.forEach(function(l){ need(4.3); txt(M, y, l, 'normal', 8.5); y += 4.3; });
+    }
+    // Riepilogo IVA e totale
+    var hasSc = t.sconto > 0, bh = hasSc ? 28 : 23;
+    y += 4; need(bh + 2);
+    var top = y, mid = W/2 + 8, r = W - M, al = q.iva || {};
+    hline(y, null, null, 0.8, INK);
+    label(M, y + 5, 'RIEPILOGO IVA'); txt(mid - 30, y + 5, 'IMPONIBILE', 'normal', 6.5, SOFT, 'right'); txt(mid - 4, y + 5, 'IMPOSTA', 'normal', 6.5, SOFT, 'right');
+    var ivaLab = al.aliquota + '%' + (al.nota ? ' - ' + al.nota : '');
+    var ivl = split(ivaLab, 'normal', 8.3, mid - 30 - M - 22);
+    ivl.forEach(function(l, i){ txt(M, y + 10.5 + i * 3.8, l, 'normal', 8.3); });
+    txt(mid - 30, y + 10.5, qpEur(t.imponibile), 'normal', 8.3, INK, 'right'); txt(mid - 4, y + 10.5, qpEur(t.iva), 'normal', 8.3, INK, 'right');
+    var ry = y + 6;
+    if(hasSc){
+      txt(r - 30, ry, 'Totale lavori', 'normal', 8.5, SOFT, 'right'); txt(r, ry, qpEur(t.imponibileLordo), 'normal', 8.5, INK, 'right'); ry += 5;
+      txt(r - 30, ry, 'Sconto ' + qpNum(q.scontoPct) + '%', 'normal', 8.5, SOFT, 'right'); txt(r, ry, qpEur(-t.sconto), 'normal', 8.5, INK, 'right'); ry += 5;
+    }
+    txt(r - 30, ry, 'Imponibile', 'normal', 8.5, SOFT, 'right'); txt(r, ry, qpEur(t.imponibile), 'normal', 8.5, INK, 'right'); ry += 5;
+    txt(r - 30, ry, 'IVA ' + al.aliquota + '%', 'normal', 8.5, SOFT, 'right'); txt(r, ry, qpEur(t.iva), 'normal', 8.5, INK, 'right'); ry += 9;
+    font('bold', 16); var tw = doc.getTextWidth(qpEur(t.totale));
+    txt(r - Math.max(30, tw + 4), ry, 'TOTALE', 'bold', 10, INK, 'right'); txt(r, ry + 0.5, qpEur(t.totale), 'bold', 16, INK, 'right');
+    y = Math.max(ry + 5, top + bh);
+    doc.setDrawColor.apply(doc, INK); doc.setLineWidth(0.6); doc.line(mid, top, mid, y);
+    hline(y, null, null, 0.8, INK);
+    // Condizioni di pagamento
+    var rate = q.rate || [], pg = q.pagamento || {};
+    var showBank = pg.metodo === 'bonifico' ? !!(bk.iban) : !!pg.testo;
+    var notaL = pg.nota ? split(pg.nota, 'normal', 7.5, W - 2*M) : [];
+    var payH = 3 + 6 + rate.length * 6.5 + 8 + (showBank ? 21.5 : 0) + notaL.length * 3.8;
+    y += 7; need(payH);
+    txt(M, y, 'CONDIZIONI DI PAGAMENTO', 'bold', 8); y += 3;
+    hline(y, null, null, 0.3);
+    label(M + 2, y + 4.2, 'N.'); label(M + 10, y + 4.2, 'DESCRIZIONE'); label(M + 62, y + 4.2, 'SCADENZA');
+    txt(W - M - 32, y + 4.2, '%', 'normal', 6.3, SOFT, 'right'); txt(W - M - 2, y + 4.2, 'IMPORTO IVA INCL.', 'normal', 6.3, SOFT, 'right');
+    y += 6; hline(y, null, null, 0.3);
+    var acc = 0;
+    rate.forEach(function(rt, i){
+      var amount = i === rate.length - 1 ? Math.round((t.totale - acc) * 100) / 100 : Math.round(t.totale * rt.pct) / 100;
+      acc += amount;
+      if(i % 2 === 0){ doc.setFillColor.apply(doc, FILL); doc.rect(M, y, W - 2*M, 6.5, 'F'); }
+      txt(M + 2, y + 4.4, String(i + 1), 'normal', 8.5); txt(M + 10, y + 4.4, split(rt.descrizione, 'bold', 8.5, 50)[0] || '', 'bold', 8.5);
+      txt(M + 62, y + 4.4, split(rt.scadenza, 'normal', 8.5, W - 2*M - 62 - 40)[0] || '', 'normal', 8.5);
+      txt(W - M - 32, y + 4.4, qpNum(rt.pct) + '%', 'normal', 8.5, INK, 'right'); txt(W - M - 2, y + 4.4, qpEur(amount), 'bold', 8.5, INK, 'right');
+      y += 6.5;
+    });
+    hline(y, null, null, 0.3);
+    txt(M + 10, y + 4.4, 'Totale', 'normal', 8.5, SOFT); txt(W - M - 32, y + 4.4, '100%', 'bold', 8.5, INK, 'right'); txt(W - M - 2, y + 4.4, qpEur(t.totale), 'bold', 8.5, INK, 'right');
+    y += 8;
+    if(showBank){
+      var bw = W - 2*M;
+      doc.setDrawColor.apply(doc, LINE); doc.setLineWidth(0.3); doc.roundedRect(M, y, bw, 17, 1.5, 1.5, 'S');
+      if(pg.metodo === 'bonifico'){
+        txt(M + 3, y + 4.8, 'MODALITÀ: BONIFICO BANCARIO', 'bold', 7);
+        var iban = String(bk.iban || '').replace(/\s+/g, '').replace(/(.{4})/g, '$1 ').trim();
+        var kv = [['Intestatario', bk.intestatario || imp.ragioneSociale || ''], ['Banca', bk.banca || ''], ['IBAN', iban], ['Causale', 'Preventivo nr. ' + numero + ' - Acconto / Saldo']];
+        kv.forEach(function(p, i){
+          var xx = M + 3 + (i % 2) * (bw / 2), yy = y + 9.5 + Math.floor(i / 2) * 4.6;
+          txt(xx, yy, p[0], 'normal', 7.5, SOFT);
+          txt(xx + 20, yy, split(p[1], p[0] === 'IBAN' ? 'bold' : 'normal', 8, bw / 2 - 26)[0] || '', p[0] === 'IBAN' ? 'bold' : 'normal', 8);
+        });
+      } else {
+        txt(M + 3, y + 4.8, 'MODALITÀ DI PAGAMENTO', 'bold', 7);
+        split(pg.testo, 'normal', 8, bw - 6).slice(0, 2).forEach(function(l, i){ txt(M + 3, y + 10 + i * 4, l, 'normal', 8); });
+      }
+      y += 21.5;
+    }
+    notaL.forEach(function(l){ txt(M, y, l, 'normal', 7.5, SOFT); y += 3.8; });
+
+    // ===== CONDIZIONI GENERALI E ACCETTAZIONE =====
+    var cond = q.condizioni || [];
+    var sigH = 6 + 5 + 6 + 38;
+    if(cond.length){
+      newPage(); y = 59;
+      txt(M, y, 'CONDIZIONI GENERALI DI FORNITURA', 'bold', 10); y += 7;
+      cond.forEach(function(cd, i){
+        var tx = String(cd.testo).replace(/\{giorni\}/g, q.validitaGiorni || 30);
+        var ls = paragraphs(tx, 'normal', 8, W - 2*M - 5);
+        need(3.9 + Math.min(ls.length, 3) * 3.6);
+        txt(M, y, (i + 1) + '. ' + cd.titolo, 'bold', 8.3); y += 3.9;
+        ls.forEach(function(l){ need(3.6); txt(M + 5, y, l, 'normal', 8, BODY); y += 3.6; });
+        y += 1.8;
+      });
+      y += 1;
+    } else { y += 8; }
+    var accL = split('Il Committente dichiara di aver preso visione del presente preventivo' + (cond.length ? ' e delle condizioni generali sopra riportate' : '') + ' e di accettarli integralmente.', 'normal', 8.3, W - 2*M);
+    var appr = []; cond.forEach(function(cd, i){ if(cd.approva) appr.push((i + 1) + ' (' + cd.titolo + ')'); });
+    var al2 = appr.length ? split('Ai sensi e per gli effetti degli artt. 1341 e 1342 del Codice Civile, il Committente dichiara di approvare specificamente ' + (appr.length === 1 ? 'la clausola n. ' : 'le clausole n. ') + appr.join(', ').replace(/, ([^,]*)$/, ' e $1') + '.', 'normal', 8.1, W - 2*M) : [];
+    if(need(sigH + accL.length * 4 + (al2.length ? al2.length * 3.9 + 8 : 0))) y = 59;
+    hline(y, null, null, 0.8, INK); y += 6;
+    txt(M, y, 'ACCETTAZIONE', 'bold', 8.5); y += 5;
+    accL.forEach(function(l){ txt(M, y, l, 'normal', 8.3); y += 4; });
+    y += 6;
+    var bw2 = (W - 2*M - 8) / 2;
+    function sig(x, title, firma){
+      doc.setDrawColor.apply(doc, LINE); doc.setLineWidth(0.3); doc.roundedRect(x, y, bw2, 31, 1.5, 1.5, 'S');
+      txt(x + 4, y + 5.5, title, 'bold', 8.5);
+      var half = (bw2 - 8) / 2;
+      txt(x + 4, y + 14, 'Luogo', 'normal', 7.5, SOFT); hline(y + 14.8, x + 14, x + 4 + half - 3, 0.3);
+      txt(x + 4 + half, y + 14, 'Data', 'normal', 7.5, SOFT); hline(y + 14.8, x + half + 13, x + bw2 - 4, 0.3);
+      txt(x + 4, y + 26, firma, 'normal', 7.5, SOFT); hline(y + 26.8, x + 28, x + bw2 - 4, 0.3);
+    }
+    sig(M, "PER L'IMPRESA", 'Timbro e firma');
+    sig(M + bw2 + 8, 'PER IL COMMITTENTE', 'Firma');
+    y += 38;
+    if(al2.length){
+      al2.forEach(function(l){ txt(M, y, l, 'normal', 8.1); y += 3.9; });
+      y += 8;
+      txt(M, y, 'Luogo e data', 'normal', 7.5, SOFT); hline(y + 0.8, M + 18, M + bw2, 0.3);
+      txt(M + bw2 + 8, y, 'Firma del Committente', 'normal', 7.5, SOFT); hline(y + 0.8, M + bw2 + 38, W - M, 0.3);
+    }
+
+    // ===== ANTEPRIMA (facoltativa) =====
+    var an = q.anteprima || {};
+    if(an.attiva && meta.dopo){
+      newPage(); y = 60;
+      txt(M, y, 'ANTEPRIMA DEL LAVORO', 'bold', 10); y += 4.5;
+      txt(M, y, "Simulazione fotorealistica realizzata sulla foto dell'ambiente del cliente.", 'normal', 8.3, SOFT); y += 6;
+      var imgs = [meta.prima, meta.dopo].filter(Boolean), labels = meta.prima ? ['PRIMA', 'DOPO'] : ['DOPO'];
+      var gap = 6, boxW = imgs.length === 2 ? (W - 2*M - gap) / 2 : W - 2*M, maxH = imgs.length === 2 ? 100 : 150, rowH = 0;
+      imgs.forEach(function(im, i){
+        var w = boxW, h = w * im.h / im.w; if(h > maxH){ h = maxH; w = h * im.w / im.h; }
+        var x = M + i * (boxW + gap) + (boxW - w) / 2;
+        try{ doc.addImage(im.url, 'JPEG', x, y, w, h); }catch(e){}
+        doc.setFillColor.apply(doc, INK); doc.roundedRect(x + 2, y + 2, 15, 5.5, 1, 1, 'F');
+        txt(x + 9.5, y + 5.8, labels[i], 'bold', 7, [255,255,255], 'center');
+        rowH = Math.max(rowH, h);
+      });
+      y += rowH + 9;
+      if((an.righe || []).length){
+        label(M, y, 'MATERIALI E COLORI SCELTI'); y += 5.5;
+        an.righe.forEach(function(l){
+          var i = l.indexOf(':'), kk = i > 0 ? l.slice(0, i) : '', vv = i > 0 ? l.slice(i + 1).trim() : l;
+          var vl = split(vv, 'normal', 8.5, W - 2*M - 48);
+          need(vl.length * 4.4 + 1);
+          txt(M, y, kk, 'normal', 8.5, SOFT); vl.forEach(function(s){ txt(M + 48, y, s, 'normal', 8.5); y += 4.4; }); y += 0.6;
+        });
+        y += 3;
+      }
+      split('Anteprima indicativa: colori e materiali reali possono differire leggermente dalla simulazione.', 'italic', 7.5, W - 2*M).forEach(function(l){ need(4); txt(M, y, l, 'italic', 7.5, SOFT); y += 4; });
+    }
+
+    // ===== piè di pagina su tutte le pagine =====
+    var n = doc.getNumberOfPages();
+    for(var p = 1; p <= n; p++){
+      doc.setPage(p);
+      hline(279, null, null, 0.3);
+      txt(M, 284, 'Preventivo nr. ' + numero + ' del ' + dataTxt + ' - pag. ' + p + ' / ' + n, 'normal', 6.8, SOFT);
+      txt(W - M, 283, imp.ragioneSociale || '', 'bold', 6.8, INK, 'right');
+      var fl = [imp.sito, imp.email, imp.telefono ? 'tel. ' + imp.telefono : ''].filter(Boolean).join(' - ');
+      if(fl) txt(W - M, 286.5, fl, 'normal', 6.5, SOFT, 'right');
+      txt(W / 2, 292, 'Creato con Rendrum · rendrum.com', 'normal', 6, [166,166,166], 'center');
+    }
+    return doc;
+  }
+
+
+  // ---------- Partita IVA (stesso controllo di api/_vat.js) ----------
+  var VAT_RULES = {
+    IT: { name: "Italia", re: /^\d{11}$/ },
+    AT: { name: "Austria", re: /^U\d{8}$/ },
+    BE: { name: "Belgio", re: /^[01]\d{9}$/ },
+    BG: { name: "Bulgaria", re: /^\d{9,10}$/ },
+    CY: { name: "Cipro", re: /^\d{8}[A-Z]$/ },
+    CZ: { name: "Repubblica Ceca", re: /^\d{8,10}$/ },
+    DE: { name: "Germania", re: /^\d{9}$/ },
+    DK: { name: "Danimarca", re: /^\d{8}$/ },
+    EE: { name: "Estonia", re: /^\d{9}$/ },
+    GR: { name: "Grecia", re: /^\d{9}$/, prefix: "EL" },
+    ES: { name: "Spagna", re: /^[A-Z0-9]\d{7}[A-Z0-9]$/ },
+    FI: { name: "Finlandia", re: /^\d{8}$/ },
+    FR: { name: "Francia", re: /^[A-HJ-NP-Z0-9]{2}\d{9}$/ },
+    HR: { name: "Croazia", re: /^\d{11}$/ },
+    HU: { name: "Ungheria", re: /^\d{8}$/ },
+    IE: { name: "Irlanda", re: /^(\d{7}[A-W][A-I]?|\d[A-Z+*]\d{5}[A-W])$/ },
+    LT: { name: "Lituania", re: /^(\d{9}|\d{12})$/ },
+    LU: { name: "Lussemburgo", re: /^\d{8}$/ },
+    LV: { name: "Lettonia", re: /^\d{11}$/ },
+    MT: { name: "Malta", re: /^\d{8}$/ },
+    NL: { name: "Paesi Bassi", re: /^\d{9}B\d{2}$/ },
+    PL: { name: "Polonia", re: /^\d{10}$/ },
+    PT: { name: "Portogallo", re: /^\d{9}$/ },
+    RO: { name: "Romania", re: /^\d{2,10}$/ },
+    SE: { name: "Svezia", re: /^\d{10}01$/ },
+    SI: { name: "Slovenia", re: /^\d{8}$/ },
+    SK: { name: "Slovacchia", re: /^\d{10}$/ },
+    SM: { name: "San Marino", re: /^\d{5}$/ },
+    CH: { name: "Svizzera", re: /^\d{9}(MWST|TVA|IVA)?$/, prefix: "CHE" },
+    GB: { name: "Regno Unito", re: /^(\d{9}|\d{12}|GD\d{3}|HA\d{3})$/ },
+    XX: { name: "Altro Paese", re: /^[A-Z0-9]{5,20}$/ },
+  };
+  function itChecksum(p) {
+    if (/^0{7}/.test(p)) return false;
+    var s = 0;
+    for (var i = 0; i < 10; i++) {
+      var d = +p[i];
+      if (i % 2 === 1) { d *= 2; if (d > 9) d -= 9; }
+      s += d;
+    }
+    return (10 - (s % 10)) % 10 === +p[10];
+  }
+  // Restituisce { ok, country, number, display, error }
+  function vatCheck(country, raw) {
+    var c = VAT_RULES[country] ? country : "IT";
+    var rule = VAT_RULES[c];
+    var n = String(raw || "").toUpperCase().replace(/[\s.\-\/]/g, "");
+    var pref = rule.prefix || c;
+    if (c !== "XX" && n.startsWith(pref)) n = n.slice(pref.length);
+    if (!n) return { ok: false, country: c, number: "", error: "Inserisci la partita IVA." };
+    if (!rule.re.test(n)) return { ok: false, country: c, number: n, error: "La partita IVA non ha il formato corretto per " + rule.name + "." };
+    if (c === "IT" && !itChecksum(n)) return { ok: false, country: c, number: n, error: "La partita IVA non è valida: controlla le cifre." };
+    var display = c === "IT" ? n : (c === "XX" ? n : pref + n);
+    return { ok: true, country: c, number: n, display };
+  }
+  
+  // ---------- Generatore di preventivi (professionisti) ----------
+  var Q_UNITS = ['a corpo','mq','ml','mc','pz','h','gg','kg','l','forfait'];
+  var Q_STATUS = { bozza:'Bozza', inviato:'Inviato', accettato:'Accettato', rifiutato:'Rifiutato' };
+  var Q_NOTA = "L'avvio dei lavori è subordinato all'accredito dell'acconto. Varianti e opere aggiuntive saranno oggetto di specifica offerta scritta.";
+  var Q_INTRO = "Gentile {cliente}, facendo seguito al sopralluogo effettuato, Le sottoponiamo la nostra migliore offerta per l'esecuzione delle opere di seguito descritte, alle condizioni riportate nel presente documento.";
+  var Q_FINITURE = {
+    resina: "Le finiture in resina e microcemento sono realizzate a mano: lievi variazioni di tonalità, spatolature e sfumature sono proprie del materiale e non costituiscono difetto. I campioni e le anteprime hanno valore indicativo.",
+    imbiancatura: "Le tinte sono riprodotte da mazzetta: lievi differenze di tonalità dovute al supporto, al suo assorbimento e alla luce ambientale sono normali e non costituiscono difetto. I campioni e le anteprime hanno valore indicativo.",
+    legno: "I pavimenti in legno e a effetto legno presentano naturali variazioni di venatura e tonalità tra le doghe; il legno è un materiale vivo, soggetto a lievi movimenti in base a umidità e temperatura. I campioni e le anteprime hanno valore indicativo.",
+    piastrelle: "Le piastrelle possono presentare lievi differenze di tono e calibro tra lotti di produzione, che non costituiscono difetto. I campioni e le anteprime hanno valore indicativo.",
+    graniglia: "Le finiture in graniglia sono composte da inerti naturali: variazioni di colore e distribuzione dei grani sono proprie del materiale e non costituiscono difetto. I campioni e le anteprime hanno valore indicativo.",
+    generica: "Lievi variazioni di tonalità e finitura, proprie dei materiali e delle lavorazioni artigianali, non costituiscono difetto. I campioni e le anteprime hanno valore indicativo."
+  };
+  var Q_LAV = [['','Più lavorazioni / altro'],['monolith','Resine'],['microcemento','Microcemento'],['scale','Scale'],['imbiancatura','Imbiancatura'],['resina_haccp','Resina industriale HACCP'],['spc','SPC'],['laminato','Laminato'],['parquet','Parquet'],['piastrelle','Piastrelle'],['graniglia_esterni','Graniglia per esterni']];
+  function qFinKey(lav){ return ({ monolith:'resina', microcemento:'resina', scale:'resina', resina_haccp:'resina', imbiancatura:'imbiancatura', spc:'legno', laminato:'legno', parquet:'legno', piastrelle:'piastrelle', graniglia_esterni:'graniglia' })[lav] || 'generica'; }
+  function qDefaultCond(lav){
+    return [
+      { key:'validita', titolo:"Validità dell'offerta", testo:"La presente offerta è valida {giorni} giorni dalla data di emissione. Decorso tale termine, prezzi e disponibilità potranno essere soggetti a revisione.", approva:false },
+      { key:'prezzi', titolo:'Oggetto e prezzi', testo:"I prezzi si riferiscono esclusivamente alle opere descritte e alle quantità indicate. Le quantità misurate a consuntivo saranno contabilizzate ai prezzi unitari del presente preventivo.", approva:false },
+      { key:'esclusioni', titolo:'Esclusioni', testo:"Sono escluse tutte le opere non espressamente indicate, tra cui a titolo esemplificativo: opere murarie, idrauliche ed elettriche, smaltimento di materiali speciali, pratiche edilizie.", approva:true },
+      { key:'oneri', titolo:'Oneri del Committente', testo:"Sono a carico del Committente la fornitura di acqua ed energia elettrica, il libero accesso ai locali e lo sgombero di arredi e oggetti dalle aree di intervento, salvo diversi accordi scritti.", approva:false },
+      { key:'supporto', titolo:'Stato del supporto', testo:"Le lavorazioni presuppongono un supporto asciutto, stabile e idoneo. Eventuali ripristini, consolidamenti o trattamenti anti-umidità non previsti saranno preventivamente concordati e quantificati a parte.", approva:true },
+      { key:'finiture', titolo:'Caratteristiche delle finiture', testo: Q_FINITURE[qFinKey(lav)], approva:true },
+      { key:'tempi', titolo:'Tempi di esecuzione', testo:"I tempi indicati sono stimati. Ritardi dovuti a cause non imputabili all'Impresa (condizioni climatiche, umidità del supporto, lavori di altre ditte, varianti richieste) non comportano penali.", approva:true },
+      { key:'garanzia', titolo:'Garanzia', testo:"Le opere sono garantite ai sensi degli artt. 1667 e seguenti del Codice Civile. La garanzia non copre danni derivanti da uso improprio, urti, mancata manutenzione o interventi di terzi.", approva:true },
+      { key:'iva', titolo:'Aliquota IVA', testo:"L'aliquota IVA agevolata è applicata sulla base delle dichiarazioni rese dal Committente in merito alla natura dell'intervento e alla destinazione dell'immobile.", approva:false },
+      { key:'privacy', titolo:'Trattamento dei dati', testo:"I dati personali sono trattati ai sensi del Regolamento UE 2016/679 (GDPR) esclusivamente per la gestione del presente rapporto contrattuale.", approva:false }
+    ];
+  }
+  var Q_RATE_PRESETS = {
+    '50/50': [{ descrizione:'Acconto', scadenza:'Alla sottoscrizione per accettazione', pct:50 }, { descrizione:'Saldo', scadenza:'Al completamento delle opere', pct:50 }],
+    '30/40/30': [{ descrizione:'Acconto', scadenza:'Alla sottoscrizione per accettazione', pct:30 }, { descrizione:'Stato avanzamento', scadenza:'A metà dei lavori', pct:40 }, { descrizione:'Saldo', scadenza:'Al completamento delle opere', pct:30 }],
+    '100% fine lavori': [{ descrizione:'Saldo', scadenza:'Al completamento delle opere', pct:100 }]
+  };
+  var qs = { settings:null, account:null, cur:null, curId:null, meta:null, newPreview:null, introAuto:true, delArm:false };
+  function qClone(o){ return JSON.parse(JSON.stringify(o)); }
+  function qToday(){ var d = new Date(); return d.getFullYear() + '-' + ('0'+(d.getMonth()+1)).slice(-2) + '-' + ('0'+d.getDate()).slice(-2); }
+  function qParse(v){ var t = String(v == null ? '' : v).trim().replace(/\s/g,''); if(t.indexOf(',') > -1) t = t.replace(/\./g,'').replace(',', '.'); var n = parseFloat(t); return isFinite(n) ? n : 0; }
+  function qFmtIn(n){ return n ? String(n).replace('.', ',') : ''; }
+  function qEsc(s){ return ppEscapeHtml(s == null ? '' : s); }
+  function qApi(action, method, body, extra){
+    return fetch('/api/quotes?action=' + action + (extra || ''), { method: method || 'GET', credentials:'same-origin', headers: body ? { 'Content-Type':'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, status:r.status, d:d }; }); });
+  }
+  function qCard(wide){ document.querySelector('#proProjectsModal .pro-projects-card').classList.toggle('wide', !!wide); }
+  function qScrollTop(){ var c = document.querySelector('#proProjectsModal .pro-projects-card'); if(c) c.scrollTop = 0; }
+  function qLoadSettings(force){
+    if(qs.settings && !force) return Promise.resolve(qs.settings);
+    return qApi('settings').then(function(x){
+      if(!x.ok) throw new Error((x.d && x.d.error) || 'Impostazioni non disponibili.');
+      qs.account = x.d.account || {};
+      var s = x.d.settings || {};
+      s.impresa = s.impresa || {};
+      if(!s.impresa.ragioneSociale) s.impresa.ragioneSociale = qs.account.companyName || '';
+      if(!s.impresa.piva) s.impresa.piva = qs.account.piva || '';
+      if(!s.impresa.paese) s.impresa.paese = 'IT';
+      if(!s.impresa.telefono) s.impresa.telefono = qs.account.phone || '';
+      if(!s.impresa.email) s.impresa.email = qs.account.email || '';
+      s.banca = s.banca || {};
+      if(!s.condizioni || !s.condizioni.length) s.condizioni = qDefaultCond('');
+      if(!s.rate || !s.rate.length) s.rate = qClone(Q_RATE_PRESETS['50/50']);
+      if(s.specifiche == null) s.specifiche = '';
+      s.validitaGiorni = s.validitaGiorni || 30;
+      s.listino = s.listino || [];
+      qs.settings = s; return s;
+    });
+  }
+  function qImpresaMissing(s){
+    var i = s.impresa || {}, m = [];
+    if(!i.ragioneSociale) m.push('ragione sociale'); if(!i.indirizzo) m.push('indirizzo della sede'); if(!vatCheck(i.paese || 'IT', i.piva).ok) m.push('partita IVA valida');
+    if(!i.telefono) m.push('telefono'); if(!i.email) m.push('email');
+    return m;
+  }
+
+  // ----- elenco -----
+  function qPivaGate(){
+    var s = qs.settings, ok = s && vatCheck((s.impresa || {}).paese || 'IT', (s.impresa || {}).piva).ok;
+    var g = document.getElementById('qPivaGate'); g.hidden = !!ok;
+    document.getElementById('qNewBtn').hidden = !ok;
+    return ok;
+  }
+  function qOpenList(){
+    qCard(false); ppShowView('quotes'); qScrollTop();
+    document.getElementById('qPivaGate').hidden = true;
+    qLoadSettings().then(qPivaGate).catch(function(){});
+    var box = document.getElementById('qList'); box.innerHTML = '<div class="pp-empty">Caricamento…</div>';
+    qApi('list').then(function(x){
+      if(!x.ok){ box.innerHTML = '<div class="pp-empty">' + qEsc((x.d && x.d.error) || 'Non riesco a caricare i preventivi.') + '</div>'; return; }
+      var list = x.d.quotes || [];
+      if(!list.length){ box.innerHTML = '<div class="pp-empty">Non hai ancora creato nessun preventivo.</div>'; return; }
+      box.innerHTML = '';
+      list.forEach(function(it){
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'pp-card q-card';
+        b.innerHTML = '<div class="pp-card-info"><div class="pp-card-name">N. ' + ('00'+it.number).slice(-3) + '/' + it.year + ' · ' + qEsc(it.clientName) + '</div><div class="pp-card-meta">' + qEsc(it.oggetto || '') + '</div></div>'
+          + '<div class="q-card-right"><div class="q-card-tot">' + qEsc(qpEur(it.total)) + '</div><span class="q-chip q-' + qEsc(it.status) + '">' + qEsc(Q_STATUS[it.status] || it.status) + '</span></div>';
+        b.addEventListener('click', function(){ qEdit(it.id); });
+        box.appendChild(b);
+      });
+    }).catch(function(){ box.innerHTML = '<div class="pp-empty">Connessione non riuscita.</div>'; });
+  }
+
+  // ----- nuovo / modifica -----
+  function qBlank(s){
+    return {
+      data: qToday(), status:'bozza',
+      cliente:{ nome:'', indirizzo:'', telefono:'', email:'', cfPiva:'' }, cantiere:{ indirizzo:'', descrizione:'' },
+      oggetto:'', intro: Q_INTRO.replace('{cliente}', 'Cliente'), lavorazione:'',
+      voci:[{ titolo:'', descrizione:'', qta:1, um:'a corpo', prezzo:0 }], scontoPct:0,
+      iva:{ aliquota:22, nota:'' }, specifiche: s.specifiche || '', rate: qClone(s.rate),
+      pagamento:{ metodo:'bonifico', testo:'', nota: Q_NOTA }, condizioni: qClone(s.condizioni),
+      validitaGiorni: s.validitaGiorni || 30, anteprima:{ attiva:false, righe:[] }
+    };
+  }
+  function qSetLav(lav){
+    var old = qs.cur.lavorazione; qs.cur.lavorazione = lav;
+    // Aggiorna la clausola sulle finiture se non è stata riscritta a mano.
+    (qs.cur.condizioni || []).forEach(function(c){
+      if(c.key === 'finiture' && (c.testo === Q_FINITURE[qFinKey(old)] || !c.testo)) c.testo = Q_FINITURE[qFinKey(lav)];
+    });
+  }
+  function qNew(prefill){
+    var err = document.getElementById('qListErr'); if(err) err.textContent = '';
+    return qLoadSettings().then(function(s){
+      if(!vatCheck((s.impresa || {}).paese || 'IT', (s.impresa || {}).piva).ok){ qCard(false); ppShowView('quotes'); qPivaGate(); throw new Error('Per creare preventivi serve la partita IVA della tua impresa.'); }
+      qs.cur = qBlank(s); qs.curId = null; qs.meta = null; qs.newPreview = null; qs.introAuto = true;
+      if(prefill) prefill(qs.cur);
+      qRenderEditor(); qCard(true); ppShowView('quote'); qScrollTop();
+    }).catch(function(e){ if(err) err.textContent = e.message; });
+  }
+  function qEdit(id){
+    Promise.all([qLoadSettings(), qApi('get', 'GET', null, '&id=' + encodeURIComponent(id))]).then(function(r){
+      var x = r[1]; if(!x.ok) throw new Error((x.d && x.d.error) || 'Preventivo non trovato.');
+      qs.cur = x.d.quote; qs.curId = x.d.id; qs.meta = { number:x.d.number, year:x.d.year }; qs.newPreview = null;
+      qs.introAuto = qs.cur.intro === Q_INTRO.replace('{cliente}', qs.cur.cliente.nome || 'Cliente');
+      ['cliente','cantiere','iva','pagamento','anteprima'].forEach(function(k){ qs.cur[k] = qs.cur[k] || {}; });
+      qs.cur.voci = qs.cur.voci || []; qs.cur.rate = qs.cur.rate || []; qs.cur.condizioni = qs.cur.condizioni || [];
+      qRenderEditor(); qCard(true); ppShowView('quote'); qScrollTop();
+    }).catch(function(e){ var el = document.getElementById('qListErr'); if(el) el.textContent = e.message; });
+  }
+  // Dall'anteprima Rendrum appena generata
+  function qOpenFromPreview(){
+    if(!proAccount || proAccount.accountType === 'privato'){ if(typeof proAuthOpen === 'function') proAuthOpen(); return; }
+    document.getElementById('proProjectsModal').classList.add('open');
+    var righe = [];
+    try{
+      layers.forEach(function(L){ righe.push('Lavorazione: ' + L.title); righe = righe.concat(L.lines.filter(function(l){ return !/^Lavorazione:/.test(l); })); });
+      righe = righe.concat(pdfChoiceLines());
+    }catch(e){}
+    var titles = []; try{ titles = layers.map(function(L){ return L.title; }).concat(state.material ? [layerTitle()] : []); }catch(e){}
+    var before = (typeof layerOriginal !== 'undefined' && layerOriginal) ? layerOriginal.img : photoImg;
+    var pv = null;
+    try{
+      if(aiResultImage){ var a = imgToJpeg(aiResultImage, 1400), b = before ? imgToJpeg(before, 1400) : null; pv = { dopo: { url:a.url, w:a.w, h:a.h }, prima: b ? { url:b.url, w:b.w, h:b.h } : null }; }
+    }catch(e){ pv = null; }
+    qNew(function(q){
+      q.lavorazione = (state.material && state.material.id) || '';
+      q.condizioni.forEach(function(c){ if(c.key === 'finiture') c.testo = Q_FINITURE[qFinKey(q.lavorazione)]; });
+      q.oggetto = titles.length ? 'Offerta per la realizzazione di: ' + titles.join(' + ') : '';
+      q.voci = titles.length ? titles.map(function(t, i){
+        var lines = i < layers.length ? layers[i].lines : pdfChoiceLines();
+        return { titolo: t, descrizione: lines.filter(function(l){ return !/^Lavorazione:/.test(l); }).join('\n'), qta:1, um:'a corpo', prezzo:0 };
+      }) : q.voci;
+      var nome = (document.getElementById('fName') || {}).value || '', city = (document.getElementById('fCity') || {}).value || '';
+      var tel = (document.getElementById('fPhone') || {}).value || '', mail = (document.getElementById('fEmail') || {}).value || '';
+      var mq = (document.getElementById('fMq') || {}).value || '';
+      q.cliente.nome = nome.trim(); q.cliente.telefono = tel.trim(); q.cliente.email = mail.trim();
+      if(city) q.cantiere.indirizzo = city.trim();
+      if(mq && q.voci.length === 1){ q.voci[0].qta = qParse(mq) || 1; q.voci[0].um = 'mq'; }
+      if(q.cliente.nome) q.intro = Q_INTRO.replace('{cliente}', q.cliente.nome);
+      if(pv){ q.anteprima = { attiva:true, righe: righe }; qs._pv = pv; } else qs._pv = null;
+    }).then(function(){ qs.newPreview = qs._pv || null; qRenderPreviewBox(); });
+  }
+
+  // ----- editor -----
+  function qGet(path){ return path.split('.').reduce(function(o, k){ return o == null ? undefined : o[k]; }, qs.cur); }
+  function qSet(path, v){ var ks = path.split('.'), o = qs.cur; for(var i = 0; i < ks.length - 1; i++){ o[ks[i]] = o[ks[i]] || {}; o = o[ks[i]]; } o[ks[ks.length-1]] = v; }
+  function qBind(root){
+    root.querySelectorAll('[data-q]').forEach(function(el){
+      var p = el.dataset.q, v = qGet(p);
+      if(el.type === 'checkbox') el.checked = !!v; else el.value = v == null ? '' : (el.dataset.num ? qFmtIn(v) : v);
+      if(el._qb) return; el._qb = 1;
+      el.addEventListener(el.tagName === 'SELECT' || el.type === 'checkbox' ? 'change' : 'input', function(){
+        var nv = el.type === 'checkbox' ? el.checked : (el.dataset.num ? qParse(el.value) : el.value);
+        if(p === 'lavorazione'){ qSetLav(el.value); qRenderCond('qCond', qs.cur.condizioni); qTotalsRender(); return; }
+        qSet(p, nv);
+        if(p === 'cliente.nome' && qs.introAuto){ qs.cur.intro = Q_INTRO.replace('{cliente}', el.value.trim() || 'Cliente'); var it = document.querySelector('[data-q="intro"]'); if(it) it.value = qs.cur.intro; }
+        if(p === 'intro') qs.introAuto = false;
+        if(p === 'iva.aliquota'){ qs.cur.iva.aliquota = Number(el.value); qIvaHint(); }
+        if(p === 'pagamento.metodo') qPayHint();
+        qTotalsRender();
+      });
+    });
+  }
+  function qRenderEditor(){
+    var q = qs.cur, s = qs.settings;
+    document.getElementById('qEdTitle').textContent = qs.meta ? 'Preventivo n. ' + ('00'+qs.meta.number).slice(-3) + '/' + qs.meta.year : 'Nuovo preventivo';
+    document.getElementById('qEdErr').textContent = ''; document.getElementById('qEdMsg').textContent = '';
+    document.getElementById('qDeleteBtn').hidden = !qs.curId; document.getElementById('qDupBtn').hidden = !qs.curId;
+    qs.delArm = false; document.getElementById('qDeleteBtn').textContent = 'Elimina preventivo';
+    var miss = qImpresaMissing(s);
+    document.getElementById('qImpresaWarn').innerHTML = miss.length ? '⚠︎ Per il PDF completa i dati della tua impresa: ' + qEsc(miss.join(', ')) + '. <button type="button" class="q-link" id="qGoSettings2">Completa ora</button>' : '';
+    var g2 = document.getElementById('qGoSettings2'); if(g2) g2.addEventListener('click', qOpenSettings);
+    var lavSel = document.getElementById('qLav'); lavSel.innerHTML = Q_LAV.map(function(l){ return '<option value="' + l[0] + '">' + qEsc(l[1]) + '</option>'; }).join('');
+    qBind(document.getElementById('ppViewQuote'));
+    qRenderVoci(); qRenderRate(); qRenderCond('qCond', q.condizioni); qIvaHint(); qPayHint(); qRenderListinoSel(); qRenderPreviewBox(); qTotalsRender();
+  }
+  function qIvaHint(){
+    var a = Number(qs.cur.iva.aliquota), el = document.getElementById('qIvaNota');
+    el.placeholder = a === 0 ? 'Obbligatorio: es. Inversione contabile art. 17 c.6 DPR 633/72' : a === 10 ? 'Es. Ristrutturazione edilizia' : a === 4 ? 'Es. Abbattimento barriere architettoniche' : 'Facoltativo';
+  }
+  function qPayHint(){
+    var m = qs.cur.pagamento.metodo, b = (qs.settings.banca || {});
+    document.getElementById('qPayAltro').hidden = m !== 'altro';
+    document.getElementById('qPayBank').innerHTML = m === 'bonifico'
+      ? (b.iban ? 'Sul PDF: bonifico su IBAN <b>' + qEsc(b.iban.replace(/(.{4})/g, '$1 ').trim()) + '</b>' + (b.banca ? ' (' + qEsc(b.banca) + ')' : '') + '.' : '⚠︎ Inserisci il tuo IBAN in <button type="button" class="q-link" id="qGoSettings3">Dati impresa e banca</button>.')
+      : '';
+    var g3 = document.getElementById('qGoSettings3'); if(g3) g3.addEventListener('click', qOpenSettings);
+  }
+  function qRenderVoci(){
+    var box = document.getElementById('qVoci'); box.innerHTML = '';
+    qs.cur.voci.forEach(function(v, i){
+      var d = document.createElement('div'); d.className = 'q-voce';
+      d.innerHTML = '<div class="q-voce-head"><b>Voce ' + (i+1) + '</b><span class="q-tools">'
+        + '<button type="button" data-a="up" title="Sposta su"' + (i === 0 ? ' disabled' : '') + '>↑</button><button type="button" data-a="down" title="Sposta giù"' + (i === qs.cur.voci.length-1 ? ' disabled' : '') + '>↓</button>'
+        + '<button type="button" data-a="list" title="Salva nel listino">☆ Listino</button><button type="button" data-a="del" title="Togli">✕</button></span></div>'
+        + '<div class="field"><label>Titolo *</label><input type="text" maxlength="160" data-f="titolo" placeholder="Es. Pavimento in resina spatolata"></div>'
+        + '<div class="field"><label>Descrizione delle lavorazioni</label><textarea rows="3" maxlength="3000" data-f="descrizione" placeholder="Es. Preparazione del supporto, primer, due mani di resina, finitura protettiva."></textarea></div>'
+        + '<div class="q-row3"><div class="field"><label>Quantità *</label><input type="text" inputmode="decimal" data-f="qta" data-n="1"></div>'
+        + '<div class="field"><label>Unità</label><select data-f="um">' + Q_UNITS.map(function(u){ return '<option>' + u + '</option>'; }).join('') + '</select></div>'
+        + '<div class="field"><label>Prezzo unitario €</label><input type="text" inputmode="decimal" data-f="prezzo" data-n="1" placeholder="0,00"></div></div>'
+        + '<div class="q-voce-tot">Importo: <b data-tot></b></div>';
+      d.querySelectorAll('[data-f]').forEach(function(el){
+        var f = el.dataset.f; el.value = el.dataset.n ? qFmtIn(v[f]) : (v[f] || (f === 'um' ? 'a corpo' : ''));
+        el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', function(){ v[f] = el.dataset.n ? qParse(el.value) : el.value; qTotalsRender(); });
+      });
+      d.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', function(){
+        var a = b.dataset.a, L = qs.cur.voci;
+        if(a === 'up' && i > 0){ L.splice(i-1, 0, L.splice(i, 1)[0]); qRenderVoci(); }
+        else if(a === 'down' && i < L.length-1){ L.splice(i+1, 0, L.splice(i, 1)[0]); qRenderVoci(); }
+        else if(a === 'del'){ L.splice(i, 1); if(!L.length) L.push({ titolo:'', descrizione:'', qta:1, um:'a corpo', prezzo:0 }); qRenderVoci(); }
+        else if(a === 'list'){ qAddToListino(v, b); }
+        qTotalsRender();
+      }); });
+      box.appendChild(d);
+    });
+    qTotalsRender();
+  }
+  function qRenderListinoSel(){
+    var sel = document.getElementById('qFromListino'), L = qs.settings.listino || [];
+    sel.innerHTML = '<option value="">＋ Aggiungi dal listino…</option>' + L.map(function(v, i){ return '<option value="' + i + '">' + qEsc(v.titolo) + (v.prezzo ? ' — ' + qEsc(qpEur(v.prezzo)) + '/' + qEsc(v.um) : '') + '</option>'; }).join('');
+    sel.hidden = !L.length;
+  }
+  function qAddToListino(v, btn){
+    if(!v.titolo){ btn.textContent = 'Serve il titolo'; setTimeout(function(){ btn.textContent = '☆ Listino'; }, 1500); return; }
+    var s = qs.settings; s.listino = (s.listino || []).filter(function(x){ return x.titolo !== v.titolo; });
+    s.listino.push({ titolo:v.titolo, descrizione:v.descrizione, qta:1, um:v.um, prezzo:v.prezzo });
+    btn.disabled = true;
+    qApi('settings', 'POST', s).then(function(x){
+      btn.disabled = false;
+      if(x.ok){ qs.settings.listino = x.d.settings.listino; btn.textContent = '★ Salvata'; qRenderListinoSel(); }
+      else btn.textContent = 'Errore';
+      setTimeout(function(){ btn.textContent = '☆ Listino'; }, 1800);
+    }).catch(function(){ btn.disabled = false; });
+  }
+  function qRenderRate(){
+    var box = document.getElementById('qRate'); box.innerHTML = '';
+    qs.cur.rate.forEach(function(r, i){
+      var d = document.createElement('div'); d.className = 'q-rata';
+      d.innerHTML = '<span class="q-rn">' + (i+1) + '</span><input type="text" maxlength="60" data-f="descrizione" placeholder="Acconto"><input type="text" maxlength="120" data-f="scadenza" placeholder="Quando"><input type="text" inputmode="decimal" data-f="pct" data-n="1" class="q-pct"><span>%</span><button type="button" title="Togli">✕</button>';
+      d.querySelectorAll('[data-f]').forEach(function(el){
+        var f = el.dataset.f; el.value = el.dataset.n ? qFmtIn(r[f]) : (r[f] || '');
+        el.addEventListener('input', function(){ r[f] = el.dataset.n ? qParse(el.value) : el.value; qTotalsRender(); });
+      });
+      d.querySelector('button').addEventListener('click', function(){ qs.cur.rate.splice(i, 1); qRenderRate(); });
+      box.appendChild(d);
+    });
+    document.getElementById('qRataAdd').hidden = qs.cur.rate.length >= 6;
+    qTotalsRender();
+  }
+  function qRenderCond(boxId, list){
+    var box = document.getElementById(boxId); box.innerHTML = '';
+    list.forEach(function(c, i){
+      var d = document.createElement('div'); d.className = 'q-cond';
+      d.innerHTML = '<div class="q-voce-head"><b>' + (i+1) + '.</b><span class="q-tools"><button type="button" data-a="up"' + (i === 0 ? ' disabled' : '') + '>↑</button><button type="button" data-a="down"' + (i === list.length-1 ? ' disabled' : '') + '>↓</button><button type="button" data-a="del">✕</button></span></div>'
+        + '<input type="text" maxlength="80" data-f="titolo" class="q-cond-t" placeholder="Titolo della clausola">'
+        + '<textarea rows="3" maxlength="1500" data-f="testo" placeholder="Testo della clausola"></textarea>'
+        + '<label class="pf-check q-small"><input type="checkbox" data-f="approva"> Da approvare con firma specifica (artt. 1341-1342 c.c.)</label>';
+      d.querySelectorAll('[data-f]').forEach(function(el){
+        var f = el.dataset.f;
+        if(el.type === 'checkbox'){ el.checked = !!c.approva; el.addEventListener('change', function(){ c.approva = el.checked; }); }
+        else { el.value = c[f] || ''; el.addEventListener('input', function(){ c[f] = el.value; }); }
+      });
+      d.querySelectorAll('[data-a]').forEach(function(b){ b.addEventListener('click', function(){
+        var a = b.dataset.a;
+        if(a === 'up' && i > 0) list.splice(i-1, 0, list.splice(i, 1)[0]);
+        else if(a === 'down' && i < list.length-1) list.splice(i+1, 0, list.splice(i, 1)[0]);
+        else if(a === 'del') list.splice(i, 1);
+        qRenderCond(boxId, list);
+      }); });
+      box.appendChild(d);
+    });
+    var cnt = document.getElementById(boxId + 'Count'); if(cnt) cnt.textContent = list.length;
+  }
+  function qRenderPreviewBox(){
+    var box = document.getElementById('qPrevBox'), a = qs.cur.anteprima || {};
+    var src = qs.newPreview ? qs.newPreview.dopo.url : a.dopo;
+    box.hidden = !src;
+    if(src){ document.getElementById('qPrevImg').src = src; document.getElementById('qPrevOn').checked = !!a.attiva; }
+  }
+  function qTotalsRender(){
+    var q = qs.cur; if(!q) return;
+    var t = qpTotals(q);
+    document.querySelectorAll('#qVoci .q-voce').forEach(function(d, i){ var v = q.voci[i]; if(v) d.querySelector('[data-tot]').textContent = qpEur(Math.round((v.qta||0) * (v.prezzo||0) * 100) / 100); });
+    var rows = [['Totale lavori', t.imponibileLordo]];
+    if(t.sconto) rows.push(['Sconto ' + qpNum(q.scontoPct) + '%', -t.sconto]);
+    rows.push(['Imponibile', t.imponibile], ['IVA ' + q.iva.aliquota + '%', t.iva]);
+    document.getElementById('qTot').innerHTML = rows.map(function(r){ return '<div><span>' + qEsc(r[0]) + '</span><span>' + qEsc(qpEur(r[1])) + '</span></div>'; }).join('')
+      + '<div class="q-tot-big"><span>TOTALE</span><span>' + qEsc(qpEur(t.totale)) + '</span></div>';
+    var sum = q.rate.reduce(function(s, r){ return s + (Number(r.pct) || 0); }, 0);
+    var rs = document.getElementById('qRateSum');
+    rs.textContent = q.rate.length ? 'Totale rate: ' + qpNum(sum) + '%' + (Math.abs(sum - 100) > 0.01 ? ' — deve fare 100%' : ' ✓') : 'Aggiungi almeno una rata.';
+    rs.style.color = q.rate.length && Math.abs(sum - 100) <= 0.01 ? '' : '#C0392B';
+  }
+  function qCheck(){
+    var q = qs.cur, m = [];
+    if((q.cliente.nome || '').trim().length < 2) m.push('nome del cliente');
+    if((q.oggetto || '').trim().length < 3) m.push('oggetto');
+    var voci = q.voci.filter(function(v){ return v.titolo || v.descrizione || v.prezzo; });
+    if(!voci.length) m.push('almeno una voce');
+    q.voci.forEach(function(v, i){ if((v.descrizione || v.prezzo) && !v.titolo) m.push('titolo della voce ' + (i+1)); if(v.titolo && !v.qta) m.push('quantità della voce ' + (i+1)); });
+    var sum = q.rate.reduce(function(s, r){ return s + (Number(r.pct) || 0); }, 0);
+    if(!q.rate.length || Math.abs(sum - 100) > 0.01) m.push('rate di pagamento (100%)');
+    if(Number(q.iva.aliquota) === 0 && !(q.iva.nota || '').trim()) m.push("motivo dell'IVA a 0%");
+    if(q.pagamento.metodo === 'altro' && !(q.pagamento.testo || '').trim()) m.push('modalità di pagamento');
+    return m;
+  }
+  function qSave(){
+    var err = document.getElementById('qEdErr'); err.textContent = '';
+    var m = qCheck(); if(m.length){ err.textContent = 'Completa: ' + m.join(', ') + '.'; return Promise.reject(null); }
+    var body = { id: qs.curId || undefined, quote: qs.cur };
+    if(qs.newPreview && qs.cur.anteprima.attiva) body.newPreview = { prima: qs.newPreview.prima ? qs.newPreview.prima.url : null, dopo: qs.newPreview.dopo.url };
+    return qApi('save', 'POST', body).then(function(x){
+      if(!x.ok){
+        if(x.d && x.d.code === 'piva_required'){ err.innerHTML = qEsc(x.d.error) + ' <button type="button" class="q-link" id="qGoSettings6">Inserisci ora</button>'; document.getElementById('qGoSettings6').addEventListener('click', qOpenSettings); throw null; }
+        err.textContent = (x.d && x.d.error) || (x.status === 413 ? 'Foto troppo pesanti.' : 'Salvataggio non riuscito. Riprova.'); throw null; }
+      var keepPv = qs.newPreview;
+      qs.cur = x.d.quote; qs.curId = x.d.id; qs.meta = { number:x.d.number, year:x.d.year };
+      qs.newPreview = null;
+      if(keepPv && qs.cur.anteprima && qs.cur.anteprima.dopo) qs._pvLocal = keepPv; // immagini già in memoria per il PDF
+      document.getElementById('qEdTitle').textContent = 'Preventivo n. ' + ('00'+qs.meta.number).slice(-3) + '/' + qs.meta.year;
+      document.getElementById('qDeleteBtn').hidden = false; document.getElementById('qDupBtn').hidden = false;
+      return x.d;
+    });
+  }
+  function qImgFromUrl(url){
+    return loadImgCors(url).then(function(im){ if(!im) return null; var j = imgToJpeg(im, 1400); return { url:j.url, w:j.w, h:j.h }; });
+  }
+  function qPdf(){
+    var btn = document.getElementById('qPdfBtn'), msg = document.getElementById('qEdMsg'), err = document.getElementById('qEdErr');
+    var miss = qImpresaMissing(qs.settings);
+    if(miss.length){ err.innerHTML = 'Prima completa i dati della tua impresa: ' + qEsc(miss.join(', ')) + '. <button type="button" class="q-link" id="qGoSettings4">Completa ora</button>'; document.getElementById('qGoSettings4').addEventListener('click', qOpenSettings); return; }
+    if(qs.cur.pagamento.metodo === 'bonifico' && !(qs.settings.banca || {}).iban){ err.innerHTML = 'Per il pagamento con bonifico inserisci il tuo IBAN. <button type="button" class="q-link" id="qGoSettings5">Inserisci ora</button>'; document.getElementById('qGoSettings5').addEventListener('click', qOpenSettings); return; }
+    btn.disabled = true; msg.textContent = 'Preparo il PDF…';
+    qSave().then(function(){
+      var a = qs.cur.anteprima || {}, loc = qs._pvLocal;
+      var logoUrl = qs.account && qs.account.logoUrl || (proAccount && proAccount.logoUrl) || null;
+      return Promise.all([
+        loadJsPdf(),
+        logoUrl ? loadImgCors(logoUrl).then(function(im){ if(!im) return null; var j = imgToJpeg(im, 600); return { url:j.url, w:j.w, h:j.h }; }) : null,
+        a.attiva ? (loc && loc.prima ? loc.prima : (a.prima ? qImgFromUrl(a.prima) : null)) : null,
+        a.attiva ? (loc && loc.dopo ? loc.dopo : (a.dopo ? qImgFromUrl(a.dopo) : null)) : null
+      ]);
+    }).then(function(r){
+      var meta = { number: qs.meta.number, year: qs.meta.year, impresa: qs.settings.impresa, banca: qs.settings.banca, logo: r[1], prima: r[2], dopo: r[3] };
+      var doc = qpBuildPdf(r[0], qs.cur, meta);
+      var who = (qs.cur.cliente.nome || '').replace(/^(sig\.?(ra)?|dott\.?(ssa)?|ing\.?|arch\.?)\s+/i, '').replace(/[^A-Za-z0-9À-ÿ]+/g, '_').replace(/^_|_$/g, '');
+      doc.save('Preventivo_' + ('00'+meta.number).slice(-3) + '-' + meta.year + (who ? '_' + who : '') + '.pdf');
+      msg.textContent = '✓ Preventivo salvato e PDF scaricato.';
+    }).catch(function(e){ if(e){ err.textContent = 'Non sono riuscito a creare il PDF: ' + (e.message || 'errore') + '.'; } msg.textContent = ''; })
+      .finally(function(){ btn.disabled = false; });
+  }
+
+  // ----- impostazioni -----
+  var qSetCond = [];
+  function qOpenSettings(){
+    qLoadSettings().then(function(s){
+      qs._fromQuote = document.getElementById('ppViewQuote').classList.contains('active');
+      var root = document.getElementById('ppViewQSettings');
+      var ps = document.getElementById('qSetPaese');
+      if(!ps.options.length){ var ks = Object.keys(VAT_RULES).filter(function(k){ return k !== 'IT' && k !== 'XX'; }).sort(function(a, b){ return VAT_RULES[a].name.localeCompare(VAT_RULES[b].name); });
+        ps.innerHTML = ['IT'].concat(ks, ['XX']).map(function(k){ return '<option value="' + k + '">' + VAT_RULES[k].name + '</option>'; }).join(''); }
+      root.querySelectorAll('[data-s]').forEach(function(el){
+        var v = el.dataset.s.split('.').reduce(function(o, k){ return o == null ? undefined : o[k]; }, s);
+        el.value = v == null ? '' : v;
+      });
+      qSetCond = qClone(s.condizioni);
+      qRenderCond('qSetCondBox', qSetCond);
+      qRenderSetRate(s.rate);
+      qRenderSetListino();
+      document.getElementById('qSetErr').textContent = ''; document.getElementById('qSetMsg').textContent = '';
+      qCard(true); ppShowView('qsettings'); qScrollTop();
+    }).catch(function(e){ var el = document.getElementById('qListErr'); if(el) el.textContent = e.message; });
+  }
+  var qSetRateList = [];
+  function qRenderSetRate(list){
+    qSetRateList = qClone(list);
+    var sel = document.getElementById('qSetRatePreset');
+    var key = Object.keys(Q_RATE_PRESETS).filter(function(k){ return JSON.stringify(Q_RATE_PRESETS[k]) === JSON.stringify(qSetRateList); })[0];
+    sel.value = key || '50/50';
+  }
+  function qRenderSetListino(){
+    var box = document.getElementById('qSetListino'), L = qs.settings.listino || [];
+    box.innerHTML = L.length ? '' : '<div class="pf-hint">Il listino è vuoto. Nel preventivo usa "☆ Listino" su una voce per salvarla qui e riusarla.</div>';
+    L.forEach(function(v, i){
+      var d = document.createElement('div'); d.className = 'q-li';
+      d.innerHTML = '<span>' + qEsc(v.titolo) + (v.prezzo ? ' — ' + qEsc(qpEur(v.prezzo)) + '/' + qEsc(v.um) : '') + '</span><button type="button" title="Togli">✕</button>';
+      d.querySelector('button').addEventListener('click', function(){ qs.settings.listino.splice(i, 1); qRenderSetListino(); });
+      box.appendChild(d);
+    });
+  }
+  function qSaveSettings(){
+    var err = document.getElementById('qSetErr'), msg = document.getElementById('qSetMsg'), btn = document.getElementById('qSetSave');
+    err.textContent = ''; msg.textContent = '';
+    var s = qClone(qs.settings);
+    document.querySelectorAll('#ppViewQSettings [data-s]').forEach(function(el){
+      var ks = el.dataset.s.split('.'), o = s; for(var i = 0; i < ks.length - 1; i++){ o[ks[i]] = o[ks[i]] || {}; o = o[ks[i]]; }
+      o[ks[ks.length-1]] = el.dataset.num ? qParse(el.value) : el.value.trim();
+    });
+    s.condizioni = qSetCond.filter(function(c){ return (c.titolo || '').trim() && (c.testo || '').trim(); });
+    s.rate = qClone(Q_RATE_PRESETS[document.getElementById('qSetRatePreset').value] || Q_RATE_PRESETS['50/50']);
+    var vc = vatCheck(s.impresa.paese || 'IT', s.impresa.piva);
+    if(!vc.ok){ err.textContent = vc.error; document.getElementById('qSetPiva').focus(); return; }
+    s.impresa.paese = vc.country; s.impresa.piva = vc.display;
+    var miss = qImpresaMissing(s);
+    if(miss.length){ err.textContent = 'Completa: ' + miss.join(', ') + '.'; return; }
+    btn.disabled = true;
+    qApi('settings', 'POST', s).then(function(x){
+      if(!x.ok){ err.textContent = (x.d && x.d.error) || 'Salvataggio non riuscito.'; return; }
+      qs.settings = null;
+      return qLoadSettings().then(function(){
+        msg.textContent = '✓ Impostazioni salvate.';
+        if(qs._fromQuote && qs.cur){ setTimeout(function(){ qRenderEditor(); ppShowView('quote'); qScrollTop(); }, 500); }
+        else setTimeout(qOpenList, 700);
+      });
+    }).catch(function(){ err.textContent = 'Connessione non riuscita.'; }).finally(function(){ btn.disabled = false; });
+  }
+
+  // ----- eventi -----
+  document.getElementById('ppQuotesBtn').addEventListener('click', qOpenList);
+  document.getElementById('qBackList').addEventListener('click', function(){ qCard(false); ppShowView('list'); ppLoadProjects(); });
+  document.getElementById('qNewBtn').addEventListener('click', function(){ qNew(null); });
+  document.getElementById('qSettingsBtn').addEventListener('click', qOpenSettings);
+  document.getElementById('qPivaGo').addEventListener('click', qOpenSettings);
+  document.getElementById('qBackQuotes').addEventListener('click', qOpenList);
+  document.getElementById('qSetBack').addEventListener('click', function(){ if(qs._fromQuote && qs.cur){ qCard(true); ppShowView('quote'); } else qOpenList(); });
+  document.getElementById('qSetSave').addEventListener('click', qSaveSettings);
+  document.getElementById('qSetCondReset').addEventListener('click', function(){ qSetCond = qDefaultCond(''); qRenderCond('qSetCondBox', qSetCond); });
+  document.getElementById('qSetCondAdd').addEventListener('click', function(){ qSetCond.push({ titolo:'', testo:'', approva:false }); qRenderCond('qSetCondBox', qSetCond); });
+  document.getElementById('qVoceAdd').addEventListener('click', function(){ qs.cur.voci.push({ titolo:'', descrizione:'', qta:1, um:'a corpo', prezzo:0 }); qRenderVoci(); });
+  document.getElementById('qFromListino').addEventListener('change', function(){
+    var v = (qs.settings.listino || [])[+this.value]; this.value = ''; if(!v) return;
+    var L = qs.cur.voci; if(L.length === 1 && !L[0].titolo && !L[0].descrizione && !L[0].prezzo) L.pop();
+    L.push({ titolo:v.titolo, descrizione:v.descrizione, qta:1, um:v.um, prezzo:v.prezzo }); qRenderVoci();
+  });
+  document.querySelectorAll('#qRatePresets button').forEach(function(b){ b.addEventListener('click', function(){ qs.cur.rate = qClone(Q_RATE_PRESETS[b.dataset.p]); qRenderRate(); }); });
+  document.getElementById('qRataAdd').addEventListener('click', function(){ qs.cur.rate.push({ descrizione:'', scadenza:'', pct:0 }); qRenderRate(); });
+  document.getElementById('qCondAdd').addEventListener('click', function(){ qs.cur.condizioni.push({ titolo:'', testo:'', approva:false }); qRenderCond('qCond', qs.cur.condizioni); });
+  document.getElementById('qCondReset').addEventListener('click', function(){ qs.cur.condizioni = qClone(qs.settings.condizioni); qs.cur.condizioni.forEach(function(c){ if(c.key === 'finiture') c.testo = Q_FINITURE[qFinKey(qs.cur.lavorazione)]; }); qRenderCond('qCond', qs.cur.condizioni); });
+  document.getElementById('qPrevOn').addEventListener('change', function(){ qs.cur.anteprima.attiva = this.checked; });
+  document.getElementById('qSaveBtn').addEventListener('click', function(){
+    var b = this, msg = document.getElementById('qEdMsg'); b.disabled = true; msg.textContent = 'Salvo…';
+    qSave().then(function(){ msg.textContent = '✓ Preventivo salvato.'; }).catch(function(){ msg.textContent = ''; }).finally(function(){ b.disabled = false; });
+  });
+  document.getElementById('qPdfBtn').addEventListener('click', qPdf);
+  document.getElementById('qDupBtn').addEventListener('click', function(){
+    var c = qClone(qs.cur); c.data = qToday(); c.status = 'bozza'; delete c.totali;
+    qs.cur = c; qs.curId = null; qs.meta = null; qs.newPreview = null; qs._pvLocal = null;
+    qRenderEditor(); qScrollTop();
+    document.getElementById('qEdMsg').textContent = 'Copia creata: salvala per assegnarle un nuovo numero.';
+  });
+  document.getElementById('qDeleteBtn').addEventListener('click', function(){
+    var b = this;
+    if(!qs.delArm){ qs.delArm = true; b.textContent = 'Tocca di nuovo per confermare'; setTimeout(function(){ qs.delArm = false; b.textContent = 'Elimina preventivo'; }, 4000); return; }
+    b.disabled = true;
+    qApi('delete', 'POST', { id: qs.curId }).then(function(x){ b.disabled = false; if(x.ok) qOpenList(); else document.getElementById('qEdErr').textContent = (x.d && x.d.error) || 'Eliminazione non riuscita.'; }).catch(function(){ b.disabled = false; });
+  });
+  ['qFromPreviewBtn','qFromPreviewBtn2'].forEach(function(id){ var el = document.getElementById(id); if(el) el.addEventListener('click', qOpenFromPreview); });
+
   document.getElementById('proProjectsOpenBtn').addEventListener('click', ppOpen);
+  // Barra area professionisti
+  function pbModal(){ document.getElementById('proProjectsModal').classList.add('open'); var bq = !(proAccount && proAccount.accountType !== 'privato'); document.getElementById('ppProfileBtn').hidden = bq; document.getElementById('ppQuotesBtn').hidden = bq; }
+  document.getElementById('pbNew').addEventListener('click', function(){
+    ppClose();
+    if(currentPanel === 'panelLanding'){ var lp = document.getElementById('landingPro'); if(lp) lp.click(); }
+    else goTo(currentSeq()[0]);
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+  document.getElementById('pbProjects').addEventListener('click', ppOpen);
+  document.getElementById('pbQuotes').addEventListener('click', function(){ pbModal(); qOpenList(); });
+  document.getElementById('pbProfile').addEventListener('click', function(){ pbModal(); pfOpen(); });
   document.getElementById('panel3SaveProjectBtn').addEventListener('click', function(){ ppOpen(); ppOpenForm(null); });
   document.getElementById('proProjectsClose').addEventListener('click', ppClose);
   document.getElementById('proProjectsModal').addEventListener('click', function(e){ if(e.target.id === 'proProjectsModal') ppClose(); });
