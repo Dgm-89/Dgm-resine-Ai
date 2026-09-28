@@ -122,8 +122,18 @@ async function webhook(req, res) {
     const accountId = meta.account_id || fallbackAccount;
     const filter = accountId ? "id=eq." + encodeURIComponent(accountId) : "stripe_customer_id=eq." + encodeURIComponent(sub.customer);
     const found = await supabaseRequest("/pro_accounts?" + filter + "&select=id,stripe_subscription_id,subscription_status", { method: "GET" });
-    const acc = found.ok && Array.isArray(found.data) ? found.data[0] : null;
-    if (!acc) return res.status(200).json({ ignored: "account non trovato" });
+    if (!found.ok) return res.status(500).json({ error: "database non raggiungibile" }); // Stripe riproverà
+    const acc = Array.isArray(found.data) ? found.data[0] : null;
+    if (!acc) {
+      // Account Rendrum eliminato: un suo abbonamento ancora vivo va disdetto
+      // subito, così nessuno paga per un account che non c'è più. Solo per gli
+      // abbonamenti creati da Rendrum (metadata.account_id), mai per altri.
+      if (meta.account_id && !["canceled", "incomplete_expired"].includes(sub.status)) {
+        await stripeRequest("DELETE", "/subscriptions/" + encodeURIComponent(sub.id)).catch(function () {});
+        return res.status(200).json({ canceled: "account non trovato" });
+      }
+      return res.status(200).json({ ignored: "account non trovato" });
+    }
 
     const liveStatuses = ["active", "trialing"];
     // Se l'account ha già un ALTRO abbonamento attivo, un abbonamento chiuso non lo spegne.

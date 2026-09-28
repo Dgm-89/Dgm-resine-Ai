@@ -555,10 +555,12 @@ module.exports = async function handler(req, res) {
   // CAMPIONE VIRTUALE (resina spatolata, scale, microcemento): texture reale
   // ricolorata nel colore scelto. Nel prompt è descritto per contenuto e non per
   // posizione, perché altre note parlano dell'"ULTIMA immagine".
-  const sampleClean = (typeof materialSampleImage === "string" && materialSampleImage.length < 1_500_000 && /^(monolith_spatolato|scale|microcemento)$/.test(String(materialId || "")))
+  const sampleClean = (typeof materialSampleImage === "string" && materialSampleImage.length < 1_500_000 && /^(monolith_spatolato|scale|microcemento|graniglia_esterni)$/.test(String(materialId || "")))
     ? materialSampleImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
-  const sampleNote = sampleClean
+  const sampleNote = (sampleClean && materialId === "graniglia_esterni")
+    ? ` CAMPIONE DELLA GRANIGLIA: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO fotografato dall'alto (solo sassolini, senza ambiente): è la graniglia REALE scelta dal cliente (${colorA || ""}). Sulla pavimentazione da rifare usa ESATTAMENTE quei sassolini: stessi colori e stesse proporzioni tra i colori, stessa forma (arrotondata o spigolosa), stessa lucentezza e stessa densità, legati in resina trasparente. Scala reale: ogni sassolino misura pochi millimetri (circa 2-6 mm), quindi da lontano la superficie appare come una grana fine e fitta e i singoli sassolini si distinguono solo vicino all'obiettivo. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine e non ripeterlo come una piastrella.${colorB ? " Il campione riguarda il colore principale; per l'altro colore segui il nome e il colore indicati." : ""}`
+    : sampleClean
     ? ` CAMPIONE DEL MATERIALE: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO ravvicinato del materiale (solo una superficie piena, senza stanza né oggetti). È un campione reale di ${materialId === "microcemento" ? "microcemento" : "resina spatolata"} nel colore esatto scelto dal cliente${colorAHex ? " (" + colorAHex + ")" : ""}. Sulla superficie da trattare riproduci la STESSA texture del campione (segni ad arco della spatola, nuvolature, leggere variazioni di tono, grana) e lo STESSO colore medio, adattati alla prospettiva, alla luce della foto e alla scala reale (i segni della spatola sono ampi 20-40 cm, non piccoli e ripetuti). La luce e i riflessi della stanza modificano il colore in modo naturale, ma la tinta di base deve restare quella del campione: non schiarirla, non scurirla e non cambiarne la tonalità. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine, non incollarlo come riquadro e non ripetere il suo disegno come una piastrella.`
     : "";
   const colorCardClean = (typeof colorCardImage === "string" && colorCardImage.length < 2_000_000)
