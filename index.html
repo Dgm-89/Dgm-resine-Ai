@@ -1296,6 +1296,31 @@
     </div>
     <div class="seg-hint" id="marmoLayoutHint" hidden>Fondo e venature nello stesso colore, con sfumature naturali.</div>
 
+    <!-- Piastrelle: pavimento / pavimento e rivestimento, altezza, doccia, formati -->
+    <div id="piaBox" style="display:none">
+      <div class="section-label">Dove posare</div>
+      <div class="seg-control" id="piaDoveControl"><button data-v="pav" class="active">Pavimento</button><button data-v="riv">Pavimento e rivestimento</button></div>
+      <div class="section-label">Formato pavimento</div>
+      <div class="seg-control" id="piaFmtPavControl"><button data-v="60x60" class="active">60×60</button><button data-v="60x120">60×120</button><button data-v="legno">Legno 20×120</button></div>
+      <div id="piaRivBox" hidden style="margin-top:16px">
+        <div class="section-label">Altezza rivestimento</div>
+        <div class="seg-control" id="piaAltControl"><button data-v="150" class="active">Fino a 150 cm</button><button data-v="tutta">Tutta altezza</button></div>
+        <div class="seg-hint">Con "fino a 150 cm" sopra il rivestimento la parete resta com'è nella foto (se ci sono vecchie piastrelle diventa parete bianca).</div>
+        <div class="section-label">Piastrella del rivestimento</div>
+        <div class="seg-control" id="piaRivTileControl"><button data-v="uguale" class="active">Uguale al pavimento</button><button data-v="diversa">Diversa</button></div>
+        <div class="section-label">Formato rivestimento</div>
+        <div class="seg-control" id="piaFmtRivControl"><button data-v="30x60" class="active">30×60</button><button data-v="60x120">60×120</button><button data-v="metro">7,5×15</button><button data-v="mosaico">Mosaico</button></div>
+        <div class="section-label">C'è una doccia?</div>
+        <div class="seg-control" id="piaDocciaControl"><button data-v="no" class="active">No</button><button data-v="si">Sì</button></div>
+        <div id="piaDocciaBox" hidden>
+          <div class="section-label">Interno doccia (sempre a tutta altezza)</div>
+          <div class="seg-control" id="piaDocciaTileControl"><button data-v="uguale" class="active">Come il rivestimento</button><button data-v="diversa">Piastrella diversa</button></div>
+          <div class="section-label">Formato interno doccia</div>
+          <div class="seg-control" id="piaFmtDocciaControl"><button data-v="mosaico" class="active">Mosaico</button><button data-v="30x60">30×60</button><button data-v="60x120">60×120</button><button data-v="metro">7,5×15</button></div>
+          <div class="seg-hint">Dopo aver caricato la foto, tocca il punto della doccia.</div>
+        </div>
+      </div>
+    </div>
     <!-- Scale: prima si sceglie il tipo di rivestimento -->
     <div class="section-label" id="scaleTipoLabel" style="display:none">Tipo di rivestimento</div>
     <div class="seg-control" id="scaleTipoControl" style="display:none">
@@ -1384,7 +1409,7 @@
       </div>
     </div>
     <div id="accentoMarkBox" hidden style="margin:-4px 0 14px;padding:10px 12px;border:1.5px dashed var(--accent);border-radius:10px;font-size:13.5px;line-height:1.4">
-      <b>Parete decorata:</b> <span id="accentoMarkText">tocca sulla foto la parete da decorare.</span>
+      <b id="accentoMarkTitle">Parete decorata:</b> <span id="accentoMarkText">tocca sulla foto la parete da decorare.</span>
     </div>
     <div id="marksBox" hidden style="margin:-4px 0 14px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13.5px;line-height:1.4">
       <button type="button" id="marksOpen" style="background:none;border:none;color:var(--accent);font-weight:700;font-size:14px;padding:0;cursor:pointer;font-family:inherit">＋ Segna altre parti sulla foto</button>
@@ -1731,6 +1756,8 @@
     pendingSecondOf3: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
     pendingVenature: { it:"+ Colore venature da scegliere", en:"+ Vein color to choose" },
     pendingSecondOf2: { it:"+ Parte bassa da scegliere", en:"+ Lower part to choose" },
+    pendingRivestimento: { it:"+ Piastrella del rivestimento da scegliere", en:"+ Wall tile to choose" },
+    pendingDoccia: { it:"+ Piastrella interno doccia da scegliere", en:"+ Shower tile to choose" },
     pendingDavanzali: { it:"+ Colore davanzali da scegliere", en:"+ Window sill color to choose" },
     pendingSottotetto: { it:"+ Colore sottotetto da scegliere", en:"+ Eave color to choose" },
     pendingBalconi: { it:"+ Colore balconi da scegliere", en:"+ Balcony color to choose" },
@@ -1881,7 +1908,7 @@
     { id:"spc", name:"SPC", nameEn:"SPC flooring", desc:"Pavimento flottante a incastro effetto legno, pietra o cemento — interni", descEn:"Click-lock floating floor with wood, stone or concrete look — indoors", swatch:"#8C8378" },
     { id:"laminato", name:"Laminato", nameEn:"Laminate", desc:"Pavimento laminato Quick-Step a incastro, effetto legno o pietra — interni", descEn:"Quick-Step click laminate, wood or stone look — indoors", swatch:"#B89A6A" },
     { id:"parquet", name:"Parquet", nameEn:"Parquet", desc:"Pavimenti in legno, tavole e doghe — solo pavimenti interni", descEn:"Wood flooring, planks and strips — indoor floors only", swatch:"#B08552" },
-    { id:"piastrelle", name:"Piastrelle", nameEn:"Tiles", desc:"Pavimenti in ceramica e gres porcellanato — solo pavimenti interni", descEn:"Ceramic and porcelain stoneware flooring — indoor floors only", swatch:"#8E9299" },
+    { id:"piastrelle", name:"Piastrelle", nameEn:"Tiles", desc:"Pavimenti e rivestimenti in ceramica e gres porcellanato, anche interno doccia", descEn:"Ceramic and porcelain stoneware flooring — indoor floors only", swatch:"#8E9299" },
     { id:"graniglia_esterni", name:"Graniglia per Esterni", nameEn:"Outdoor Terrazzo Chips", desc:"Resina con graniglie di sasso decorative per terrazzi, giardini, vialetti, bordo piscina e rampe garage", descEn:"Resin with decorative stone chips for terraces, gardens, driveways, pool edges and garage ramps", swatch:"#A9967A" }
   ];
 
@@ -4465,7 +4492,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', scaleTipo:'resina', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addPlafone:false, effettoScatola:false, colorPlafone:null, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', scaleTipo:'resina', piaDove:'pav', piaAlt:'150', piaRivTile:'uguale', piaFmtPav:'60x60', piaFmtRiv:'30x60', piaDoccia:'no', piaDocciaTile:'uguale', piaFmtDoccia:'mosaico', colorDoccia:null, context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addPlafone:false, effettoScatola:false, colorPlafone:null, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -4526,7 +4553,13 @@
   var aiResultImageMime = null; // mime type dell'immagine AI generata (es. "image/png"), abbinato a aiResultImageBase64
   var lastSendChannel = null; // 'whatsapp' o 'email': tiene traccia di come è stata inviata l'ultima richiesta, per personalizzare il messaggio di conferma
 
+  // ---- Piastrelle: zone ----
+  function isPia(){ return !!(state.material && state.material.id === 'piastrelle'); }
+  function piaRiv(){ return isPia() && state.piaDove === 'riv'; }
+  function showerActive(){ return piaRiv() && state.piaDoccia === 'si'; }
+  function needsDocciaColor(){ return showerActive() && state.piaDocciaTile === 'diversa'; }
   function facadeColorCount(){
+    if(piaRiv() && state.piaRivTile === 'diversa') return 2;
     if(state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'){
       return FACADE_COLOR_COUNT[state.facadeLayout] || 1;
     }
@@ -4578,6 +4611,7 @@
   function phaseOrder(){
     var order = ['A'];
     if(needsSecondColor()) order.push('B');
+    if(needsDocciaColor()) order.push('W');
     if(needsPlafoneColor()) order.push('P');
     if(needsAccentoColor()) order.push('X');
     if(needsBordaturaColor()) order.push('Y');
@@ -4605,6 +4639,7 @@
     if(p==='F') return state.colorBalconi;
     if(p==='G') return state.colorSerramenti;
     if(p==='H') return state.colorRighe;
+    if(p==='W') return state.colorDoccia;
     return null;
   }
 
@@ -4613,6 +4648,7 @@
     state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.marmoLayout = 'uno'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addPlafone = false; state.effettoScatola = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
     document.getElementById('colorSearch').value='';
     state.scaleTipo = 'resina';
+    state.piaDove='pav'; state.piaAlt='150'; state.piaRivTile='uguale'; state.piaFmtPav='60x60'; state.piaFmtRiv='30x60'; state.piaDoccia='no'; state.piaDocciaTile='uguale'; state.piaFmtDoccia='mosaico'; state.colorDoccia=null;
     syncBoiserieStyleVisibility();
     syncEffettoVisibility();
     syncColorCatalogVisibility();
@@ -4642,7 +4678,18 @@
     document.getElementById('marmoLayoutHint').textContent = tr(MARMO_HINT[state.marmoLayout] || MARMO_HINT.uno);
   }
   function isScale(){ return !!(state.material && state.material.id === 'scale'); }
+  function syncPiaVisibility(){
+    var on = isPia();
+    document.getElementById('piaBox').style.display = on ? 'block' : 'none';
+    if(!on) return;
+    var map = { piaDoveControl:'piaDove', piaFmtPavControl:'piaFmtPav', piaAltControl:'piaAlt', piaRivTileControl:'piaRivTile', piaFmtRivControl:'piaFmtRiv', piaDocciaControl:'piaDoccia', piaDocciaTileControl:'piaDocciaTile', piaFmtDocciaControl:'piaFmtDoccia' };
+    Object.keys(map).forEach(function(id){ Array.prototype.forEach.call(document.getElementById(id).children, function(b){ b.classList.toggle('active', b.dataset.v === state[map[id]]); }); });
+    document.getElementById('piaRivBox').hidden = !piaRiv();
+    document.getElementById('piaDocciaBox').hidden = !showerActive();
+    if(typeof syncAccentoMark === 'function') try{ syncAccentoMark(); }catch(e){}
+  }
   function syncEffettoVisibility(){
+    syncPiaVisibility();
     syncMarmoLayout();
     var sc = isScale();
     if(!sc) state.scaleTipo = 'resina';
@@ -5469,10 +5516,14 @@
   document.getElementById('marksTargetControl').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; state.markTarget=b.dataset.v; renderMarksUI(); });
   function syncAccentoMark(){
     var box = document.getElementById('accentoMarkBox'), pin = document.getElementById('accentoPin');
-    var on = accentoActive() && !!photoImg;
-    box.hidden = !accentoActive();
+    var pinOn = accentoActive() || showerActive();
+    var on = pinOn && !!photoImg;
+    box.hidden = !pinOn;
+    document.getElementById('accentoMarkTitle').textContent = showerActive() ? 'Doccia:' : 'Parete decorata:';
     if(!on || !state.accentoPoint){ pin.hidden = true; }
-    document.getElementById('accentoMarkText').textContent = !photoImg ? "carica la foto, poi tocca la parete da decorare." : (state.accentoPoint ? "segnata ✓ (tocca di nuovo per spostare il segno)." : "tocca sulla foto la parete da decorare.");
+    document.getElementById('accentoMarkText').textContent = showerActive()
+      ? (!photoImg ? "carica la foto, poi tocca il punto della doccia." : (state.accentoPoint ? "segnata ✓ (tocca di nuovo per spostare il segno)." : "tocca sulla foto il punto della doccia."))
+      : !photoImg ? "carica la foto, poi tocca la parete da decorare." : (state.accentoPoint ? "segnata ✓ (tocca di nuovo per spostare il segno)." : "tocca sulla foto la parete da decorare.");
     if(on && state.accentoPoint){
       var g = heroGeom();
       pin.style.left = (g.ox + state.accentoPoint.x*g.nw*g.sc) + 'px'; pin.style.top = (g.oy + state.accentoPoint.y*g.nh*g.sc) + 'px'; pin.hidden = false;
@@ -5481,13 +5532,13 @@
   }
   document.getElementById('heroPhoto').addEventListener('click', function(e){
     if(!photoImg || e.target.closest('label,button,input')) return;
-    var wantAccento = accentoActive() && (!state.accentoPoint || !state.marksMode);
+    var wantAccento = (accentoActive() || showerActive()) && (!state.accentoPoint || !state.marksMode);
     var wantMark = marksAvailable() && state.marksMode;
     if(!wantAccento && !wantMark) return;
     var r = this.getBoundingClientRect(), g = heroGeom();
     var x = (e.clientX - r.left - g.ox)/(g.nw*g.sc), y = (e.clientY - r.top - g.oy)/(g.nh*g.sc);
     if(x<0||x>1||y<0||y>1) return;
-    if(wantMark && !(accentoActive() && !state.accentoPoint)){
+    if(wantMark && !((accentoActive() || showerActive()) && !state.accentoPoint)){
       state.marks = state.marks || [];
       if(state.marks.length >= 5) return;
       state.marks.push({ x:x, y:y, target: state.markTarget || 'pareti' });
@@ -5500,7 +5551,7 @@
   // Foto con il segno sulla parete d'accento, mandata all'AI come riferimento.
   function buildAccentoRefImage(){
     try{
-      var hasAcc = accentoActive() && !!state.accentoPoint, marks = (marksAvailable() && state.marks) ? state.marks : [];
+      var hasAcc = (accentoActive() || showerActive()) && !!state.accentoPoint, marks = (marksAvailable() && state.marks) ? state.marks : [];
       if(!photoImg || (!hasAcc && !marks.length)) return null;
       var nw = photoImg.naturalWidth || photoImg.width, nh = photoImg.naturalHeight || photoImg.height, k = Math.min(1, 1024/Math.max(nw,nh));
       var cv = document.createElement('canvas'); cv.width = Math.round(nw*k); cv.height = Math.round(nh*k);
@@ -5961,7 +6012,8 @@
     // altrimenti si confonde con gli extra.
     var isFacciataMono = phase==='A' && !needsSecondColor() && (needsDavanzaliColor() || needsMarcapianoColor() || needsSottotettoColor() || needsTettoColor() || needsCorniciColor() || needsBalconiColor() || needsSerramentiColor() || needsRigheColor());
     var showLabel = needsThirdColor() || phase==='D' || phase==='E' || phase==='P' || phase==='X' || phase==='Y' || phase==='T' || phase==='K' || phase==='F' || phase==='G' || phase==='H' || isFacciataMono; // marcapiano, davanzali, sottotetto, balconi, serramenti e righe distinguono sempre l'etichetta
-    var labelText = (phase==='A' && (needsPlafoneColor() || needsAccentoColor() || needsBordaturaColor())) ? tr({it:'Pareti: ', en:'Walls: '}) : isFacciataMono ? tr({it:'Facciata: ', en:'Facade: '}) : (showLabel ? tr(PHASE_CHIP_LABEL[phase]) : '');
+    var PIA_CHIP = { A:'Pavimento: ', B:'Rivestimento: ', W:'Doccia: ' };
+    var labelText = (piaRiv() && PIA_CHIP[phase]) ? PIA_CHIP[phase] : (phase==='A' && (needsPlafoneColor() || needsAccentoColor() || needsBordaturaColor())) ? tr({it:'Pareti: ', en:'Walls: '}) : isFacciataMono ? tr({it:'Facciata: ', en:'Facade: '}) : (showLabel ? tr(PHASE_CHIP_LABEL[phase]) : '');
     var chip=document.createElement('span'); chip.className='chip';
     chip.innerHTML='<span class="dot" style="'+(color.img ? 'background-image:url('+color.img+');background-size:cover;' : granaAppliesToPhase(phase) ? granaStyle(color.hex, 40) : texStyle(color.hex, color.tex || texKeyFor(phase), 60))+'"></span>'+labelText+color.name+'<button aria-label="'+ts('removeAria')+'">×</button>';
     chip.querySelector('button').addEventListener('click', function(){
@@ -5977,6 +6029,7 @@
       else if(phase==='F'){ state.colorBalconi=null; }
       else if(phase==='G'){ state.colorSerramenti=null; }
       else if(phase==='H'){ state.colorRighe=null; }
+      else if(phase==='W'){ state.colorDoccia=null; }
       else { state.colorB=null; }
       pickPhase=phase; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; renderStep2UI();
     });
@@ -6000,7 +6053,10 @@
     if(isCortenActive()) return;
     if(state.colorA) addColorChip(row, 'A', state.colorA);
     if(needsSecondColor()){
-      if(state.colorB) addColorChip(row, 'B', state.colorB); else if(state.colorA) addPendingChip(row, (state.material && state.material.id==='monolith_marmo') ? 'pendingVenature' : 'pendingSecondOf2');
+      if(state.colorB) addColorChip(row, 'B', state.colorB); else if(state.colorA) addPendingChip(row, isPia() ? 'pendingRivestimento' : (state.material && state.material.id==='monolith_marmo') ? 'pendingVenature' : 'pendingSecondOf2');
+    }
+    if(needsDocciaColor()){
+      if(state.colorDoccia) addColorChip(row, 'W', state.colorDoccia); else if(state.colorA) addPendingChip(row, 'pendingDoccia');
     }
     if(needsDavanzaliColor()){
       if(state.colorDavanzali) addColorChip(row, 'D', state.colorDavanzali); else addPendingChip(row, 'pendingDavanzali');
@@ -6171,7 +6227,9 @@
       C: { it:'Colore marcapiano (fascia)', en:'String course color (band)' },
       B: { it:'Colore parte bassa/basamento', en:'Lower part/base color' }
     };
-    if(pickPhase==='D'){
+    if(piaRiv() && (pickPhase==='A' || pickPhase==='B' || pickPhase==='W')){
+      label.textContent = ({A:'Piastrella del pavimento', B:'Piastrella del rivestimento', W:'Piastrella interno doccia'})[pickPhase];
+    } else if(pickPhase==='D'){
       label.textContent = ts('clusterLabelDavanzali');
     } else if(pickPhase==='E'){
       label.textContent = ts('clusterLabelSottotetto');
@@ -6334,6 +6392,7 @@
     else if(pickPhase==='F'){ state.colorBalconi=c; }
     else if(pickPhase==='G'){ state.colorSerramenti=c; }
     else if(pickPhase==='H'){ state.colorRighe=c; }
+    else if(pickPhase==='W'){ state.colorDoccia=c; }
     else { state.colorB=c; }
     // avanza alla prossima fase richiesta ma non ancora scelta, nell'ordine giusto
     var order = phaseOrder();
@@ -6432,6 +6491,19 @@
     renderStep2UI();
   });
 
+  document.getElementById('piaBox').addEventListener('click', function(e){
+    var btn = e.target.closest('.seg-control button'); if(!btn) return;
+    var key = { piaDoveControl:'piaDove', piaFmtPavControl:'piaFmtPav', piaAltControl:'piaAlt', piaRivTileControl:'piaRivTile', piaFmtRivControl:'piaFmtRiv', piaDocciaControl:'piaDoccia', piaDocciaTileControl:'piaDocciaTile', piaFmtDocciaControl:'piaFmtDoccia' }[btn.parentNode.id];
+    if(!key || state[key] === btn.dataset.v) return;
+    state[key] = btn.dataset.v;
+    if(!(piaRiv() && state.piaRivTile === 'diversa')) state.colorB = null;
+    if(!needsDocciaColor()) state.colorDoccia = null;
+    if(!showerActive()) state.accentoPoint = null;
+    var order = phaseOrder(); pickPhase = 'A';
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+    aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
+    syncPiaVisibility(); renderStep2UI();
+  });
   document.getElementById('scaleTipoControl').addEventListener('click', function(e){
     var btn = e.target.closest('button'); if(!btn || btn.dataset.v === state.scaleTipo) return;
     state.scaleTipo = btn.dataset.v;
@@ -6611,6 +6683,10 @@
         materialSampleImage: buildMaterialSample(),
         qualita: RD_TEST_Q || null,
         scaleTipo: (state.material && state.material.id === 'scale') ? state.scaleTipo : null,
+        piaDove: isPia() ? state.piaDove : null, piaAlt: piaRiv() ? state.piaAlt : null, piaFmtPav: isPia() ? state.piaFmtPav : null,
+        piaFmtRiv: piaRiv() ? state.piaFmtRiv : null, piaRivTile: piaRiv() ? state.piaRivTile : null, piaDoccia: showerActive() ? 'si' : null,
+        piaDocciaTile: showerActive() ? state.piaDocciaTile : null, piaFmtDoccia: showerActive() ? state.piaFmtDoccia : null,
+        colorDoccia: (needsDocciaColor() && state.colorDoccia) ? state.colorDoccia.name : null, colorDocciaHex: (needsDocciaColor() && state.colorDoccia) ? apiHex(state.colorDoccia) : null,
         righeSpessore: needsRigheColor() ? state.righeSpessore : null,
         resinaArea: (state.category && (state.category.id === 'monolith' || state.category.id === 'microcemento')) ? state.resinaArea : null,
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
@@ -7046,8 +7122,8 @@
     var ok = true;
     if(currentPanel==='panelResinaArea') ok = !!state.resinaArea;
     else if(currentPanel==='panelSub') ok = !!state.material;
-    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!(state.material && (state.material.id==='parquet' || state.material.id==='spc' || state.material.id==='laminato')) || state.parquetPosa) && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsPlafoneColor() || state.colorPlafone) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
-    else if(currentPanel==='panelPhoto') ok = !!photoImg && (!accentoActive() || !!state.accentoPoint);
+    else if(currentPanel==='panelColor') ok = !!(state.colorA && (!needsDocciaColor() || state.colorDoccia) && (!(state.material && (state.material.id==='parquet' || state.material.id==='spc' || state.material.id==='laminato')) || state.parquetPosa) && (!needsSecondColor() || state.colorB) && (!needsThirdColor() || state.colorC) && (!needsDavanzaliColor() || state.colorDavanzali) && (!needsSottotettoColor() || state.colorSottotetto) && (!needsPlafoneColor() || state.colorPlafone) && (!needsTettoColor() || state.colorTetto) && (!needsCorniciColor() || state.colorCornici) && (!needsBalconiColor() || state.colorBalconi) && (!needsSerramentiColor() || state.colorSerramenti) && (!needsRigheColor() || state.colorRighe));
+    else if(currentPanel==='panelPhoto') ok = !!photoImg && (!(accentoActive() || showerActive()) || !!state.accentoPoint);
     btn.disabled = !ok;
     var miss = (currentPanel==='panelColor' && !ok && typeof missingColors==='function' && phaseOrder().length > 1) ? missingColors() : 0;
     btn.textContent = miss > 1 ? tr({it:'Mancano '+miss+' colori', en:miss+' colors missing'}) : miss === 1 ? tr({it:'Manca 1 colore', en:'1 color missing'}) : ts('btnContinua');
@@ -7094,7 +7170,7 @@
     if(id==='panelFinitura') syncNextStepEnabled();
     if(id==='panelPhoto'){
       syncNextStepEnabled();
-      var floorOnly = state.material && ['monolith_pietra','monolith_terrazzo','parquet','spc','laminato','piastrelle'].indexOf(state.material.id) !== -1;
+      var floorOnly = state.material && ['monolith_pietra','monolith_terrazzo','parquet','spc','laminato','piastrelle'].indexOf(state.material.id) !== -1 && !piaRiv();
       var isOutdoorGraniglia = state.material && state.material.id === 'graniglia_esterni';
       document.getElementById('photoHint').textContent = isOutdoorGraniglia
         ? ts('photoHintGraniglia')
@@ -7362,6 +7438,12 @@
       "Tipo cliente: "+(state.userType==='professionista' ? 'Professionista' : 'Privato'),
       "Lavorazione: "+state.material.name, "Colore: "+colorLine
     ];
+    if(isPia()){
+      var FMT = {'60x60':'60×60', '60x120':'60×120', 'legno':'effetto legno 20×120', '30x60':'30×60', 'metro':'7,5×15', 'mosaico':'mosaico 2,5×2,5'};
+      lines.push("Posa: " + (piaRiv() ? "pavimento e rivestimento" : "solo pavimento") + " · formato pavimento " + FMT[state.piaFmtPav]);
+      if(piaRiv()) lines.push("Rivestimento: " + (state.piaAlt === 'tutta' ? "tutta altezza" : "fino a 150 cm") + " · formato " + FMT[state.piaFmtRiv] + " · " + (state.piaRivTile === 'diversa' && state.colorB ? state.colorB.name : "come il pavimento"));
+      if(showerActive()) lines.push("Interno doccia: tutta altezza · formato " + FMT[state.piaFmtDoccia] + " · " + (state.piaDocciaTile === 'diversa' && state.colorDoccia ? state.colorDoccia.name : "come il rivestimento"));
+    }
     if(state.material.id === 'scale') lines.push("Rivestimento: " + SCALE_TIPO[state.scaleTipo || 'resina'].it + (state.scaleTipo === 'decorativi' && EFFETTO_LABEL[state.effetto] ? " – " + EFFETTO_LABEL[state.effetto].it : ""));
     if(state.material.id === 'imbiancatura') lines.push("Ambiente: "+(state.context === 'esterno' ? 'Esterno' : 'Interno'));
     if(granaActive()) lines.push("Tipo lavorazione: "+GRANA_NAME[state.grana].it);
@@ -9161,6 +9243,8 @@
     ['laminato','Fornitura e posa pavimento in laminato','Fornitura di pavimento in laminato a incastro nel decoro scelto, materassino isolante, posa flottante con tagli e raccordi. Battiscopa e profili esclusi se non indicati.','mq'],
     ['parquet','Fornitura e posa parquet','Fornitura di parquet nell\'essenza, formato e finitura scelti, posa incollata o flottante secondo lo schema scelto (dritta, spina di pesce, ecc.), tagli e raccordi.','mq'],
     ['piastrelle','Posa pavimento in piastrelle','Posa di piastrelle in gres porcellanato con collante cementizio, fughe nel colore scelto, tagli e rifiniture. Fornitura delle piastrelle esclusa se non indicata.','mq'],
+    ['piastrelle','Posa rivestimento in piastrelle','Posa di piastrelle a parete (rivestimento) con collante cementizio, fughe nel colore scelto, tagli, spigoli e rifiniture. Fornitura delle piastrelle esclusa salvo diversa indicazione.','mq'],
+    ['piastrelle','Posa interno doccia','Rivestimento interno doccia a tutta altezza con impermeabilizzazione sotto piastrella, posa, fughe e sigillature. Fornitura delle piastrelle esclusa salvo diversa indicazione.','mq'],
     ['graniglia_esterni','Pavimentazione in graniglia per esterni','Preparazione del sottofondo, stesura di graniglia di sasso naturale legata con resina poliuretanica trasparente nello spessore indicato, superficie drenante nel colore scelto.','mq'],
     ['','Rimozione pavimento esistente e smaltimento','Demolizione del pavimento esistente, carico, trasporto e smaltimento in discarica autorizzata.','mq'],
     ['','Rasatura e livellamento del sottofondo','Rasatura autolivellante per correggere dislivelli e imperfezioni del supporto prima della posa.','mq'],
