@@ -1296,6 +1296,14 @@
     </div>
     <div class="seg-hint" id="marmoLayoutHint" hidden>Fondo e venature nello stesso colore, con sfumature naturali.</div>
 
+    <!-- Scale: prima si sceglie il tipo di rivestimento -->
+    <div class="section-label" id="scaleTipoLabel" style="display:none">Tipo di rivestimento</div>
+    <div class="seg-control" id="scaleTipoControl" style="display:none">
+      <button data-v="resina" class="active">Resina</button>
+      <button data-v="microcemento">Microcemento</button>
+      <button data-v="decorativi">Effetti decorativi</button>
+    </div>
+    <div class="seg-hint" id="scaleTipoHint" style="display:none"></div>
     <div class="section-label" id="effettoLabel" style="display:none" data-i18n="effettoLabel">Effetto superficie</div>
     <div class="seg-control" id="effettoControl" style="display:none">
       <button data-v="liscio" class="active" data-i18n="btnLiscio">Liscio</button>
@@ -1305,8 +1313,10 @@
     <!-- Sotto-scelta visibile solo quando è selezionato "Effetti particolari": qui vivono
          Materico e Corten, entrambe finiture non lisce/non a tinta piatta scelta dal cliente. -->
     <div class="seg-control" id="effettoParticolareControl" style="display:none">
+      <button data-v="marmo" class="fx-scale">Marmo</button>
       <button data-v="materico" class="active" data-i18n="btnMaterico">Materico</button>
       <button data-v="corten" data-i18n="btnCorten">Corten</button>
+      <button data-v="metallico" class="fx-scale">Metallico</button>
     </div>
     <div class="seg-hint" id="effettoParticolareHint" style="display:none">Superficie ruvida e materica con rilievo tattile, variazioni di tono naturali.</div>
     <!-- Effetti di finitura superficiale (Liscio/Materico/Corten): non miscelano colori, cambiano solo la texture della superficie. -->
@@ -1864,7 +1874,7 @@
       { id:"monolith_terrazzo", name:"Effetto Terrazzo", nameEn:"Terrazzo Effect", desc:"Resina con graniglie effetto terrazzo — solo per pavimenti interni", descEn:"Resin with terrazzo-effect aggregates — floors only, indoor", swatch:"#8B8D89", floorOnly:true }
     ]},
     { id:"microcemento", name:"Microcemento", nameEn:"Microcement", desc:"Superfici continue, effetto materico", descEn:"Seamless surfaces, textured effect", swatch:"#8F8B82" },
-    { id:"scale", name:"Scale", nameEn:"Stairs", desc:"Rivestimento di scale interne ed esterne, colori ed effetti Resina Spatolata", descEn:"Indoor and outdoor stair coverings, Spatolato resin colors and effects", swatch:"#9C9186" },
+    { id:"scale", name:"Scale", nameEn:"Stairs", desc:"Scale interne ed esterne in resina, microcemento o con effetti decorativi (marmo, materico, corten, metallico)", descEn:"Indoor and outdoor stairs in resin, microcement or decorative effects (marble, textured, corten, metallic)", swatch:"#9C9186" },
     { id:"imbiancatura", name:"Imbiancatura", nameEn:"Painting", desc:"Interventi civili e industriali", descEn:"Residential and industrial painting work", swatch:"#D6D2C8" },
     { id:"decorazioni", hidden:true, name:"Decorazioni", nameEn:"Decorations", desc:"Finiture e boiserie su misura", descEn:"Custom finishes and boiserie panelling", swatch:"#B5652E" },
     { id:"resina_haccp", name:"Resina Industriale HACCP", nameEn:"HACCP Industrial Resin", desc:"Pavimenti resistenti e certificati per cucine professionali e industria alimentare", descEn:"Certified, resistant flooring for professional kitchens and the food industry", swatch:"#E9E7DE", professionistiOnly:true },
@@ -3923,6 +3933,14 @@
     ],
     // Scale usa gli stessi colori/effetti di Monolith Spatolato (richiesta esplicita).
     scale: MONOLITH_CHART,
+    // Scale, effetto metallico: tinte metallizzate (indicative).
+    metallico: [
+      {name:"Oro", hex:"#C9A24D", code:"MET-01"}, {name:"Oro Rosa", hex:"#C98E77", code:"MET-02"},
+      {name:"Champagne", hex:"#D8C7A0", code:"MET-03"}, {name:"Perla", hex:"#E3DCCD", code:"MET-04"},
+      {name:"Argento", hex:"#B8B8B5", code:"MET-05"}, {name:"Bronzo", hex:"#8C6A3F", code:"MET-06"},
+      {name:"Rame", hex:"#B06A3B", code:"MET-07"}, {name:"Titanio", hex:"#6E6C69", code:"MET-08"},
+      {name:"Canna di Fucile", hex:"#4A4A4C", code:"MET-09"}
+    ],
     // Quick-Step Alpha Vinyl (SPC): nomi e codici del catalogo; colori campionati dal catalogo (indicativi).
     spc: [
       {name:"Pino neve", hex:"#D4D0C5", code:"AVMPU40204", family:"Legno a doghe", coll:"Bloom", line:"bloom", tex:"qsw0"},
@@ -4430,16 +4448,24 @@
   var EFFETTO_HINT = {
     liscio: { it:"Un unico colore steso in modo uniforme, superficie liscia e continua.", en:"A single color applied evenly, smooth and continuous surface." },
     materico: { it:"Superficie ruvida e tattile, con rilievo irregolare e variazioni di tono chiare/scure naturali.", en:"Rough, tactile surface, with irregular relief and natural light/dark tone variations." },
-    corten: { it:"Base ocra/ruggine con macchie scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten.", en:"Ochre/rust base with irregular dark patches mimicking the natural oxidation of Corten steel." }
+    corten: { it:"Base ocra/ruggine con macchie scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten.", en:"Ochre/rust base with irregular dark patches mimicking the natural oxidation of Corten steel." },
+    marmo: { it:"Venature marmoree morbide sul colore scelto, superficie liscia come un marmo levigato.", en:"Soft marble veining over the chosen colour, smooth like polished marble." },
+    metallico: { it:"Pigmenti metallici con riflessi cangianti e nuvolature di luce.", en:"Metallic pigments with shimmering reflections and clouds of light." },
   };
-  var EFFETTO_LABEL = { liscio:{it:'Liscio uniforme', en:'Uniform smooth'}, materico:{it:'Materico', en:'Textured'}, corten:{it:'Corten', en:'Corten'} };
+  var EFFETTO_LABEL = { liscio:{it:'Liscio uniforme', en:'Uniform smooth'}, materico:{it:'Materico', en:'Textured'}, corten:{it:'Corten', en:'Corten'}, marmo:{it:'Marmo', en:'Marble'}, metallico:{it:'Metallico', en:'Metallic'} };
+  var SCALE_TIPO = { resina:{it:'Resina', en:'Resin'}, microcemento:{it:'Microcemento', en:'Microcement'}, decorativi:{it:'Effetti decorativi', en:'Decorative effects'} };
+  var SCALE_TIPO_HINT = {
+    resina:{it:'Resina spatolata liscia, superficie continua e uniforme su pedate e alzate.', en:'Smooth trowelled resin, continuous surface on treads and risers.'},
+    microcemento:{it:'Microcemento con i colori ARDEX Pandomo o NCS, superficie continua e naturale.', en:'Microcement in ARDEX Pandomo or NCS colours, natural seamless surface.'},
+    decorativi:{it:'Finiture speciali: marmo, materico, corten o metallico.', en:'Special finishes: marble, textured, corten or metallic.'}
+  };
   var FINITURA_HINT = {
     opaco: { it:"Superficie piena, senza riflessi.", en:"Full surface, no reflections." },
     satinato: { it:"Via di mezzo tra opaco e lucido, la più richiesta.", en:"A middle ground between matte and glossy, the most requested." },
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addPlafone:false, effettoScatola:false, colorPlafone:null, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
+  var state = { userType:null, category:null, material:null, effetto:'liscio', scaleTipo:'resina', context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addPlafone:false, effettoScatola:false, colorPlafone:null, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -4586,6 +4612,7 @@
     state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorPlafone=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
     state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.marmoLayout = 'uno'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addPlafone = false; state.effettoScatola = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
     document.getElementById('colorSearch').value='';
+    state.scaleTipo = 'resina';
     syncBoiserieStyleVisibility();
     syncEffettoVisibility();
     syncColorCatalogVisibility();
@@ -4614,10 +4641,25 @@
     Array.prototype.forEach.call(document.getElementById('marmoLayoutControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.marmoLayout); });
     document.getElementById('marmoLayoutHint').textContent = tr(MARMO_HINT[state.marmoLayout] || MARMO_HINT.uno);
   }
+  function isScale(){ return !!(state.material && state.material.id === 'scale'); }
   function syncEffettoVisibility(){
     syncMarmoLayout();
-    var show = state.material && EFFETTO_MATERIALS.indexOf(state.material.id) > -1;
-    if(state.material && !show) state.effetto = 'liscio';
+    var sc = isScale();
+    if(!sc) state.scaleTipo = 'resina';
+    if(!state.scaleTipo) state.scaleTipo = 'resina';
+    // Scale: tipo di rivestimento (Resina / Microcemento / Effetti decorativi)
+    document.getElementById('scaleTipoLabel').style.display = sc ? 'block' : 'none';
+    document.getElementById('scaleTipoControl').style.display = sc ? 'flex' : 'none';
+    document.getElementById('scaleTipoHint').style.display = sc ? 'block' : 'none';
+    if(sc){
+      Array.prototype.forEach.call(document.getElementById('scaleTipoControl').children, function(b){ b.classList.toggle('active', b.dataset.v === state.scaleTipo); });
+      document.getElementById('scaleTipoHint').textContent = tr(SCALE_TIPO_HINT[state.scaleTipo]);
+      if(state.scaleTipo === 'decorativi'){ if(['marmo','materico','corten','metallico'].indexOf(state.effetto) < 0) state.effetto = 'marmo'; }
+      else state.effetto = 'liscio';
+    } else if(state.effetto === 'marmo' || state.effetto === 'metallico') state.effetto = 'liscio';
+    Array.prototype.forEach.call(document.querySelectorAll('#effettoParticolareControl .fx-scale'), function(b){ b.style.display = sc ? '' : 'none'; });
+    var show = state.material && EFFETTO_MATERIALS.indexOf(state.material.id) > -1 && !sc;
+    if(state.material && !show && !sc) state.effetto = 'liscio';
     // "Effetti particolari" raggruppa Materico e Corten sotto un secondo livello,
     // per non buttare tre bottoni tutti insieme al cliente.
     var group = state.effetto === 'liscio' ? 'liscio' : 'particolare';
@@ -4628,7 +4670,8 @@
       Array.prototype.forEach.call(document.getElementById('effettoControl').children, function(b){ b.classList.toggle('active', b.dataset.v===group); });
       document.getElementById('effettoHint').textContent = tr(EFFETTO_HINT[group === 'particolare' ? state.effetto : 'liscio']);
     }
-    var showSub = show && group === 'particolare';
+    var showSub = (show && group === 'particolare') || (sc && state.scaleTipo === 'decorativi');
+    document.getElementById('effettoLabel').style.display = (show || showSub) ? 'block' : 'none';
     document.getElementById('effettoParticolareControl').style.display = showSub ? 'flex' : 'none';
     document.getElementById('effettoParticolareHint').style.display = showSub ? 'block' : 'none';
     if(showSub){
@@ -4652,13 +4695,13 @@
   };
   // Microcemento: i "colori base" sono le collezioni originali ARDEX Pandomo.
   function catalogHint(v){
-    if(v === 'base' && state.material && state.material.id === 'microcemento') return tr({it:"Colori originali ARDEX Pandomo: collezioni Floor, Loft, Clay e Studio.", en:"Original ARDEX Pandomo colours: Floor, Loft, Clay and Studio collections."});
+    if(v === 'base' && state.material && (state.material.id === 'microcemento' || (state.material.id === 'scale' && state.scaleTipo === 'microcemento'))) return tr({it:"Colori originali ARDEX Pandomo: collezioni Floor, Loft, Clay e Studio.", en:"Original ARDEX Pandomo colours: Floor, Loft, Clay and Studio collections."});
     return tr(COLOR_CATALOG_HINT[v]);
   }
   function syncColorCatalogVisibility(){
     var baseBtn = document.querySelector('#colorCatalogControl [data-v="base"]');
-    if(baseBtn) baseBtn.textContent = (state.material && state.material.id === 'microcemento') ? 'ARDEX Pandomo' : ts('btnCatalogoBase');
-    var show = state.material && NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1 && !isCortenActive();
+    if(baseBtn) baseBtn.textContent = (state.material && (state.material.id === 'microcemento' || (state.material.id === 'scale' && state.scaleTipo === 'microcemento'))) ? 'ARDEX Pandomo' : ts('btnCatalogoBase');
+    var show = state.material && NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1 && !isCortenActive() && !(isScale() && state.effetto === 'metallico');
     document.getElementById('colorCatalogLabel').style.display = show ? 'block' : 'none';
     document.getElementById('colorCatalogControl').style.display = show ? 'flex' : 'none';
     document.getElementById('colorCatalogHint').style.display = show ? 'block' : 'none';
@@ -5153,9 +5196,11 @@
       if(m === 'graniglia_esterni') return (state.colorA && state.colorA.img) || null;
       if(m !== 'monolith_spatolato' && m !== 'scale' && m !== 'microcemento') return null;
       if(state.effetto === 'corten') return null;
+      if(m === 'scale' && (state.effetto === 'marmo' || state.effetto === 'metallico')) return null;
       var hex = apiHex(state.colorA);
       if(!/^#?[0-9a-f]{6}$/i.test(hex || '')) return null;
-      var TX = (m === 'microcemento') ? TEX_MICRO : TEX_SPATOLATO;
+      var isMicro = m === 'microcemento' || (m === 'scale' && state.scaleTipo === 'microcemento');
+      var TX = isMicro ? TEX_MICRO : TEX_SPATOLATO;
       if(!TX.complete || !TX.naturalWidth) return null;
       var S = 512, cv = document.createElement('canvas'); cv.width = S; cv.height = S;
       var g = cv.getContext('2d'); if(!g) return null;
@@ -5165,7 +5210,7 @@
       // Colore in luce lineare; la mappa contiene il rapporto di luminosità (128 = colore pieno).
       var lin = [0, 2, 4].map(function(i){ return Math.pow(parseInt(h.slice(i, i + 2), 16) / 255, 2.2); });
       // Microcemento: segni del frattazzo attenuati (effetto ad arco più delicato).
-      var k = m === 'microcemento' ? 0.55 : (state.effetto === 'materico' ? 1.8 : 1);
+      var k = isMicro ? 0.55 : (state.effetto === 'materico' ? 1.8 : 1);
       var lut = new Float32Array(256);
       for(var v = 0; v < 256; v++) lut[v] = Math.pow(Math.max(0.05, 1 + (v / 128 - 1) * k), 2.2);
       for(var i = 0; i < px.length; i += 4){
@@ -5757,6 +5802,7 @@
     if(!state.material) return null;
     var id = state.material.id;
     if(id==='imbiancatura') return state.context==='esterno' ? (ph==='T' ? null : 'pittura') : 'pittura';
+    if(id==='scale') return state.scaleTipo==='microcemento' ? 'micro_reale' : (state.scaleTipo==='decorativi' && state.effetto==='marmo') ? 'marmo' : 'resina_reale';
     return ({monolith_spatolato:'resina_reale', scale:'resina_reale', monolith_marmo:'marmo', monolith_terrazzo:'terrazzo', monolith_pietra:'pietra',
              microcemento:'micro_reale', decorazioni:'pittura', resina_haccp:'resina', parquet:'parquet', spc:'parquet', laminato:'parquet', piastrelle:'piastrelle'})[id] || null;
   }
@@ -6166,6 +6212,7 @@
       if(stepIdx > 0) label.textContent += ' (' + stepIdx + ' ' + (LANG==='en' ? 'of' : 'di') + ' ' + coreOrder.length + ')';
     }
     var paletteKey = state.material.id;
+    if(paletteKey === 'scale'){ if(state.scaleTipo === 'microcemento') paletteKey = 'microcemento'; else if(state.scaleTipo === 'decorativi' && state.effetto === 'metallico') paletteKey = 'metallico'; }
     if(paletteKey === 'imbiancatura' && state.context === 'esterno') paletteKey = 'imbiancatura_esterni';
     // Serramenti: palette fissa (4 colori indicativi), indipendente dal
     // materiale/catalogo in corso, quindi la forziamo qui.
@@ -6385,9 +6432,21 @@
     renderStep2UI();
   });
 
+  document.getElementById('scaleTipoControl').addEventListener('click', function(e){
+    var btn = e.target.closest('button'); if(!btn || btn.dataset.v === state.scaleTipo) return;
+    state.scaleTipo = btn.dataset.v;
+    state.effetto = state.scaleTipo === 'decorativi' ? 'marmo' : 'liscio';
+    // cambiano i colori disponibili: azzera la scelta
+    state.colorA=null; state.colorB=null; pickPhase='A'; familyFilter=null; colorSearchQuery=''; state.colorCatalog='base';
+    document.getElementById('colorSearch').value='';
+    aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
+    syncEffettoVisibility(); syncColorCatalogVisibility(); renderStep2UI();
+  });
   document.getElementById('effettoParticolareControl').addEventListener('click', function(e){
     var btn = e.target.closest('button'); if(!btn) return;
-    state.effetto = btn.dataset.v; // 'materico' oppure 'corten'
+    var prevMet = state.effetto === 'metallico';
+    state.effetto = btn.dataset.v; // 'materico', 'corten' (+ 'marmo', 'metallico' per le scale)
+    if(isScale() && prevMet !== (state.effetto === 'metallico')){ state.colorA=null; state.colorB=null; pickPhase='A'; familyFilter=null; colorSearchQuery=''; state.colorCatalog='base'; document.getElementById('colorSearch').value=''; }
     aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null;
     syncEffettoVisibility();
     syncColorCatalogVisibility();
@@ -6551,6 +6610,7 @@
         posaRefImage: posaRefImage,
         materialSampleImage: buildMaterialSample(),
         qualita: RD_TEST_Q || null,
+        scaleTipo: (state.material && state.material.id === 'scale') ? state.scaleTipo : null,
         righeSpessore: needsRigheColor() ? state.righeSpessore : null,
         resinaArea: (state.category && (state.category.id === 'monolith' || state.category.id === 'microcemento')) ? state.resinaArea : null,
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
@@ -7301,6 +7361,7 @@
       "Tipo cliente: "+(state.userType==='professionista' ? 'Professionista' : 'Privato'),
       "Lavorazione: "+state.material.name, "Colore: "+colorLine
     ];
+    if(state.material.id === 'scale') lines.push("Rivestimento: " + SCALE_TIPO[state.scaleTipo || 'resina'].it + (state.scaleTipo === 'decorativi' && EFFETTO_LABEL[state.effetto] ? " – " + EFFETTO_LABEL[state.effetto].it : ""));
     if(state.material.id === 'imbiancatura') lines.push("Ambiente: "+(state.context === 'esterno' ? 'Esterno' : 'Interno'));
     if(granaActive()) lines.push("Tipo lavorazione: "+GRANA_NAME[state.grana].it);
     if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it);
