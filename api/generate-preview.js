@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, qualita, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -647,7 +647,13 @@ module.exports = async function handler(req, res) {
 
   if (provider === "openai") {
     const model = (process.env.OPENAI_IMAGE_MODEL || "gpt-image-2.5-sunburst").trim();
-    const quality = (process.env.OPENAI_IMAGE_QUALITY || "max").trim();
+    // MODALITÀ TEST (solo account autorizzati, da rendrum.com/?test=bozza|media|alta):
+    // genera a qualità ridotta per valutare la "bozza" e restituisce i token usati
+    // con il costo stimato. Per tutti gli altri non cambia nulla.
+    const TEST_EMAILS = String(process.env.TEST_EMAILS || "info@dgmresine.com,provalo@rendrum.com").toLowerCase().split(",").map(function (x) { return x.trim(); });
+    const isTester = !!(quotaAcc && quotaAcc.email && TEST_EMAILS.includes(String(quotaAcc.email).toLowerCase()));
+    const testQuality = isTester ? ({ bozza: "low", media: "medium", alta: "high" })[String(qualita || "")] || null : null;
+    const quality = testQuality || (process.env.OPENAI_IMAGE_QUALITY || "max").trim();
     const ext = (m) => (m.includes("png") ? "png" : m.includes("webp") ? "webp" : "jpg");
     // Stesso ordine delle immagini descritto nel prompt: 1) foto del cliente,
     // 2) cartella colori (o riferimento boiserie).
@@ -695,7 +701,14 @@ module.exports = async function handler(req, res) {
       const b64 = data && data.data && data.data[0] && data.data[0].b64_json;
       if (!b64) return res.status(502).json({ error: "Il modello non ha restituito un'immagine", details: data });
       await countUsage();
-      return res.status(200).json({ imageBase64: b64, mimeType: outMime });
+      let test = null;
+      if (isTester && data.usage) {
+        const u = data.usage, d = u.input_tokens_details || {};
+        const imgIn = d.image_tokens || 0, txtIn = d.text_tokens || Math.max(0, (u.input_tokens || 0) - imgIn), out = u.output_tokens || 0;
+        const usd = imgIn * 8e-6 + txtIn * 5e-6 + out * 30e-6; // listino OpenAI per token (stima)
+        test = { quality: quality, inputImageTokens: imgIn, inputTextTokens: txtIn, outputTokens: out, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
+      }
+      return res.status(200).json({ imageBase64: b64, mimeType: outMime, test: test });
     } catch (err) {
       console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
     }
