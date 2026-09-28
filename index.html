@@ -6549,6 +6549,7 @@
         colorBordatura: needsBordaturaColor() && state.colorBordatura ? state.colorBordatura.name : null, colorBordaturaHex: (needsBordaturaColor() && state.colorBordatura) ? apiHex(state.colorBordatura) : null,
         posaRefImage: posaRefImage,
         materialSampleImage: buildMaterialSample(),
+        qualita: RD_TEST_Q || null,
         righeSpessore: needsRigheColor() ? state.righeSpessore : null,
         resinaArea: (state.category && (state.category.id === 'monolith' || state.category.id === 'microcemento')) ? state.resinaArea : null,
         granigliaLayout: (state.material && state.material.id === 'graniglia_esterni') ? state.granigliaLayout : null,
@@ -6687,6 +6688,7 @@
           var e2 = new Error(msg); e2.code = res.data && res.data.code; throw e2;
         }
         if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
+        window.__rdLastTest = res.data.test || null;
         return new Promise(function(resolve, reject){
           var img = new Image();
           img.onload = function(){ resolve({ img: img, base64: res.data.imageBase64, mime: res.data.mimeType }); };
@@ -6739,6 +6741,10 @@
         }
         renderHeroPreview();
         statusEl.textContent = ts('aiStatusDone');
+        if(RD_TEST_Q){
+          var tq = window.__rdLastTest;
+          statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' : ' · modalità test non attiva per questo account';
+        }
         stopAiProgress(true);
       })
       .catch(function(err){
@@ -7572,6 +7578,8 @@
   // ---------- Abbonamenti (Stripe) ----------
   function subActive(){ return !!(proAccount && (proAccount.subscriptionStatus === 'active' || proAccount.subscriptionStatus === 'trialing')); }
   var IS_APP = document.documentElement.classList.contains('is-app');
+  // Test qualità (solo account autorizzati): rendrum.com/?test=bozza | media | alta | max (costo del render normale); ?test=off per uscire
+  var RD_TEST_Q = (function(){ try{ var t = new URLSearchParams(location.search).get('test'); if(t){ sessionStorage.setItem('rdTestQ', t); } else { t = sessionStorage.getItem('rdTestQ'); } return ['bozza','media','alta','max'].indexOf(t) > -1 ? t : ''; }catch(e){ return ''; } })();
   // Salva un PDF creato con jsPDF. Nel browser lo scarica; nell'app (dove i
   // download non esistono) lo scrive nella cache e apre "Condividi / Salva".
   // Restituisce una Promise: true se salvato/condiviso, false se annullato.
