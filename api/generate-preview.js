@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, qualita, scaleTipo, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -196,6 +196,9 @@ module.exports = async function handler(req, res) {
   if (scaleTipoOk === "microcemento") {
     MATERIAL_TEXTURE.scale = "microcemento applicato su gradini e alzate di una scala (pedate, alzate e frontalini), superficie continua senza fughe con segni di lavorazione del frattazzo DELICATI e sfumati, leggere velature e nuvolature di tono (niente archi o ventagli marcati), finitura satinata-opaca, spigoli dei gradini netti e ben rifiniti";
   }
+  if (materialId === "piastrelle" && piaDove === "riv") {
+    MATERIAL_TEXTURE.piastrelle = "piastrelle in ceramica/gres porcellanato posate a pavimento e a parete (rivestimento), moduli regolari con fughe sottili dritte e uniformi ben visibili, leggerissima variazione naturale di tono tra i pezzi, superfici perfettamente planari";
+  }
   const baseTextureDesc = materialId === "decorazioni"
     ? boiserieDesc
     : isGranaStyled
@@ -227,7 +230,18 @@ module.exports = async function handler(req, res) {
   // diciamo esplicitamente all'AI così non applica la lavorazione anche ai muri
   // inquadrati nella foto.
   const FLOOR_ONLY_MATERIALS = ["monolith_pietra", "monolith_terrazzo", "parquet", "spc", "laminato", "piastrelle", "graniglia_esterni"];
-  const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId);
+  // PIASTRELLE: solo pavimento oppure pavimento e rivestimento (con doccia).
+  const piaRivOn = materialId === "piastrelle" && piaDove === "riv";
+  const piaDocciaOn = piaRivOn && piaDoccia === "si";
+  const PIA_FMT = {
+    "60x60": "piastrelle quadrate 60×60 cm posate a griglia con fughe sottili allineate",
+    "60x120": "lastre rettangolari 60×120 cm con fughe sottili",
+    "legno": "piastrelle in gres effetto legno a listoni 20×120 cm posati a correre (giunti di testa sfalsati)",
+    "30x60": "piastrelle rettangolari 30×60 cm posate in orizzontale con fughe sottili allineate",
+    "metro": "piastrelle 7,5×15 cm stile metro posate a mattoncino sfalsato, bordi leggermente bisellati",
+    "mosaico": "mosaico a tessere quadrate 2,5×2,5 cm con fughe sottili e regolari"
+  };
+  const isFloorOnly = FLOOR_ONLY_MATERIALS.includes(materialId) && !piaRivOn;
 
   // Per la categoria "Resine" (monolith), l'utente ora sceglie esplicitamente DOVE
   // applicare la resina: solo pavimento, solo pareti (rivestimento), o entrambi
@@ -243,7 +257,9 @@ module.exports = async function handler(req, res) {
     ? RESINA_AREA_DESC[resinaArea]
     : null;
 
-  const surfaceDesc = isFloorOnly
+  const surfaceDesc = piaRivOn
+    ? "al pavimento e alle pareti (rivestimento) come descritto zona per zona nelle ZONE PIASTRELLE qui sotto"
+    : isFloorOnly
     ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
     : (resinaAreaDesc || ((materialId === "imbiancatura" && context === "esterno") ? "a tutte le pareti esterne della facciata visibili nella foto" : "alla superficie del pavimento/parete inquadrata"));
 
@@ -433,7 +449,23 @@ module.exports = async function handler(req, res) {
   const isCortenStyled = effettoOk && effetto === "corten";
 
   // Costruzione del prompt descrittivo per il modello di editing immagine.
-  const colorDesc = isCortenStyled
+  const piaFmtPavDesc = (materialId === "piastrelle" && PIA_FMT[piaFmtPav]) ? PIA_FMT[piaFmtPav] : "";
+  const piaRivColor = (piaRivOn && piaRivTile === "diversa" && colorB) ? colorRef(colorB, colorBHex) : colorRef(colorA, colorAHex);
+  const piaDocciaColor = (piaDocciaOn && piaDocciaTile === "diversa" && colorDoccia) ? colorRef(colorDoccia, colorDocciaHex) : piaRivColor;
+  const piaZonesNote = piaRivOn ? [
+    " ZONE PIASTRELLE (vincolanti):",
+    ` (1) PAVIMENTO: tutto il pavimento visibile in piastrelle nel colore ${colorRef(colorA, colorAHex)}${piaFmtPavDesc ? ", " + piaFmtPavDesc : ""}.`,
+    ` (2) RIVESTIMENTO PARETI: tutte le pareti visibili rivestite in piastrelle nel colore ${piaRivColor}${PIA_FMT[piaFmtRiv] ? ", " + PIA_FMT[piaFmtRiv] : ""}, `
+      + (piaAlt === "tutta"
+        ? "dal pavimento fino al soffitto."
+        : "dal pavimento fino a un'altezza di circa 150 cm (come riferimento: il bordo di un lavabo è a circa 85 cm, una porta è alta circa 210 cm). Il rivestimento termina con un bordo superiore NETTO, DRITTO e ORIZZONTALE, alla stessa altezza su tutte le pareti (con un sottile profilo di finitura). SOPRA quel bordo la parete è intonacata e tinteggiata: se nella foto originale lì c'è già una parete dipinta resta identica; se ci sono vecchie piastrelle vanno tolte e al loro posto c'è una parete liscia tinteggiata di bianco."),
+    " Le vecchie piastrelle e i vecchi rivestimenti vanno sostituiti completamente, senza lasciarne traccia. Sanitari, lavabo, mobili, rubinetti, accessori, porte e finestre restano identici e davanti al nuovo rivestimento; i tagli delle piastrelle seguono con precisione i loro contorni.",
+    piaDocciaOn ? ` (3) DOCCIA: ${accentoRefClean ? "nell'ULTIMA immagine un CERCHIO ROSSO indica la zona della doccia. " : ""}All'interno della doccia le pareti sono rivestite a TUTTA ALTEZZA (dal piatto doccia fino al soffitto), anche se il resto del bagno è rivestito fino a 150 cm, con piastrelle nel colore ${piaDocciaColor}${PIA_FMT[piaFmtDoccia] ? ", " + PIA_FMT[piaFmtDoccia] : ""}. Il piatto doccia, il box/vetro e la rubinetteria della doccia restano identici.${accentoRefClean ? " Il cerchio rosso è solo un'indicazione: NON disegnarlo." : ""}` : ""
+  ].join("") : "";
+  const colorDesc = (materialId === "piastrelle" && piaRivOn)
+    ? `quelli indicati zona per zona nelle ZONE PIASTRELLE (pavimento, rivestimento${piaDocciaOn ? " e doccia" : ""})`
+    : (materialId === "piastrelle" && piaFmtPavDesc) ? `${colorRef(colorA, colorAHex)}, ${piaFmtPavDesc}`
+    : isCortenStyled
     ? "il colore naturale ocra/ruggine dell'effetto Corten (la texture stessa definisce già la tonalità, non è un colore scelto a parte)"
     : isFacadeStyled
       ? FACADE_LAYOUT_DESC[facadeLayout]
@@ -611,9 +643,10 @@ module.exports = async function handler(req, res) {
   const prompt = isRigheStep ? righeStepPrompt : [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
-    isFacadeStyled ? colorDesc : `Il colore/tonalità da usare è ${colorDesc}.`,
+    isFacadeStyled ? colorDesc : piaRivOn ? `I colori da usare sono ${colorDesc}.` : `Il colore/tonalità da usare è ${colorDesc}.`,
     finitura ? `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).` : "",
     continuityNote,
+    piaZonesNote,
     isExteriorFacade
       ? facadeKeepSentence
       : isFloorOnly
