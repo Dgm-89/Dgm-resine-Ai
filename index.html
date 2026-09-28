@@ -4594,7 +4594,8 @@
   // Effetto superficie (Materico/Corten): ha senso solo su Resina Spatolata/Marmo,
   // Microcemento e Scale — non su Pietra/Terrazzo (già hanno una texture a
   // graniglie) né su Imbiancatura/Decorazioni/HACCP.
-  var EFFETTO_MATERIALS = ['monolith_spatolato', 'microcemento', 'scale'];
+  // Microcemento: niente effetti particolari (Materico/Corten), solo colori Pandomo o NCS.
+  var EFFETTO_MATERIALS = ['monolith_spatolato', 'scale'];
   // Vero quando è attivo l'effetto Corten: in questo caso il colore è
   // intrinseco alla texture (base ocra/ruggine), il cliente non ne sceglie uno.
   function isCortenActive(){
@@ -4616,6 +4617,7 @@
   function syncEffettoVisibility(){
     syncMarmoLayout();
     var show = state.material && EFFETTO_MATERIALS.indexOf(state.material.id) > -1;
+    if(state.material && !show) state.effetto = 'liscio';
     // "Effetti particolari" raggruppa Materico e Corten sotto un secondo livello,
     // per non buttare tre bottoni tutti insieme al cliente.
     var group = state.effetto === 'liscio' ? 'liscio' : 'particolare';
@@ -5162,7 +5164,7 @@
       var h = hex.replace('#', '');
       // Colore in luce lineare; la mappa contiene il rapporto di luminosità (128 = colore pieno).
       var lin = [0, 2, 4].map(function(i){ return Math.pow(parseInt(h.slice(i, i + 2), 16) / 255, 2.2); });
-      var k = (state.effetto === 'materico' ? 1.8 : 1);
+      var k = (state.effetto === 'materico' && m !== 'microcemento' ? 1.8 : 1);
       var lut = new Float32Array(256);
       for(var v = 0; v < 256; v++) lut[v] = Math.pow(Math.max(0.05, 1 + (v / 128 - 1) * k), 2.2);
       for(var i = 0; i < px.length; i += 4){
