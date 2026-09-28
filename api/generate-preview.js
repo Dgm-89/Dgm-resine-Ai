@@ -142,7 +142,7 @@ module.exports = async function handler(req, res) {
     materico: " con un effetto materico superficiale sovrapposto: texture ruvida e tattile, rilievo irregolare ben visibile, variazioni di tono chiare e scure che si alternano in modo naturale e non simmetrico sulla superficie, aspetto grezzo e tridimensionale, decisamente non liscio né piatto",
     corten: " con un effetto Corten sovrapposto: base cromatica ocra/ruggine, con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, pattern asimmetrico e naturale (mai simmetrico, mai ripetitivo o a griglia), superficie opaca"
   };
-  const EFFETTO_MATERIALS = ["monolith_spatolato", "microcemento", "scale"];
+  const EFFETTO_MATERIALS = ["monolith_spatolato", "scale"]; // microcemento: senza effetti particolari
 
   // La boiserie NON è un semplice colore piatto: è una geometria di pannelli/doghe
   // applicata fisicamente sulla parete, quindi il prompt deve descrivere la forma
