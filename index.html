@@ -6548,7 +6548,7 @@
       var pct = 95 * (1 - Math.exp(-t / 35));
       fill.style.width = pct.toFixed(1) + '%';
       var i = Math.min(AI_PROGRESS_MSGS.length - 1, Math.floor(t / 15));
-      msg.textContent = tr(AI_PROGRESS_MSGS[i]);
+      msg.textContent = (RD_TEST_Q ? 'TEST ' + RD_TEST_NAME[RD_TEST_Q] + ' · ' : '') + tr(AI_PROGRESS_MSGS[i]);
     }, 700);
   }
   function stopAiProgress(ok){
@@ -6804,6 +6804,7 @@
         statusEl.textContent = ts('aiStatusDone');
         if(RD_TEST_Q){
           var tq = window.__rdLastTest;
+          rdTestBadge(tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account');
           statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' : ' · modalità test non attiva per questo account';
         }
         stopAiProgress(true);
@@ -7641,7 +7642,20 @@
   function subActive(){ return !!(proAccount && (proAccount.subscriptionStatus === 'active' || proAccount.subscriptionStatus === 'trialing')); }
   var IS_APP = document.documentElement.classList.contains('is-app');
   // Test qualità (solo account autorizzati): rendrum.com/?test=bozza | media | alta | max (costo del render normale); ?test=off per uscire
+  var RD_TEST_NAME = { bozza:'BOZZA (qualità bassa)', media:'MEDIA', alta:'ALTA', max:'MASSIMA (render)' };
   var RD_TEST_Q = (function(){ try{ var t = new URLSearchParams(location.search).get('test'); if(t){ sessionStorage.setItem('rdTestQ', t); } else { t = sessionStorage.getItem('rdTestQ'); } return ['bozza','media','alta','max'].indexOf(t) > -1 ? t : ''; }catch(e){ return ''; } })();
+  // Etichetta sempre visibile quando la modalità test è attiva.
+  function rdTestBadge(extra){
+    if(!RD_TEST_Q) return;
+    var b = document.getElementById('rdTestBadge');
+    if(!b){
+      b = document.createElement('div'); b.id = 'rdTestBadge';
+      b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(2px + env(safe-area-inset-top,0px));z-index:10050;max-width:92vw;background:#E0915A;color:#1A120C;font:700 11px/1.3 Inter,system-ui,sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;box-shadow:0 6px 20px rgba(0,0,0,.45);text-align:center;pointer-events:none';
+      document.body.appendChild(b);
+    }
+    b.textContent = 'TEST · ' + RD_TEST_NAME[RD_TEST_Q] + (extra ? ' · ' + extra : ' · per uscire apri rendrum.com/?test=off');
+  }
+  rdTestBadge();
   // Salva un PDF creato con jsPDF. Nel browser lo scarica; nell'app (dove i
   // download non esistono) lo scrive nella cache e apre "Condividi / Salva".
   // Restituisce una Promise: true se salvato/condiviso, false se annullato.
