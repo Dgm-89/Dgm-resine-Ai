@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, qualita, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, qualita, scaleTipo, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -140,7 +140,9 @@ module.exports = async function handler(req, res) {
   // "Liscio" è il default e non aggiunge nulla (la texture base è già liscia).
   const EFFETTO_TEXTURE = {
     materico: " con un effetto materico superficiale sovrapposto: texture ruvida e tattile, rilievo irregolare ben visibile, variazioni di tono chiare e scure che si alternano in modo naturale e non simmetrico sulla superficie, aspetto grezzo e tridimensionale, decisamente non liscio né piatto",
-    corten: " con un effetto Corten sovrapposto: base cromatica ocra/ruggine, con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, pattern asimmetrico e naturale (mai simmetrico, mai ripetitivo o a griglia), superficie opaca"
+    corten: " con un effetto Corten sovrapposto: base cromatica ocra/ruggine, con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, pattern asimmetrico e naturale (mai simmetrico, mai ripetitivo o a griglia), superficie opaca",
+    marmo: " con effetto MARMO: venature marmoree morbide e naturali, leggermente più chiare e più scure del colore indicato, che attraversano pedate e alzate in modo irregolare e non ripetitivo, superficie liscia e levigata come un marmo lucidato",
+    metallico: " con effetto METALLICO: resina con pigmenti metallici perlescenti nel colore indicato, riflessi cangianti e nuvolature di luce che cambiano con l'angolo di vista, aspetto di metallo liquido/spazzolato, superficie liscia e continua"
   };
   const EFFETTO_MATERIALS = ["monolith_spatolato", "scale"]; // microcemento: senza effetti particolari
 
@@ -189,12 +191,20 @@ module.exports = async function handler(req, res) {
   if (materialId === "parquet" && collezione) {
     MATERIAL_TEXTURE.parquet = (MATERIAL_TEXTURE.parquet || "parquet in legno") + ", parquet prefinito Quick-Step collezione " + collezione + " in rovere con finitura extra opaca, venature e nodi naturali visibili";
   }
+  // Scale: tipo di rivestimento scelto dal cliente.
+  const scaleTipoOk = materialId === "scale" ? (["resina", "microcemento", "decorativi"].includes(scaleTipo) ? scaleTipo : "resina") : null;
+  if (scaleTipoOk === "microcemento") {
+    MATERIAL_TEXTURE.scale = "microcemento applicato su gradini e alzate di una scala (pedate, alzate e frontalini), superficie continua senza fughe con segni di lavorazione del frattazzo DELICATI e sfumati, leggere velature e nuvolature di tono (niente archi o ventagli marcati), finitura satinata-opaca, spigoli dei gradini netti e ben rifiniti";
+  }
   const baseTextureDesc = materialId === "decorazioni"
     ? boiserieDesc
     : isGranaStyled
       ? GRANA_TEXTURE[grana]
       : (MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`);
-  const effettoAddon = (EFFETTO_MATERIALS.includes(materialId) && EFFETTO_TEXTURE[effetto]) ? EFFETTO_TEXTURE[effetto] : "";
+  const effettoOk = materialId === "scale"
+    ? (scaleTipoOk === "decorativi" && ["marmo", "materico", "corten", "metallico"].includes(effetto))
+    : (materialId === "monolith_spatolato" && ["materico", "corten"].includes(effetto));
+  const effettoAddon = (effettoOk && EFFETTO_TEXTURE[effetto]) ? EFFETTO_TEXTURE[effetto] : "";
   const PARQUET_POSA_DESC = {
     cassero_regolare: "posa a cassero regolare: tavole lunghe in file parallele, con i giunti di testa sfalsati a passo costante (ogni fila spostata di metà tavola rispetto alla precedente)",
     cassero_irregolare: "posa a cassero irregolare (a correre): tavole in file parallele con i giunti di testa sfalsati in modo casuale, lunghezze delle tavole variabili",
@@ -420,7 +430,7 @@ module.exports = async function handler(req, res) {
   // già descritto in EFFETTO_TEXTURE.corten): il cliente non sceglie un colore
   // per questo effetto, quindi il colore non entra nella descrizione — solo la
   // texture/pattern Corten, aggiunta separatamente più sotto via effettoAddon.
-  const isCortenStyled = EFFETTO_MATERIALS.includes(materialId) && effetto === "corten";
+  const isCortenStyled = effettoOk && effetto === "corten";
 
   // Costruzione del prompt descrittivo per il modello di editing immagine.
   const colorDesc = isCortenStyled
@@ -555,13 +565,14 @@ module.exports = async function handler(req, res) {
   // CAMPIONE VIRTUALE (resina spatolata, scale, microcemento): texture reale
   // ricolorata nel colore scelto. Nel prompt è descritto per contenuto e non per
   // posizione, perché altre note parlano dell'"ULTIMA immagine".
+  const sampleIsMicro = materialId === "microcemento" || (materialId === "scale" && scaleTipoOk === "microcemento");
   const sampleClean = (typeof materialSampleImage === "string" && materialSampleImage.length < 1_500_000 && /^(monolith_spatolato|scale|microcemento|graniglia_esterni)$/.test(String(materialId || "")))
     ? materialSampleImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
   const sampleNote = (sampleClean && materialId === "graniglia_esterni")
     ? ` CAMPIONE DELLA GRANIGLIA: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO fotografato dall'alto (solo sassolini, senza ambiente): è la graniglia REALE scelta dal cliente (${colorA || ""}). Sulla pavimentazione da rifare usa ESATTAMENTE quei sassolini: stessi colori e stesse proporzioni tra i colori, stessa forma (arrotondata o spigolosa), stessa lucentezza e stessa densità, legati in resina trasparente. Scala reale: ogni sassolino misura pochi millimetri (circa 2-6 mm), quindi da lontano la superficie appare come una grana fine e fitta e i singoli sassolini si distinguono solo vicino all'obiettivo. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine e non ripeterlo come una piastrella.${colorB ? " Il campione riguarda il colore principale; per l'altro colore segui il nome e il colore indicati." : ""}`
     : sampleClean
-    ? ` CAMPIONE DEL MATERIALE: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO ravvicinato del materiale (solo una superficie piena, senza stanza né oggetti). È un campione reale di ${materialId === "microcemento" ? "microcemento" : "resina spatolata"} nel colore esatto scelto dal cliente${colorAHex ? " (" + colorAHex + ")" : ""}. Sulla superficie da trattare riproduci la STESSA texture del campione (${materialId === "microcemento" ? "velature e nuvolature morbide del frattazzo, DELICATE e sfumate: non accentuare i segni e non trasformarli in archi o ventagli evidenti" : "segni ad arco della spatola, nuvolature, leggere variazioni di tono, grana"}) e lo STESSO colore medio, adattati alla prospettiva, alla luce della foto e alla scala reale (i segni della spatola sono ampi 20-40 cm, non piccoli e ripetuti). La luce e i riflessi della stanza modificano il colore in modo naturale, ma la tinta di base deve restare quella del campione: non schiarirla, non scurirla e non cambiarne la tonalità. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine, non incollarlo come riquadro e non ripetere il suo disegno come una piastrella.`
+    ? ` CAMPIONE DEL MATERIALE: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO ravvicinato del materiale (solo una superficie piena, senza stanza né oggetti). È un campione reale di ${sampleIsMicro ? "microcemento" : "resina spatolata"} nel colore esatto scelto dal cliente${colorAHex ? " (" + colorAHex + ")" : ""}. Sulla superficie da trattare riproduci la STESSA texture del campione (${sampleIsMicro ? "velature e nuvolature morbide del frattazzo, DELICATE e sfumate: non accentuare i segni e non trasformarli in archi o ventagli evidenti" : "segni ad arco della spatola, nuvolature, leggere variazioni di tono, grana"}) e lo STESSO colore medio, adattati alla prospettiva, alla luce della foto e alla scala reale (i segni della spatola sono ampi 20-40 cm, non piccoli e ripetuti). La luce e i riflessi della stanza modificano il colore in modo naturale, ma la tinta di base deve restare quella del campione: non schiarirla, non scurirla e non cambiarne la tonalità. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine, non incollarlo come riquadro e non ripetere il suo disegno come una piastrella.`
     : "";
   const colorCardClean = (typeof colorCardImage === "string" && colorCardImage.length < 2_000_000)
     ? colorCardImage.replace(/^data:image\/\w+;base64,/, "")
