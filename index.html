@@ -77,6 +77,8 @@
   .sf-photo img{ display:block; width:100%; max-height:52vh; object-fit:cover; }
   .sf-upload{ display:flex; align-items:center; justify-content:center; gap:8px; padding:18px; border-radius:16px; border:2px dashed var(--accent); color:var(--accent); font-weight:800; font-size:17px; cursor:pointer; margin-bottom:10px; }
   .sf-note{ font-size:13px; color:var(--ink-soft); text-align:center; }
+  .sf-topback{ font:inherit; display:inline-flex; align-items:center; gap:4px; background:none; border:1px solid var(--line); color:var(--ink); border-radius:999px; padding:8px 14px; font-size:14px; font-weight:700; cursor:pointer; margin:0 0 10px; }
+  body:not(.sf-mode) .sf-only{ display:none !important; }
   .sf-adv-btn{ font:inherit; width:100%; text-align:left; margin:0 0 14px; padding:12px 14px; border-radius:12px; border:1px dashed var(--line); background:var(--surface); color:var(--ink); font-weight:700; font-size:14px; cursor:pointer; }
   body.sf-adv-open .sf-adv-btn{ border-color:var(--accent); color:var(--accent); }
   @media (min-width:720px){ .sf-cards{ grid-template-columns:repeat(3,1fr); } }
@@ -1122,6 +1124,7 @@
 
   <!-- 1: CATEGORIA -->
   <section class="panel" id="panelSimple">
+    <button type="button" class="sf-topback" data-sfback="1">‹ Indietro</button>
     <h1 class="title" id="sfTitle">Fotografa la stanza</h1>
     <p class="sf-sub" id="sfSub"></p>
     <div id="sfBody"></div>
@@ -1147,6 +1150,7 @@
 
   <!-- 3: COLORE -->
   <section class="panel" id="panelColor">
+    <button type="button" class="sf-topback sf-only" data-sfback="1">‹ Indietro</button>
     <h1 class="title" data-i18n="panelColorTitle">Scegli il colore</h1>
     <button type="button" class="sf-adv-btn" id="sfAdvBtn" hidden>⚙️ Opzioni avanzate</button>
     <div id="sfFinBox" hidden>
@@ -1444,6 +1448,7 @@
 
   <!-- 5: CARICA FOTO -->
   <section class="panel" id="panelPhoto">
+    <button type="button" class="sf-topback sf-only" data-sfback="1">‹ Indietro</button>
     <h1 class="title" data-i18n="panelPhotoTitle">Carica la foto del tuo ambiente</h1>
     <div class="hero" id="heroPhoto">
       <img id="photoPreviewImg" style="display:none; position:absolute; inset:0; width:100%; height:100%; object-fit:cover;" alt="Foto caricata" data-i18n-alt="photoUploadedAlt">
@@ -9444,6 +9449,7 @@
   document.getElementById('panelSimple').addEventListener('click', function(e){
     var j = e.target.closest('[data-sfjump]'); if(j){ sfGo(j.dataset.sfjump); }
   });
+  document.addEventListener('click', function(e){ if(e.target.closest('[data-sfback]')){ var bs = document.getElementById('backStep'); if(bs) bs.click(); } });
   document.getElementById('sfAdvBtn').addEventListener('click', function(){ document.body.classList.toggle('sf-adv-open'); });
   document.getElementById('sfFinControl').addEventListener('click', function(e){
     var b = e.target.closest('button'); if(!b) return;
