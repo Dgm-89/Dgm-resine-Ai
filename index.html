@@ -52,6 +52,34 @@
     -webkit-font-smoothing:antialiased;
   }
 
+  /* ---- Rendrum semplice ---- */
+  body.sf-mode .sf-hide{ display:none !important; }
+  body.sf-mode:not(.sf-adv-open) .sf-adv{ display:none !important; }
+  body:not(.sf-mode) #sfAdvBtn, body:not(.sf-mode) #sfFinBox{ display:none !important; }
+  .sf-sub{ color:var(--ink-soft); font-size:15px; line-height:1.45; margin:-8px 0 16px; }
+  .sf-sub:empty{ display:none; }
+  .sf-recap{ display:flex; gap:10px; align-items:center; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:8px; margin-bottom:16px; }
+  .sf-recap img{ width:52px; height:52px; object-fit:cover; border-radius:10px; flex:none; }
+  .sf-chips{ display:flex; flex-wrap:wrap; gap:6px; min-width:0; }
+  .sf-chip{ font:inherit; font-size:13px; padding:5px 10px; border-radius:999px; background:var(--accent-soft); border:1px solid var(--line); color:var(--ink); cursor:pointer; }
+  .sf-chip.empty{ color:var(--ink-soft); border-style:dashed; cursor:default; background:none; }
+  .sf-cards{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .sf-card{ font:inherit; background:var(--surface); border:2px solid var(--line); border-radius:18px; padding:10px; text-align:left; color:var(--ink); cursor:pointer; display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .sf-card.sel{ border-color:var(--accent); }
+  .sf-card:focus-visible, .sf-help:focus-visible, .sf-upload:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
+  .sf-card b{ font-size:16px; line-height:1.25; }
+  .sf-card span{ font-size:13px; color:var(--ink-soft); line-height:1.35; }
+  .sf-pic{ aspect-ratio:4/3; max-width:100%; border-radius:12px; overflow:hidden; display:grid; place-items:center; background:var(--surface); }
+  .sf-pic svg{ width:100%; height:100%; display:block; }
+  .sf-pic .sf-ico svg{ width:46px; height:46px; }
+  .sf-help{ font:inherit; margin-top:14px; background:none; border:none; color:var(--accent); font-weight:700; font-size:15px; cursor:pointer; padding:8px 0; }
+  .sf-photo{ border-radius:16px; overflow:hidden; border:1px solid var(--line); margin-bottom:12px; }
+  .sf-photo img{ display:block; width:100%; max-height:52vh; object-fit:cover; }
+  .sf-upload{ display:flex; align-items:center; justify-content:center; gap:8px; padding:18px; border-radius:16px; border:2px dashed var(--accent); color:var(--accent); font-weight:800; font-size:17px; cursor:pointer; margin-bottom:10px; }
+  .sf-note{ font-size:13px; color:var(--ink-soft); text-align:center; }
+  .sf-adv-btn{ font:inherit; width:100%; text-align:left; margin:0 0 14px; padding:12px 14px; border-radius:12px; border:1px dashed var(--line); background:var(--surface); color:var(--ink); font-weight:700; font-size:14px; cursor:pointer; }
+  body.sf-adv-open .sf-adv-btn{ border-color:var(--accent); color:var(--accent); }
+  @media (min-width:720px){ .sf-cards{ grid-template-columns:repeat(3,1fr); } }
   /* ---- Solo dentro l'app iPhone/Android (classe is-app) ---- */
   html.is-app{ padding-top:0; }
   html.is-app #splashScreen{ display:none !important; }
@@ -1093,6 +1121,12 @@
   </section>
 
   <!-- 1: CATEGORIA -->
+  <section class="panel" id="panelSimple">
+    <h1 class="title" id="sfTitle">Fotografa la stanza</h1>
+    <p class="sf-sub" id="sfSub"></p>
+    <div id="sfBody"></div>
+  </section>
+
   <section class="panel" id="panel1">
     <div id="layerBanner" hidden style="margin:0 0 14px;padding:10px 12px;border-radius:10px;background:var(--accent-soft);font-size:13.5px;line-height:1.4">📐 <span id="layerBannerText"></span> Scegli la prossima lavorazione (es. pareti, soffitto).</div>
     <h1 class="title" data-i18n="panel1Title">Cosa vuoi realizzare?</h1>
@@ -1114,6 +1148,11 @@
   <!-- 3: COLORE -->
   <section class="panel" id="panelColor">
     <h1 class="title" data-i18n="panelColorTitle">Scegli il colore</h1>
+    <button type="button" class="sf-adv-btn" id="sfAdvBtn" hidden>⚙️ Opzioni avanzate</button>
+    <div id="sfFinBox" hidden>
+      <div class="section-label">Finitura</div>
+      <div class="seg-control" id="sfFinControl"><button data-v="opaco">Opaco</button><button data-v="satinato" class="active">Satinato</button><button data-v="lucido">Lucido</button></div>
+    </div>
 
     <div class="section-label" id="contextLabel" style="display:none" data-i18n="contextLabel">Ambiente</div>
     <div class="seg-control" id="contextControl" style="display:none">
@@ -1336,7 +1375,8 @@
     <div class="seg-control" id="scaleTipoControl" style="display:none">
       <button data-v="resina" class="active">Resina</button>
       <button data-v="microcemento">Microcemento</button>
-      <button data-v="decorativi">Effetti decorativi</button>
+      <button data-v="piastrelle">Piastrelle</button>
+      <button data-v="parquet">Parquet</button>
     </div>
     <div class="seg-hint" id="scaleTipoHint" style="display:none"></div>
     <div class="section-label" id="effettoLabel" style="display:none" data-i18n="effettoLabel">Effetto superficie</div>
@@ -1348,6 +1388,7 @@
     <!-- Sotto-scelta visibile solo quando è selezionato "Effetti particolari": qui vivono
          Materico e Corten, entrambe finiture non lisce/non a tinta piatta scelta dal cliente. -->
     <div class="seg-control" id="effettoParticolareControl" style="display:none">
+      <button data-v="liscio" class="fx-scale">Liscio</button>
       <button data-v="marmo" class="fx-scale">Marmo</button>
       <button data-v="materico" class="active" data-i18n="btnMaterico">Materico</button>
       <button data-v="corten" data-i18n="btnCorten">Corten</button>
@@ -1912,7 +1953,7 @@
       { id:"monolith_terrazzo", name:"Effetto Terrazzo", nameEn:"Terrazzo Effect", desc:"Resina con graniglie effetto terrazzo — solo per pavimenti interni", descEn:"Resin with terrazzo-effect aggregates — floors only, indoor", swatch:"#8B8D89", floorOnly:true }
     ]},
     { id:"microcemento", name:"Microcemento", nameEn:"Microcement", desc:"Superfici continue, effetto materico", descEn:"Seamless surfaces, textured effect", swatch:"#8F8B82" },
-    { id:"scale", name:"Scale", nameEn:"Stairs", desc:"Scale interne ed esterne in resina, microcemento o con effetti decorativi (marmo, materico, corten, metallico)", descEn:"Indoor and outdoor stairs in resin, microcement or decorative effects (marble, textured, corten, metallic)", swatch:"#9C9186" },
+    { id:"scale", name:"Scale", nameEn:"Stairs", desc:"Scale interne ed esterne in resina, microcemento, piastrelle o parquet", descEn:"Indoor and outdoor stairs in resin, microcement, tiles or parquet", swatch:"#9C9186" },
     { id:"imbiancatura", name:"Imbiancatura", nameEn:"Painting", desc:"Interventi civili e industriali", descEn:"Residential and industrial painting work", swatch:"#D6D2C8" },
     { id:"decorazioni", hidden:true, name:"Decorazioni", nameEn:"Decorations", desc:"Finiture e boiserie su misura", descEn:"Custom finishes and boiserie panelling", swatch:"#B5652E" },
     { id:"resina_haccp", name:"Resina Industriale HACCP", nameEn:"HACCP Industrial Resin", desc:"Pavimenti resistenti e certificati per cucine professionali e industria alimentare", descEn:"Certified, resistant flooring for professional kitchens and the food industry", swatch:"#E9E7DE", professionistiOnly:true },
@@ -6049,6 +6090,14 @@
       {name:"Cool Graphite", hex:"#756E6C", code:"S27", family:"Pandomo Studio", coll:"Pandomo Studio", line:"pandomo"}, {name:"Elegant Anthracite", hex:"#635C5B", code:"S28", family:"Pandomo Studio", coll:"Pandomo Studio", line:"pandomo"},
       {name:"Calm Stone", hex:"#453F3D", code:"S29", family:"Pandomo Studio", coll:"Pandomo Studio", line:"pandomo"}, {name:"Warm Slate", hex:"#2A2526", code:"S30", family:"Pandomo Studio", coll:"Pandomo Studio", line:"pandomo"}
     ],
+    // Resina industriale HACCP: tinte RAL più usate nelle cucine professionali.
+    resina_haccp: [
+      {name:"Bianco", hex:"#EDEBE4", code:"RAL 9010"}, {name:"Grigio luce", hex:"#C5C7C4", code:"RAL 7035"},
+      {name:"Grigio finestra", hex:"#9DA3A6", code:"RAL 7040"}, {name:"Grigio sabbia", hex:"#B5B0A1", code:"RAL 7032"},
+      {name:"Beige", hex:"#D0B084", code:"RAL 1001"},
+      {name:"Verde reseda", hex:"#587246", code:"RAL 6011"}, {name:"Rosso ossido", hex:"#703731", code:"RAL 3009"},
+      {name:"Grigio antracite", hex:"#383E42", code:"RAL 7016"}
+    ],
     // Scale usa gli stessi colori/effetti di Monolith Spatolato (richiesta esplicita).
     scale: MONOLITH_CHART,
     // Scale, effetto metallico: tinte metallizzate (indicative).
@@ -6571,11 +6620,12 @@
     metallico: { it:"Pigmenti metallici con riflessi cangianti e nuvolature di luce.", en:"Metallic pigments with shimmering reflections and clouds of light." },
   };
   var EFFETTO_LABEL = { liscio:{it:'Liscio uniforme', en:'Uniform smooth'}, materico:{it:'Materico', en:'Textured'}, corten:{it:'Corten', en:'Corten'}, marmo:{it:'Marmo', en:'Marble'}, metallico:{it:'Metallico', en:'Metallic'} };
-  var SCALE_TIPO = { resina:{it:'Resina', en:'Resin'}, microcemento:{it:'Microcemento', en:'Microcement'}, decorativi:{it:'Effetti decorativi', en:'Decorative effects'} };
+  var SCALE_TIPO = { resina:{it:'Resina', en:'Resin'}, microcemento:{it:'Microcemento', en:'Microcement'}, piastrelle:{it:'Piastrelle', en:'Tiles'}, parquet:{it:'Parquet', en:'Parquet'} };
   var SCALE_TIPO_HINT = {
-    resina:{it:'Resina spatolata liscia, superficie continua e uniforme su pedate e alzate.', en:'Smooth trowelled resin, continuous surface on treads and risers.'},
-    microcemento:{it:'Microcemento con i colori ARDEX Pandomo o NCS, superficie continua e naturale.', en:'Microcement in ARDEX Pandomo or NCS colours, natural seamless surface.'},
-    decorativi:{it:'Finiture speciali: marmo, materico, corten o metallico.', en:'Special finishes: marble, textured, corten or metallic.'}
+    resina:{it:'Resina spatolata su pedate e alzate: liscia oppure con effetto marmo, materico, corten o metallico.', en:'Trowelled resin on treads and risers: smooth or marble, textured, corten, metallic.'},
+    microcemento:{it:'Microcemento con i colori ARDEX Pandomo, Sikkens o NCS.', en:'Microcement in ARDEX Pandomo, Sikkens or NCS colours.'},
+    piastrelle:{it:'Piastrelle in gres su pedate e alzate, con gradino rifinito.', en:'Porcelain tiles on treads and risers.'},
+    parquet:{it:'Legno su pedate e alzate, con naso del gradino in legno.', en:'Wood on treads and risers.'}
   };
   var FINITURA_HINT = {
     opaco: { it:"Superficie piena, senza riflessi.", en:"Full surface, no reflections." },
@@ -6793,7 +6843,8 @@
     if(sc){
       Array.prototype.forEach.call(document.getElementById('scaleTipoControl').children, function(b){ b.classList.toggle('active', b.dataset.v === state.scaleTipo); });
       document.getElementById('scaleTipoHint').textContent = tr(SCALE_TIPO_HINT[state.scaleTipo]);
-      if(state.scaleTipo === 'decorativi'){ if(['marmo','materico','corten','metallico'].indexOf(state.effetto) < 0) state.effetto = 'marmo'; }
+      if(state.scaleTipo === 'decorativi') state.scaleTipo = 'resina';
+      if(state.scaleTipo === 'resina'){ if(['liscio','marmo','materico','corten','metallico'].indexOf(state.effetto) < 0) state.effetto = 'liscio'; }
       else state.effetto = 'liscio';
     } else if(state.effetto === 'marmo' || state.effetto === 'metallico') state.effetto = 'liscio';
     Array.prototype.forEach.call(document.querySelectorAll('#effettoParticolareControl .fx-scale'), function(b){ b.style.display = sc ? '' : 'none'; });
@@ -6809,7 +6860,7 @@
       Array.prototype.forEach.call(document.getElementById('effettoControl').children, function(b){ b.classList.toggle('active', b.dataset.v===group); });
       document.getElementById('effettoHint').textContent = tr(EFFETTO_HINT[group === 'particolare' ? state.effetto : 'liscio']);
     }
-    var showSub = (show && group === 'particolare') || (sc && state.scaleTipo === 'decorativi');
+    var showSub = (show && group === 'particolare') || (sc && state.scaleTipo === 'resina');
     document.getElementById('effettoLabel').style.display = (show || showSub) ? 'block' : 'none';
     document.getElementById('effettoParticolareControl').style.display = showSub ? 'flex' : 'none';
     document.getElementById('effettoParticolareHint').style.display = showSub ? 'block' : 'none';
@@ -6841,7 +6892,7 @@
   function syncColorCatalogVisibility(){
     var baseBtn = document.querySelector('#colorCatalogControl [data-v="base"]');
     if(baseBtn) baseBtn.textContent = (state.material && (state.material.id === 'microcemento' || (state.material.id === 'scale' && state.scaleTipo === 'microcemento'))) ? 'ARDEX Pandomo' : ts('btnCatalogoBase');
-    var show = state.material && (NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1 || (state.material.id === 'imbiancatura' && state.context !== 'esterno')) && !isCortenActive() && !(isScale() && state.effetto === 'metallico');
+    var show = state.material && (NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1 || (state.material.id === 'imbiancatura' && state.context !== 'esterno')) && !isCortenActive() && !(isScale() && (state.effetto === 'metallico' || state.scaleTipo === 'piastrelle' || state.scaleTipo === 'parquet'));
     document.getElementById('colorCatalogLabel').style.display = show ? 'block' : 'none';
     document.getElementById('colorCatalogControl').style.display = show ? 'flex' : 'none';
     document.getElementById('colorCatalogHint').style.display = show ? 'block' : 'none';
@@ -7345,7 +7396,7 @@
       if(m === 'graniglia_esterni') return (state.colorA && state.colorA.img) || null;
       if(m !== 'monolith_spatolato' && m !== 'scale' && m !== 'microcemento') return null;
       if(state.effetto === 'corten') return null;
-      if(m === 'scale' && (state.effetto === 'marmo' || state.effetto === 'metallico')) return null;
+      if(m === 'scale' && (state.effetto === 'marmo' || state.effetto === 'metallico' || state.scaleTipo === 'piastrelle' || state.scaleTipo === 'parquet')) return null;
       var hex = apiHex(state.colorA);
       if(!/^#?[0-9a-f]{6}$/i.test(hex || '')) return null;
       var isMicro = m === 'microcemento' || (m === 'scale' && state.scaleTipo === 'microcemento');
@@ -7682,6 +7733,7 @@
     prev.src = photoImg.src; prev.style.display = 'block';
     document.getElementById('templateSection').style.display = 'none';
     document.getElementById('toggleTemplates').style.display = 'block';
+    if(typeof SF_ON !== 'undefined' && SF_ON && currentPanel === 'panelSimple' && SF.step === 'foto'){ sfRender(); setTimeout(function(){ if(currentPanel === 'panelSimple' && SF.step === 'foto') sfNext(); }, 700); }
   }
 
   document.getElementById('toggleTemplates').addEventListener('click', function(){
@@ -7955,7 +8007,7 @@
     if(!state.material) return null;
     var id = state.material.id;
     if(id==='imbiancatura') return state.context==='esterno' ? (ph==='T' ? null : 'pittura') : 'pittura';
-    if(id==='scale') return state.scaleTipo==='microcemento' ? 'micro_reale' : (state.scaleTipo==='decorativi' && state.effetto==='marmo') ? 'marmo' : 'resina_reale';
+    if(id==='scale') return state.scaleTipo==='microcemento' ? 'micro_reale' : state.scaleTipo==='piastrelle' ? 'piastrelle' : state.scaleTipo==='parquet' ? 'parquet' : (state.effetto==='marmo') ? 'marmo' : 'resina_reale';
     return ({monolith_spatolato:'resina_reale', scale:'resina_reale', monolith_marmo:'marmo', monolith_terrazzo:'terrazzo', monolith_pietra:'pietra',
              microcemento:'micro_reale', decorazioni:'pittura', resina_haccp:'resina', parquet:'parquet', spc:'parquet', laminato:'parquet', piastrelle:'piastrelle'})[id] || null;
   }
@@ -8354,6 +8406,8 @@
       label.textContent = ts('clusterLabelSerramenti');
     } else if(pickPhase==='H'){
       label.textContent = ts('clusterLabelRighe');
+    } else if(state.material && state.material.id === 'graniglia_esterni' && needsSecondColor() && (pickPhase === 'A' || pickPhase === 'B')){
+      label.textContent = pickPhase === 'A' ? 'Graniglia principale' : 'Graniglia del bordo';
     } else if(needsThirdColor()){
       label.textContent = tr(PHASE_LABEL_3[pickPhase]);
     } else if(needsSecondColor()){
@@ -8373,7 +8427,7 @@
       if(stepIdx > 0) label.textContent += ' (' + stepIdx + ' ' + (LANG==='en' ? 'of' : 'di') + ' ' + coreOrder.length + ')';
     }
     var paletteKey = state.material.id;
-    if(paletteKey === 'scale'){ if(state.scaleTipo === 'microcemento') paletteKey = 'microcemento'; else if(state.scaleTipo === 'decorativi' && state.effetto === 'metallico') paletteKey = 'metallico'; }
+    if(paletteKey === 'scale'){ paletteKey = state.scaleTipo === 'microcemento' ? 'microcemento' : state.scaleTipo === 'piastrelle' ? 'piastrelle' : state.scaleTipo === 'parquet' ? 'parquet' : state.effetto === 'metallico' ? 'metallico' : 'scale'; }
     if(paletteKey === 'imbiancatura' && state.context === 'esterno') paletteKey = 'imbiancatura_esterni';
     // Serramenti: palette fissa (4 colori indicativi), indipendente dal
     // materiale/catalogo in corso, quindi la forziamo qui.
@@ -8612,7 +8666,7 @@
   document.getElementById('scaleTipoControl').addEventListener('click', function(e){
     var btn = e.target.closest('button'); if(!btn || btn.dataset.v === state.scaleTipo) return;
     state.scaleTipo = btn.dataset.v;
-    state.effetto = state.scaleTipo === 'decorativi' ? 'marmo' : 'liscio';
+    state.effetto = 'liscio';
     // cambiano i colori disponibili: azzera la scelta
     state.colorA=null; state.colorB=null; pickPhase='A'; familyFilter=null; colorSearchQuery=''; state.colorCatalog='base';
     document.getElementById('colorSearch').value='';
@@ -9176,8 +9230,235 @@
   // Sequenza: 1 Categoria -> (2 Sotto-materiale, solo se la categoria ha "subs") ->
   // 3 Colore -> 4 Finitura -> 5 Carica foto -> 6 Risultato -> 7 Dati -> Confirm.
   function noFinitura(){ return !!(state.material && ['piastrelle','parquet','spc','laminato'].indexOf(state.material.id) > -1); }
-  var ALL_PANELS = ['panelLanding','panel1','panelResinaArea','panelSub','panelColor','panelFinitura','panelPhoto','panelResult','panel3','panelConfirm'];
+  // =====================================================================
+  // RENDRUM SEMPLICE: foto, poi una domanda per schermata, poi il colore.
+  // Usa lo stesso stato e le stesse funzioni del percorso classico (che resta
+  // disponibile con ?classico=1 per tornare indietro in un attimo).
+  // =====================================================================
+  var SF_ON = (function(){ try{ var q = new URLSearchParams(location.search).get('classico'); if(q === '1') sessionStorage.setItem('rdClassico','1'); if(q === '0') sessionStorage.removeItem('rdClassico'); return sessionStorage.getItem('rdClassico') !== '1'; }catch(e){ return true; } })();
+  if(SF_ON) document.body.classList.add('sf-mode');
+  var SF = { step:'foto', mat:null };
+  function sfCat(id){ for(var i=0;i<CATEGORIES.length;i++){ if(CATEGORIES[i].id === id) return i; } return -1; }
+  function sfSelectCat(id){ var i = sfCat(id); if(i > -1 && materialGrid.children[i]) materialGrid.children[i].click(); }
+  function sfCatId(){ return state.category ? state.category.id : null; }
+  // Materiali mostrati al cliente (parquet, SPC e laminato raggruppati in "Pavimenti in legno")
+  function sfMats(){
+    var pro = state.userType === 'professionista';
+    var L = [
+      { v:'monolith', n:'Resina', d:'Pavimenti e pareti senza fughe' },
+      { v:'microcemento', n:'Microcemento', d:'Colori ARDEX Pandomo e Sikkens' },
+      { v:'piastrelle', n:'Piastrelle', d:'Pavimenti, pareti e docce' },
+      { v:'imbiancatura', n:'Pittura', d:'Pareti e soffitti, interni ed esterni' },
+      { v:'legno', n:'Pavimenti in legno', d:'Parquet, SPC o laminato', cat:'parquet' },
+      { v:'scale', n:'Scale', d:'Resina, microcemento, piastrelle o parquet' },
+      { v:'graniglia_esterni', n:'Graniglia per esterni', d:'Vialetti, terrazzi, bordi piscina' }
+    ];
+    if(pro) L.push({ v:'resina_haccp', n:'Resina HACCP', d:'Cucine professionali e industria' });
+    return L.map(function(m){ var st = CATEGORY_STYLE[m.cat || m.v] || {}; m.bg = st.bg; m.icon = st.icon || ''; return m; });
+  }
+  function sfSteps(){
+    var s = ['foto', 'mat'], c = SF.mat;
+    if(c === 'monolith') s.push('dove', 'resEff');
+    else if(c === 'microcemento') s.push('dove');
+    else if(c === 'piastrelle'){ s.push('piaDove'); if(state.piaDove === 'riv'){ s.push('piaAlt', 'piaDoccia', 'piaRivTile'); if(state.piaDoccia === 'si') s.push('piaDocTile'); } }
+    else if(c === 'imbiancatura') s.push('ctx');
+    else if(c === 'legno') s.push('legnoTipo');
+    else if(c === 'scale') s.push('scaleMat');
+    else if(c === 'graniglia_esterni') s.push('granLayout');
+    return s;
+  }
+  function sfAnswered(st){
+    switch(st){
+      case 'foto': return !!photoImg;
+      case 'mat': return !!SF.mat && !!state.category;
+      case 'dove': return !!state.resinaArea;
+      case 'resEff': return !!state.material;
+      case 'piaDove': return !!SF.a.piaDove; case 'piaAlt': return !!SF.a.piaAlt; case 'piaDoccia': return !!SF.a.piaDoccia;
+      case 'piaRivTile': return !!SF.a.piaRivTile; case 'piaDocTile': return !!SF.a.piaDocTile;
+      case 'ctx': return !!SF.a.ctx;
+      case 'legnoTipo': return !!state.material && ['parquet','spc','laminato'].indexOf(state.material.id) > -1;
+      case 'scaleMat': return !!SF.a.scaleMat;
+      case 'granLayout': return !!SF.a.granLayout;
+    }
+    return false;
+  }
+  SF.a = {};
+  function room(o){ // disegno semplice della stanza: pavimento/pareti/altezza/doccia
+    var acc = '#E0915A', wall = '#3A3129', fl = o.floor ? acc : '#2A231D';
+    var top = o.walls ? (o.h === '150' ? 52 : 10) : 90, side = o.h === '150' ? 50 : 0;
+    return '<svg viewBox="0 0 120 90" aria-hidden="true"><rect width="120" height="90" fill="#1F1A15"/>'
+      + '<polygon points="20,10 100,10 100,62 20,62" fill="#2A231D"/>'
+      + (o.walls ? '<polygon points="20,'+top+' 100,'+top+' 100,62 20,62" fill="'+acc+'" opacity=".85"/>' : '')
+      + '<polygon points="0,0 20,10 20,62 0,90" fill="'+wall+'"/>' + (o.walls ? '<polygon points="0,'+side+' 20,'+(o.h === '150' ? 52 : 10)+' 20,62 0,90" fill="'+acc+'" opacity=".7"/>' : '')
+      + '<polygon points="120,0 100,10 100,62 120,90" fill="'+wall+'"/>' + (o.walls ? '<polygon points="120,'+side+' 100,'+(o.h === '150' ? 52 : 10)+' 100,62 120,90" fill="'+acc+'" opacity=".7"/>' : '')
+      + '<polygon points="20,62 100,62 120,90 0,90" fill="'+fl+'"/>'
+      + (o.ceil ? '<polygon points="0,0 120,0 100,10 20,10" fill="'+acc+'" opacity=".6"/>' : '')
+      + (o.shower ? '<rect x="72" y="10" width="26" height="52" fill="#7FA7C9" opacity=".8"/><circle cx="85" cy="18" r="3" fill="#fff"/>' : '')
+      + (o.walls && o.h === '150' ? '<line x1="20" y1="52" x2="100" y2="52" stroke="#fff" stroke-width="1.2"/>' : '')
+      + (o.out ? '<rect x="0" y="0" width="120" height="40" fill="#5E7F99"/><polygon points="25,40 60,14 95,40" fill="#8C5A3C"/><rect x="30" y="40" width="60" height="40" fill="'+acc+'"/><rect x="52" y="56" width="16" height="24" fill="#2A231D"/>' : '')
+      + '</svg>';
+  }
+  function sfPic(bg, html){ return '<div class="sf-pic" style="background:'+(bg || 'var(--surface)')+'">'+html+'</div>'; }
+  function sfQ(st){
+    var catObj = state.category;
+    switch(st){
+      case 'mat': return { t:'Cosa vuoi rifare?', s:'Tocca il lavoro.', opts: sfMats().map(function(m){ return { v:m.v, n:m.n, d:m.d, pic:sfPic(m.bg, '<span class="sf-ico">'+m.icon+'</span>'), sel: SF.mat === m.v }; }) };
+      case 'dove': return { t: SF.mat === 'microcemento' ? 'Dove metti il microcemento?' : 'Dove metti la resina?', help:'pavimento', opts:[
+        { v:'pavimento', n:'Pavimento', pic:sfPic('', room({floor:1})), sel: state.resinaArea === 'pavimento' },
+        { v:'rivestimento', n:'Pareti', pic:sfPic('', room({walls:1, h:'tutta'})), sel: state.resinaArea === 'rivestimento' },
+        { v:'tutto', n:'Pavimento e pareti', d:'Tutto continuo, senza fughe', pic:sfPic('', room({floor:1, walls:1, h:'tutta'})), sel: state.resinaArea === 'tutto' } ] };
+      case 'resEff':
+        var subs = (catObj && catObj.subs || []).filter(function(x){ return !(state.resinaArea === 'rivestimento' && x.floorOnly) && !(state.resinaArea === 'tutto' && x.floorOnly); });
+        return { t:'Che effetto vuoi?', help:'monolith_spatolato', opts: subs.map(function(x){ var st = SUBMATERIAL_STYLE[x.id] || {}; return { v:x.id, n:x.name.replace(/^Effetto\s+/,''), d:x.desc, pic:sfPic(st.bg, '<span class="sf-ico">'+(st.icon||'')+'</span>'), sel: state.material && state.material.id === x.id }; }) };
+      case 'piaDove': return { t:'Dove metti le piastrelle?', help:'pav', opts:[
+        { v:'pav', n:'Solo pavimento', pic:sfPic('', room({floor:1})), sel: SF.a.piaDove === 'pav' },
+        { v:'riv', n:'Pavimento e pareti', d:'Bagni e cucine', pic:sfPic('', room({floor:1, walls:1, h:'150'})), sel: SF.a.piaDove === 'riv' } ] };
+      case 'piaAlt': return { t:'Fino a che altezza le pareti?', help:'150', opts:[
+        { v:'150', n:'Fino a 150 cm', d:'Sopra la parete resta com\'è', pic:sfPic('', room({floor:1, walls:1, h:'150'})), sel: SF.a.piaAlt === '150' },
+        { v:'tutta', n:'Fino al soffitto', pic:sfPic('', room({floor:1, walls:1, h:'tutta'})), sel: SF.a.piaAlt === 'tutta' } ] };
+      case 'piaDoccia': return { t:'C\'è una doccia?', s:'Dentro la doccia le piastrelle arrivano sempre al soffitto.', opts:[
+        { v:'no', n:'No', pic:sfPic('', room({floor:1, walls:1, h:state.piaAlt})), sel: SF.a.piaDoccia === 'no' },
+        { v:'si', n:'Sì', d:'Poi tocchi sulla foto dove si trova', pic:sfPic('', room({floor:1, walls:1, h:state.piaAlt, shower:1})), sel: SF.a.piaDoccia === 'si' } ] };
+      case 'piaRivTile': return { t:'Le pareti con la stessa piastrella del pavimento?', help:'uguale', opts:[
+        { v:'uguale', n:'Sì, uguale', pic:sfPic('', room({floor:1, walls:1, h:state.piaAlt})), sel: SF.a.piaRivTile === 'uguale' },
+        { v:'diversa', n:'No, un\'altra', d:'La scegli dopo il pavimento', pic:sfPic('linear-gradient(135deg,#E7E4DC,#9C9B95)', ''), sel: SF.a.piaRivTile === 'diversa' } ] };
+      case 'piaDocTile': return { t:'E dentro la doccia?', help:'uguale', opts:[
+        { v:'uguale', n:'Come le pareti', pic:sfPic('', room({floor:1, walls:1, h:state.piaAlt, shower:1})), sel: SF.a.piaDocTile === 'uguale' },
+        { v:'diversa', n:'Un\'altra piastrella', d:'Per esempio un mosaico', pic:sfPic('linear-gradient(135deg,#2B2B2B,#7FA7C9)', ''), sel: SF.a.piaDocTile === 'diversa' } ] };
+      case 'ctx': return { t:'Interno o esterno?', opts:[
+        { v:'interno', n:'Interno', d:'Pareti e soffitti di casa', pic:sfPic('', room({walls:1, h:'tutta', ceil:1})), sel: SF.a.ctx === 'interno' },
+        { v:'esterno', n:'Esterno', d:'Facciata della casa', pic:sfPic('', room({out:1})), sel: SF.a.ctx === 'esterno' } ] };
+      case 'legnoTipo': return { t:'Che pavimento in legno?', help:'parquet', opts:['parquet','spc','laminato'].map(function(id){ var c = CATEGORIES[sfCat(id)], st = CATEGORY_STYLE[id] || {}; return { v:id, n:c.name, d:c.desc.split('—')[0], pic:sfPic(st.bg, '<span class="sf-ico">'+(st.icon||'')+'</span>'), sel: state.material && state.material.id === id }; }) };
+      case 'scaleMat': return { t:'Con cosa rivesti la scala?', help:'resina', opts:[
+        { v:'resina', n:'Resina', d:'Anche marmo, materico, corten, metallico', pic:sfPic('linear-gradient(135deg,#8D949D,#5F666E)', ''), sel: SF.a.scaleMat === 'resina' },
+        { v:'microcemento', n:'Microcemento', d:'Colori ARDEX Pandomo', pic:sfPic('linear-gradient(135deg,#A08E7F,#6F6258)', ''), sel: SF.a.scaleMat === 'microcemento' },
+        { v:'piastrelle', n:'Piastrelle', d:'Gres su pedate e alzate', pic:sfPic('linear-gradient(135deg,#C7C6C0,#8E9299)', ''), sel: SF.a.scaleMat === 'piastrelle' },
+        { v:'parquet', n:'Parquet', d:'Legno su pedate e alzate', pic:sfPic('linear-gradient(135deg,#C7A876,#8C6A3F)', ''), sel: SF.a.scaleMat === 'parquet' } ] };
+      case 'granLayout': return { t:'Un colore o con bordo?', help:'unico', opts:[
+        { v:'unico', n:'Un solo colore', pic:sfPic('linear-gradient(135deg,#B7AC9F,#8C8375)', ''), sel: SF.a.granLayout === 'unico' },
+        { v:'bordo', n:'Con bordo di un altro colore', pic:sfPic('radial-gradient(circle,#B7AC9F 55%,#494440 56%)', ''), sel: SF.a.granLayout === 'bordo' } ] };
+    }
+    return null;
+  }
+  function sfPiaApply(){
+    if(!(piaRiv() && state.piaRivTile === 'diversa')) state.colorB = null;
+    if(!needsDocciaColor()) state.colorDoccia = null;
+    if(!showerActive()) state.accentoPoint = null;
+    var order = phaseOrder(); pickPhase = 'A';
+    for(var i=0;i<order.length;i++){ if(!colorForPhase(order[i])){ pickPhase = order[i]; break; } }
+  }
+  function sfApply(st, v){
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    if(st === 'mat'){
+      if(SF.mat !== v || !state.category){ SF.a = {}; }
+      SF.mat = v;
+      sfSelectCat(v === 'legno' ? 'parquet' : v);
+      if(v === 'legno'){ state.material = null; }
+      if(v === 'microcemento' || v === 'monolith'){ state.resinaArea = null; }
+      return;
+    }
+    if(st === 'dove'){ state.resinaArea = v; if(SF.mat === 'monolith'){ state.material = null; } return; }
+    if(st === 'resEff'){
+      var sub = (state.category.subs || []).filter(function(x){ return x.id === v; })[0];
+      if(sub){ state.material = sub; resetSelectionForNewCategory(); }
+      return;
+    }
+    if(st === 'piaDove'){ SF.a.piaDove = v; state.piaDove = v; if(v === 'pav'){ delete SF.a.piaAlt; delete SF.a.piaDoccia; delete SF.a.piaRivTile; delete SF.a.piaDocTile; state.piaDoccia = 'no'; } sfPiaApply(); return; }
+    if(st === 'piaAlt'){ SF.a.piaAlt = v; state.piaAlt = v; return; }
+    if(st === 'piaDoccia'){ SF.a.piaDoccia = v; state.piaDoccia = v; if(v === 'no') delete SF.a.piaDocTile; sfPiaApply(); return; }
+    if(st === 'piaRivTile'){ SF.a.piaRivTile = v; state.piaRivTile = v; sfPiaApply(); return; }
+    if(st === 'piaDocTile'){ SF.a.piaDocTile = v; state.piaDocciaTile = v; if(v === 'diversa') state.piaFmtDoccia = 'mosaico'; sfPiaApply(); return; }
+    if(st === 'ctx'){ SF.a.ctx = v; var cards = subGrid.children; if(cards[v === 'interno' ? 0 : 1]) cards[v === 'interno' ? 0 : 1].click(); return; }
+    if(st === 'legnoTipo'){ sfSelectCat(v); return; }
+    if(st === 'scaleMat'){ SF.a.scaleMat = v; state.scaleTipo = v; state.effetto = 'liscio'; state.colorA = null; state.colorB = null; familyFilter = null; colorSearchQuery = ''; state.colorCatalog = 'base'; return; }
+    if(st === 'granLayout'){ SF.a.granLayout = v; var gc = subGrid.children; if(gc[v === 'unico' ? 0 : 1]) gc[v === 'unico' ? 0 : 1].click(); return; }
+  }
+  function sfLabel(st){
+    var q = sfQ(st); if(!q) return '';
+    var o = q.opts.filter(function(x){ return x.sel; })[0];
+    return o ? o.n : '';
+  }
+  function sfRecap(){
+    var chips = [];
+    sfSteps().forEach(function(st){ if(st === 'foto' || !sfAnswered(st)) return; var l = sfLabel(st); if(l) chips.push('<button type="button" class="sf-chip" data-sfjump="'+st+'">'+l+'</button>'); });
+    return '<div class="sf-recap">' + (photoImg ? '<img src="'+photoImg.src+'" alt="La tua foto">' : '') + '<div class="sf-chips">' + (chips.length ? chips.join('') : '<span class="sf-chip empty">Le tue scelte compaiono qui</span>') + '</div></div>';
+  }
+  function sfRender(){
+    if(!SF_ON) return;
+    var body = document.getElementById('sfBody'); if(!body) return;
+    var st = SF.step, html = '';
+    if(st === 'foto'){
+      document.getElementById('sfTitle').textContent = 'Fotografa la stanza';
+      document.getElementById('sfSub').textContent = 'Una foto dritta, con la luce accesa. Va bene quella del telefono.';
+      html = (photoImg ? '<div class="sf-photo"><img src="'+photoImg.src+'" alt="La tua foto"></div>' : '')
+        + '<label class="sf-upload" for="photoInput">📷 ' + (photoImg ? 'Cambia foto' : 'Scatta o carica la foto') + '</label>'
+        + '<label class="sf-upload app-cam" for="photoCamInput">📷 Scatta con la fotocamera</label>'
+        + (photoImg ? '' : '<p class="sf-note">La foto serve solo per creare l\'anteprima del lavoro.</p>');
+    } else {
+      var q = sfQ(st) || { t:'', opts:[] };
+      document.getElementById('sfTitle').textContent = q.t;
+      document.getElementById('sfSub').textContent = q.s || '';
+      html = sfRecap() + '<div class="sf-cards">' + q.opts.map(function(o){
+        return '<button type="button" class="sf-card'+(o.sel ? ' sel' : '')+'" data-sfv="'+o.v+'">'+o.pic+'<b>'+o.n+'</b>'+(o.d ? '<span>'+o.d+'</span>' : '')+'</button>';
+      }).join('') + '</div>'
+      + (q.help ? '<button type="button" class="sf-help" data-sfv="'+q.help+'">🤷 Non so, consigliami</button>' : '');
+    }
+    body.innerHTML = html;
+    var steps = sfSteps(), i = steps.indexOf(st);
+    document.getElementById('backStep').style.display = 'inline-block';
+    document.getElementById('progressLabel').textContent = st === 'foto' ? 'Passo 1 · La foto' : 'Passo 2 · Il lavoro' + (i > 1 ? ' · domanda ' + i : '');
+    document.getElementById('progressFill').style.width = (st === 'foto' ? 4 : Math.min(30, 8 + i * 4)) + '%';
+    syncNextStepEnabled();
+  }
+  function sfGo(st){ SF.step = st; sfRender(); window.scrollTo(0,0); }
+  function sfNext(){
+    var steps = sfSteps(), i = steps.indexOf(SF.step);
+    for(var k = i + 1; k < steps.length; k++){ return sfGo(steps[k]); }
+    goTo('panelColor');
+  }
+  function sfBack(){
+    var steps = sfSteps(), i = steps.indexOf(SF.step);
+    if(i > 0) sfGo(steps[i-1]); else goTo('panelLanding');
+  }
+  function sfEnter(){
+    if(!photoImg) SF.step = 'foto';
+    else if(!state.category){ SF.step = 'mat'; SF.mat = null; SF.a = {}; }
+    else if(sfSteps().indexOf(SF.step) < 0) SF.step = sfSteps()[sfSteps().length - 1];
+    sfRender();
+  }
+  function sfPrepColor(){
+    try{ syncEffettoVisibility(); syncContextVisibility(); syncColorCatalogVisibility(); }catch(e){}
+    document.body.classList.remove('sf-adv-open');
+    var ab = document.getElementById('sfAdvBtn');
+    if(ab){ ab.hidden = !(!noFinitura() || isInterniPittura() || isScale()); ab.textContent = '⚙️ Opzioni avanzate' + (isInterniPittura() ? ' (soffitto, colonne, parete decorata, finitura)' : isScale() && state.scaleTipo === 'resina' ? ' (marmo, materico, corten, metallico, finitura)' : state.material && state.material.id === 'monolith_spatolato' ? ' (effetti, finitura)' : ' (finitura)'); }
+    var fb = document.getElementById('sfFinBox'); if(fb) fb.hidden = noFinitura() || (typeof granaActive === 'function' && granaActive());
+    Array.prototype.forEach.call(document.querySelectorAll('#sfFinControl button'), function(b){ b.classList.toggle('active', b.dataset.v === state.finitura); });
+  }
+  document.getElementById('sfBody').addEventListener('click', function(e){
+    var b = e.target.closest('[data-sfv]'); if(!b) return;
+    var st = SF.step;
+    sfApply(st, b.dataset.sfv);
+    sfRender();
+    setTimeout(sfNext, 160);
+  });
+  document.getElementById('panelSimple').addEventListener('click', function(e){
+    var j = e.target.closest('[data-sfjump]'); if(j){ sfGo(j.dataset.sfjump); }
+  });
+  document.getElementById('sfAdvBtn').addEventListener('click', function(){ document.body.classList.toggle('sf-adv-open'); });
+  document.getElementById('sfFinControl').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    state.finitura = b.dataset.v; aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    Array.prototype.forEach.call(this.children, function(x){ x.classList.toggle('active', x === b); });
+  });
+  // Nel percorso semplice: sezioni già chieste prima (nascoste) e opzioni avanzate (chiuse)
+  ['contextLabel','contextControl','contextHint','piaBox','scaleTipoLabel','scaleTipoControl','scaleTipoHint'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.add('sf-hide'); });
+  ['interniExtras','effettoLabel','effettoControl','effettoHint','effettoParticolareControl','effettoParticolareHint','sfFinBox'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.add('sf-adv'); });
+
+  window.__rdDbg = function(){ return { panel: currentPanel, SF: SF, state: state }; };
+  ['templateSection','toggleTemplates','photoHint'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.add('sf-hide'); });
+  var ALL_PANELS = ['panelLanding','panelSimple','panel1','panelResinaArea','panelSub','panelColor','panelFinitura','panelPhoto','panelResult','panel3','panelConfirm'];
   var STEP_LABELS = {
+    panelSimple: { it:'Foto e lavoro', en:'Photo and job' },
     panel1: { it:'Lavorazione', en:'Category' },
     panelResinaArea: { it:'Dove applicare', en:'Where to apply' },
     panelSub: { it:'Finitura Resina', en:'Finish' },
@@ -9192,7 +9473,12 @@
   function currentSeq(){
     // panelLanding non è un "passo" del wizard: è la schermata di ingresso, non entra
     // nel calcolo della barra di avanzamento né nella navigazione avanti/indietro.
-    var seq = ALL_PANELS.slice().filter(function(id){ return id!=='panelLanding'; });
+    if(SF_ON){
+      var sq = ['panelSimple', 'panelColor'];
+      if(accentoActive() || showerActive()) sq.push('panelPhoto');
+      return sq.concat(['panelResult', 'panel3', 'panelConfirm']);
+    }
+    var seq = ALL_PANELS.slice().filter(function(id){ return id!=='panelLanding' && id!=='panelSimple'; });
     if(!(state.category && (state.category.id === 'monolith' || state.category.id === 'microcemento'))){
       seq = seq.filter(function(id){ return id!=='panelResinaArea'; });
     }
@@ -9235,6 +9521,10 @@
     var miss = (currentPanel==='panelColor' && !ok && typeof missingColors==='function' && phaseOrder().length > 1) ? missingColors() : 0;
     btn.textContent = miss > 1 ? tr({it:'Mancano '+miss+' colori', en:miss+' colors missing'}) : miss === 1 ? tr({it:'Manca 1 colore', en:'1 color missing'}) : ts('btnContinua');
     if(typeof syncResultCta === 'function') syncResultCta();
+    if(currentPanel === 'panelSimple' && typeof sfAnswered === 'function'){
+      var sfa = sfAnswered(SF.step); btn.disabled = !sfa;
+      btn.textContent = SF.step === 'foto' ? (photoImg ? 'Avanti' : 'Carica una foto per iniziare') : (sfa ? 'Avanti' : 'Tocca una scelta');
+    }
   }
 
   function updateProgress(id, seq){
@@ -9246,7 +9536,7 @@
     var label = (id==='panelSub' && state.category && state.category.id==='imbiancatura') ? ts('subTitleContext')
       : (id==='panelSub' && state.category && state.category.id==='graniglia_esterni') ? ts('subTitleGraniglia')
       : (id==='panelSub' && state.category && (state.category.id==='parquet' || state.category.id==='spc' || state.category.id==='laminato')) ? ts('subTitleParquet')
-      : tr(STEP_LABELS[id]);
+      : (SF_ON && id === 'panelPhoto') ? 'Segna sulla foto' : tr(STEP_LABELS[id]);
     var ofTotal = state.category ? ts('progressStepOf')+totalSteps : '';
     document.getElementById('progressLabel').textContent = id==='panelConfirm' ? ts('progressRequestSent') : (ts('progressStepPrefix')+stepNum+ofTotal+(label?' · '+label:''));
   }
@@ -9300,6 +9590,9 @@
     if(id==='panel3') renderSummary();
 
     updateProgress(id, seq);
+    if(SF_ON && id === 'panelSimple') sfEnter();
+    if(SF_ON && id === 'panelColor') sfPrepColor();
+    if(SF_ON && id === 'panelPhoto'){ var pl = document.getElementById('progressLabel'); pl.textContent = pl.textContent.replace('Carica foto', 'Segna sulla foto'); var pt = document.querySelector('#panelPhoto h1.title'); if(pt) pt.textContent = showerActive() ? 'Tocca sulla foto dove c\'è la doccia' : 'Tocca sulla foto la parete da decorare'; }
     syncResultCta();
     window.scrollTo(0,0);
   }
@@ -9496,7 +9789,7 @@
       contextLine + granaLine + facadeLine + posaLine + boiserieLine + davanzaliLine + marcapianoLine + sottotettoLine + plafoneLine + tettoLine + corniciLine + serramentiLine + balconiLine + righeLine +
       (noFinitura() ? '' : '<div class="line"><span class="sw" style="background:var(--ink-soft)"></span><span>'+ts('summaryFinitura')+' '+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1)+'</span></div>') +
       '<span class="edit" id="editSel">'+ts('summaryEdit')+'</span>';
-    document.getElementById('editSel').addEventListener('click', function(){ goTo('panel1'); });
+    document.getElementById('editSel').addEventListener('click', function(){ if(SF_ON){ SF.step = 'mat'; goTo('panelSimple'); } else goTo('panel1'); });
     // Il salvataggio nella cartella progetti ha senso solo per un professionista
     // loggato: per un privato il bottone resta nascosto.
     var saveProjectBtn = document.getElementById('panel3SaveProjectBtn');
@@ -9536,10 +9829,12 @@
   });
   document.getElementById('nextStep').addEventListener('click', function(){
     if(this.dataset.gen === '1') return;
+    if(currentPanel === 'panelSimple'){ if(sfAnswered(SF.step)) sfNext(); return; }
     var seq = currentSeq(); var idx = seq.indexOf(currentPanel);
     if(idx>=0 && idx+1<seq.length) goTo(seq[idx+1]);
   });
   document.getElementById('backStep').addEventListener('click', function(){
+    if(currentPanel === 'panelSimple'){ sfBack(); return; }
     var seq = currentSeq(); var idx = seq.indexOf(currentPanel);
     if(idx>0) goTo(seq[idx-1]);
   });
@@ -9581,7 +9876,7 @@
       if(piaRiv()) lines.push("Rivestimento: " + (state.piaAlt === 'tutta' ? "tutta altezza" : "fino a 150 cm") + " · formato " + FMT[state.piaFmtRiv] + " · " + (state.piaRivTile === 'diversa' && state.colorB ? state.colorB.name : "come il pavimento"));
       if(showerActive()) lines.push("Interno doccia: tutta altezza · formato " + FMT[state.piaFmtDoccia] + " · " + (state.piaDocciaTile === 'diversa' && state.colorDoccia ? state.colorDoccia.name : "come il rivestimento"));
     }
-    if(state.material.id === 'scale') lines.push("Rivestimento: " + SCALE_TIPO[state.scaleTipo || 'resina'].it + (state.scaleTipo === 'decorativi' && EFFETTO_LABEL[state.effetto] ? " – " + EFFETTO_LABEL[state.effetto].it : ""));
+    if(state.material.id === 'scale') lines.push("Rivestimento: " + SCALE_TIPO[state.scaleTipo || 'resina'].it + (state.scaleTipo === 'resina' && state.effetto !== 'liscio' && EFFETTO_LABEL[state.effetto] ? " – " + EFFETTO_LABEL[state.effetto].it : ""));
     if(state.material.id === 'imbiancatura') lines.push("Ambiente: "+(state.context === 'esterno' ? 'Esterno' : 'Interno'));
     if(granaActive()) lines.push("Tipo lavorazione: "+GRANA_NAME[state.grana].it);
     if(needsSecondColor()) lines.push("Facciata: "+FACADE_LAYOUT_NAME[state.facadeLayout].it);
