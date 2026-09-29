@@ -192,7 +192,12 @@ module.exports = async function handler(req, res) {
     MATERIAL_TEXTURE.parquet = (MATERIAL_TEXTURE.parquet || "parquet in legno") + ", parquet prefinito Quick-Step collezione " + collezione + " in rovere con finitura extra opaca, venature e nodi naturali visibili";
   }
   // Scale: tipo di rivestimento scelto dal cliente.
-  const scaleTipoOk = materialId === "scale" ? (["resina", "microcemento", "decorativi"].includes(scaleTipo) ? scaleTipo : "resina") : null;
+  const scaleTipoOk = materialId === "scale" ? (["resina", "microcemento", "piastrelle", "parquet"].includes(scaleTipo) ? scaleTipo : "resina") : null;
+  if (scaleTipoOk === "piastrelle") {
+    MATERIAL_TEXTURE.scale = "rivestimento della scala in PIASTRELLE di gres porcellanato: ogni pedata è una lastra intera con il bordo frontale (naso) rifinito, ogni alzata è rivestita con una fascia di piastrella dello stesso colore, fughe sottili e dritte, superfici perfettamente planari";
+  } else if (scaleTipoOk === "parquet") {
+    MATERIAL_TEXTURE.scale = "rivestimento della scala in LEGNO (parquet): ogni pedata è un'asse di legno massello o multistrato con naso arrotondato sul fronte, alzate rivestite in legno dello stesso tono, venature del legno ben visibili che corrono nel senso della larghezza del gradino, finitura naturale opaca";
+  }
   if (scaleTipoOk === "microcemento") {
     MATERIAL_TEXTURE.scale = "microcemento applicato su gradini e alzate di una scala (pedate, alzate e frontalini), superficie continua senza fughe con segni di lavorazione del frattazzo DELICATI e sfumati, leggere velature e nuvolature di tono (niente archi o ventagli marcati), finitura satinata-opaca, spigoli dei gradini netti e ben rifiniti";
   }
@@ -205,7 +210,7 @@ module.exports = async function handler(req, res) {
       ? GRANA_TEXTURE[grana]
       : (MATERIAL_TEXTURE[materialId] || `una finitura in ${material}`);
   const effettoOk = materialId === "scale"
-    ? (scaleTipoOk === "decorativi" && ["marmo", "materico", "corten", "metallico"].includes(effetto))
+    ? (scaleTipoOk === "resina" && ["marmo", "materico", "corten", "metallico"].includes(effetto))
     : (materialId === "monolith_spatolato" && ["materico", "corten"].includes(effetto));
   const effettoAddon = (effettoOk && EFFETTO_TEXTURE[effetto]) ? EFFETTO_TEXTURE[effetto] : "";
   const PARQUET_POSA_DESC = {
