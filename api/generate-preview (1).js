@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -313,9 +313,17 @@ module.exports = async function handler(req, res) {
 
   // Imbiancatura interni: soffitto (plafone) ed effetto scatola.
   const isInterniPittura = materialId === "imbiancatura" && context !== "esterno";
+  const PLAFONE_DECOR = {
+    spatolato: "con effetto SPATOLATO decorativo (passate di spatola incrociate e velature ben visibili, leggere variazioni di tono)",
+    stucco: "a STUCCO VENEZIANO (superficie liscia e lucida, profondità di colore con marezzature e riflessi tipici della lucidatura a ferro)",
+    marmorino: "a MARMORINO (superficie liscia e setosa, opaca-satinata, con leggere venature e nuvolature minerali)",
+    velatura: "a VELATURA decorativa (effetto nuvolato morbido con leggere sfumature di tono, opaco)"
+  };
   const plafoneNote = !isInterniPittura ? ""
     : effettoScatola
       ? ` EFFETTO SCATOLA: dipingi pareti E soffitto nello stesso identico colore ${colorRef(colorA, colorAHex)}, senza stacchi tra parete e soffitto, compresi eventuali travi, cornici e sporgenze del soffitto: l'ambiente deve risultare avvolgente e continuo, tutto in un unico colore. Porte, finestre, mobili e pavimento restano come sono.`
+      : (colorPlafone && PLAFONE_DECOR[plafoneTipo])
+        ? ` SOFFITTO (plafone) DECORATO: tutto il soffitto è rifinito ${PLAFONE_DECOR[plafoneTipo]} nel colore ${colorRef(colorPlafone, colorPlafoneHex)}, uniforme su tutta la superficie del soffitto, travi e cornici comprese. La decorazione riguarda SOLO il soffitto: le pareti restano nel loro colore. Tra soffitto e pareti non disegnare righe, bordi o fasce.`
       : colorPlafone
         ? ` Dipingi il soffitto (plafone) nel colore ${colorRef(colorPlafone, colorPlafoneHex)}. Il passaggio tra soffitto e pareti è semplicemente il punto dove finisce una vernice e inizia l'altra, come nella realtà: NON disegnare nessuna linea, riga, bordo, contorno o fascia di colore diverso (né più chiara, né più scura, né più satura) lungo lo spigolo tra soffitto e pareti${bordatura ? ", a parte la bordatura descritta più avanti" : ""}. Il soffitto riceve la luce della stanza: è più chiaro vicino alla finestra e più scuro negli angoli e lontano dalla luce, con sfumature morbide, e l'eventuale lampada o faretto proietta un leggero alone; NON deve essere una campitura piatta e uniforme. Le pareti restano nel loro colore indicato sopra.`
         : " Il soffitto NON va dipinto: resta esattamente com'è nella foto, cambia solo il colore delle pareti.";
