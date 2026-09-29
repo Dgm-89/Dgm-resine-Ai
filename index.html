@@ -1139,7 +1139,7 @@
 
     <div id="interniExtras" hidden>
       <div class="section-label">Colonne e sporgenze</div>
-      <button type="button" class="niche-toggle active" id="colonneToggle">
+      <button type="button" class="niche-toggle" id="colonneToggle">
         <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#C9B79C"/><rect x="0" y="0" width="180" height="18" fill="#F4F1EA"/><rect x="70" y="18" width="30" height="112" fill="#B9A588"/><rect x="100" y="18" width="8" height="112" fill="#A8947A"/><rect x="0" y="18" width="180" height="10" fill="#B9A588"/></svg>
         <span class="nt-text"><span class="nt-title">Colora anche colonne e travi</span><span class="nt-desc">Colonne, pilastri, travi, nicchie e sporgenze dello stesso colore delle pareti</span></span>
         <span class="nt-check"></span>
@@ -6668,7 +6668,8 @@
   // (solo per Imbiancatura Esterno, come davanzali/marcapiano/righe).
   function needsSottotettoColor(){ return !!(state.addSottotetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   function isInterniPittura(){ return !!(state.material && state.material.id === 'imbiancatura' && state.context !== 'esterno'); }
-  function colonneOn(){ return state.colonne !== false; }
+  // Parte spento: lo sceglie il cliente.
+  function colonneOn(){ return state.colonne === true; }
   function accentoActive(){ return !!(state.addAccento && isInterniPittura()); }
   function needsAccentoColor(){ return !!(accentoActive() && state.accentoTipo !== 'corten'); }
   function bordaturaActive(){ return !!(state.addBordatura && !state.effettoScatola && isInterniPittura()); }
