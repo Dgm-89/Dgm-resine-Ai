@@ -1147,9 +1147,19 @@
       <div class="section-label">Soffitto</div>
       <button type="button" class="niche-toggle" id="plafoneToggle">
         <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E9E4DA"/><polygon points="0,0 180,0 140,34 40,34" fill="#7FA3C8"/><polygon points="0,0 40,34 40,110 0,130" fill="#F1ECE2"/><polygon points="180,0 140,34 140,110 180,130" fill="#F1ECE2"/><rect x="40" y="34" width="100" height="76" fill="#F6F2EA"/><polygon points="0,130 40,110 140,110 180,130" fill="#B89B78"/></svg>
-        <span class="nt-text"><span class="nt-title">Colora il plafone (soffitto)</span><span class="nt-desc">Il soffitto in un colore a scelta, diverso dalle pareti</span></span>
+        <span class="nt-text"><span class="nt-title">Colora o decora il plafone (soffitto)</span><span class="nt-desc">Il soffitto in un colore a scelta oppure decorato: spatolato, stucco veneziano, marmorino, velatura</span></span>
         <span class="nt-check"></span>
       </button>
+      <div id="plafoneOpts" hidden>
+        <div class="seg-control" id="plafoneTipoControl" style="flex-wrap:wrap">
+          <button type="button" data-v="colore" class="active">Colore</button>
+          <button type="button" data-v="spatolato">Spatolato</button>
+          <button type="button" data-v="stucco">Stucco veneziano</button>
+          <button type="button" data-v="marmorino">Marmorino</button>
+          <button type="button" data-v="velatura">Velatura</button>
+        </div>
+        <div class="seg-hint" id="plafoneTipoHint">Soffitto in tinta unita nel colore che scegli.</div>
+      </div>
       <button type="button" class="niche-toggle" id="scatolaToggle">
         <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#6F8FA8"/><polygon points="0,0 180,0 140,34 40,34" fill="#6A8AA3"/><polygon points="0,0 40,34 40,110 0,130" fill="#5F7F98"/><polygon points="180,0 140,34 140,110 180,130" fill="#5F7F98"/><rect x="40" y="34" width="100" height="76" fill="#7394AD"/><polygon points="0,130 40,110 140,110 180,130" fill="#B89B78"/></svg>
         <span class="nt-text"><span class="nt-title">Effetto scatola</span><span class="nt-desc">Pareti e soffitto nello stesso colore, per un ambiente avvolgente e continuo</span></span>
@@ -6880,6 +6890,10 @@
     box.hidden = !show;
     if(!show){ state.addPlafone=false; state.effettoScatola=false; state.colorPlafone=null; state.addAccento=false; state.colorAccento=null; state.addBordatura=false; state.colorBordatura=null; state.accentoPoint=null; }
     document.getElementById('plafoneToggle').classList.toggle('active', !!state.addPlafone);
+    document.getElementById('plafoneOpts').hidden = !needsPlafoneColor();
+    var pt = state.plafoneTipo || 'colore';
+    Array.prototype.forEach.call(document.getElementById('plafoneTipoControl').children, function(b){ b.classList.toggle('active', b.dataset.v === pt); });
+    document.getElementById('plafoneTipoHint').textContent = ({colore:'Soffitto in tinta unita nel colore che scegli.', spatolato:'Soffitto con passate di spatola e velature, nel colore che scegli.', stucco:'Stucco veneziano lucido e profondo, nel colore che scegli.', marmorino:'Marmorino liscio e setoso con leggere venature, nel colore che scegli.', velatura:'Velatura morbida e nuvolata, nel colore che scegli.'})[pt];
     document.getElementById('colonneToggle').classList.toggle('active', colonneOn());
     var bt = document.getElementById('bordaturaToggle');
     bt.classList.toggle('active', !!state.addBordatura); bt.disabled = !!state.effettoScatola; bt.style.opacity = state.effettoScatola ? '0.45' : '';
@@ -6897,6 +6911,11 @@
     aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
     syncInterniExtras(); renderStep2UI();
   }
+  document.getElementById('plafoneTipoControl').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    state.plafoneTipo = b.dataset.v; aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    syncInterniExtras(); renderStep2UI();
+  });
   document.getElementById('plafoneToggle').addEventListener('click', function(){
     state.addPlafone = !state.addPlafone;
     if(state.addPlafone) state.effettoScatola = false; else state.colorPlafone = null;
@@ -8324,7 +8343,7 @@
     } else if(pickPhase==='A' && (needsPlafoneColor() || needsAccentoColor() || needsBordaturaColor())){
       label.textContent = tr({it:'Colore pareti', en:'Wall color'});
     } else if(pickPhase==='P'){
-      label.textContent = tr({it:'Colore plafone (soffitto)', en:'Ceiling color'});
+      label.textContent = tr({it:'Colore plafone (soffitto)', en:'Ceiling color'}) + (state.plafoneTipo && state.plafoneTipo !== 'colore' ? ' · ' + ({spatolato:'spatolato', stucco:'stucco veneziano', marmorino:'marmorino', velatura:'velatura'})[state.plafoneTipo] : '');
     } else if(pickPhase==='T'){
       label.textContent = ts('clusterLabelTetto');
     } else if(pickPhase==='K'){
@@ -8746,6 +8765,7 @@
         colorA: state.colorA.name, colorAHex: apiHex(state.colorA), colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? apiHex(state.colorB) : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? apiHex(state.colorC) : null,
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? apiHex(state.colorDavanzali) : null,
         colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? apiHex(state.colorSottotetto) : null,
+        plafoneTipo: needsPlafoneColor() ? (state.plafoneTipo || 'colore') : null,
         colorPlafone: (needsPlafoneColor() && state.colorPlafone) ? state.colorPlafone.name : null, colorPlafoneHex: (needsPlafoneColor() && state.colorPlafone) ? apiHex(state.colorPlafone) : null,
         effettoScatola: !!(isInterniPittura() && state.effettoScatola),
         colorTetto: (needsTettoColor() && state.colorTetto) ? state.colorTetto.name : null, colorTettoHex: (needsTettoColor() && state.colorTetto) ? apiHex(state.colorTetto) : null,
@@ -9570,7 +9590,7 @@
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+colorLabel(state.colorDavanzali));
     if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+colorLabel(state.colorC));
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+colorLabel(state.colorSottotetto));
-    if(needsPlafoneColor() && state.colorPlafone) lines.push("Plafone (soffitto): "+colorLabel(state.colorPlafone));
+    if(needsPlafoneColor() && state.colorPlafone) lines.push("Plafone (soffitto): "+({spatolato:"spatolato ", stucco:"stucco veneziano ", marmorino:"marmorino ", velatura:"velatura "}[state.plafoneTipo] || "")+colorLabel(state.colorPlafone));
     if(accentoActive()) lines.push("Parete decorata: "+(state.accentoTipo==='corten' ? 'Corten' : ((state.accentoTipo && state.accentoTipo!=='colore' ? state.accentoTipo+' ' : '') + (state.colorAccento ? colorLabel(state.colorAccento) : ''))));
     if(isInterniPittura()) lines.push("Colonne, travi e sporgenze: "+(colonneOn() ? "colorate come le pareti" : "lasciate come sono"));
     if(marksAvailable() && state.marks && state.marks.length) lines.push("Parti segnate sulla foto: "+state.marks.map(function(m,i){ return (i+1)+" = "+markTargetLabel(m.target); }).join("; "));
