@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, lavoriPrecedenti, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { muro, porteInterne, imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, lavoriPrecedenti, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -440,6 +440,11 @@ module.exports = async function handler(req, res) {
   // degli infissi (finestre e porte esterne), non ai davanzali, ai vetri né al
   // resto della facciata.
   const isSerramentiStyled = materialId === "imbiancatura" && context === "esterno" && addSerramenti && colorSerramenti;
+  // Pittura interni: porte interne e finestre in un colore a scelta.
+  const isPorteInt = materialId === "imbiancatura" && context !== "esterno" && !!porteInterne && !!colorSerramenti;
+  const porteIntNote = isPorteInt
+    ? ` PORTE E FINESTRE: dipingi OBBLIGATORIAMENTE nel colore ${colorRef(colorSerramenti, colorSerramentiHex)} tutte le porte interne visibili (ante e stipiti/telai, comprese porte di metallo) e i telai delle finestre e portefinestre. Il loro colore originale non deve restare. NON colorare vetri, maniglie, serrature, cerniere e chiavistelli, che restano identici; le pareti restano nel loro colore.`
+    : "";
   const serramentiNote = isSerramentiStyled
     ? ` Inoltre, dipingi OBBLIGATORIAMENTE TUTTI i serramenti visibili nella foto nel colore ${colorRef(colorSerramenti, colorSerramentiHex)}: telai delle finestre, persiane, scuri, ante a battente, tapparelle e porte/portefinestre esterne. Il loro colore originale (es. marrone/legno) NON deve restare da nessuna parte: nel risultato devono essere tutti di questo colore. Non colorare i vetri, i davanzali e il resto della facciata.`
     : "";
@@ -608,7 +613,7 @@ module.exports = async function handler(req, res) {
   const keepList = ["la prospettiva", "la luce", "le ombre", "il terreno, il giardino, gli oggetti e l'ambiente circostante"];
   if (!(isTettoStyled)) keepList.splice(3, 0, "il manto di copertura del tetto (tegole/coppi)");
   if (!(isCorniciStyled)) keepList.push("le cornici di porte e finestre");
-  if (!(isSerramentiStyled)) keepList.push("gli infissi, le persiane e le porte");
+  if (!(isSerramentiStyled) && !isPorteInt) keepList.push("gli infissi, le persiane e le porte");
   if (!(isSottotettoStyled)) keepList.push("il sottotetto/sporto di gronda");
   if (!(isDavanzaliStyled)) keepList.push("i davanzali");
   if (!(isBalconiStyled)) keepList.push("i balconi/parapetti");
@@ -715,10 +720,15 @@ module.exports = async function handler(req, res) {
     : "";
   // I colori scelti vanno SOLO sulle superfici richieste: niente "contagio" su porte, metalli e oggetti vicini.
   // Pittura interni: la vernice cambia il colore, non la forma dell'intonaco; le travi in legno restano legno.
+  const muroSel = (muro === "liscio" || muro === "civile") ? muro : "com";
   const paintTextureNote = !isInterniPittura ? ""
+    : muroSel === "liscio"
+      ? " FINITURA DEI MURI (richiesta dal cliente): RASATURA A GESSO. Tutte le pareti da dipingere diventano perfettamente LISCE, piane e uniformi, senza grana, rilievi, crepe o buccia d'arancia: l'intonaco ruvido originale NON deve più vedersi. Spigoli dritti e puliti. La luce scivola uniforme sulla superficie opaca. Travi e architravi in LEGNO a vista, cornici, cerniere, ganci e piccoli oggetti fissati al muro NON si dipingono e non spariscono: restano identici." + (plafoneTipo ? " Il trattamento del plafone riguarda solo la superficie del soffitto: le travi in legno a vista sotto il soffitto restano di legno." : "")
+    : muroSel === "civile"
+      ? " FINITURA DEI MURI (richiesta dal cliente): INTONACO CIVILE. Tutte le pareti da dipingere hanno una superficie uniforme a GRANA FINE, come sabbia fine (granelli di circa 0,5-1 mm), opaca e regolare su tutta la parete: niente zone lisce, niente rilievi grossi, crepe o buccia d'arancia irregolare dell'intonaco originale. Travi e architravi in LEGNO a vista, cornici, cerniere, ganci e piccoli oggetti fissati al muro NON si dipingono e non spariscono: restano identici." + (plafoneTipo ? " Il trattamento del plafone riguarda solo la superficie del soffitto: le travi in legno a vista sotto il soffitto restano di legno." : "")
     : " TEXTURE DEI MURI: la pittura cambia SOLO il colore. Se l'intonaco originale è ruvido, grezzo, a buccia d'arancia o irregolare, nel risultato resta ESATTAMENTE così (stessi rilievi, stesse ombre della grana), solo nel nuovo colore: non lisciare e non rasare i muri. Travi e architravi in LEGNO a vista, cornici, cerniere, ganci e piccoli oggetti fissati al muro NON si dipingono e non spariscono: restano identici." + (plafoneTipo ? " Il trattamento del plafone riguarda solo la superficie del soffitto: le travi in legno a vista sotto il soffitto restano di legno." : "");
   const colorContainNote = isExteriorFacade ? ""
-    : " COLORI SOLO DOVE RICHIESTO (regola vincolante): il colore e il materiale scelti si applicano ESCLUSIVAMENTE alle superfici indicate. Nessun altro oggetto deve prendere quel colore, nemmeno come riflesso o sfumatura: porte (anche metalliche o zincate), telai, maniglie, serrature, cerniere, tubi, cavi, lampade, prese, mobili e oggetti mantengono ESATTAMENTE il loro colore, materiale e grado di usura originali. Non aggiungere oggetti che non ci sono (prese, interruttori, placche, quadri) e non trasformare quelli esistenti in altro: una cerniera resta una cerniera.";
+    : " COLORI SOLO DOVE RICHIESTO (regola vincolante): il colore e il materiale scelti si applicano ESCLUSIVAMENTE alle superfici indicate." + (isPorteInt ? " Porte e telai delle finestre vanno SOLO nel colore indicato per porte e finestre." : "") + " Nessun altro oggetto deve prendere quel colore, nemmeno come riflesso o sfumatura: " + (isPorteInt ? "" : "porte (anche metalliche o zincate), telai, ") + "maniglie, serrature, cerniere, tubi, cavi, lampade, prese, mobili e oggetti mantengono ESATTAMENTE il loro colore, materiale e grado di usura originali. Non aggiungere oggetti che non ci sono (prese, interruttori, placche, quadri) e non trasformare quelli esistenti in altro: una cerniera resta una cerniera.";
   const prompt = isRigheStep ? righeStepPrompt : [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
@@ -752,6 +762,7 @@ module.exports = async function handler(req, res) {
     tettoNote,
     corniciNote,
     serramentiNote,
+    porteIntNote,
     balconiNote,
     righeNote,
     boiserieStyleRefNote,
