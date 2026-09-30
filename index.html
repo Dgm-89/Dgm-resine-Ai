@@ -1195,6 +1195,21 @@
     <div class="seg-hint" id="facadeLayoutHint" style="display:none">L'intera facciata dello stesso colore.</div>
 
     <div id="interniExtras" hidden>
+      <div id="muroBox">
+        <div class="section-label">Come vuoi il muro finito?</div>
+        <div class="seg-control" id="muroControl" style="flex-wrap:wrap">
+          <button type="button" data-v="com" class="active">Lascia com'è</button>
+          <button type="button" data-v="liscio">Liscio (gesso)</button>
+          <button type="button" data-v="civile">Ruvido (civile)</button>
+        </div>
+        <div class="seg-hint" id="muroHint">Cambia solo il colore: il muro resta come nella tua foto.</div>
+      </div>
+      <div class="section-label">Porte e finestre</div>
+      <button type="button" class="niche-toggle" id="porteToggle">
+        <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#E9E4DA"/><rect x="40" y="30" width="44" height="100" fill="#3F4448"/><circle cx="76" cy="84" r="3" fill="#C9C2B4"/><rect x="108" y="30" width="48" height="44" fill="#BFD3E2" stroke="#3F4448" stroke-width="6"/><line x1="132" y1="30" x2="132" y2="74" stroke="#3F4448" stroke-width="4"/></svg>
+        <span class="nt-text"><span class="nt-title">Colora porte e finestre</span><span class="nt-desc">Porte interne, stipiti e telai delle finestre in un colore RAL</span></span>
+        <span class="nt-check"></span>
+      </button>
       <div class="section-label">Colonne e sporgenze</div>
       <button type="button" class="niche-toggle" id="colonneToggle">
         <svg viewBox="0 0 180 130" xmlns="http://www.w3.org/2000/svg"><rect width="180" height="130" fill="#C9B79C"/><rect x="0" y="0" width="180" height="18" fill="#F4F1EA"/><rect x="70" y="18" width="30" height="112" fill="#B9A588"/><rect x="100" y="18" width="8" height="112" fill="#A8947A"/><rect x="0" y="18" width="180" height="10" fill="#B9A588"/></svg>
@@ -1208,6 +1223,7 @@
         <span class="nt-check"></span>
       </button>
       <div id="plafoneOpts" hidden>
+        <div class="seg-hint" style="font-weight:700;color:var(--ink);margin:10px 0 6px">Soffitto: come lo vuoi?</div>
         <div class="seg-control" id="plafoneTipoControl" style="flex-wrap:wrap">
           <button type="button" data-v="colore" class="active">Colore</button>
           <button type="button" data-v="spatolato">Spatolato</button>
@@ -1247,6 +1263,7 @@
         <span class="nt-check"></span>
       </button>
       <div id="accentoOpts" hidden>
+        <div class="seg-hint" style="font-weight:700;color:var(--ink);margin:10px 0 6px">Parete diversa: come la vuoi?</div>
         <div class="seg-control" id="accentoTipoControl" style="flex-wrap:wrap">
           <button type="button" data-v="colore" class="active">Colore</button>
           <button type="button" data-v="corten">Corten</button>
@@ -1911,7 +1928,8 @@
   try { var savedLang = localStorage.getItem('dgmLang'); if(savedLang==='en') LANG='en'; } catch(e){}
 
   function tr(dict){ if(!dict) return ''; return dict[LANG] || dict.it || ''; }
-  function ts(key){ return tr(I18N_STATIC[key]); }
+  var PORTE_I18N = { clusterLabelSerramenti:{ it:'Colore porte e finestre', en:'Doors and windows color' }, pendingSerramenti:{ it:'+ Colore porte e finestre da scegliere', en:'+ Doors and windows color to choose' }, summarySerramenti:{ it:'Porte e finestre: ', en:'Doors and windows: ' } };
+  function ts(key){ if(PORTE_I18N[key] && typeof isInterniPittura === 'function' && isInterniPittura()) return tr(PORTE_I18N[key]); return tr(I18N_STATIC[key]); }
   // Nomi/descrizioni bilingue di oggetti dati (categorie, materiali, opzioni scheda):
   // usa "<field>En" se la lingua è inglese ed esiste, altrimenti torna all'italiano.
   function LF(obj, field){
@@ -6735,7 +6753,7 @@
     lucido: { it:"Massima brillantezza e profondità del colore.", en:"Maximum shine and color depth." }
   };
 
-  var state = { userType:null, category:null, material:null, effetto:'liscio', scaleTipo:'resina', granScale:'no', piaDove:'pav', piaAlt:'150', piaRivTile:'uguale', piaFmtPav:'60x60', piaFmtRiv:'30x60', piaDoccia:'no', piaDocciaTile:'uguale', piaFmtDoccia:'mosaico', colorDoccia:null, context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addPlafone:false, effettoScatola:false, colorPlafone:null, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
+  var state = { muro:'com', addPorte:false, userType:null, category:null, material:null, effetto:'liscio', scaleTipo:'resina', granScale:'no', piaDove:'pav', piaAlt:'150', piaRivTile:'uguale', piaFmtPav:'60x60', piaFmtRiv:'30x60', piaDoccia:'no', piaDocciaTile:'uguale', piaFmtDoccia:'mosaico', colorDoccia:null, context:'interno', resinaArea:null, facadeLayout:'monocolore', righeExtent:'meta', righeOrientamento:'verticali', righeZona:'bassa', righeSpessore:'sottili', granigliaLayout:'unico', marmoLayout:'uno', parquetPosa:'cassero_regolare', boiserieStyle:'specchiatura', boiserieHeight:'bassa', addDavanzali:false, addMarcapiano:false, addSottotetto:false, addPlafone:false, effettoScatola:false, colorPlafone:null, addTetto:false, addCornici:false, addBalconi:false, addSerramenti:false, addRighe:false, colorCatalog:'base', colorA:null, colorB:null, colorC:null, colorDavanzali:null, colorSottotetto:null, colorTetto:null, colorCornici:null, colorBalconi:null, colorSerramenti:null, colorRighe:null, finitura:'satinato', grana:'fine', photoBase64:null, photoMime:null };
   var CONTEXT_HINT = {
     interno: { it:"Colori pensati per pareti e superfici interne.", en:"Colors designed for interior walls and surfaces." },
     esterno: { it:"Collezione Match Point 200: colori resistenti pensati per facciate ed esterni.", en:"Match Point 200 collection: resistant colors designed for facades and exteriors." }
@@ -6846,7 +6864,7 @@
   function needsBalconiColor(){ return !!(state.addBalconi && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   // Vero quando il cliente ha attivato il toggle "serramenti colore diverso"
   // (solo per Imbiancatura Esterno, come davanzali/sottotetto/balconi).
-  function needsSerramentiColor(){ return !!(state.addSerramenti && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
+  function needsSerramentiColor(){ return !!(state.material && state.material.id === 'imbiancatura' && ((state.addSerramenti && state.context === 'esterno') || (state.addPorte && state.context !== 'esterno'))); }
   // Vero quando il cliente ha attivato il toggle "righe decorative"
   // (solo per Imbiancatura Esterno, indipendente dal layout principale).
   function needsRigheColor(){ return !!(state.addRighe && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
@@ -6890,6 +6908,7 @@
   }
 
   function resetSelectionForNewCategory(){
+    state.muro = 'com'; state.addPorte = false;
     state.colorA=null; state.colorB=null; state.colorC=null; state.colorDavanzali=null; state.colorSottotetto=null; state.colorPlafone=null; state.colorTetto=null; state.colorCornici=null; state.colorBalconi=null; state.colorSerramenti=null; state.colorRighe=null; pickPhase='A'; aiResultImage=null; aiResultImageBase64=null; aiResultImageMime=null; familyFilter=null; colorSearchQuery='';
     state.context = 'interno'; state.facadeLayout = 'monocolore'; state.righeExtent = 'meta'; state.righeOrientamento = 'verticali'; state.righeZona = 'bassa'; state.righeSpessore = 'sottili'; state.granigliaLayout = 'unico'; state.marmoLayout = 'uno'; state.boiserieStyle = 'specchiatura'; state.boiserieHeight = 'bassa'; state.addDavanzali = false; state.addMarcapiano = false; state.addSottotetto = false; state.addPlafone = false; state.effettoScatola = false; state.addTetto = false; state.addCornici = false; state.addBalconi = false; state.addSerramenti = false; state.addRighe = false; state.colorCatalog = 'base'; state.effetto = 'liscio'; state.grana = 'fine';
     document.getElementById('colorSearch').value='';
@@ -7065,7 +7084,10 @@
     var box = document.getElementById('interniExtras'); if(!box) return;
     var show = isInterniPittura();
     box.hidden = !show;
-    if(!show){ state.addPlafone=false; state.effettoScatola=false; state.colorPlafone=null; state.addAccento=false; state.colorAccento=null; state.addBordatura=false; state.colorBordatura=null; state.accentoPoint=null; }
+    if(!show){ state.addPlafone=false; state.effettoScatola=false; state.colorPlafone=null; state.addAccento=false; state.colorAccento=null; state.addBordatura=false; state.colorBordatura=null; state.accentoPoint=null; if(state.addPorte){ state.addPorte=false; state.colorSerramenti=null; } state.muro='com'; }
+    document.getElementById('porteToggle').classList.toggle('active', !!state.addPorte);
+    Array.prototype.forEach.call(document.getElementById('muroControl').children, function(b){ b.classList.toggle('active', b.dataset.v === (state.muro || 'com')); });
+    document.getElementById('muroHint').textContent = MURO_HINT[state.muro || 'com'];
     document.getElementById('plafoneToggle').classList.toggle('active', !!state.addPlafone);
     document.getElementById('plafoneOpts').hidden = !plafoneActive();
     var pt = state.plafoneTipo || 'colore';
@@ -7102,6 +7124,17 @@
   document.getElementById('scatolaToggle').addEventListener('click', function(){
     state.effettoScatola = !state.effettoScatola;
     if(state.effettoScatola){ state.addPlafone = false; state.colorPlafone = null; state.addBordatura = false; state.colorBordatura = null; }
+    afterInterniToggle();
+  });
+  var MURO_NAME = { com:"com'è (cambia solo il colore)", liscio:'liscio (rasatura a gesso)', civile:'ruvido (intonaco civile)' };
+  var MURO_HINT = { com:"Cambia solo il colore: il muro resta come nella tua foto.", liscio:'Rasatura a gesso: il muro diventa liscio e uniforme.', civile:'Intonaco civile: superficie a grana fine, come la sabbia.' };
+  document.getElementById('muroControl').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    state.muro = b.dataset.v; aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null; syncInterniExtras();
+  });
+  document.getElementById('porteToggle').addEventListener('click', function(){
+    state.addPorte = !state.addPorte;
+    if(!state.addPorte) state.colorSerramenti = null;
     afterInterniToggle();
   });
   document.getElementById('colonneToggle').addEventListener('click', function(){
@@ -7288,7 +7321,7 @@
     });
     var serEl = document.getElementById('serramentiToggle');
     serEl.style.display = show ? 'flex' : 'none';
-    if(!show){ state.addSerramenti = false; state.colorSerramenti = null; }
+    if(!show){ state.addSerramenti = false; if(!(state.addPorte && isInterniPittura())) state.colorSerramenti = null; }
     serEl.classList.toggle('active', state.addSerramenti);
     var balEl = document.getElementById('balconiToggle');
     balEl.style.display = show ? 'flex' : 'none';
@@ -8353,7 +8386,7 @@
     Y: { it:'Bordatura: ', en:'Border: ' },
     K: { it:'Cornici: ', en:'Surrounds: ' },
     F: { it:'Balconi: ', en:'Balconies: ' },
-    G: { it:'Serramenti: ', en:'Window frames: ' },
+    get G(){ return (typeof isInterniPittura === 'function' && isInterniPittura()) ? { it:'Porte e finestre: ', en:'Doors and windows: ' } : { it:'Serramenti: ', en:'Window frames: ' }; },
     H: { it:'Righe: ', en:'Stripes: ' }
   };
   function addColorChip(row, phase, color){
@@ -9035,6 +9068,8 @@
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? apiHex(state.colorDavanzali) : null,
         colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? apiHex(state.colorSottotetto) : null,
         plafoneTipo: plafoneActive() ? (state.plafoneTipo || 'colore') : null,
+        muro: isInterniPittura() ? (state.muro || 'com') : null,
+        porteInterne: !!(state.addPorte && isInterniPittura()),
         colorPlafone: (needsPlafoneColor() && state.colorPlafone) ? state.colorPlafone.name : null, colorPlafoneHex: (needsPlafoneColor() && state.colorPlafone) ? apiHex(state.colorPlafone) : null,
         effettoScatola: !!(isInterniPittura() && state.effettoScatola),
         colorTetto: (needsTettoColor() && state.colorTetto) ? state.colorTetto.name : null, colorTettoHex: (needsTettoColor() && state.colorTetto) ? apiHex(state.colorTetto) : null,
@@ -9506,7 +9541,7 @@
     if(c === 'monolith') s.push('dove', 'resEff');
     else if(c === 'microcemento') s.push('dove');
     else if(c === 'piastrelle'){ s.push('piaDove'); if(state.piaDove === 'riv'){ s.push('piaAlt', 'piaDoccia', 'piaRivTile'); if(state.piaDoccia === 'si') s.push('piaDocTile'); } }
-    else if(c === 'imbiancatura') s.push('ctx');
+    else if(c === 'imbiancatura'){ s.push('ctx'); if(SF.a.ctx === 'interno') s.push('pitCosa', 'pitMuro'); }
     else if(c === 'legno') s.push('legnoTipo');
     else if(c === 'scale') s.push('scaleMat');
     else if(c === 'graniglia_esterni') s.push('granLayout', 'granScale');
@@ -9521,6 +9556,8 @@
       case 'piaDove': return !!SF.a.piaDove; case 'piaAlt': return !!SF.a.piaAlt; case 'piaDoccia': return !!SF.a.piaDoccia;
       case 'piaRivTile': return !!SF.a.piaRivTile; case 'piaDocTile': return !!SF.a.piaDocTile;
       case 'ctx': return !!SF.a.ctx;
+      case 'pitCosa': return !!SF.a.pitCosa;
+      case 'pitMuro': return !!SF.a.pitMuro;
       case 'legnoTipo': return !!state.material && ['parquet','spc','laminato'].indexOf(state.material.id) > -1;
       case 'scaleMat': return !!SF.a.scaleMat;
       case 'granLayout': return !!SF.a.granLayout;
@@ -9574,6 +9611,15 @@
       case 'ctx': return { t:'Interno o esterno?', opts:[
         { v:'interno', n:'Interno', d:'Pareti e soffitti di casa', pic:sfPic('', room({walls:1, h:'tutta', ceil:1})), sel: SF.a.ctx === 'interno' },
         { v:'esterno', n:'Esterno', d:'Facciata della casa', pic:sfPic('', room({out:1})), sel: SF.a.ctx === 'esterno' } ] };
+      case 'pitCosa': return { t:'Cosa vuoi dipingere?', s:'Tocca tutto quello che vuoi rinnovare, poi premi Continua.', multi:true, opts:[
+        { v:'pareti', n:'Pareti', d:'Sempre incluse', pic:sfPic('', room({walls:1, h:'tutta'})), sel:true },
+        { v:'soffitto', n:'Soffitto', d:'In colore o decorato', pic:sfPic('', room({ceil:1})), sel: !!(state.addPlafone || state.effettoScatola) },
+        { v:'accento', n:'Una parete diversa', d:'Altro colore, Corten, spatolato, marmo…', pic:sfPic('', room({walls:1, h:'tutta'}).replace(/#E0915A/g, '#8B4A2B')), sel: !!state.addAccento },
+        { v:'porte', n:'Porte e finestre', d:'Porte interne e telai in un colore RAL', pic:sfPic('#E9E4DA', '<svg viewBox="0 0 120 90" aria-hidden="true"><rect x="28" y="20" width="30" height="70" fill="#3F4448"/><circle cx="52" cy="58" r="2.5" fill="#C9C2B4"/><rect x="72" y="20" width="34" height="30" fill="#BFD3E2" stroke="#3F4448" stroke-width="4"/></svg>'), sel: !!state.addPorte } ] };
+      case 'pitMuro': return { t:'Come vuoi il muro finito?', s:'Scegli la superficie: il colore lo scegli dopo.', opts:[
+        { v:'com', n:"Lascia com'è", d:'Cambia solo il colore: il muro resta come nella tua foto', pic: (photoImg ? '<div class="sf-pic" style="background:#2A231D"><img src="'+photoImg.src+'" alt="" style="width:100%;height:100%;object-fit:cover"></div>' : sfPic('#2A231D', '<span class="sf-ico">📷</span>')), sel: (state.muro || 'com') === 'com' && !!SF.a.pitMuro },
+        { v:'liscio', n:'Liscio', d:'Rasato a gesso: superficie liscia e uniforme', pic:sfPic('linear-gradient(135deg,#EFEBE3,#DCD6CB)', ''), sel: state.muro === 'liscio' },
+        { v:'civile', n:'Ruvido', d:'Intonaco civile: grana fine, come la sabbia', pic:'<div class="sf-pic" style="background-color:#E6E1D6;background-image:url('+GRANA_TEX.fine.tex+'),url('+GRANA_TEX.fine.ombra+');background-size:90px;background-repeat:repeat;background-blend-mode:soft-light,multiply"></div>', sel: state.muro === 'civile' } ] };
       case 'legnoTipo': return { t:'Che pavimento in legno?', help:'parquet', opts:['parquet','spc','laminato'].map(function(id){ var c = CATEGORIES[sfCat(id)], st = CATEGORY_STYLE[id] || {}; return { v:id, n:c.name, d:c.desc.split('—')[0], pic:sfPic(st.bg, '<span class="sf-ico">'+(st.icon||'')+'</span>'), sel: state.material && state.material.id === id }; }) };
       case 'scaleMat': return { t:'Con cosa rivesti la scala?', help:'resina', opts:[
         { v:'resina', n:'Resina', d:'Anche marmo, materico, corten, metallico', pic:sfPic('linear-gradient(135deg,#8D949D,#5F666E)', ''), sel: SF.a.scaleMat === 'resina' },
@@ -9618,7 +9664,14 @@
     if(st === 'piaDoccia'){ SF.a.piaDoccia = v; state.piaDoccia = v; if(v === 'no') delete SF.a.piaDocTile; sfPiaApply(); return; }
     if(st === 'piaRivTile'){ SF.a.piaRivTile = v; state.piaRivTile = v; sfPiaApply(); return; }
     if(st === 'piaDocTile'){ SF.a.piaDocTile = v; state.piaDocciaTile = v; if(v === 'diversa') state.piaFmtDoccia = 'mosaico'; sfPiaApply(); return; }
-    if(st === 'ctx'){ SF.a.ctx = v; var cards = subGrid.children; if(cards[v === 'interno' ? 0 : 1]) cards[v === 'interno' ? 0 : 1].click(); return; }
+    if(st === 'pitCosa'){
+      if(v === 'soffitto'){ if(state.effettoScatola) document.getElementById('scatolaToggle').click(); else document.getElementById('plafoneToggle').click(); }
+      else if(v === 'accento') document.getElementById('accentoToggle').click();
+      else if(v === 'porte') document.getElementById('porteToggle').click();
+      return;
+    }
+    if(st === 'pitMuro'){ SF.a.pitMuro = v; state.muro = v; syncInterniExtras(); return; }
+    if(st === 'ctx'){ if(SF.a.ctx !== v){ delete SF.a.pitCosa; delete SF.a.pitMuro; } SF.a.ctx = v; var cards = subGrid.children; if(cards[v === 'interno' ? 0 : 1]) cards[v === 'interno' ? 0 : 1].click(); return; }
     if(st === 'legnoTipo'){ sfSelectCat(v); return; }
     if(st === 'scaleMat'){ SF.a.scaleMat = v; state.scaleTipo = v; state.effetto = 'liscio'; state.colorA = null; state.colorB = null; familyFilter = null; colorSearchQuery = ''; state.colorCatalog = 'base'; return; }
     if(st === 'granScale'){ SF.a.granScale = v; state.granScale = v; syncPiaVisibility(); return; }
@@ -9626,6 +9679,7 @@
   }
   function sfLabel(st){
     var q = sfQ(st); if(!q) return '';
+    if(q.multi) return q.opts.filter(function(x){ return x.sel; }).map(function(x){ return x.n; }).join(' + ');
     var o = q.opts.filter(function(x){ return x.sel; })[0];
     return o ? o.n : '';
   }
@@ -9647,10 +9701,11 @@
         + (photoImg ? '' : '<p class="sf-note">La foto serve solo per creare l\'anteprima del lavoro.</p>');
     } else {
       var q = sfQ(st) || { t:'', opts:[] };
+      if(q.multi) SF.a[st] = 1;
       document.getElementById('sfTitle').textContent = q.t;
       document.getElementById('sfSub').textContent = q.s || '';
       html = sfRecap() + '<div class="sf-cards">' + q.opts.map(function(o){
-        return '<button type="button" class="sf-card'+(o.sel ? ' sel' : '')+'" data-sfv="'+o.v+'">'+o.pic+'<b>'+o.n+'</b>'+(o.d ? '<span>'+o.d+'</span>' : '')+'</button>';
+        return '<button type="button" class="sf-card'+(o.sel ? ' sel' : '')+(q.multi ? ' sf-multi' : '')+'" data-sfv="'+o.v+'"'+(q.multi && o.v === 'pareti' ? ' data-lock="1"' : '')+'>'+o.pic+'<b>'+(q.multi ? (o.sel ? '☑ ' : '☐ ') : '')+o.n+'</b>'+(o.d ? '<span>'+o.d+'</span>' : '')+'</button>';
       }).join('') + '</div>'
       + (q.help ? '<button type="button" class="sf-help" data-sfv="'+q.help+'">🤷 Non so, consigliami</button>' : '');
     }
@@ -9704,13 +9759,15 @@
     try{ syncEffettoVisibility(); syncContextVisibility(); syncColorCatalogVisibility(); }catch(e){}
     document.body.classList.remove('sf-adv-open');
     var ab = document.getElementById('sfAdvBtn');
-    if(ab){ ab.hidden = !(!noFinitura() || isInterniPittura() || isScale()); ab.textContent = '⚙️ Opzioni avanzate' + (isInterniPittura() ? ' (soffitto, colonne, parete decorata, finitura)' : isScale() && state.scaleTipo === 'resina' ? ' (marmo, materico, corten, metallico, finitura)' : state.material && state.material.id === 'monolith_spatolato' ? ' (effetti, finitura)' : ' (finitura)'); }
+    if(ab){ ab.hidden = !(!noFinitura() || isInterniPittura() || isScale()); ab.textContent = (isInterniPittura() ? '⚙️ Altre opzioni' : '⚙️ Opzioni avanzate') + (isInterniPittura() ? ' (bordatura, colonne e travi, finitura)' : isScale() && state.scaleTipo === 'resina' ? ' (marmo, materico, corten, metallico, finitura)' : state.material && state.material.id === 'monolith_spatolato' ? ' (effetti, finitura)' : ' (finitura)'); }
     var fb = document.getElementById('sfFinBox'); if(fb) fb.hidden = noFinitura() || (typeof granaActive === 'function' && granaActive());
     Array.prototype.forEach.call(document.querySelectorAll('#sfFinControl button'), function(b){ b.classList.toggle('active', b.dataset.v === state.finitura); });
   }
   document.getElementById('sfBody').addEventListener('click', function(e){
     var b = e.target.closest('[data-sfv]'); if(!b) return;
     var st = SF.step;
+    var qq = sfQ(st);
+    if(qq && qq.multi){ if(!b.dataset.lock) sfApply(st, b.dataset.sfv); sfRender(); return; }
     sfApply(st, b.dataset.sfv);
     sfRender();
     setTimeout(sfNext, 160);
@@ -9727,7 +9784,10 @@
   });
   // Nel percorso semplice: sezioni già chieste prima (nascoste) e opzioni avanzate (chiuse)
   ['contextLabel','contextControl','contextHint','piaBox','scaleTipoLabel','scaleTipoControl','scaleTipoHint'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.add('sf-hide'); });
-  ['interniExtras','effettoLabel','effettoControl','effettoHint','effettoParticolareControl','effettoParticolareHint','sfFinBox'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.add('sf-adv'); });
+  ['effettoLabel','effettoControl','effettoHint','effettoParticolareControl','effettoParticolareHint','sfFinBox','muroBox','bordaturaOpts'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.add('sf-adv'); });
+  // Pittura interni nel percorso semplice: cosa dipingere e com'è il muro si scelgono prima (domande a schede);
+  // qui restano visibili solo le opzioni delle cose scelte (tipo di soffitto, parete diversa), il resto in "Altre opzioni".
+  Array.prototype.forEach.call(document.querySelectorAll('#interniExtras > .section-label, #interniExtras > .niche-toggle'), function(el){ el.classList.add('sf-adv'); });
 
   window.__rdDbg = function(){ return { panel: currentPanel, SF: SF, state: state }; };
   ['templateSection','toggleTemplates','photoHint'].forEach(function(id){ var el = document.getElementById(id); if(el) el.classList.add('sf-hide'); });
@@ -9899,7 +9959,7 @@
     if(needsSottotettoColor()) add('SOTTOTETTO', state.colorSottotetto);
     if(needsTettoColor()) add('TETTO', state.colorTetto);
     if(needsCorniciColor()) add('CORNICI PORTE E FINESTRE', state.colorCornici);
-    if(needsSerramentiColor()) add('SERRAMENTI E PERSIANE', state.colorSerramenti);
+    if(needsSerramentiColor()) add(isInterniPittura() ? 'PORTE E FINESTRE' : 'SERRAMENTI E PERSIANE', state.colorSerramenti);
     if(needsBalconiColor()) add('BALCONI', state.colorBalconi);
     return z;
   }
@@ -10185,7 +10245,8 @@
     if(isInterniPittura() && state.effettoScatola) lines.push("Effetto scatola: pareti e soffitto nello stesso colore");
     if(needsTettoColor() && state.colorTetto) lines.push("Tetto: "+colorLabel(state.colorTetto));
     if(needsCorniciColor() && state.colorCornici) lines.push("Cornici porte e finestre: "+colorLabel(state.colorCornici));
-    if(needsSerramentiColor() && state.colorSerramenti) lines.push("Serramenti: "+colorLabel(state.colorSerramenti));
+    if(needsSerramentiColor() && state.colorSerramenti) lines.push((isInterniPittura() ? "Porte e finestre: " : "Serramenti: ")+colorLabel(state.colorSerramenti));
+    if(isInterniPittura()) lines.push("Muro: "+MURO_NAME[state.muro || 'com']);
     if(needsBalconiColor() && state.colorBalconi) lines.push("Balconi: "+colorLabel(state.colorBalconi));
     if(needsRigheColor() && state.colorRighe) lines.push("Righe ("+righeDescriptionText('it')+"): "+colorLabel(state.colorRighe));
     if(!noFinitura()) lines.push("Finitura: "+state.finitura.charAt(0).toUpperCase()+state.finitura.slice(1));
