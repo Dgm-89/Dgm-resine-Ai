@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, lavoriPrecedenti, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -305,7 +305,7 @@ module.exports = async function handler(req, res) {
     ? "al pavimento e alle pareti (rivestimento) come descritto zona per zona nelle ZONE PIASTRELLE qui sotto"
     : isFloorOnly
     ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
-    : (resinaAreaDesc || ((materialId === "imbiancatura" && context === "esterno") ? "a tutte le pareti esterne della facciata visibili nella foto" : "alla superficie del pavimento/parete inquadrata"));
+    : (resinaAreaDesc || ((materialId === "imbiancatura" && context === "esterno") ? "a tutte le pareti esterne della facciata visibili nella foto" : (materialId === "imbiancatura" || materialId === "decorazioni") ? "SOLO alle pareti della stanza visibili nella foto (il pavimento NON si tocca: resta identico per colore, materiale e finitura)" : "alla superficie del pavimento/parete inquadrata"));
 
   // Layout principale facciata (solo Imbiancatura Esterno): "due_colori" divide
   // semplicemente la facciata in parte alta e parte bassa. Il marcapiano
@@ -699,12 +699,18 @@ module.exports = async function handler(req, res) {
       + ". I segni di cantiere presenti nella foto originale sulla superficie da trattare (nastro adesivo, tracce di gesso o matita, macchie, crepe, polvere, rappezzi, zone di colore diverso del massetto o dell'intonaco) NON vanno riprodotti né trasformati in decorazioni: sotto la nuova lavorazione spariscono completamente. Sono ammesse solo le lievi variazioni di tono e i segni di lavorazione tipici del materiale descritto."
     : "";
 
+  // Più lavorazioni sulla stessa foto: quelle già fatte sono nella foto e NON vanno cambiate.
+  const prevList = Array.isArray(lavoriPrecedenti) ? lavoriPrecedenti.filter(function (x) { return typeof x === "string" && x.trim(); }).slice(0, 6).map(function (x) { return x.slice(0, 120); }) : [];
+  const prevNote = prevList.length
+    ? ` LAVORI GIÀ FATTI SU QUESTA FOTO (da NON modificare): ${prevList.join("; ")}. Quelle superfici sono già il risultato finale: devono restare IDENTICHE (stesso colore, stesso materiale, stessa finitura, stessa texture). Cambia SOLO la nuova lavorazione descritta qui.`
+    : "";
   const prompt = isRigheStep ? righeStepPrompt : [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
     isFacadeStyled ? colorDesc : piaRivOn ? `I colori da usare sono ${colorDesc}.` : `Il colore/tonalità da usare è ${colorDesc}.`,
     finitura ? `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).` : "",
     continuityNote,
+    prevNote,
     granNote,
     piaZonesNote,
     isExteriorFacade
