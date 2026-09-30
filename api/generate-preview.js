@@ -831,15 +831,30 @@ module.exports = async function handler(req, res) {
     };
     try {
       let outMime = "image/jpeg";
-      let r = await sendRetry(Object.assign({ quality, input_fidelity: "high", size: outSize, output_format: "jpeg" }, outExtra));
+      // Parametri della richiesta. Se OpenAI ne rifiuta uno, si toglie SOLO quello e si riprova
+      // (prima si ripiegava su "auto" togliendo tutto: il formato 2K/4K andava perso).
+      const params = Object.assign({ quality, input_fidelity: "high", size: outSize, output_format: "jpeg" }, outExtra);
+      const dropped = [];
+      // Parametri già rifiutati da questo modello (memoria per istanza): non si rimandano.
+      const memo = (global.__rdRejected = global.__rdRejected || {})[model] = (global.__rdRejected[model] || {});
+      Object.keys(memo).forEach(function (k) { if (k in params) { delete params[k]; dropped.push(k); } });
+      let r = await sendRetry(params);
       let txt = await r.text();
       let fallbackWhy = "";
-      // Se un parametro opzionale non è accettato dal modello, riproviamo con i soli essenziali.
-      if (r.status === 400 && /input_fidelity|size|output_format|quality/i.test(txt)) {
-        try { const ej = JSON.parse(txt); fallbackWhy = String((ej && ej.error && ej.error.message) || txt).slice(0, 300); } catch (e) { fallbackWhy = txt.slice(0, 300); }
-        console.error("openai parametri rifiutati, riprovo senza:", fallbackWhy);
-        outMime = "image/png";
-        r = await sendRetry({ quality: /quality/i.test(txt) ? "high" : quality });
+      for (let tries = 0; tries < 4 && r.status === 400; tries++) {
+        let msg = txt;
+        try { const ej = JSON.parse(txt); msg = String((ej && ej.error && (ej.error.param ? ej.error.param + ": " : "") + ej.error.message) || txt); } catch (e) {}
+        const low = msg.toLowerCase();
+        let key = ["input_fidelity", "output_compression", "output_format", "size", "quality"].find(function (k) { return k in params && low.indexOf(k) > -1; });
+        if (!key) break;
+        fallbackWhy = (fallbackWhy ? fallbackWhy + " | " : "") + msg.slice(0, 200);
+        console.error("openai parametro rifiutato (" + key + "), riprovo senza:", msg.slice(0, 300));
+        if (key === "size" && params.size !== SIZES[resTest]?.[orient] && SIZES[resTest]) params.size = SIZES[resTest][orient];   // formato esatto rifiutato: formato standard della stessa risoluzione
+        else if (key === "size") { delete params.size; dropped.push("size"); }
+        else if (key === "quality" && params.quality !== "high") params.quality = "high";
+        else if (key === "output_format") { delete params.output_format; delete params.output_compression; outMime = "image/png"; dropped.push("output_format"); }
+        else { delete params[key]; dropped.push(key); if (key === "input_fidelity" || key === "output_compression") memo[key] = 1; }
+        r = await sendRetry(params);
         txt = await r.text();
       }
       let data;
@@ -860,7 +875,7 @@ module.exports = async function handler(req, res) {
         test = { quality: quality, size: outSize, inputImageTokens: imgIn, inputTextTokens: txtIn, outputTokens: out, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
       }
       const fit = await fitJpeg(b64, outMime);
-      if (test) { test.engine = "openai " + model; test.sizeSent = fallbackWhy ? "auto" : outSize; if (fallbackWhy) test.fallback = fallbackWhy; }
+      if (test) { test.engine = "openai " + model; test.sizeSent = params.size || "auto"; test.quality = params.quality || quality; if (dropped.length) test.dropped = dropped.join(", "); if (fallbackWhy) test.fallback = fallbackWhy; }
       return res.status(200).json({ imageBase64: fit.b64, mimeType: fit.mime, test: test });
     } catch (err) {
       console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
