@@ -301,7 +301,10 @@ module.exports = async function handler(req, res) {
       + " NON toccare prato, terra, aiuole, piante, vasi, muretti, fioriere, muri della casa, colonne, soffitto del portico e arredi."
       + " ATTENZIONE: il colore della graniglia scelta può somigliare a quello della pavimentazione attuale; questo NON è un motivo per lasciarla com'è. Il cambiamento deve vedersi chiaramente nella TEXTURE: al posto di masselli, lastre o piastrelle con le loro fughe ci deve essere una superficie continua fatta di sassolini fitti legati in resina. Un risultato in cui si vedono ancora i masselli o le fughe della vecchia pavimentazione è SBAGLIATO."
     : "";
-  const surfaceDesc = granSurfaceDesc ? granSurfaceDesc : piaRivOn
+  const scaleSurfaceDesc = materialId === "scale"
+    ? "SOLO ai gradini della scala visibile nella foto (pedate, alzate, frontalini e gli eventuali pianerottoli INTERMEDI tra una rampa e l'altra), dal primo all'ultimo gradino visibile. Il PAVIMENTO della stanza davanti, sotto e intorno alla scala (anche se è una piccola porzione in primo piano o ai piedi del primo gradino) NON fa parte della scala: resta IDENTICO alla foto originale, stesso materiale, stesse piastrelle e fughe, stesso colore. Pareti, soffitto, porte e corrimano non si toccano"
+    : "";
+  const surfaceDesc = granSurfaceDesc ? granSurfaceDesc : scaleSurfaceDesc ? scaleSurfaceDesc : piaRivOn
     ? "al pavimento e alle pareti (rivestimento) come descritto zona per zona nelle ZONE PIASTRELLE qui sotto"
     : isFloorOnly
     ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
@@ -710,6 +713,9 @@ module.exports = async function handler(req, res) {
   const prevNote = prevList.length
     ? ` LAVORI GIÀ FATTI SU QUESTA FOTO (da NON modificare): ${prevList.join("; ")}. Quelle superfici sono già il risultato finale: devono restare IDENTICHE (stesso colore, stesso materiale, stessa finitura, stessa texture). Cambia SOLO la nuova lavorazione descritta qui.`
     : "";
+  // I colori scelti vanno SOLO sulle superfici richieste: niente "contagio" su porte, metalli e oggetti vicini.
+  const colorContainNote = isExteriorFacade ? ""
+    : " COLORI SOLO DOVE RICHIESTO (regola vincolante): il colore e il materiale scelti si applicano ESCLUSIVAMENTE alle superfici indicate. Nessun altro oggetto deve prendere quel colore, nemmeno come riflesso o sfumatura: porte (anche metalliche o zincate), telai, maniglie, serrature, cerniere, tubi, cavi, lampade, prese, mobili e oggetti mantengono ESATTAMENTE il loro colore, materiale e grado di usura originali. Non aggiungere oggetti che non ci sono (prese, interruttori, placche, quadri) e non trasformare quelli esistenti in altro: una cerniera resta una cerniera.";
   const prompt = isRigheStep ? righeStepPrompt : [
     `Modifica ${sceneDesc}.`,
     `Applica ${surfaceDesc} la seguente lavorazione: ${textureDesc}.`,
@@ -717,6 +723,7 @@ module.exports = async function handler(req, res) {
     finitura ? `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).` : "",
     continuityNote,
     buildNote,
+    colorContainNote,
     ceilingNote,
     prevNote,
     granNote,
