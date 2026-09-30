@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="it" data-theme="dark">
+<html lang="it" translate="no" class="notranslate" data-theme="dark">
 <head>
 <meta charset="UTF-8">
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{if(window.Capacitor&&typeof Capacitor.isNativePlatform==="function"&&Capacitor.isNativePlatform()){document.documentElement.classList.add("is-app");document.documentElement.classList.add("is-app-"+Capacitor.getPlatform());}else{var ap=new URLSearchParams(location.search).get("app");if(ap==="1")localStorage.setItem("rdAppPreview","1");if(ap==="0")localStorage.removeItem("rdAppPreview");if(localStorage.getItem("rdAppPreview")==="1"){document.documentElement.classList.add("is-app","is-app-ios","is-app-preview");}}}catch(e){}</script>
 <title>Rendrum – Vedi la tua casa rinnovata prima dei lavori</title>
@@ -7998,6 +7999,7 @@
     var after=document.getElementById('canvasAfter');
     if(!aiResultImage){
       drawCover(after, photoImg);
+      var hh0 = document.getElementById('heroHint'); if(hh0) hh0.style.display = '';
       document.getElementById('tagBefore').style.display='none';
       document.getElementById('tagAfter').style.display='none';
       heroDots.style.display='none';
@@ -8008,6 +8010,7 @@
       return;
     }
     drawCover(after, aiResultImage);
+    var hh = document.getElementById('heroHint'); if(hh) hh.style.display = 'none';
     document.getElementById('tagBefore').textContent='PRIMA';
     document.getElementById('tagAfter').textContent='DOPO';
     document.getElementById('tagBefore').style.display='block';
