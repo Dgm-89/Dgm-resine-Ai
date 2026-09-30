@@ -9183,7 +9183,7 @@
   // Ogni strato: la lavorazione fatta, le sue scelte e la foto risultante.
   // La lavorazione successiva parte dalla foto già modificata.
   var layers = [], layerOriginal = null;
-  function layerTitle(){ return state.material ? state.material.name + (state.material.id==='imbiancatura' ? (state.context==='esterno' ? ' esterni' : ' interni') : '') : ''; }
+  function layerTitle(){ return state.material ? state.material.name + (state.material.id==='imbiancatura' ? (state.context==='esterno' ? ' esterni' : ' interni') : '') + (state.material.id==='scale' && state.scaleTipo ? ' in ' + state.scaleTipo : '') + (state.material.id==='graniglia_esterni' && state.granScale==='si' ? ' + gradini' : '') + (state.colorA ? ' · ' + state.colorA.name : '') : ''; }
   function renderLayerBox(){
     var done = document.getElementById('layerDone');
     var all = layers.map(function(l){ return l.title; }).concat(state.material ? [layerTitle()] : []);
