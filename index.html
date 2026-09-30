@@ -9283,8 +9283,8 @@
         statusEl.textContent = ts('aiStatusDone');
         if(RD_TEST_Q){
           var tq = window.__rdLastTest;
-          rdTestBadge((tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account') + ' · ' + result.img.naturalWidth + '×' + result.img.naturalHeight + ' px');
-          statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' : ' · modalità test non attiva per questo account';
+          rdTestBadge((tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account') + ' · ' + result.img.naturalWidth + '×' + result.img.naturalHeight + ' px' + (tq && tq.sizeSent ? ' · chiesto ' + tq.sizeSent : '') + (tq && tq.fallback ? ' · ⚠ OpenAI ha rifiutato: ' + tq.fallback : ''));
+          statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' + (tq.engine ? ' · motore ' + tq.engine : '') + (tq.size ? ' · formato chiesto ' + tq.size : '') + (tq.fallback ? ' · ⚠ OpenAI ha rifiutato il formato: ' + tq.fallback : '') : ' · modalità test non attiva per questo account';
         }
         stopAiProgress(true);
       })
