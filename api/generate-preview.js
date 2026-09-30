@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -192,11 +192,14 @@ module.exports = async function handler(req, res) {
     MATERIAL_TEXTURE.parquet = (MATERIAL_TEXTURE.parquet || "parquet in legno") + ", parquet prefinito Quick-Step collezione " + collezione + " in rovere con finitura extra opaca, venature e nodi naturali visibili";
   }
   // Scale: tipo di rivestimento scelto dal cliente.
-  const scaleTipoOk = materialId === "scale" ? (["resina", "microcemento", "piastrelle", "parquet"].includes(scaleTipo) ? scaleTipo : "resina") : null;
+  const scaleTipoOk = materialId === "scale" ? (["resina", "microcemento", "piastrelle", "parquet", "graniglia"].includes(scaleTipo) ? scaleTipo : "resina") : null;
   if (scaleTipoOk === "piastrelle") {
     MATERIAL_TEXTURE.scale = "rivestimento della scala in PIASTRELLE di gres porcellanato: ogni pedata è una lastra intera con il bordo frontale (naso) rifinito, ogni alzata è rivestita con una fascia di piastrella dello stesso colore, fughe sottili e dritte, superfici perfettamente planari";
   } else if (scaleTipoOk === "parquet") {
     MATERIAL_TEXTURE.scale = "rivestimento della scala in LEGNO (parquet): ogni pedata è un'asse di legno massello o multistrato con naso arrotondato sul fronte, alzate rivestite in legno dello stesso tono, venature del legno ben visibili che corrono nel senso della larghezza del gradino, finitura naturale opaca";
+  }
+  if (scaleTipoOk === "graniglia") {
+    MATERIAL_TEXTURE.scale = "rivestimento della scala in GRANIGLIA DI SASSO legata con resina trasparente (tipica delle scale esterne): pedate, alzate e frontalini interamente coperti da sassolini naturali di piccola pezzatura (2-6 mm), fitti e distribuiti in modo uniforme, texture granulare e materica ben visibile (non liscia, non piatta, non piastrellata), spigoli dei gradini arrotondati e rifiniti, nessuna fuga né giunto, stessa graniglia su tutti i gradini";
   }
   if (scaleTipoOk === "microcemento") {
     MATERIAL_TEXTURE.scale = "microcemento applicato su gradini e alzate di una scala (pedate, alzate e frontalini), superficie continua senza fughe con segni di lavorazione del frattazzo DELICATI e sfumati, leggere velature e nuvolature di tono (niente archi o ventagli marcati), finitura satinata-opaca, spigoli dei gradini netti e ben rifiniti";
@@ -262,7 +265,18 @@ module.exports = async function handler(req, res) {
     ? RESINA_AREA_DESC[resinaArea]
     : null;
 
-  const surfaceDesc = piaRivOn
+  // GRANIGLIA PER ESTERNI: la pavimentazione esistente (autobloccanti, lastre,
+  // piastrelle, cemento) va SOSTITUITA per intero; a richiesta anche i gradini.
+  const granScaleOn = materialId === "graniglia_esterni" && granigliaScale === "si";
+  const granSurfaceDesc = materialId === "graniglia_esterni"
+    ? "a TUTTA la pavimentazione esterna calpestabile visibile nella foto" + (granScaleOn ? " e a tutti i gradini esterni" : "")
+    : null;
+  const granNote = granSurfaceDesc
+    ? " PAVIMENTAZIONE DA RIFARE: comprende vialetti, cortile, marciapiede intorno alla casa e pavimento del portico o del terrazzo, qualunque sia il materiale attuale (autobloccanti, masselli, lastre, piastrelle, cemento, ghiaia). La vecchia pavimentazione va coperta completamente dalla graniglia e non deve restare visibile, nemmeno le sue fughe o il disegno dei masselli."
+      + (granScaleOn ? " Rivesti con la stessa graniglia anche TUTTI i gradini e le scale esterne visibili (pedate, alzate e frontalini), con spigoli rifiniti." : " I gradini e le scale restano invece come sono nella foto.")
+      + " NON toccare prato, terra, aiuole, piante, vasi, muretti, fioriere, muri della casa, colonne, soffitto del portico e arredi."
+    : "";
+  const surfaceDesc = granSurfaceDesc ? granSurfaceDesc : piaRivOn
     ? "al pavimento e alle pareti (rivestimento) come descritto zona per zona nelle ZONE PIASTRELLE qui sotto"
     : isFloorOnly
     ? "SOLO al pavimento inquadrato (questa lavorazione si posa esclusivamente a pavimento, non va applicata alle pareti anche se visibili nella foto)"
@@ -614,8 +628,8 @@ module.exports = async function handler(req, res) {
   const sampleClean = (typeof materialSampleImage === "string" && materialSampleImage.length < 1_500_000 && /^(monolith_spatolato|scale|microcemento|graniglia_esterni)$/.test(String(materialId || "")))
     ? materialSampleImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
-  const sampleNote = (sampleClean && materialId === "graniglia_esterni")
-    ? ` CAMPIONE DELLA GRANIGLIA: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO fotografato dall'alto (solo sassolini, senza ambiente): è la graniglia REALE scelta dal cliente (${colorA || ""}). Sulla pavimentazione da rifare usa ESATTAMENTE quei sassolini: stessi colori e stesse proporzioni tra i colori, stessa forma (arrotondata o spigolosa), stessa lucentezza e stessa densità, legati in resina trasparente. Scala reale: ogni sassolino misura pochi millimetri (circa 2-6 mm), quindi da lontano la superficie appare come una grana fine e fitta e i singoli sassolini si distinguono solo vicino all'obiettivo. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine e non ripeterlo come una piastrella.${colorB ? " Il campione riguarda il colore principale; per l'altro colore segui il nome e il colore indicati." : ""}`
+  const sampleNote = (sampleClean && (materialId === "graniglia_esterni" || scaleTipoOk === "graniglia"))
+    ? ` CAMPIONE DELLA GRANIGLIA: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO fotografato dall'alto (solo sassolini, senza ambiente): è la graniglia REALE scelta dal cliente (${colorA || ""}). Sulla superficie da rifare usa ESATTAMENTE quei sassolini: stessi colori e stesse proporzioni tra i colori, stessa forma (arrotondata o spigolosa), stessa lucentezza e stessa densità, legati in resina trasparente. Scala reale: ogni sassolino misura pochi millimetri (circa 2-6 mm), quindi da lontano la superficie appare come una grana fine e fitta e i singoli sassolini si distinguono solo vicino all'obiettivo. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine e non ripeterlo come una piastrella.${colorB ? " Il campione riguarda il colore principale; per l'altro colore segui il nome e il colore indicati." : ""}`
     : sampleClean
     ? ` CAMPIONE DEL MATERIALE: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO ravvicinato del materiale (solo una superficie piena, senza stanza né oggetti). È un campione reale di ${sampleIsMicro ? "microcemento" : "resina spatolata"} nel colore esatto scelto dal cliente${colorAHex ? " (" + colorAHex + ")" : ""}. Sulla superficie da trattare riproduci la STESSA texture del campione (${sampleIsMicro ? "velature e nuvolature morbide del frattazzo, DELICATE e sfumate: non accentuare i segni e non trasformarli in archi o ventagli evidenti" : "segni ad arco della spatola, nuvolature, leggere variazioni di tono, grana"}) e lo STESSO colore medio, adattati alla prospettiva, alla luce della foto e alla scala reale (i segni della spatola sono ampi 20-40 cm, non piccoli e ripetuti). La luce e i riflessi della stanza modificano il colore in modo naturale, ma la tinta di base deve restare quella del campione: non schiarirla, non scurirla e non cambiarne la tonalità. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine, non incollarlo come riquadro e non ripetere il suo disegno come una piastrella.`
     : "";
@@ -659,9 +673,12 @@ module.exports = async function handler(req, res) {
     isFacadeStyled ? colorDesc : piaRivOn ? `I colori da usare sono ${colorDesc}.` : `Il colore/tonalità da usare è ${colorDesc}.`,
     finitura ? `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).` : "",
     continuityNote,
+    granNote,
     piaZonesNote,
     isExteriorFacade
       ? facadeKeepSentence
+      : granSurfaceDesc
+        ? `Mantieni identiche la prospettiva, la luce, le ombre, il cielo, il prato, le piante, i muri e la facciata della casa, le colonne, gli arredi e i vasi: cambia solo la pavimentazione esterna${granScaleOn ? " e i gradini" : ""}, in modo fotorealistico, come una vera posa professionale di graniglia in resina.`
       : isFloorOnly
         ? `Mantieni identiche la prospettiva, la luce, le ombre, i mobili, e mantieni assolutamente INVARIATE tutte le pareti/muri della stanza (colore e materiale originali): cambia solo il pavimento, in modo fotorealistico, come se fosse una vera posa professionale.`
         : `Mantieni identica la prospettiva, la luce, le ombre, i mobili e tutto il resto della stanza: cambia solo il materiale/colore/texture della superficie indicata, in modo fotorealistico, come se fosse una vera posa professionale.`,
