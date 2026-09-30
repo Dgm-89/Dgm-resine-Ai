@@ -833,8 +833,11 @@ module.exports = async function handler(req, res) {
       let outMime = "image/jpeg";
       let r = await sendRetry(Object.assign({ quality, input_fidelity: "high", size: outSize, output_format: "jpeg" }, outExtra));
       let txt = await r.text();
+      let fallbackWhy = "";
       // Se un parametro opzionale non è accettato dal modello, riproviamo con i soli essenziali.
       if (r.status === 400 && /input_fidelity|size|output_format|quality/i.test(txt)) {
+        try { const ej = JSON.parse(txt); fallbackWhy = String((ej && ej.error && ej.error.message) || txt).slice(0, 300); } catch (e) { fallbackWhy = txt.slice(0, 300); }
+        console.error("openai parametri rifiutati, riprovo senza:", fallbackWhy);
         outMime = "image/png";
         r = await sendRetry({ quality: /quality/i.test(txt) ? "high" : quality });
         txt = await r.text();
@@ -857,7 +860,7 @@ module.exports = async function handler(req, res) {
         test = { quality: quality, size: outSize, inputImageTokens: imgIn, inputTextTokens: txtIn, outputTokens: out, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
       }
       const fit = await fitJpeg(b64, outMime);
-      if (test) test.engine = "openai " + model;
+      if (test) { test.engine = "openai " + model; test.sizeSent = fallbackWhy ? "auto" : outSize; if (fallbackWhy) test.fallback = fallbackWhy; }
       return res.status(200).json({ imageBase64: fit.b64, mimeType: fit.mime, test: test });
     } catch (err) {
       console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
