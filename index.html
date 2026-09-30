@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<script>try{if(window.Capacitor&&typeof Capacitor.isNativePlatform==="function"&&Capacitor.isNativePlatform()){document.documentElement.classList.add("is-app");document.documentElement.classList.add("is-app-"+Capacitor.getPlatform());}}catch(e){}</script>
+<script>try{if(window.Capacitor&&typeof Capacitor.isNativePlatform==="function"&&Capacitor.isNativePlatform()){document.documentElement.classList.add("is-app");document.documentElement.classList.add("is-app-"+Capacitor.getPlatform());}else{var ap=new URLSearchParams(location.search).get("app");if(ap==="1")localStorage.setItem("rdAppPreview","1");if(ap==="0")localStorage.removeItem("rdAppPreview");if(localStorage.getItem("rdAppPreview")==="1"){document.documentElement.classList.add("is-app","is-app-ios","is-app-preview");}}}catch(e){}</script>
 <title>Rendrum – Vedi la tua casa rinnovata prima dei lavori</title>
 <meta name="description" content="Carica una foto e guarda in anteprima resine, microcemento, parquet, SPC, piastrelle, pittura e facciate con i colori reali che scegli. Anteprima realistica con intelligenza artificiale.">
 <meta property="og:type" content="website">
@@ -584,6 +584,15 @@
   .ai-btn{ display:block; width:100%; margin-top:4px; border:none; border-radius:8px; padding:14px 16px; font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; background:var(--accent-gradient); color:var(--accent-ink); }
   .ai-btn:disabled{ background:var(--accent-soft); color:var(--ink-soft); }
   .ai-btn:disabled{ opacity:0.5; cursor:wait; }
+  .ai-busy{ position:fixed; inset:0; z-index:9000; background:var(--bg); display:none; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px)); text-align:center; }
+  body.ai-busy-on .ai-busy{ display:flex; }
+  body.ai-busy-on{ overflow:hidden; }
+  .ai-busy img{ width:min(78vw,420px); aspect-ratio:4/3; object-fit:cover; border-radius:16px; opacity:.55; filter:saturate(.8); }
+  .ai-busy h2{ margin:4px 0 0; font-size:22px; color:var(--ink); }
+  .ai-busy .ab-step{ color:var(--accent); font-weight:700; font-size:15px; }
+  .ai-busy .ab-msg{ color:var(--ink-soft); font-size:14px; min-height:20px; }
+  .ai-busy .ai-progress{ width:min(78vw,420px); margin-top:4px; }
+  .ai-busy .ab-note{ color:var(--ink-soft); font-size:12.5px; max-width:340px; }
   .ai-progress{ height:8px; border-radius:6px; background:var(--accent-soft); overflow:hidden; margin-top:12px; }
   .ai-progress-fill{ height:100%; width:0; border-radius:6px; background:linear-gradient(90deg, var(--accent), #F3B27A); transition:width .8s ease; }
   .ai-progress-msg{ font-size:12.5px; color:var(--ink); margin-top:8px; text-align:center; }
@@ -1204,6 +1213,7 @@
           <button type="button" data-v="stucco">Stucco veneziano</button>
           <button type="button" data-v="marmorino">Marmorino</button>
           <button type="button" data-v="velatura">Velatura</button>
+          <button type="button" data-v="corten">Corten</button>
         </div>
         <div class="seg-hint" id="plafoneTipoHint">Soffitto in tinta unita nel colore che scegli.</div>
       </div>
@@ -1519,6 +1529,14 @@
       <div style="font-size:12px;color:var(--ink-soft);margin-top:3px">Es. pavimento + pareti + soffitto: le generiamo tutte insieme, una dopo l'altra.</div>
     </div>
     <button class="ai-btn" id="aiGenerateBtn" disabled data-i18n="aiGenerateBtn">Genera anteprima AI fotorealistica</button>
+    <div class="ai-busy" id="aiBusy" role="status" aria-live="polite">
+      <img id="aiBusyImg" alt="">
+      <h2>Sto creando la tua anteprima…</h2>
+      <div class="ab-step" id="aiBusyStep"></div>
+      <div class="ai-progress"><div class="ai-progress-fill" id="aiBusyFill"></div></div>
+      <div class="ab-msg" id="aiBusyMsg"></div>
+      <div class="ab-note">Non chiudere la pagina: ci vuole circa un minuto per ogni lavorazione.</div>
+    </div>
     <div class="ai-progress" id="aiProgress" hidden><div class="ai-progress-fill" id="aiProgressFill"></div></div>
     <div class="ai-progress-msg" id="aiProgressMsg" hidden></div>
     <div class="ai-status" id="aiStatus"></div>
@@ -6750,7 +6768,9 @@
   function needsAccentoColor(){ return !!(accentoActive() && state.accentoTipo !== 'corten'); }
   function bordaturaActive(){ return !!(state.addBordatura && !state.effettoScatola && isInterniPittura()); }
   function needsBordaturaColor(){ return !!(bordaturaActive() && state.bordaturaCol === 'colore'); }
-  function needsPlafoneColor(){ return !!(state.addPlafone && !state.effettoScatola && isInterniPittura()); }
+  function plafoneActive(){ return !!(state.addPlafone && !state.effettoScatola && isInterniPittura()); }
+  // Corten: colore naturale ruggine, non si sceglie un colore a parte.
+  function needsPlafoneColor(){ return plafoneActive() && state.plafoneTipo !== 'corten'; }
   function needsTettoColor(){ return !!(state.addTetto && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   function needsCorniciColor(){ return !!(state.addCornici && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno'); }
   // Vero quando il cliente ha attivato il toggle "balconi colore diverso"
@@ -6959,10 +6979,10 @@
     box.hidden = !show;
     if(!show){ state.addPlafone=false; state.effettoScatola=false; state.colorPlafone=null; state.addAccento=false; state.colorAccento=null; state.addBordatura=false; state.colorBordatura=null; state.accentoPoint=null; }
     document.getElementById('plafoneToggle').classList.toggle('active', !!state.addPlafone);
-    document.getElementById('plafoneOpts').hidden = !needsPlafoneColor();
+    document.getElementById('plafoneOpts').hidden = !plafoneActive();
     var pt = state.plafoneTipo || 'colore';
     Array.prototype.forEach.call(document.getElementById('plafoneTipoControl').children, function(b){ b.classList.toggle('active', b.dataset.v === pt); });
-    document.getElementById('plafoneTipoHint').textContent = ({colore:'Soffitto in tinta unita nel colore che scegli.', spatolato:'Soffitto con passate di spatola e velature, nel colore che scegli.', stucco:'Stucco veneziano lucido e profondo, nel colore che scegli.', marmorino:'Marmorino liscio e setoso con leggere venature, nel colore che scegli.', velatura:'Velatura morbida e nuvolata, nel colore che scegli.'})[pt];
+    document.getElementById('plafoneTipoHint').textContent = ({colore:'Soffitto in tinta unita nel colore che scegli.', spatolato:'Soffitto con passate di spatola e velature, nel colore che scegli.', stucco:'Stucco veneziano lucido e profondo, nel colore che scegli.', marmorino:'Marmorino liscio e setoso con leggere venature, nel colore che scegli.', velatura:'Velatura morbida e nuvolata, nel colore che scegli.', corten:'Effetto Corten: color ruggine naturale con macchie di ossidazione. Non serve scegliere un colore.'})[pt];
     document.getElementById('colonneToggle').classList.toggle('active', colonneOn());
     var bt = document.getElementById('bordaturaToggle');
     bt.classList.toggle('active', !!state.addBordatura); bt.disabled = !!state.effettoScatola; bt.style.opacity = state.effettoScatola ? '0.45' : '';
@@ -6982,8 +7002,9 @@
   }
   document.getElementById('plafoneTipoControl').addEventListener('click', function(e){
     var b = e.target.closest('button'); if(!b) return;
-    state.plafoneTipo = b.dataset.v; aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
-    syncInterniExtras(); renderStep2UI();
+    state.plafoneTipo = b.dataset.v;
+    if(state.plafoneTipo === 'corten') state.colorPlafone = null;
+    afterInterniToggle();
   });
   document.getElementById('plafoneToggle').addEventListener('click', function(){
     state.addPlafone = !state.addPlafone;
@@ -8700,7 +8721,7 @@
     if(isInterniPittura()){
       var hx = function(c, def){ return c && c.hex ? c.hex : def; };
       var wall = hx(state.colorA, '#E9E4DA');
-      var ceil = state.effettoScatola ? wall : (needsPlafoneColor() ? hx(state.colorPlafone, '#FFFFFF') : '#FAFAF7');
+      var ceil = state.effettoScatola ? wall : (plafoneActive() && state.plafoneTipo === 'corten') ? '#8B4A26' : (needsPlafoneColor() ? hx(state.colorPlafone, '#FFFFFF') : '#FAFAF7');
       var acc = accentoActive() ? (state.accentoTipo==='corten' ? '#A5602E' : hx(state.colorAccento, wall)) : wall;
       var band = bordaturaActive() ? (needsBordaturaColor() ? hx(state.colorBordatura, '#FFFFFF') : '#FFFFFF') : null;
       var hl = function(ph){ return ph===pickPhase ? ' stroke="#E68A4C" stroke-width="3"' : ' stroke="rgba(0,0,0,.12)" stroke-width="1"'; };
@@ -8846,6 +8867,15 @@
   });
 
   // ---------- AI generation ----------
+  // Durante la generazione la pagina è bloccata su una schermata di attesa: niente
+  // indietro, niente aggiunte, niente cambi di scelta finché l'AI non ha finito.
+  function setAiBusy(on, stepText){
+    document.body.classList.toggle('ai-busy-on', !!on);
+    if(on){
+      var im = document.getElementById('aiBusyImg'); try{ if(photoImg && im.src !== photoImg.src) im.src = photoImg.src; }catch(e){}
+      document.getElementById('aiBusyStep').textContent = stepText || '';
+    }
+  }
   // ---------- barra di avanzamento durante la generazione AI ----------
   // Il servizio non comunica l'avanzamento reale: la barra avanza in modo
   // graduale (rallentando verso il 95%) e i messaggi cambiano, così il cliente
@@ -8862,6 +8892,7 @@
   function startAiProgress(){
     var bar = document.getElementById('aiProgress'), fill = document.getElementById('aiProgressFill'), msg = document.getElementById('aiProgressMsg');
     bar.hidden = false; msg.hidden = false; fill.style.width = '2%';
+    var bfi = document.getElementById('aiBusyFill'); if(bfi) bfi.style.width = '2%';
     aiProgStart = Date.now();
     clearInterval(aiProgTimer);
     aiProgTimer = setInterval(function(){
@@ -8870,6 +8901,7 @@
       fill.style.width = pct.toFixed(1) + '%';
       var i = Math.min(AI_PROGRESS_MSGS.length - 1, Math.floor(t / 15));
       msg.textContent = (RD_TEST_Q ? 'TEST ' + RD_TEST_NAME[RD_TEST_Q] + ' · ' : '') + tr(AI_PROGRESS_MSGS[i]);
+      var bf = document.getElementById('aiBusyFill'), bm = document.getElementById('aiBusyMsg'); if(bf) bf.style.width = pct.toFixed(1) + '%'; if(bm) bm.textContent = tr(AI_PROGRESS_MSGS[i]);
     }, 700);
   }
   function stopAiProgress(ok){
@@ -8890,6 +8922,7 @@
     var btn = this; var statusEl = document.getElementById('aiStatus');
     btn.disabled = true; statusEl.classList.remove('error');
     statusEl.textContent = ts('aiStatusGenerating') + (chainRun ? ' — lavorazione ' + (chainIdx+1) + ' di ' + chainRun.length + ': ' + layerTitle() : '');
+    setAiBusy(true, (chainRun ? 'Lavorazione ' + (chainIdx+1) + ' di ' + chainRun.length + ' · ' : '') + layerTitle());
     startAiProgress();
     // Foto di riferimento dello stile di boiserie scelto (una delle 10 miniature già
     // presenti nella griglia .boiserie-grid): la inviamo al backend, insieme alla foto
@@ -8909,7 +8942,7 @@
         colorA: state.colorA.name, colorAHex: apiHex(state.colorA), colorB: state.colorB ? state.colorB.name : null, colorBHex: state.colorB ? apiHex(state.colorB) : null, colorC: state.colorC ? state.colorC.name : null, colorCHex: state.colorC ? apiHex(state.colorC) : null,
         colorDavanzali: (needsDavanzaliColor() && state.colorDavanzali) ? state.colorDavanzali.name : null, colorDavanzaliHex: (needsDavanzaliColor() && state.colorDavanzali) ? apiHex(state.colorDavanzali) : null,
         colorSottotetto: (needsSottotettoColor() && state.colorSottotetto) ? state.colorSottotetto.name : null, colorSottotettoHex: (needsSottotettoColor() && state.colorSottotetto) ? apiHex(state.colorSottotetto) : null,
-        plafoneTipo: needsPlafoneColor() ? (state.plafoneTipo || 'colore') : null,
+        plafoneTipo: plafoneActive() ? (state.plafoneTipo || 'colore') : null,
         colorPlafone: (needsPlafoneColor() && state.colorPlafone) ? state.colorPlafone.name : null, colorPlafoneHex: (needsPlafoneColor() && state.colorPlafone) ? apiHex(state.colorPlafone) : null,
         effettoScatola: !!(isInterniPittura() && state.effettoScatola),
         colorTetto: (needsTettoColor() && state.colorTetto) ? state.colorTetto.name : null, colorTettoHex: (needsTettoColor() && state.colorTetto) ? apiHex(state.colorTetto) : null,
@@ -9150,6 +9183,7 @@
             setTimeout(function(){ document.getElementById('aiGenerateBtn').disabled = false; document.getElementById('aiGenerateBtn').click(); }, 300);
           } else { chainRun = null; renderQueue(); renderLayerBox(); }
         }
+        if(!chainRun) setAiBusy(false);
         renderHeroPreview();
         setTimeout(syncResultCta, 0);
         statusEl.textContent = ts('aiStatusDone');
@@ -9169,6 +9203,7 @@
         if(IS_APP && err && err.code === 'quota_exceeded') errMsg = 'Hai usato tutte le anteprime del tuo piano per questo mese.';
         statusEl.textContent = ts('aiStatusErrorPrefix') + errMsg + ts('aiStatusErrorSuffix');
         stopAiProgress(false);
+        setAiBusy(false);
         if(chainRun){ statusEl.textContent += ' (lavorazione ' + (chainIdx+1) + ' di ' + chainRun.length + ')'; chainRun = null; }
       })
       .finally(function(){ btn.disabled = false; });
@@ -9193,7 +9228,8 @@
   }
   document.getElementById('queueAddBtn').addEventListener('click', function(){
     if(!state.material || !state.colorA){ return; }
-    genQueue.push({ snap: Object.assign({}, state), title: layerTitle() });
+    genQueue.push({ snap: Object.assign({}, state), title: layerTitle(), sf: JSON.parse(JSON.stringify(SF)), from: currentPanel });
+    queueAddPending = true;
     state.category = null; state.material = null;
     syncLayerBanner();
     goTo(currentSeq()[0]);
@@ -9214,6 +9250,7 @@
     if(!aiResultImage || !aiResultImageBase64) return;
     if(!layerOriginal) layerOriginal = { img: photoImg, b64: state.photoBase64, mime: state.photoMime };
     layers.push({ title: layerTitle(), lines: pdfChoiceLines(), stateSnap: Object.assign({}, state), basePhoto: { img: photoImg, b64: state.photoBase64, mime: state.photoMime }, result: { img: aiResultImage, b64: aiResultImageBase64, mime: aiResultImageMime } });
+    layers[layers.length - 1].sf = JSON.parse(JSON.stringify(SF)); layerAddPending = true;
     // la nuova base è il risultato appena ottenuto
     photoImg = aiResultImage; state.photoBase64 = aiResultImageBase64; state.photoMime = aiResultImageMime;
     aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
@@ -9417,7 +9454,7 @@
   function sfQ(st){
     var catObj = state.category;
     switch(st){
-      case 'mat': return { t:'Cosa vuoi rifare?', s:'Tocca il lavoro.', opts: sfMats().map(function(m){ return { v:m.v, n:m.n, d:m.d, pic:sfPic(m.bg, '<span class="sf-ico">'+m.icon+'</span>'), sel: SF.mat === m.v }; }) };
+      case 'mat': return { t:'Cosa vuoi rifare?', s: ((queueAddPending && genQueue.length) || (layerAddPending && layers.length)) ? 'Lavorazione ' + (genQueue.length + layers.length + 1) + ': tocca il lavoro. Hai sbagliato? Premi Indietro per annullare.' : 'Tocca il lavoro.', opts: sfMats().map(function(m){ return { v:m.v, n:m.n, d:m.d, pic:sfPic(m.bg, '<span class="sf-ico">'+m.icon+'</span>'), sel: SF.mat === m.v }; }) };
       case 'dove': return { t: SF.mat === 'microcemento' ? 'Dove metti il microcemento?' : 'Dove metti la resina?', help:'pavimento', opts:[
         { v:'pavimento', n:'Pavimento', pic:sfPic('', room({floor:1})), sel: state.resinaArea === 'pavimento' },
         { v:'rivestimento', n:'Pareti', pic:sfPic('', room({walls:1, h:'tutta'})), sel: state.resinaArea === 'rivestimento' },
@@ -9536,7 +9573,30 @@
     for(var k = i + 1; k < steps.length; k++){ return sfGo(steps[k]); }
     goTo('panelColor');
   }
+  // "Aggiungi un'altra lavorazione" premuto per sbaglio: tornando indietro dalla scelta
+  // del lavoro si annulla l'aggiunta e si torna alla lavorazione di prima, senza doppioni.
+  var queueAddPending = false, layerAddPending = false;
+  function undoQueueAdd(){
+    var last = genQueue.pop(); queueAddPending = false;
+    if(!last) return false;
+    restoreSnap(last.snap);
+    if(last.sf){ SF.step = last.sf.step; SF.mat = last.sf.mat; SF.a = last.sf.a || {}; }
+    aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+    try{ syncLayerBanner(); }catch(e){}
+    goTo(last.from && last.from !== 'panelSimple' ? last.from : 'panelResult');
+    try{ renderQueue(); syncNextStepEnabled(); syncResultCta(); }catch(e){}
+    return true;
+  }
   function sfBack(){
+    if(queueAddPending && genQueue.length && (SF.step === 'mat' || SF.step === 'foto')){ undoQueueAdd(); return; }
+    if(layerAddPending && layers.length && (SF.step === 'mat' || SF.step === 'foto')){
+      var lsf = layers[layers.length - 1].sf; layerAddPending = false;
+      document.getElementById('layerUndoBtn').click();
+      if(lsf){ SF.step = lsf.step; SF.mat = lsf.mat; SF.a = lsf.a || {}; }
+      document.getElementById('pdfBox').hidden = false; document.getElementById('layerBox').hidden = false;
+      goTo('panelResult'); try{ renderHeroPreview(); renderLayerBox(); syncNextStepEnabled(); syncResultCta(); }catch(e){}
+      return;
+    }
     var steps = sfSteps(), i = steps.indexOf(SF.step);
     if(i > 0) sfGo(steps[i-1]); else goTo('panelLanding');
   }
@@ -9665,6 +9725,7 @@
   }
 
   function goTo(id){
+    if(id === 'panelResult' && state.material){ queueAddPending = false; layerAddPending = false; }
     currentPanel = id;
     var seq = currentSeq();
     if(id === 'panelConfirm'){
@@ -9900,7 +9961,7 @@
     var davanzaliLine = (needsDavanzaliColor() && state.colorDavanzali) ? '<div class="line"><span class="sw" style="background:'+state.colorDavanzali.hex+'"></span><span>'+ts('summaryDavanzali')+state.colorDavanzali.name+' ('+state.colorDavanzali.code+')</span></div>' : '';
     var marcapianoLine = (needsMarcapianoColor() && state.colorC) ? '<div class="line"><span class="sw" style="background:'+state.colorC.hex+'"></span><span>'+ts('summaryMarcapiano')+state.colorC.name+' ('+state.colorC.code+')</span></div>' : '';
     var sottotettoLine = (needsSottotettoColor() && state.colorSottotetto) ? '<div class="line"><span class="sw" style="background:'+state.colorSottotetto.hex+'"></span><span>'+ts('summarySottotetto')+state.colorSottotetto.name+' ('+state.colorSottotetto.code+')</span></div>' : '';
-    var plafoneLine = (needsPlafoneColor() && state.colorPlafone) ? '<div class="line"><span class="sw" style="background:'+state.colorPlafone.hex+'"></span><span>Plafone: '+state.colorPlafone.name+' ('+state.colorPlafone.code+')</span></div>' : (isInterniPittura() && state.effettoScatola ? '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>Effetto scatola: pareti e soffitto nello stesso colore</span></div>' : '');
+    var plafoneLine = (plafoneActive() && state.plafoneTipo === 'corten') ? '<div class="line"><span class="sw" style="background:#8B4A26"></span><span>Plafone: effetto Corten</span></div>' : (needsPlafoneColor() && state.colorPlafone) ? '<div class="line"><span class="sw" style="background:'+state.colorPlafone.hex+'"></span><span>Plafone: '+state.colorPlafone.name+' ('+state.colorPlafone.code+')</span></div>' : (isInterniPittura() && state.effettoScatola ? '<div class="line"><span class="sw" style="background:'+state.colorA.hex+'"></span><span>Effetto scatola: pareti e soffitto nello stesso colore</span></div>' : '');
     var tettoLine = (needsTettoColor() && state.colorTetto) ? '<div class="line"><span class="sw" style="background:'+state.colorTetto.hex+'"></span><span>'+ts('summaryTetto')+state.colorTetto.name+' ('+state.colorTetto.code+')</span></div>' : '';
     var corniciLine = (needsCorniciColor() && state.colorCornici) ? '<div class="line"><span class="sw" style="background:'+state.colorCornici.hex+'"></span><span>'+ts('summaryCornici')+state.colorCornici.name+' ('+state.colorCornici.code+')</span></div>' : '';
     var balconiLine = (needsBalconiColor() && state.colorBalconi) ? '<div class="line"><span class="sw" style="background:'+state.colorBalconi.hex+'"></span><span>'+ts('summaryBalconi')+state.colorBalconi.name+' ('+state.colorBalconi.code+')</span></div>' : '';
@@ -9931,7 +9992,7 @@
     if(!nb || !gb) return;
     var gen = currentPanel === 'panelResult' && !aiResultImage;
     nb.dataset.gen = gen ? '1' : '';
-    gb.style.display = gen ? 'none' : '';
+    gb.style.display = 'none'; // il pulsante per generare è sempre quello in basso
     if(gen){
       var busy = gb.disabled && !!(state.photoBase64 && state.colorA);
       nb.textContent = busy ? 'Generazione in corso…' : ('✨ ' + gb.textContent);
@@ -9957,6 +10018,7 @@
     if(idx>=0 && idx+1<seq.length) goTo(seq[idx+1]);
   });
   document.getElementById('backStep').addEventListener('click', function(){
+    if(document.body.classList.contains('ai-busy-on')) return;
     if(currentPanel === 'panelSimple'){ sfBack(); return; }
     var seq = currentSeq(); var idx = seq.indexOf(currentPanel);
     if(idx>0) goTo(seq[idx-1]);
@@ -10009,6 +10071,7 @@
     if(needsDavanzaliColor() && state.colorDavanzali) lines.push("Davanzali finestre: "+colorLabel(state.colorDavanzali));
     if(needsMarcapianoColor() && state.colorC) lines.push("Marcapiano: "+colorLabel(state.colorC));
     if(needsSottotettoColor() && state.colorSottotetto) lines.push("Sottotetto: "+colorLabel(state.colorSottotetto));
+    if(plafoneActive() && state.plafoneTipo === 'corten') lines.push("Plafone (soffitto): effetto Corten");
     if(needsPlafoneColor() && state.colorPlafone) lines.push("Plafone (soffitto): "+({spatolato:"spatolato ", stucco:"stucco veneziano ", marmorino:"marmorino ", velatura:"velatura "}[state.plafoneTipo] || "")+colorLabel(state.colorPlafone));
     if(accentoActive()) lines.push("Parete decorata: "+(state.accentoTipo==='corten' ? 'Corten' : ((state.accentoTipo && state.accentoTipo!=='colore' ? state.accentoTipo+' ' : '') + (state.colorAccento ? colorLabel(state.colorAccento) : ''))));
     if(isInterniPittura()) lines.push("Colonne, travi e sporgenze: "+(colonneOn() ? "colorate come le pareti" : "lasciate come sono"));
@@ -12074,6 +12137,7 @@
     // precedente; dalla schermata iniziale mette l'app in secondo piano.
     function appVisible(el){ return !!(el && el.offsetParent !== null && !el.disabled); }
     function appBack(){
+      if(document.body.classList.contains('ai-busy-on')) return;
       var fs = document.getElementById('fsViewer');
       if(fs && fs.classList.contains('open')){ document.getElementById('fsClose').click(); return; }
       var cpmEl = document.getElementById('colorPreviewModal');
