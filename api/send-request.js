@@ -42,15 +42,15 @@
 // limite è che alcuni client email possono mostrare al destinatario un'etichetta
 // tipo "via resend.dev" accanto al mittente, che è meno professionale per un
 // uso definitivo.
-// Quando l'azienda vorrà un mittente definitivo tipo "richieste@dgmresine.com",
+// Quando l'azienda vorrà un mittente definitivo tipo "richieste@rendrum.com",
 // occorre:
 //   1. Andare nella dashboard Resend, sezione "Domains"
-//   2. Aggiungere il dominio "dgmresine.com" e seguire le istruzioni per
+//   2. Aggiungere il dominio "rendrum.com" e seguire le istruzioni per
 //      aggiungere alcuni record DNS (SPF/DKIM) forniti da Resend presso il
 //      provider dove è registrato il dominio (es. pannello del provider hosting/DNS)
 //   3. Attendere la verifica del dominio (di solito pochi minuti/ore)
 //   4. Una volta verificato, aggiornare qui sotto la riga "from" con qualcosa
-//      come: "DGM Resine <richieste@dgmresine.com>"
+//      come: "Rendrum <richieste@rendrum.com>"
 // Fino a quel momento, l'indirizzo di test "onboarding@resend.dev" resta
 // perfettamente funzionante e non richiede alcuna azione.
 
@@ -75,7 +75,7 @@ module.exports = async function handler(req, res) {
   } = req.body || {};
 
   // Il destinatario lo decide SOLO il server (variabile REQUEST_TO su Vercel).
-  const toEmail = (process.env.REQUEST_TO || "info@dgmresine.com").trim();
+  const toEmail = (process.env.REQUEST_TO || "info@rendrum.com").trim();
   if (!textSummary || typeof textSummary !== "string") {
     return res.status(400).json({ error: "Richiesta vuota." });
   }
