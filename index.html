@@ -897,7 +897,7 @@
       </div>
       <div id="tfStep2" hidden>
         <div class="pf-sec" id="tfCount"></div>
-        <div class="pf-hint">Scegli fino a 3 artigiani: riceveranno la tua richiesta con foto e dettagli.</div>
+        <div class="pf-hint">Scegli tu a quanti artigiani inviarla: solo quelli che selezioni riceveranno la tua richiesta con foto e dettagli.</div>
         <div id="tfList"></div>
         <div class="pp-error" id="tfErr2" style="margin-top:10px"></div>
         <button type="button" class="pro-auth-submit" id="tfSend">Invia la richiesta</button>
@@ -1557,6 +1557,11 @@
       <button type="button" class="ai-btn" id="tfBtn" hidden style="margin:8px 0 0">🔎 Trova un artigiano per questo lavoro</button>
       <button type="button" class="ai-btn" id="qFromPreviewBtn" hidden style="margin:8px 0 0;background:none;color:var(--ink);border:1.5px solid var(--accent)">📄 Crea un preventivo con questa anteprima</button>
       <div id="pdfStatus" style="font-size:13px;margin-top:6px"></div>
+      <div style="margin-top:6px">
+        <button class="share-btn" id="shareConfigBtn" data-i18n="shareConfigBtn">Salva o condividi questa selezione</button>
+        <button class="share-btn" id="panel3SaveProjectBtn" style="display:none" data-i18n="panel3SaveProjectBtn">Salva questo progetto nella tua cartella</button>
+        <canvas id="shareCardCanvas" width="800" height="1000" style="display:none"></canvas>
+      </div>
     </div>
   </section>
 
@@ -1564,9 +1569,6 @@
   <section class="panel" id="panel3">
     <h1 class="title" data-i18n="panel3Title">I tuoi dati</h1>
     <div class="summary" id="summaryBox"></div>
-    <button class="share-btn" id="shareConfigBtn" data-i18n="shareConfigBtn">Salva o condividi questa selezione</button>
-    <button class="share-btn" id="panel3SaveProjectBtn" style="display:none" data-i18n="panel3SaveProjectBtn">Salva questo progetto nella tua cartella</button>
-    <canvas id="shareCardCanvas" width="800" height="1000" style="display:none"></canvas>
 
     <div class="field"><label for="fName" data-i18n="fNameLabel">Nome e cognome</label><input id="fName" type="text" placeholder="Mario Rossi" autocomplete="name"></div>
     <div class="row2">
@@ -1646,7 +1648,7 @@
 
 <script>
 (function(){
-  var WHATSAPP_LINK = "https://wa.me/message/IOK6PQT77DFTJ1";
+  var WHATSAPP_LINK = "";
   var EMAIL_TO = "info@rendrum.com";
   var AI_ENDPOINT = "/api/generate-preview";
 
@@ -9260,6 +9262,7 @@
         document.getElementById('pdfBox').hidden = false;
         document.getElementById('qFromPreviewBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
         document.getElementById('tfBtn').hidden = !!(proAccount && proAccount.accountType !== 'privato');
+        var spb = document.getElementById('panel3SaveProjectBtn'); if(spb) spb.style.display = proAccount ? 'block' : 'none';
         document.getElementById('layerBox').hidden = false; renderLayerBox();
         if(chainRun){
           if(chainIdx < chainRun.length - 1){
@@ -9748,7 +9751,7 @@
     if(SF_ON){
       var sq = ['panelSimple', 'panelColor'];
       if(accentoActive() || showerActive()) sq.push('panelPhoto');
-      return sq.concat(['panelResult', 'panel3', 'panelConfirm']);
+      return sq.concat(['panelResult']);
     }
     var seq = ALL_PANELS.slice().filter(function(id){ return id!=='panelLanding' && id!=='panelSimple'; });
     if(!(state.category && (state.category.id === 'monolith' || state.category.id === 'microcemento'))){
@@ -9767,7 +9770,10 @@
       seq = seq.filter(function(id){ return id!=='panelFinitura'; });
       state.finitura = 'opaco';
     }
-    return seq;
+    // Rendrum è solo la piattaforma: dopo il risultato non c'è più la pagina
+    // "I tuoi dati" (richiesta diretta alla vecchia ditta). Il cliente passa da
+    // "Trova un artigiano", il professionista da "Crea un preventivo".
+    return seq.filter(function(id){ return id!=='panel3' && id!=='panelConfirm'; });
   }
 
   document.getElementById('landingPrivato').addEventListener('click', function(){
@@ -9803,9 +9809,9 @@
 
   function updateProgress(id, seq){
     var idx = seq.indexOf(id);
-    var totalSteps = seq.length - 1; // panelConfirm non conta come "passo"
+    var totalSteps = seq.length;
     var stepNum = Math.min(idx+1, totalSteps);
-    var pct = totalSteps>0 ? Math.round((idx/totalSteps)*100) : 0;
+    var pct = totalSteps>0 ? Math.round(((idx+1)/totalSteps)*100) : 0;
     document.getElementById('progressFill').style.width = pct+'%';
     var label = (id==='panelSub' && state.category && state.category.id==='imbiancatura') ? ts('subTitleContext')
       : (id==='panelSub' && state.category && state.category.id==='graniglia_esterni') ? ts('subTitleGraniglia')
@@ -10093,7 +10099,10 @@
       nb.classList.remove('cta-gen');
       if(currentPanel === 'panelResult'){ nb.textContent = ts('btnContinua'); nb.disabled = false; }
     }
+    if(currentPanel === 'panelResult' && !gen){ nb.textContent = resultCtaLabel(); nb.disabled = false; }
   }
+  function isProUser(){ return !!(proAccount && proAccount.accountType !== 'privato'); }
+  function resultCtaLabel(){ return isProUser() ? tr({it:'📄 Crea il preventivo', en:'📄 Create the quote'}) : tr({it:'🔎 Trova un artigiano', en:'🔎 Find a contractor'}); }
   try{ new MutationObserver(syncResultCta).observe(document.getElementById('aiGenerateBtn'), { attributes:true, childList:true, characterData:true, subtree:true }); }catch(e){}
   document.getElementById('nextStep').addEventListener('click', function(e){
     if(this.dataset.gen === '1'){
@@ -10105,6 +10114,11 @@
   document.getElementById('nextStep').addEventListener('click', function(){
     if(this.dataset.gen === '1') return;
     if(currentPanel === 'panelSimple'){ if(sfAnswered(SF.step)) sfNext(); return; }
+    if(currentPanel === 'panelResult'){
+      if(!aiResultImage) return;
+      if(isProUser()) document.getElementById('qFromPreviewBtn').click(); else tfOpen();
+      return;
+    }
     var seq = currentSeq(); var idx = seq.indexOf(currentPanel);
     if(idx>=0 && idx+1<seq.length) goTo(seq[idx+1]);
   });
@@ -10192,6 +10206,7 @@
 
   document.getElementById('sendWa').addEventListener('click', function(){
     lastSendChannel = 'whatsapp';
+    if(!WHATSAPP_LINK) return;
     window.open(WHATSAPP_LINK+"?text="+encodeURIComponent(buildMessage()), '_blank');
     goTo('panelConfirm');
   });
@@ -11782,7 +11797,6 @@
       if(a.logoUrl) d.querySelector('.tf-logo').src = a.logoUrl;
       (a.gallery || []).slice(0, 4).forEach(function(u){ var im = document.createElement('img'); im.src = u; im.alt = ''; d.querySelector('.tf-gal').appendChild(im); });
       d.querySelector('input').addEventListener('change', function(){
-        if(this.checked && Object.keys(tf.sel).length >= 3){ this.checked = false; document.getElementById('tfErr2').textContent = 'Puoi scegliere al massimo 3 artigiani.'; return; }
         document.getElementById('tfErr2').textContent = '';
         if(this.checked) tf.sel[a.id] = 1; else delete tf.sel[a.id]; d.classList.toggle('on', this.checked);
       });
