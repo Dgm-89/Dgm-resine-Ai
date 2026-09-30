@@ -1425,6 +1425,7 @@
       <button data-v="base" class="active" data-i18n="btnCatalogoBase">Colori base</button>
       <button data-v="ncs" data-i18n="btnCatalogoNcs">Catalogo NCS</button>
       <button data-v="sikkens">Sikkens 5051</button>
+      <button data-v="ral">RAL</button>
     </div>
     <div class="seg-hint" id="colorCatalogHint" style="display:none">Una selezione ristretta di colori pensati per questa lavorazione.</div>
 
@@ -6981,6 +6982,20 @@
   // lavorazioni "a tinta piatta" (Resina Spatolata/Marmo/Terrazzo, Microcemento,
   // Scale) — non su Pietra (già foto reali di sassi) né sulle altre lavorazioni.
   var NCS_CATALOG_MATERIALS = ['monolith_spatolato', 'monolith_marmo', 'monolith_terrazzo', 'microcemento', 'scale'];
+  // RAL Classic: campionario sceglibile in resine, resine industriali, microcemento,
+  // pittura interni ed esterni, scale e serramenti.
+  var RAL_CLASSIC = PALETTES.imbiancatura;
+  PALETTES.serramenti = SERRAMENTI_PALETTE.map(function(c){ return Object.assign({ family:'Serramenti più usati' }, c); }).concat(RAL_CLASSIC);
+  // Campionari disponibili per il materiale/fase attuali (il primo è quello "base").
+  function catalogsFor(){
+    if(!state.material || isCortenActive()) return [];
+    var id = state.material.id;
+    if(isScale() && (state.effetto === 'metallico' || ['piastrelle','parquet','graniglia'].indexOf(state.scaleTipo) > -1)) return [];
+    if(id === 'imbiancatura') return state.context === 'esterno' ? ['base','ral'] : ['base','ncs','sikkens'];
+    if(id === 'resina_haccp') return ['base','ral'];
+    if(NCS_CATALOG_MATERIALS.indexOf(id) > -1) return ['base','ral','ncs','sikkens'];
+    return [];
+  }
   var COLOR_CATALOG_HINT = {
     base: { it:"Una selezione ristretta di colori pensati per questa lavorazione.", en:"A curated, shorter selection of colors for this finish." },
     sikkens: { it:"Sikkens 5051 Color Concept: 2077 colori ufficiali. Scegli una famiglia o scrivi il codice (es. F0.15.79).", en:"Sikkens 5051 Color Concept: 2077 official colours. Pick a family or type a code (e.g. F0.15.79)." },
@@ -6988,20 +7003,25 @@
   };
   // Microcemento: i "colori base" sono le collezioni originali ARDEX Pandomo.
   function catalogHint(v){
+    if(v === 'ral') return tr({it:"Colori RAL Classic: scegli una famiglia oppure scrivi il codice (es. RAL 7016).", en:"RAL Classic colours: pick a family or type the code (e.g. RAL 7016)."});
+    if(v === 'base' && state.material && state.material.id === 'imbiancatura' && state.context === 'esterno') return tr({it:"Sikkens Match Point: i colori per le facciate esterne.", en:"Sikkens Match Point: colours for exterior facades."});
     if(v === 'base' && state.material && state.material.id === 'imbiancatura' && state.context !== 'esterno') return tr({it:"Colori RAL Classic: scegli una famiglia oppure scrivi il codice (es. RAL 9010).", en:"RAL Classic colours: pick a family or type the code (e.g. RAL 9010)."});
     if(v === 'base' && state.material && (state.material.id === 'microcemento' || (state.material.id === 'scale' && state.scaleTipo === 'microcemento'))) return tr({it:"Colori originali ARDEX Pandomo: collezioni Floor, Loft, Clay e Studio.", en:"Original ARDEX Pandomo colours: Floor, Loft, Clay and Studio collections."});
     return tr(COLOR_CATALOG_HINT[v]);
   }
   function syncColorCatalogVisibility(){
     var baseBtn = document.querySelector('#colorCatalogControl [data-v="base"]');
-    if(baseBtn) baseBtn.textContent = (state.material && (state.material.id === 'microcemento' || (state.material.id === 'scale' && state.scaleTipo === 'microcemento'))) ? 'ARDEX Pandomo' : (state.material && state.material.id === 'imbiancatura' && state.context !== 'esterno') ? 'Colori RAL' : ts('btnCatalogoBase');
-    var show = state.material && (NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1 || (state.material.id === 'imbiancatura' && state.context !== 'esterno')) && !isCortenActive() && !(isScale() && (state.effetto === 'metallico' || state.scaleTipo === 'piastrelle' || state.scaleTipo === 'parquet' || state.scaleTipo === 'graniglia'));
+    var m = state.material && state.material.id;
+    if(baseBtn) baseBtn.textContent = (m === 'microcemento' || (m === 'scale' && state.scaleTipo === 'microcemento')) ? 'ARDEX Pandomo'
+      : (m === 'imbiancatura' && state.context !== 'esterno') ? 'Colori RAL'
+      : (m === 'imbiancatura') ? 'Match Point' : ts('btnCatalogoBase');
+    var cats = catalogsFor(), show = cats.length > 1;
     document.getElementById('colorCatalogLabel').style.display = show ? 'block' : 'none';
     document.getElementById('colorCatalogControl').style.display = show ? 'flex' : 'none';
     document.getElementById('colorCatalogHint').style.display = show ? 'block' : 'none';
-    if(!show){ state.colorCatalog = 'base'; }
+    if(cats.indexOf(state.colorCatalog) < 0){ state.colorCatalog = 'base'; }
     if(show){
-      Array.prototype.forEach.call(document.getElementById('colorCatalogControl').children, function(b){ b.classList.toggle('active', b.dataset.v===state.colorCatalog); });
+      Array.prototype.forEach.call(document.getElementById('colorCatalogControl').children, function(b){ b.style.display = cats.indexOf(b.dataset.v) > -1 ? '' : 'none'; b.classList.toggle('active', b.dataset.v===state.colorCatalog); });
       document.getElementById('colorCatalogHint').textContent = catalogHint(state.colorCatalog);
     }
   }
@@ -8604,10 +8624,12 @@
     // Serramenti: palette fissa (4 colori indicativi), indipendente dal
     // materiale/catalogo in corso, quindi la forziamo qui.
     if(pickPhase==='G') paletteKey = 'serramenti';
-    var catOk = pickPhase!=='G' && !(isScale() && ['piastrelle','parquet','graniglia'].indexOf(state.scaleTipo) > -1) && (NCS_CATALOG_MATERIALS.indexOf(state.material.id) > -1 || (state.material.id === 'imbiancatura' && state.context !== 'esterno'));
-    var useNcs = catOk && state.colorCatalog === 'ncs';
-    var useSik = catOk && state.colorCatalog === 'sikkens';
-    var fullList = useSik ? SIKKENS_5051 : useNcs ? NCS_PALETTE : (PALETTES[paletteKey] || []);
+    var catSel = (pickPhase !== 'G' && catalogsFor().indexOf(state.colorCatalog) > -1) ? state.colorCatalog : 'base';
+    var useNcs = catSel === 'ncs', useSik = catSel === 'sikkens', useRal = catSel === 'ral';
+    var fullList = useSik ? SIKKENS_5051 : useNcs ? NCS_PALETTE : useRal ? RAL_CLASSIC : (PALETTES[paletteKey] || []);
+    // famiglia rimasta da un altro campionario/fase: si azzera; per i serramenti si parte dai più usati
+    if(familyFilter && !fullList.some(function(c){ return c.family === familyFilter; })) familyFilter = null;
+    if(pickPhase === 'G' && !familyFilter && !colorSearchQuery) familyFilter = 'Serramenti più usati';
     var hasFamilies = fullList.length && fullList[0].family;
 
     if(fullList[0] && fullList[0].line === 'pandomo' && familyFilter === null && !colorSearchQuery) familyFilter = 'Pandomo Floor';
