@@ -164,7 +164,7 @@ module.exports = async function handler(req, res) {
   // "Liscio" è il default e non aggiunge nulla (la texture base è già liscia).
   const EFFETTO_TEXTURE = {
     materico: " con un effetto materico superficiale sovrapposto: texture ruvida e tattile, rilievo irregolare ben visibile, variazioni di tono chiare e scure che si alternano in modo naturale e non simmetrico sulla superficie, aspetto grezzo e tridimensionale, decisamente non liscio né piatto",
-    corten: " con un effetto Corten sovrapposto: base cromatica ocra/ruggine, con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, pattern asimmetrico e naturale (mai simmetrico, mai ripetitivo o a griglia), superficie opaca",
+    corten: " con un effetto Corten sovrapposto: base cromatica ocra/ruggine, con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, pattern asimmetrico e naturale (mai simmetrico, mai ripetitivo o a griglia), superficie opaca. Aspetto realistico del Corten: colore ruggine SCURO e OPACO (bruno-ruggine, mai arancione acceso), ossidazione con macchie e sfumature diverse zona per zona (su un controsoffitto a pannelli ogni pannello è diverso dagli altri, mai la stessa texture ripetuta), riceve la luce della stanza: più scuro in ombra, più caldo dove arriva la luce.",
     marmo: " con effetto MARMO: venature marmoree morbide e naturali, leggermente più chiare e più scure del colore indicato, che attraversano pedate e alzate in modo irregolare e non ripetitivo, superficie liscia e levigata come un marmo lucidato",
     metallico: " con effetto METALLICO: resina con pigmenti metallici perlescenti nel colore indicato, riflessi cangianti e nuvolature di luce che cambiano con l'angolo di vista, aspetto di metallo liquido/spazzolato, superficie liscia e continua"
   };
@@ -367,7 +367,7 @@ module.exports = async function handler(req, res) {
     : effettoScatola
       ? ` EFFETTO SCATOLA: dipingi pareti E soffitto nello stesso identico colore ${colorRef(colorA, colorAHex)}, senza stacchi tra parete e soffitto, compresi eventuali travi, cornici e sporgenze del soffitto: l'ambiente deve risultare avvolgente e continuo, tutto in un unico colore. Porte, finestre, mobili e pavimento restano come sono.`
       : (plafoneTipo === "corten")
-        ? ` SOFFITTO (plafone) EFFETTO CORTEN: tutto il soffitto è rifinito con una finitura decorativa effetto Corten, base ocra/ruggine con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, aspetto materico e opaco, pattern asimmetrico e naturale, travi e cornici del soffitto comprese. Riguarda SOLO il soffitto: le pareti restano nel loro colore. Tra soffitto e pareti non disegnare righe, bordi o fasce.`
+        ? ` SOFFITTO (plafone) EFFETTO CORTEN: tutto il soffitto è rifinito con una finitura decorativa effetto Corten, base ocra/ruggine con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, aspetto materico e opaco, pattern asimmetrico e naturale, travi e cornici del soffitto comprese. Aspetto realistico del Corten: colore ruggine SCURO e OPACO (bruno-ruggine, mai arancione acceso), ossidazione con macchie e sfumature diverse zona per zona (su un controsoffitto a pannelli ogni pannello è diverso dagli altri, mai la stessa texture ripetuta), riceve la luce della stanza: più scuro in ombra, più caldo dove arriva la luce. Riguarda SOLO il soffitto: le pareti restano nel loro colore. Tra soffitto e pareti non disegnare righe, bordi o fasce.`
       : (colorPlafone && PLAFONE_DECOR[plafoneTipo])
         ? ` SOFFITTO (plafone) DECORATO: tutto il soffitto è rifinito ${PLAFONE_DECOR[plafoneTipo]} nel colore ${colorRef(colorPlafone, colorPlafoneHex)}, uniforme su tutta la superficie del soffitto, travi e cornici comprese. La decorazione riguarda SOLO il soffitto: le pareti restano nel loro colore. Tra soffitto e pareti non disegnare righe, bordi o fasce.`
       : colorPlafone
@@ -379,7 +379,7 @@ module.exports = async function handler(req, res) {
     ? accentoRefImage.replace(/^data:image\/\w+;base64,/, "") : null;
   const ACCENTO_DESC = {
     colore: () => `dipinta in tinta unita nel colore ${colorRef(colorAccento, colorAccentoHex)}`,
-    corten: () => "rivestita con una finitura decorativa EFFETTO CORTEN: base ocra/ruggine con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, aspetto materico e opaco, pattern asimmetrico e naturale",
+    corten: () => "rivestita con una finitura decorativa EFFETTO CORTEN: base ocra/ruggine con macchie e chiazze scure irregolari che imitano l'ossidazione naturale dell'acciaio Corten, aspetto materico e opaco, pattern asimmetrico e naturale. Aspetto realistico del Corten: colore ruggine SCURO e OPACO (bruno-ruggine, mai arancione acceso), ossidazione con macchie e sfumature diverse zona per zona (su un controsoffitto a pannelli ogni pannello è diverso dagli altri, mai la stessa texture ripetuta), riceve la luce della stanza: più scuro in ombra, più caldo dove arriva la luce.",
     spatolato: () => `rivestita in resina SPATOLATA decorativa nel colore ${colorRef(colorAccento, colorAccentoHex)}, con le tipiche velature e passate di spatola ben visibili e leggere variazioni di tono`,
     microcemento: () => `rivestita in MICROCEMENTO nel colore ${colorRef(colorAccento, colorAccentoHex)}, superficie continua senza fughe, leggermente nuvolata e materica`,
     marmo: () => `rivestita con una finitura decorativa EFFETTO MARMO (marmorino) nel colore di fondo ${colorRef(colorAccento, colorAccentoHex)}, con venature naturali sottili e superficie liscia e setosa`,
@@ -574,7 +574,7 @@ module.exports = async function handler(req, res) {
     "Materiali con microdettagli realistici (grana, leggere irregolarità, venature coerenti con la scala reale; fughe e giunti SOLO nei materiali che li hanno davvero, come piastrelle, parquet, laminato e SPC). Dove due colori o materiali si incontrano il passaggio è netto ma NATURALE: non aggiungere mai linee, contorni, righe luminose o bordi colorati lungo spigoli e angoli, e non cambiare il colore delle superfici che non sono state richieste (una parete bianca resta dello stesso bianco dell'originale).",
     "LUCI COLORATE E RIFLESSI ESISTENTI: le luci colorate già presenti nella foto (aloni rossi, arancioni o blu di insegne, neon, schermi, lampade colorate, luce calda dei faretti) e le dominanti di colore che proiettano sulle superfici NON richieste devono restare IDENTICHE: non 'ripulire' e non neutralizzare le pareti, il soffitto o gli oggetti che non fanno parte della lavorazione. Anche sulle superfici nuove quelle luci colorate si riflettono nello stesso punto e con la stessa intensità.",
     fotoPro
-      ? "NITIDEZZA NATURALE: l'immagine deve sembrare la stessa foto scattata con una fotocamera migliore, NON un rendering. Luce, esposizione, contrasto e colori restano quelli della foto originale; migliorano solo nitidezza e definizione: fughe delle piastrelle, spigoli di gradini, muri e serramenti netti, texture dei materiali definite, senza rumore, sfocature o artefatti di compressione. Vietato l'aspetto da render: niente effetto HDR, niente luci o riflessi in più, niente superfici troppo lisce, lucide o perfette, niente colori saturi o 'plastici'. Le imperfezioni naturali della foto (ombre, piccole differenze di luce, oggetti fuori posto) restano."
+      ? "ASPETTO NATURALE, DA FOTO VERA (molto importante): il risultato deve sembrare la stessa foto scattata dallo stesso punto con una buona fotocamera, NON un rendering 3D. I dettagli sono definiti (fughe, spigoli, texture dei materiali leggibili), ma l'immagine NON è più pulita della realtà: restano ombre, penombre, zone più chiare vicino a finestre e lucernari e più scure negli angoli, riflessi naturali, piccole imperfezioni, lo sporco e gli oggetti che non fanno parte del lavoro. Le superfici nuove non sono mai perfettamente uniformi: hanno le leggere variazioni di tono e di luce che la stanza crea su di loro. Vietato l'aspetto da render: niente superfici piatte e perfette, niente luce uguale ovunque, niente HDR, niente luci o bagliori in più, niente colori saturi o 'plastici'."
       : "Mantieni la stessa nitidezza, profondità di campo, grana/rumore e compressione della foto originale: non renderla più pulita, più nitida, più satura o più contrastata dell'originale. Niente effetti HDR, niente glow, niente colori 'plastici'."
   ].join(" ");
   const colorFidelityNote = hasAnyHex
@@ -696,9 +696,15 @@ module.exports = async function handler(req, res) {
   const continuityNote = isContinuous
     ? " SUPERFICIE CONTINUA (regola vincolante): la nuova lavorazione è un'unica superficie continua e omogenea, senza interruzioni. NON aggiungere linee, strisce, righe chiare o scure, nastri, giunti, fughe, riquadri, bordi, triangoli, bande o disegni geometrici di alcun tipo sulla superficie trattata"
       + (hasRequestedLines ? ", a parte quelli richiesti esplicitamente in queste istruzioni" : "")
-      + ". I segni di cantiere presenti nella foto originale sulla superficie da trattare (nastro adesivo, tracce di gesso o matita, macchie, crepe, polvere, rappezzi, zone di colore diverso del massetto o dell'intonaco) NON vanno riprodotti né trasformati in decorazioni: sotto la nuova lavorazione spariscono completamente. Sono ammesse solo le lievi variazioni di tono e i segni di lavorazione tipici del materiale descritto."
+      + ". I segni di cantiere presenti nella foto originale sulla superficie da trattare (nastro adesivo, tracce di gesso o matita, macchie, crepe sottili, polvere) NON vanno riprodotti né trasformati in decorazioni: sotto la nuova lavorazione spariscono completamente. ATTENZIONE: nicchie, rientranze, riquadri incassati, sporgenze e spallette NON sono segni di cantiere anche se hanno un intonaco di colore diverso: sono parte della costruzione e restano. Sono ammesse solo le lievi variazioni di tono e i segni di lavorazione tipici del materiale descritto."
     : "";
 
+  // Forma della costruzione: la lavorazione cambia solo la superficie, mai i volumi.
+  const buildNote = " ELEMENTI DELLA COSTRUZIONE (regola vincolante): nicchie, rientranze, riquadri incassati, sporgenze, spallette, colonne, pilastri, travi, gradini, soglie, fori, aperture, porte, finestre, controsoffitti a pannelli, impianti (fili, lampade, prese, interruttori, tubi, bocchette) restano nella stessa posizione, con la stessa forma e la stessa profondità. Cambia SOLO il colore o il materiale della superficie richiesta: una nicchia dipinta resta una nicchia, una parete non diventa mai piatta dove prima aveva rientranze.";
+  // Soffitto: se il cliente non ha chiesto il plafone (o l'effetto scatola) resta com'è.
+  const ceilingRequested = isInterniPittura && (effettoScatola || !!plafoneTipo);
+  const ceilingNote = (materialId === "imbiancatura" && context === "esterno") || ceilingRequested ? ""
+    : " SOFFITTO: non è stato richiesto, quindi resta IDENTICO alla foto originale (stesso colore, stessa luminosità, stesso materiale, stesse aperture e lampade). Non scurirlo e non schiarirlo.";
   // Più lavorazioni sulla stessa foto: quelle già fatte sono nella foto e NON vanno cambiate.
   const prevList = Array.isArray(lavoriPrecedenti) ? lavoriPrecedenti.filter(function (x) { return typeof x === "string" && x.trim(); }).slice(0, 6).map(function (x) { return x.slice(0, 120); }) : [];
   const prevNote = prevList.length
@@ -710,6 +716,8 @@ module.exports = async function handler(req, res) {
     isFacadeStyled ? colorDesc : piaRivOn ? `I colori da usare sono ${colorDesc}.` : `Il colore/tonalità da usare è ${colorDesc}.`,
     finitura ? `Finitura superficiale ${finitura} (${finitura === "lucido" ? "molto riflettente" : finitura === "opaco" ? "senza riflessi" : "leggermente satinata"}).` : "",
     continuityNote,
+    buildNote,
+    ceilingNote,
     prevNote,
     granNote,
     piaZonesNote,
