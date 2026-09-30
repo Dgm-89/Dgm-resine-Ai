@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="it" translate="no" class="notranslate" data-theme="dark">
+<html lang="it" translate="no" class="notranslate">
 <head>
 <meta charset="UTF-8">
 <meta name="google" content="notranslate">
@@ -19,18 +19,19 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="icon-192.png" type="image/png">
-<meta name="theme-color" content="#1A1A1A">
+<meta name="theme-color" content="#F7F5F1">
+<script>try{var tq=new URLSearchParams(location.search).get("tema");if(tq){localStorage.setItem("rdTema",tq);}if((tq||localStorage.getItem("rdTema"))==="scuro"){document.documentElement.setAttribute("data-theme","dark");}}catch(e){}</script>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Rendrum">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
   :root{
-    --bg:#F7F6F3; --surface:#FFFFFF; --ink:#1C1B18; --ink-soft:#6B6558;
-    --line:#E5E2D9; --accent:#A8552A; --accent-soft:#F3E3D3; --accent-ink:#FFFFFF;
-    --accent-gradient: linear-gradient(135deg, #E8A659, #A8552A);
+    --bg:#F7F5F1; --surface:#FFFFFF; --ink:#1D1B18; --ink-soft:#6F685F;
+    --line:#E8E3DB; --accent:#C8692E; --accent-soft:#F6E6DA; --accent-ink:#FFFFFF;
+    --accent-gradient: linear-gradient(135deg, #D98A55, #C8692E);
     --success:#2E7D32; --radius:10px; --logo-bg:#2B1408;
     box-sizing:border-box;
     padding-top: env(safe-area-inset-top, 0px);
@@ -70,6 +71,8 @@
   .sf-card:focus-visible, .sf-help:focus-visible, .sf-upload:focus-visible{ outline:3px solid var(--accent); outline-offset:2px; }
   .sf-card b{ font-size:16px; line-height:1.25; }
   .sf-card span{ font-size:13px; color:var(--ink-soft); line-height:1.35; }
+  .sf-mi{ width:46px; height:46px; border-radius:14px; background:var(--accent-soft); color:var(--accent); display:grid; place-items:center; margin-bottom:4px; }
+  .sf-mi svg{ width:26px; height:26px; }
   .sf-pic{ aspect-ratio:4/3; max-width:100%; border-radius:12px; overflow:hidden; display:grid; place-items:center; background:var(--surface); }
   .sf-pic svg{ width:100%; height:100%; display:block; }
   .sf-pic .sf-ico svg{ width:46px; height:46px; }
@@ -104,6 +107,23 @@
   }
   .pro-bar{ flex-basis:100%; display:flex; gap:6px; margin-top:10px; overflow-x:auto; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
   .pro-bar::-webkit-scrollbar{ display:none; }
+  /* Menu semplice: tre voci con icona a linea; Account e Profilo nel menu dell'avatar */
+  .pro-bar .pb-in-menu{ display:none !important; }
+  .pro-bar button span{ display:inline-flex; align-items:center; gap:6px; }
+  .pro-bar button svg{ width:18px; height:18px; flex:none; }
+  .pro-bar button:not(.primary){ border-color:transparent; color:var(--ink-soft); }
+  .pro-bar button:not(.primary):hover{ color:var(--ink); border-color:var(--line); }
+  .rd-avatar{ width:34px; height:34px; border-radius:50%; border:1px solid var(--line); background:var(--accent-soft); color:var(--accent); font-weight:800; font-size:14px; cursor:pointer; font-family:inherit; flex:none; }
+  .pro-account-badge{ position:relative; }
+  .rd-menu{ display:none; position:absolute; right:0; top:42px; z-index:40; min-width:210px; background:var(--surface); border:1px solid var(--line); border-radius:14px; box-shadow:0 12px 30px rgba(30,20,10,.14); padding:12px; flex-direction:column; gap:10px; }
+  .pro-account-badge.open .rd-menu{ display:flex; }
+  .rd-menu .pro-account-badge-info{ padding-bottom:10px !important; border-bottom:1px solid var(--line) !important; width:100%; }
+  .rd-menu .pro-account-badge-name{ font-size:14px !important; max-width:none !important; }
+  .rd-menu .pro-account-badge-tier{ font-size:12px !important; max-width:none !important; }
+  .rd-menu .pro-account-badge-actions{ align-items:stretch !important; gap:2px !important; }
+  .rd-menu .pro-account-badge-logout{ text-decoration:none !important; font-size:14px !important; color:var(--ink) !important; text-align:left; padding:8px 4px !important; border-radius:8px; }
+  .rd-menu .pro-account-badge-logout:hover{ background:var(--bg) !important; }
+  .rd-menu #proLogoutBtn{ color:#B3402F !important; }
   .pro-bar[hidden]{ display:none; }
   .pro-bar button{ flex:none; display:flex; align-items:center; gap:6px; border:1.5px solid var(--line); background:none; color:var(--ink); border-radius:999px; padding:7px 13px; font-size:13px; font-weight:700; cursor:pointer; font-family:inherit; white-space:nowrap; }
   .pro-bar button:hover{ border-color:var(--accent); }
@@ -111,7 +131,7 @@
   .pro-bar .pb-short{ display:none; }
   @media (max-width:480px){ .pro-bar{ gap:5px; } .pro-bar button{ padding:6px 9px; font-size:12.5px; } .pro-bar .pb-long{ display:none; } .pro-bar .pb-short{ display:inline; } }
   .brand{ display:flex; align-items:center; gap:10px; }
-  #splashScreen{ position:fixed; inset:0; z-index:9999; background:var(--logo-bg); display:flex; align-items:center; justify-content:center; transition:opacity .5s ease, visibility .5s ease; }
+  #splashScreen{ position:fixed; inset:0; z-index:9999; background:var(--bg); --x:var(--logo-bg); display:flex; align-items:center; justify-content:center; transition:opacity .5s ease, visibility .5s ease; }
   #splashScreen.hide{ opacity:0; visibility:hidden; pointer-events:none; }
   .splash-logo{ width:min(60vw, 280px); height:auto; animation:splashPop .6s ease; border-radius:22%; }
   @keyframes splashPop{ from{ opacity:0; transform:scale(.92); } to{ opacity:1; transform:scale(1); } }
@@ -658,6 +678,8 @@
   <div class="header-actions">
     <button type="button" class="theme-btn" id="proAuthOpen" data-i18n="proAuthOpenBtn">Accedi</button>
     <div class="pro-account-badge" id="proBadge" style="display:none">
+      <button type="button" class="rd-avatar" id="rdAvatar" aria-label="Il mio account" aria-expanded="false">?</button>
+      <div class="rd-menu" id="rdMenu">
       <button type="button" class="pro-account-badge-info" id="proProjectsOpenBtn" aria-label="I miei progetti" data-i18n-aria="proProjectsLinkAria">
         <span class="pro-account-badge-name" id="proBadgeName"></span>
         <span class="pro-account-badge-tier" id="proBadgeTier"></span>
@@ -665,18 +687,20 @@
       <div class="pro-account-badge-actions">
         <button type="button" class="pro-account-badge-logout" id="proSubBtn" style="display:none">Abbonamento</button>
         <button type="button" class="pro-account-badge-logout" id="proAccountBtn">Account</button>
+        <button type="button" class="pro-account-badge-logout" id="rdMenuProfile" style="display:none">Profilo artigiano</button>
         <button type="button" class="pro-account-badge-logout" id="proLogoutBtn" data-i18n="proLogoutBtn">Esci</button>
+      </div>
       </div>
     </div>
     <button type="button" class="theme-btn" id="langToggle" aria-label="Cambia lingua / Change language">EN</button>
   </div>
   <nav class="pro-bar" id="proBar" hidden aria-label="La mia area">
-    <button type="button" class="primary" id="pbNew"><span>📐 <span class="pb-long">Nuova a</span><span class="pb-short">A</span>nteprima</span></button>
-    <button type="button" id="pbProjects"><span>📁 Progetti</span></button>
-    <button type="button" id="pbLeads" data-pro="1"><span>📥 Richieste <span class="pb-badge" id="pbLeadsBadge" hidden>0</span></span></button>
-    <button type="button" id="pbMyReq" data-priv="1"><span>📨 Richieste e preventivi</span></button>
-    <button type="button" id="pbQuotes" data-pro="1"><span>📄 Preventivi</span></button>
-    <button type="button" id="pbProfile" data-pro="1"><span>🧰 Profilo<span class="pb-long"> artigiano</span></span></button>
+    <button type="button" class="primary" id="pbNew"><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7v18M7 16h18"/></svg> Nuova</span></button>
+    <button type="button" id="pbProjects"><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a2 2 0 0 1 2-2h6l3 3h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg> Progetti</span></button>
+    <button type="button" id="pbLeads" data-pro="1"><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h20a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H13l-6 5v-5H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M10 12h12M10 16h8"/></svg> Richieste <span class="pb-badge" id="pbLeadsBadge" hidden>0</span></span></button>
+    <button type="button" id="pbMyReq" data-priv="1"><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h20a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H13l-6 5v-5H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"/><path d="M10 12h12M10 16h8"/></svg> Richieste</span></button>
+    <button type="button" id="pbQuotes" data-pro="1"><span><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h11l6 6v18H8z"/><path d="M19 4v6h6M12 16h9M12 21h9"/></svg> Preventivi</span></button>
+    <button type="button" id="pbProfile" data-pro="1" class="pb-in-menu"><span>🧰 Profilo<span class="pb-long"> artigiano</span></span></button>
   </nav>
 </header>
 
@@ -9522,6 +9546,7 @@
   function sfSelectCat(id){ var i = sfCat(id); if(i > -1 && materialGrid.children[i]) materialGrid.children[i].click(); }
   function sfCatId(){ return state.category ? state.category.id : null; }
   // Materiali mostrati al cliente (parquet, SPC e laminato raggruppati in "Pavimenti in legno")
+  var MAT_LINE_ICON = {"monolith": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 4c4 5 7 8.6 7 12.2A7 7 0 0 1 9 16.2C9 12.6 12 9 16 4z\"/><path d=\"M4 27c3-1.6 5-1.6 8 0s5 1.6 8 0 5-1.6 8 0\"/></svg>", "microcemento": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M5 20h18l3-4H8z\"/><path d=\"M15 16v-5a3 3 0 0 1 3-3h2\"/><path d=\"M4 26h24\"/></svg>", "piastrelle": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"5\" y=\"5\" width=\"22\" height=\"22\" rx=\"2\"/><path d=\"M16 5v22M5 16h22\"/></svg>", "imbiancatura": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"5\" y=\"5\" width=\"18\" height=\"7\" rx=\"2\"/><path d=\"M23 8.5h3v6H15v4\"/><rect x=\"13\" y=\"18.5\" width=\"4\" height=\"9\" rx=\"1.5\"/></svg>", "legno": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><rect x=\"4\" y=\"6\" width=\"24\" height=\"20\" rx=\"2\"/><path d=\"M4 12.7h24M4 19.3h24M13 6v6.7M21 12.7v6.6M10 19.3V26\"/></svg>", "scale": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 27h6v-6h6v-6h6V9h6\"/><path d=\"M4 27h24\"/></svg>", "graniglia_esterni": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"9\" cy=\"10\" r=\"2.5\"/><circle cx=\"18\" cy=\"8\" r=\"1.8\"/><circle cx=\"24\" cy=\"13\" r=\"2.6\"/><circle cx=\"12\" cy=\"18\" r=\"1.8\"/><circle cx=\"20\" cy=\"21\" r=\"2.8\"/><circle cx=\"8\" cy=\"25\" r=\"2\"/><circle cx=\"26\" cy=\"25\" r=\"1.5\"/></svg>", "resina_haccp": "<svg viewBox=\"0 0 32 32\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 4l10 4v7c0 6.5-4.3 11-10 13-5.7-2-10-6.5-10-13V8z\"/><path d=\"M11.5 16l3 3 6-6\"/></svg>"};
   function sfMats(){
     var pro = state.userType === 'professionista';
     var L = [
@@ -9566,26 +9591,28 @@
     return false;
   }
   SF.a = {};
-  function room(o){ // disegno semplice della stanza: pavimento/pareti/altezza/doccia
-    var acc = '#E0915A', wall = '#3A3129', fl = o.floor ? acc : '#2A231D';
-    var top = o.walls ? (o.h === '150' ? 52 : 10) : 90, side = o.h === '150' ? 50 : 0;
-    return '<svg viewBox="0 0 120 90" aria-hidden="true"><rect width="120" height="90" fill="#1F1A15"/>'
-      + '<polygon points="20,10 100,10 100,62 20,62" fill="#2A231D"/>'
-      + (o.walls ? '<polygon points="20,'+top+' 100,'+top+' 100,62 20,62" fill="'+acc+'" opacity=".85"/>' : '')
-      + '<polygon points="0,0 20,10 20,62 0,90" fill="'+wall+'"/>' + (o.walls ? '<polygon points="0,'+side+' 20,'+(o.h === '150' ? 52 : 10)+' 20,62 0,90" fill="'+acc+'" opacity=".7"/>' : '')
-      + '<polygon points="120,0 100,10 100,62 120,90" fill="'+wall+'"/>' + (o.walls ? '<polygon points="120,'+side+' 100,'+(o.h === '150' ? 52 : 10)+' 100,62 120,90" fill="'+acc+'" opacity=".7"/>' : '')
-      + '<polygon points="20,62 100,62 120,90 0,90" fill="'+fl+'"/>'
-      + (o.ceil ? '<polygon points="0,0 120,0 100,10 20,10" fill="'+acc+'" opacity=".6"/>' : '')
-      + (o.shower ? '<rect x="72" y="10" width="26" height="52" fill="#7FA7C9" opacity=".8"/><circle cx="85" cy="18" r="3" fill="#fff"/>' : '')
-      + (o.walls && o.h === '150' ? '<line x1="20" y1="52" x2="100" y2="52" stroke="#fff" stroke-width="1.2"/>' : '')
-      + (o.out ? '<rect x="0" y="0" width="120" height="40" fill="#5E7F99"/><polygon points="25,40 60,14 95,40" fill="#8C5A3C"/><rect x="30" y="40" width="60" height="40" fill="'+acc+'"/><rect x="52" y="56" width="16" height="24" fill="#2A231D"/>' : '')
+  function room(o){ // disegno a linea della stanza: in arancio la parte da rifare
+    var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    var L = dark ? '#B0A897' : '#1D1B18', BG = dark ? '#1A160F' : '#FBFAF7', W = dark ? '#221D16' : '#FFFFFF', SW = dark ? '#1E1913' : '#F3F0EA', FL = dark ? '#1E1913' : '#EFEBE4';
+    var A = o.acc || '#E8A77A', AS = o.acc ? o.acc : '#C8692E';
+    var top = o.walls ? (o.h === '150' ? 52 : 10) : 90, side = o.h === '150' ? 50 : 0, st = ' stroke="'+L+'" stroke-width="1.2" stroke-linejoin="round"', ha = ' fill="'+A+'" stroke="'+AS+'" stroke-width="1.2" stroke-linejoin="round"';
+    if(o.out) return '<svg viewBox="0 0 120 90" aria-hidden="true"><rect width="120" height="90" fill="'+BG+'"/><path d="M0 70h120"'+st+' fill="none"/><polygon points="25,40 60,14 95,40"'+st+' fill="'+W+'"/><rect x="30" y="40" width="60" height="30"'+ha+'/><rect x="52" y="52" width="16" height="18"'+st+' fill="'+W+'"/><rect x="36" y="46" width="10" height="9"'+st+' fill="'+W+'"/><rect x="74" y="46" width="10" height="9"'+st+' fill="'+W+'"/></svg>';
+    return '<svg viewBox="0 0 120 90" aria-hidden="true"><rect width="120" height="90" fill="'+BG+'"/>'
+      + '<polygon points="20,10 100,10 100,62 20,62" fill="'+W+'"'+st+'/>'
+      + '<polygon points="0,0 20,10 20,62 0,90" fill="'+SW+'"'+st+'/><polygon points="120,0 100,10 100,62 120,90" fill="'+SW+'"'+st+'/>'
+      + '<polygon points="20,62 100,62 120,90 0,90" fill="'+FL+'"'+st+'/>'
+      + (o.walls ? '<polygon points="20,'+top+' 100,'+top+' 100,62 20,62"'+ha+' opacity=".9"/><polygon points="0,'+side+' 20,'+(o.h === '150' ? 52 : 10)+' 20,62 0,90"'+ha+' opacity=".75"/><polygon points="120,'+side+' 100,'+(o.h === '150' ? 52 : 10)+' 100,62 120,90"'+ha+' opacity=".75"/>' : '')
+      + (o.floor ? '<polygon points="20,62 100,62 120,90 0,90"'+ha+'/>' : '')
+      + (o.ceil ? '<polygon points="0,0 120,0 100,10 20,10"'+ha+'/>' : '')
+      + (o.shower ? '<rect x="72" y="14" width="24" height="48" fill="#DCEAF4" stroke="#6E9CC0" stroke-width="1.2"/><circle cx="84" cy="21" r="2.5" fill="none" stroke="#6E9CC0" stroke-width="1.2"/>' : '')
+      + (o.walls && o.h === '150' ? '<line x1="20" y1="52" x2="100" y2="52" stroke="'+AS+'" stroke-width="1.6"/>' : '')
       + '</svg>';
   }
   function sfPic(bg, html){ return '<div class="sf-pic" style="background:'+(bg || 'var(--surface)')+'">'+html+'</div>'; }
   function sfQ(st){
     var catObj = state.category;
     switch(st){
-      case 'mat': return { t:'Cosa vuoi rifare?', s: ((queueAddPending && genQueue.length) || (layerAddPending && layers.length)) ? 'Lavorazione ' + (genQueue.length + layers.length + 1) + ': tocca il lavoro. Hai sbagliato? Premi Indietro per annullare.' : 'Tocca il lavoro.', opts: sfMats().map(function(m){ return { v:m.v, n:m.n, d:m.d, pic:sfPic(m.bg, '<span class="sf-ico">'+m.icon+'</span>'), sel: SF.mat === m.v }; }) };
+      case 'mat': return { t:'Cosa vuoi rifare?', s: ((queueAddPending && genQueue.length) || (layerAddPending && layers.length)) ? 'Lavorazione ' + (genQueue.length + layers.length + 1) + ': tocca il lavoro. Hai sbagliato? Premi Indietro per annullare.' : 'Tocca il lavoro.', opts: sfMats().map(function(m){ return { v:m.v, n:m.n, d:m.d, pic:(MAT_LINE_ICON[m.v] ? '<div class="sf-mi">'+MAT_LINE_ICON[m.v]+'</div>' : sfPic(m.bg, '<span class="sf-ico">'+m.icon+'</span>')), sel: SF.mat === m.v }; }) };
       case 'dove': return { t: SF.mat === 'microcemento' ? 'Dove metti il microcemento?' : 'Dove metti la resina?', help:'pavimento', opts:[
         { v:'pavimento', n:'Pavimento', pic:sfPic('', room({floor:1})), sel: state.resinaArea === 'pavimento' },
         { v:'rivestimento', n:'Pareti', pic:sfPic('', room({walls:1, h:'tutta'})), sel: state.resinaArea === 'rivestimento' },
@@ -9614,7 +9641,7 @@
       case 'pitCosa': return { t:'Cosa vuoi dipingere?', s:'Tocca tutto quello che vuoi rinnovare, poi premi Continua.', multi:true, opts:[
         { v:'pareti', n:'Pareti', d:'Sempre incluse', pic:sfPic('', room({walls:1, h:'tutta'})), sel:true },
         { v:'soffitto', n:'Soffitto', d:'In colore o decorato', pic:sfPic('', room({ceil:1})), sel: !!(state.addPlafone || state.effettoScatola) },
-        { v:'accento', n:'Una parete diversa', d:'Altro colore, Corten, spatolato, marmo…', pic:sfPic('', room({walls:1, h:'tutta'}).replace(/#E0915A/g, '#8B4A2B')), sel: !!state.addAccento },
+        { v:'accento', n:'Una parete diversa', d:'Altro colore, Corten, spatolato, marmo…', pic:sfPic('', room({walls:1, h:'tutta', acc:'#A5602E'})), sel: !!state.addAccento },
         { v:'porte', n:'Porte e finestre', d:'Porte interne e telai in un colore RAL', pic:sfPic('#E9E4DA', '<svg viewBox="0 0 120 90" aria-hidden="true"><rect x="28" y="20" width="30" height="70" fill="#3F4448"/><circle cx="52" cy="58" r="2.5" fill="#C9C2B4"/><rect x="72" y="20" width="34" height="30" fill="#BFD3E2" stroke="#3F4448" stroke-width="4"/></svg>'), sel: !!state.addPorte } ] };
       case 'pitMuro': return { t:'Come vuoi il muro finito?', s:'Scegli la superficie: il colore lo scegli dopo.', opts:[
         { v:'com', n:"Lascia com'è", d:'Cambia solo il colore: il muro resta come nella tua foto', pic: (photoImg ? '<div class="sf-pic" style="background:#2A231D"><img src="'+photoImg.src+'" alt="" style="width:100%;height:100%;object-fit:cover"></div>' : sfPic('#2A231D', '<span class="sf-ico">📷</span>')), sel: (state.muro || 'com') === 'com' && !!SF.a.pitMuro },
@@ -10493,6 +10520,7 @@
       document.body.classList.add('pro-logged');
       badge.style.display = 'flex';
       document.getElementById('proBadgeName').textContent = proAccount.companyName || proAccount.email;
+      try{ document.getElementById('rdAvatar').textContent = String(proAccount.companyName || proAccount.email || '?').trim().charAt(0).toUpperCase(); document.getElementById('rdMenuProfile').style.display = (proAccount.accountType && proAccount.accountType !== 'privato') ? '' : 'none'; }catch(e){}
       var tierLabel = proAccount.tier ? (proAccount.tier.charAt(0).toUpperCase()+proAccount.tier.slice(1)) : '';
       var typeLabel = proAccount.accountType === 'privato' ? tr({it:'Privato',en:'Homeowner'}) : tr({it:'Professionista',en:'Professional'});
       var subTxt = !proAccount.paymentsEnabled ? '' : (subActive() ? ' · ' + (proAccount.usageCount||0) + '/' + (proAccount.usageLimit||0) + ' foto' : ' · non attivo');
@@ -12181,6 +12209,14 @@
   document.getElementById('pbProjects').addEventListener('click', ppOpen);
   document.getElementById('pbQuotes').addEventListener('click', function(){ pbModal(); qOpenList(); });
   document.getElementById('pbProfile').addEventListener('click', function(){ pbModal(); pfOpen(); });
+  (function(){
+    var badge = document.getElementById('proBadge'), av = document.getElementById('rdAvatar');
+    function setOpen(on){ badge.classList.toggle('open', on); av.setAttribute('aria-expanded', on ? 'true' : 'false'); }
+    av.addEventListener('click', function(e){ e.stopPropagation(); setOpen(!badge.classList.contains('open')); });
+    document.getElementById('rdMenu').addEventListener('click', function(e){ if(e.target.closest('button')) setTimeout(function(){ setOpen(false); }, 0); });
+    document.getElementById('rdMenuProfile').addEventListener('click', function(){ document.getElementById('pbProfile').click(); });
+    document.addEventListener('click', function(e){ if(!e.target.closest('#proBadge')) setOpen(false); });
+  })();
   document.getElementById('panel3SaveProjectBtn').addEventListener('click', function(){ ppOpen(); ppOpenForm(null); });
   document.getElementById('proProjectsClose').addEventListener('click', ppClose);
   document.getElementById('proProjectsModal').addEventListener('click', function(e){ if(e.target.id === 'proProjectsModal') ppClose(); });
