@@ -275,6 +275,7 @@ module.exports = async function handler(req, res) {
     ? " PAVIMENTAZIONE DA RIFARE: comprende vialetti, cortile, marciapiede intorno alla casa e pavimento del portico o del terrazzo, qualunque sia il materiale attuale (autobloccanti, masselli, lastre, piastrelle, cemento, ghiaia). La vecchia pavimentazione va coperta completamente dalla graniglia e non deve restare visibile, nemmeno le sue fughe o il disegno dei masselli."
       + (granScaleOn ? " Rivesti con la stessa graniglia anche TUTTI i gradini e le scale esterne visibili (pedate, alzate e frontalini), con spigoli rifiniti." : " I gradini e le scale restano invece come sono nella foto.")
       + " NON toccare prato, terra, aiuole, piante, vasi, muretti, fioriere, muri della casa, colonne, soffitto del portico e arredi."
+      + " ATTENZIONE: il colore della graniglia scelta può somigliare a quello della pavimentazione attuale; questo NON è un motivo per lasciarla com'è. Il cambiamento deve vedersi chiaramente nella TEXTURE: al posto di masselli, lastre o piastrelle con le loro fughe ci deve essere una superficie continua fatta di sassolini fitti legati in resina. Un risultato in cui si vedono ancora i masselli o le fughe della vecchia pavimentazione è SBAGLIATO."
     : "";
   const surfaceDesc = granSurfaceDesc ? granSurfaceDesc : piaRivOn
     ? "al pavimento e alle pareti (rivestimento) come descritto zona per zona nelle ZONE PIASTRELLE qui sotto"
