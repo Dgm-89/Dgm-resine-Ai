@@ -7780,13 +7780,13 @@
         // Le foto scattate da smartphone/tablet possono pesare molti MB: le
         // ridimensioniamo qui prima di usarle, sia per la resa nel browser
         // sia per l'invio all'AI (che ha un limite di dimensione della richiesta).
-        var MAX_DIM = 1600;
+        var MAX_DIM = 2048; // più dettaglio di partenza = risultato più nitido
         var w = rawImg.width, h = rawImg.height;
         var scale = Math.min(1, MAX_DIM / Math.max(w, h));
         var cw = Math.max(1, Math.round(w * scale)), ch = Math.max(1, Math.round(h * scale));
         var rc = document.createElement('canvas'); rc.width = cw; rc.height = ch;
-        rc.getContext('2d').drawImage(rawImg, 0, 0, cw, ch);
-        var resizedDataUrl = rc.toDataURL('image/jpeg', 0.85);
+        var rcx = rc.getContext('2d'); rcx.imageSmoothingQuality = 'high'; rcx.drawImage(rawImg, 0, 0, cw, ch);
+        var resizedDataUrl = rc.toDataURL('image/jpeg', 0.9);
         var match = /^data:(.+);base64,(.*)$/.exec(resizedDataUrl);
         if(match){ state.photoMime = match[1]; state.photoBase64 = match[2]; }
         var img = new Image();
@@ -8932,6 +8932,8 @@
         posaRefImage: posaRefImage,
         materialSampleImage: buildMaterialSample(),
         qualita: RD_TEST_Q || null,
+        risoluzione: (RD_TEST_Q && RD_TEST_RES) || null,
+        stile: (RD_TEST_Q && RD_TEST_STILE) || null,
         scaleTipo: (state.material && state.material.id === 'scale') ? state.scaleTipo : null,
         piaDove: isPia() ? state.piaDove : null, piaAlt: piaRiv() ? state.piaAlt : null, piaFmtPav: isPia() ? state.piaFmtPav : null,
         piaFmtRiv: piaRiv() ? state.piaFmtRiv : null, piaRivTile: piaRiv() ? state.piaRivTile : null, piaDoccia: showerActive() ? 'si' : null,
@@ -8965,14 +8967,23 @@
     function loadImg(src){ return new Promise(function(res, rej){ var i = new Image(); i.onload = function(){ res(i); }; i.onerror = rej; i.src = src; }); }
     function padForAI(b64, mime){
       return loadImg('data:' + mime + ';base64,' + b64).then(function(im){
-        var w = im.naturalWidth, h = im.naturalHeight, r = w / h;
+        var ow = im.naturalWidth, oh = im.naturalHeight;
+        // Si invia al massimo 2048 px di lato (limite dimensione richiesta): il risultato torna comunque alla risoluzione piena.
+        var ks = Math.min(1, 2048 / Math.max(ow, oh)), w = Math.round(ow * ks), h = Math.round(oh * ks), r = w / h;
+        // In 2K/4K l'AI lavora nel formato esatto della foto: nessuna banda aggiunta.
+        if(!(RD_TEST_Q && RD_TEST_RES === 'std')){
+          if(ks === 1) return { b64:b64, mime:mime, box:null, ratio: w / h, w0:ow, h0:oh };
+          var sc = document.createElement('canvas'); sc.width = w; sc.height = h; var sg = sc.getContext('2d'); sg.imageSmoothingQuality = 'high'; sg.drawImage(im, 0, 0, w, h);
+          var sm = /^data:(.+);base64,(.*)$/.exec(sc.toDataURL('image/jpeg', 0.92));
+          return { b64:sm[2], mime:sm[1], box:{ x:0, y:0, w:1, h:1, ow:ow, oh:oh }, ratio: w / h, w0:ow, h0:oh };
+        }
         var best = null;
         [1, 1.5, 2/3].forEach(function(t){
           var W = t >= r ? Math.round(h * t) : w, H = t >= r ? h : Math.round(w / t);
           var area = W * H; if(!best || area < best.area) best = { W:W, H:H, area:area };
         });
         var W = best.W, H = best.H;
-        if(W === w && H === h) return { b64:b64, mime:mime, box:null };
+        if(W === w && H === h && ks === 1) return { b64:b64, mime:mime, box:null, ratio: w / h, w0:ow, h0:oh };
         var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
         var cx = cv.getContext('2d');
         try { cx.filter = 'blur(40px) brightness(0.8)'; } catch(e){}
@@ -8981,16 +8992,25 @@
         var x = Math.round((W - w) / 2), y = Math.round((H - h) / 2);
         cx.drawImage(im, x, y, w, h);
         var m = /^data:(.+);base64,(.*)$/.exec(cv.toDataURL('image/jpeg', 0.9));
-        return { b64:m[2], mime:m[1], box:{ x:x/W, y:y/H, w:w/W, h:h/H, ow:w, oh:h } };
+        return { b64:m[2], mime:m[1], box:{ x:x/W, y:y/H, w:w/W, h:h/H, ow:ow, oh:oh }, ratio: W / H };
       });
     }
-    function unpadFromAI(img, box){
-      if(!box) return Promise.resolve(null);
+    function unpadFromAI(img, box, srcW, srcH){
       var rw = img.naturalWidth, rh = img.naturalHeight;
-      var cv = document.createElement('canvas'); cv.width = box.ow; cv.height = box.oh;
-      cv.getContext('2d').drawImage(img, box.x*rw, box.y*rh, box.w*rw, box.h*rh, 0, 0, box.ow, box.oh);
-      var m = /^data:(.+);base64,(.*)$/.exec(cv.toDataURL('image/jpeg', 0.92));
-      return loadImg(cv.toDataURL('image/jpeg', 0.92)).then(function(i){ return { img:i, base64:m[2], mime:m[1] }; });
+      if(!box){
+        // Nessun ritaglio da fare, salvo che l'AI abbia risposto in un formato diverso: allora si ritaglia al centro.
+        if(!srcW || Math.abs(rw / rh - srcW / srcH) < 0.01) return Promise.resolve(null);
+        box = { x:0, y:0, w:1, h:1, ow:srcW, oh:srcH };
+      }
+      // Si tiene la risoluzione più alta tra quella della foto e quella restituita dall'AI.
+      var sx = box.x*rw, sy = box.y*rh, sw = box.w*rw, sh = box.h*rh, want = box.ow / box.oh;
+      if(Math.abs(sw / sh - want) > 0.01){ if(sw / sh > want){ var nw = sh * want; sx += (sw - nw) / 2; sw = nw; } else { var nh = sw / want; sy += (sh - nh) / 2; sh = nh; } }
+      var k = Math.max(1, sw / box.ow), tw = Math.round(box.ow * k), th = Math.round(box.oh * k);
+      var cv = document.createElement('canvas'); cv.width = tw; cv.height = th;
+      var cg = cv.getContext('2d'); cg.imageSmoothingQuality = 'high';
+      cg.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
+      var url = cv.toDataURL('image/jpeg', 0.95), m = /^data:(.+);base64,(.*)$/.exec(url);
+      return loadImg(url).then(function(i){ return { img:i, base64:m[2], mime:m[1] }; });
     }
     // Rifinitura fotografica: dove l'AI NON doveva cambiare niente (mobili, finestre,
     // oggetti, zone non trattate) rimettiamo i pixel della foto originale, con la sua
@@ -8998,10 +9018,10 @@
     // della foto, così il risultato sembra una foto vera e non un'immagine generata.
     function refinePhoto(origB64, origMime, res){
       return loadImg('data:' + origMime + ';base64,' + origB64).then(function(orig){
-        var W = orig.naturalWidth, H = orig.naturalHeight;
+        var W = Math.max(orig.naturalWidth, res.img.naturalWidth), H = Math.round(W * orig.naturalHeight / orig.naturalWidth);
         var A = document.createElement('canvas'); A.width = W; A.height = H; var ax = A.getContext('2d');
         ax.imageSmoothingQuality = 'high'; ax.drawImage(res.img, 0, 0, W, H);
-        var O = document.createElement('canvas'); O.width = W; O.height = H; var ox = O.getContext('2d'); ox.drawImage(orig, 0, 0);
+        var O = document.createElement('canvas'); O.width = W; O.height = H; var ox = O.getContext('2d'); ox.drawImage(orig, 0, 0, W, H);
         // maschera delle zone cambiate, calcolata in piccolo e sfumata
         var s = Math.min(1, 256 / Math.max(W, H)), w = Math.max(8, Math.round(W*s)), h = Math.max(8, Math.round(H*s));
         function small(src){ var c = document.createElement('canvas'); c.width = w; c.height = h; var g = c.getContext('2d'); try{ g.filter = 'blur(1.5px)'; }catch(e){} g.drawImage(src, 0, 0, w, h); return g.getImageData(0, 0, w, h).data; }
@@ -9047,9 +9067,9 @@
     }
     function callAI(body){
       return padForAI(body.imageBase64, body.mimeType || 'image/jpeg').then(function(pad){
-        var sendBody = Object.assign({}, body, { imageBase64: pad.b64, mimeType: pad.mime, paddedBands: !!pad.box });
+        var sendBody = Object.assign({}, body, { imageBase64: pad.b64, mimeType: pad.mime, paddedBands: !!(pad.box && (pad.box.w < 0.999 || pad.box.h < 0.999)), rapporto: pad.ratio });
         return callAIRaw(sendBody).then(function(result){
-          return unpadFromAI(result.img, pad.box).then(function(cut){ return cut || result; });
+          return unpadFromAI(result.img, pad.box, pad.w0, pad.h0).then(function(cut){ return cut || result; });
         }).then(function(res){
           if(body.step === 'righe') return res;
           // Materiali a texture (graniglia, piastrelle, legno, resine, scale): la rifinitura
@@ -9135,7 +9155,7 @@
         statusEl.textContent = ts('aiStatusDone');
         if(RD_TEST_Q){
           var tq = window.__rdLastTest;
-          rdTestBadge(tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account');
+          rdTestBadge((tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account') + ' · ' + result.img.naturalWidth + '×' + result.img.naturalHeight + ' px');
           statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' : ' · modalità test non attiva per questo account';
         }
         stopAiProgress(true);
@@ -10261,6 +10281,10 @@
   var IS_APP = document.documentElement.classList.contains('is-app');
   // Test qualità (solo account autorizzati): rendrum.com/?test=bozza | media | alta | max (costo del render normale); ?test=off per uscire
   var RD_TEST_NAME = { bozza:'BOZZA (qualità bassa)', media:'MEDIA', alta:'ALTA', max:'MASSIMA (render)' };
+  // Prova risoluzione (solo test): rendrum.com/?test=max&res=2k oppure &res=4k; &res=off per tornare normale.
+  // Stile foto (solo test): &stile=reale (come il telefono) oppure &stile=pro (predefinito).
+  var RD_TEST_STILE = (function(){ try{ var r = new URLSearchParams(location.search).get('stile'); if(r){ sessionStorage.setItem('rdTestStile', r); } else { r = sessionStorage.getItem('rdTestStile'); } return (r === 'reale' || r === 'pro') ? r : ''; }catch(e){ return ''; } })();
+  var RD_TEST_RES = (function(){ try{ var r = new URLSearchParams(location.search).get('res'); if(r){ sessionStorage.setItem('rdTestRes', r); } else { r = sessionStorage.getItem('rdTestRes'); } return (r === '2k' || r === '4k' || r === 'std') ? r : ''; }catch(e){ return ''; } })();
   var RD_TEST_Q = (function(){ try{ var t = new URLSearchParams(location.search).get('test'); if(t){ sessionStorage.setItem('rdTestQ', t); } else { t = sessionStorage.getItem('rdTestQ'); } return t === 'max' ? t : ''; }catch(e){ return ''; } })();
   // Etichetta sempre visibile quando la modalità test è attiva.
   function rdTestBadge(extra){
@@ -10271,7 +10295,7 @@
       b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(2px + env(safe-area-inset-top,0px));z-index:10050;max-width:92vw;background:#E0915A;color:#1A120C;font:700 11px/1.3 Inter,system-ui,sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;box-shadow:0 6px 20px rgba(0,0,0,.45);text-align:center;pointer-events:none';
       document.body.appendChild(b);
     }
-    b.textContent = 'TEST · ' + RD_TEST_NAME[RD_TEST_Q] + (extra ? ' · ' + extra : ' · per uscire apri rendrum.com/?test=off');
+    b.textContent = 'TEST · ' + RD_TEST_NAME[RD_TEST_Q] + (RD_TEST_RES ? ' · ' + RD_TEST_RES.toUpperCase() : '') + (RD_TEST_STILE ? ' · stile ' + RD_TEST_STILE : '') + (extra ? ' · ' + extra : ' · per uscire apri rendrum.com/?test=off');
   }
   rdTestBadge();
   // Salva un PDF creato con jsPDF. Nel browser lo scarica; nell'app (dove i
