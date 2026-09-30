@@ -714,6 +714,9 @@ module.exports = async function handler(req, res) {
     ? ` LAVORI GIÀ FATTI SU QUESTA FOTO (da NON modificare): ${prevList.join("; ")}. Quelle superfici sono già il risultato finale: devono restare IDENTICHE (stesso colore, stesso materiale, stessa finitura, stessa texture). Cambia SOLO la nuova lavorazione descritta qui.`
     : "";
   // I colori scelti vanno SOLO sulle superfici richieste: niente "contagio" su porte, metalli e oggetti vicini.
+  // Pittura interni: la vernice cambia il colore, non la forma dell'intonaco; le travi in legno restano legno.
+  const paintTextureNote = !isInterniPittura ? ""
+    : " TEXTURE DEI MURI: la pittura cambia SOLO il colore. Se l'intonaco originale è ruvido, grezzo, a buccia d'arancia o irregolare, nel risultato resta ESATTAMENTE così (stessi rilievi, stesse ombre della grana), solo nel nuovo colore: non lisciare e non rasare i muri. Travi e architravi in LEGNO a vista, cornici, cerniere, ganci e piccoli oggetti fissati al muro NON si dipingono e non spariscono: restano identici." + (plafoneTipo ? " Il trattamento del plafone riguarda solo la superficie del soffitto: le travi in legno a vista sotto il soffitto restano di legno." : "");
   const colorContainNote = isExteriorFacade ? ""
     : " COLORI SOLO DOVE RICHIESTO (regola vincolante): il colore e il materiale scelti si applicano ESCLUSIVAMENTE alle superfici indicate. Nessun altro oggetto deve prendere quel colore, nemmeno come riflesso o sfumatura: porte (anche metalliche o zincate), telai, maniglie, serrature, cerniere, tubi, cavi, lampade, prese, mobili e oggetti mantengono ESATTAMENTE il loro colore, materiale e grado di usura originali. Non aggiungere oggetti che non ci sono (prese, interruttori, placche, quadri) e non trasformare quelli esistenti in altro: una cerniera resta una cerniera.";
   const prompt = isRigheStep ? righeStepPrompt : [
@@ -724,6 +727,7 @@ module.exports = async function handler(req, res) {
     continuityNote,
     buildNote,
     colorContainNote,
+    paintTextureNote,
     ceilingNote,
     prevNote,
     granNote,
