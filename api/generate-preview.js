@@ -47,7 +47,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -105,7 +105,31 @@ module.exports = async function handler(req, res) {
   // Gemini. Si può forzare con la variabile AI_PROVIDER = "openai" | "gemini".
   const openaiKey = (process.env.OPENAI_API_KEY || "").trim();
   const apiKey = (process.env.GEMINI_API_KEY || "").trim();
+  const TEST_EMAILS_ALL = String(process.env.TEST_EMAILS || "info@dgmresine.com,provalo@rendrum.com").toLowerCase().split(",").map(function (x) { return x.trim(); });
+  const isTesterAll = !!(quotaAcc && quotaAcc.email && TEST_EMAILS_ALL.includes(String(quotaAcc.email).toLowerCase()));
   const provider = ((process.env.AI_PROVIDER || "").trim().toLowerCase()) || (openaiKey ? "openai" : "gemini");
+  // Risoluzione in uscita (vale per entrambi i motori): 2K per tutti, modificabile da
+  // Vercel con IMAGE_RES = "std" | "2k" | "4k"; i tester possono provarne un'altra.
+  const resDefaultAll = String(process.env.IMAGE_RES || process.env.OPENAI_IMAGE_RES || "2k").trim().toLowerCase();
+  const resSel = (isTesterAll && (risoluzione === "2k" || risoluzione === "4k" || risoluzione === "std")) ? risoluzione : ((resDefaultAll === "4k" || resDefaultAll === "std") ? resDefaultAll : "2k");
+  const ratioIn = Number(rapporto) || 1.5;
+  const orientIn = ratioIn >= 1.3 ? "h" : ratioIn <= 0.77 ? "v" : "q";
+  // Le risposte di Vercel non possono superare ~4,5 MB: le immagini grandi (PNG di Gemini,
+  // 4K) vengono ricompresse in JPEG sul server. Se la libreria manca, si restituisce com'è.
+  async function fitJpeg(b64, mime) {
+    const LIMIT = 4_000_000;
+    if (/jpe?g/i.test(mime || "") && b64.length < LIMIT) return { b64, mime: "image/jpeg" };
+    let sharp = null;
+    try { sharp = require("sharp"); } catch (e) { sharp = null; }
+    if (!sharp) return { b64, mime: mime || "image/png" };
+    const buf = Buffer.from(b64, "base64");
+    for (const q of [92, 86, 78]) {
+      const out = await sharp(buf).jpeg({ quality: q, mozjpeg: true, chromaSubsampling: "4:4:4" }).toBuffer();
+      const o64 = out.toString("base64");
+      if (o64.length < LIMIT || q === 78) return { b64: o64, mime: "image/jpeg" };
+    }
+    return { b64, mime };
+  }
   if (provider === "openai" && !openaiKey) {
     return res.status(500).json({ error: "OPENAI_API_KEY non configurata sul server" });
   }
@@ -536,15 +560,22 @@ module.exports = async function handler(req, res) {
   const hasAnyHex = !isCortenStyled && Boolean(colorAHex || colorBHex || colorCHex || colorDavanzaliHex || colorSottotettoHex || colorPlafoneHex || colorTettoHex || colorCorniciHex || colorBalconiHex || colorSerramentiHex || colorRigheHex);
   // FOTOREALISMO E LUCE: il risultato deve sembrare una foto vera scattata dopo il
   // lavoro, non un rendering. La luce della foto originale "comanda" sui nuovi materiali.
+  // Stile foto: "pro" (predefinito) = qualità da fotografo di architettura, nitida e pulita;
+  // "reale" = identica alla foto del telefono (vecchio comportamento). Da Vercel: IMAGE_STYLE.
+  const fotoPro = (stile === "reale" || stile === "pro") ? stile === "pro" : String(process.env.IMAGE_STYLE || "pro").trim().toLowerCase() !== "reale";
   const realismNote = [
     " FOTOREALISMO E LUCE (molto importante): il risultato deve sembrare una FOTOGRAFIA REALE della stessa stanza/edificio scattata con la stessa fotocamera subito dopo il lavoro, NON un rendering 3D, NON un'immagine digitale.",
-    "Conserva la luce ESATTA della foto originale: stessa direzione e intensità, stessa temperatura colore (luce calda, fredda o mista), stessa esposizione, stesso bilanciamento del bianco.",
+    fotoPro
+      ? "Conserva la luce della foto originale: stessa direzione, stesso momento della giornata e stessa temperatura colore (luce calda, fredda o mista); puoi solo correggere l'esposizione e il bilanciamento del bianco come farebbe un fotografo professionista."
+      : "Conserva la luce ESATTA della foto originale: stessa direzione e intensità, stessa temperatura colore (luce calda, fredda o mista), stessa esposizione, stesso bilanciamento del bianco.",
     "Le nuove superfici devono ricevere quella luce in modo fisicamente credibile: zone più chiare vicino a finestre e lampade, gradienti morbidi di luce sulle pareti, angoli e spigoli leggermente più scuri (occlusione ambientale), ombre di contatto sotto mobili, battiscopa e oggetti, ombre portate identiche a quelle originali.",
     "Il colore richiesto è quello della vernice/materiale vista in luce neutra: in foto deve apparire come apparirebbe davvero sotto QUESTA luce (più scuro in ombra, più chiaro in luce, con la stessa dominante di colore delle altre superfici), MAI come una campitura piatta e uniforme.",
     "Riflessi: rispetta la finitura; le superfici opache non riflettono, le satinate hanno riflessi morbidi e sfumati, le lucide riflettono finestre, luci e mobili in modo coerente con la prospettiva.",
     "Materiali con microdettagli realistici (grana, leggere irregolarità, venature coerenti con la scala reale; fughe e giunti SOLO nei materiali che li hanno davvero, come piastrelle, parquet, laminato e SPC). Dove due colori o materiali si incontrano il passaggio è netto ma NATURALE: non aggiungere mai linee, contorni, righe luminose o bordi colorati lungo spigoli e angoli, e non cambiare il colore delle superfici che non sono state richieste (una parete bianca resta dello stesso bianco dell'originale).",
     "LUCI COLORATE E RIFLESSI ESISTENTI: le luci colorate già presenti nella foto (aloni rossi, arancioni o blu di insegne, neon, schermi, lampade colorate, luce calda dei faretti) e le dominanti di colore che proiettano sulle superfici NON richieste devono restare IDENTICHE: non 'ripulire' e non neutralizzare le pareti, il soffitto o gli oggetti che non fanno parte della lavorazione. Anche sulle superfici nuove quelle luci colorate si riflettono nello stesso punto e con la stessa intensità.",
-    "Mantieni la stessa nitidezza, profondità di campo, grana/rumore e compressione della foto originale: non renderla più pulita, più nitida, più satura o più contrastata dell'originale. Niente effetti HDR, niente glow, niente colori 'plastici'."
+    fotoPro
+      ? "QUALITÀ DA FOTOGRAFO PROFESSIONISTA DI ARCHITETTURA: il risultato è la stessa inquadratura rifatta con una fotocamera professionale e un buon obiettivo. Massima nitidezza e definizione su tutta l'immagine: fughe delle piastrelle dritte e ben leggibili, spigoli di gradini, muri e serramenti netti, texture dei materiali (graniglia, legno, pietra, intonaco, resina) definite fino al dettaglio fine, erba e piante con foglie distinte. Esposizione bilanciata: cielo non bruciato, ombre leggibili, colori puliti e naturali, bilanciamento del bianco corretto; niente rumore, niente sfocature, niente artefatti di compressione. La direzione della luce resta quella della foto. NON è un restyling: NON aggiungere, togliere o spostare mobili, piante, vasi, lampade, oggetti, finestre, colonne o travi, e non cambiare materiali o colori delle parti non richieste. Niente effetto HDR esagerato, niente glow, niente colori saturi o 'plastici'."
+      : "Mantieni la stessa nitidezza, profondità di campo, grana/rumore e compressione della foto originale: non renderla più pulita, più nitida, più satura o più contrastata dell'originale. Niente effetti HDR, niente glow, niente colori 'plastici'."
   ].join(" ");
   const colorFidelityNote = hasAnyHex
     ? " ATTENZIONE, REGOLA VINCOLANTE SUL COLORE: usa ESATTAMENTE e SOLO il/i codice/i colore esadecimale indicato/i sopra, non un colore simile, non un colore della stessa famiglia, non il colore che ti sembra stia meglio nella scena: il codice esadecimale è un vincolo numerico assoluto, non un'ispirazione. Non sostituire mai la tonalità richiesta con un'altra tonalità (es. se viene richiesto un colore bordeaux/prugna scuro, il risultato NON deve mai diventare verde, blu o qualsiasi altra famiglia di colore diversa da quella del codice indicato). L'unica variazione ammessa è la normale resa fotografica della luce/ombra ambientale sopra quella tonalità esatta, mai un cambio di tonalità. Inoltre non modificare nient'altro rispetto alla richiesta: mantieni la finitura (lucido/opaco/satinato) esattamente come indicato, e non cambiare materiale, texture o finitura in modo diverso da quanto specificato."
@@ -630,7 +661,7 @@ module.exports = async function handler(req, res) {
     ? materialSampleImage.replace(/^data:image\/\w+;base64,/, "")
     : null;
   const sampleNote = (sampleClean && (materialId === "graniglia_esterni" || scaleTipoOk === "graniglia"))
-    ? ` CAMPIONE DELLA GRANIGLIA: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO fotografato dall'alto (solo sassolini, senza ambiente): è la graniglia REALE scelta dal cliente (${colorA || ""}). Sulla superficie da rifare usa ESATTAMENTE quei sassolini: stessi colori e stesse proporzioni tra i colori, stessa forma (arrotondata o spigolosa), stessa lucentezza e stessa densità, legati in resina trasparente. Scala reale: ogni sassolino misura pochi millimetri (circa 2-6 mm), quindi da lontano la superficie appare come una grana fine e fitta e i singoli sassolini si distinguono solo vicino all'obiettivo. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine e non ripeterlo come una piastrella.${colorB ? " Il campione riguarda il colore principale; per l'altro colore segui il nome e il colore indicati." : ""}`
+    ? ` CAMPIONE DELLA GRANIGLIA: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO fotografato dall'alto (solo sassolini, senza ambiente): è la graniglia REALE scelta dal cliente (${colorA || ""}). Sulla superficie da rifare usa ESATTAMENTE quei sassolini: stessi colori e stesse proporzioni tra i colori, stessa forma (arrotondata o spigolosa), stessa lucentezza e stessa densità, legati in resina trasparente. SCALA REALE, MOLTO IMPORTANTE: ogni sassolino misura 2-5 mm, più o meno come un chicco di riso. Sassolini grandi come ciottoli o come fagioli sono SBAGLIATI. A due o tre metri dall'obiettivo la superficie appare come una grana fine, fitta e uniforme; solo nella parte più vicina all'obiettivo si distinguono i singoli sassolini, e restano comunque piccoli rispetto a un piede o a un vaso. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine e non ripeterlo come una piastrella.${colorB ? " Il campione riguarda il colore principale; per l'altro colore segui il nome e il colore indicati." : ""}`
     : sampleClean
     ? ` CAMPIONE DEL MATERIALE: oltre alla foto da modificare ti è stato fornito un CAMPIONE QUADRATO ravvicinato del materiale (solo una superficie piena, senza stanza né oggetti). È un campione reale di ${sampleIsMicro ? "microcemento" : "resina spatolata"} nel colore esatto scelto dal cliente${colorAHex ? " (" + colorAHex + ")" : ""}. Sulla superficie da trattare riproduci la STESSA texture del campione (${sampleIsMicro ? "velature e nuvolature morbide del frattazzo, DELICATE e sfumate: non accentuare i segni e non trasformarli in archi o ventagli evidenti" : "segni ad arco della spatola, nuvolature, leggere variazioni di tono, grana"}) e lo STESSO colore medio, adattati alla prospettiva, alla luce della foto e alla scala reale (i segni della spatola sono ampi 20-40 cm, non piccoli e ripetuti). La luce e i riflessi della stanza modificano il colore in modo naturale, ma la tinta di base deve restare quella del campione: non schiarirla, non scurirla e non cambiarne la tonalità. Il campione serve SOLO come riferimento: NON inserirlo nell'immagine, non incollarlo come riquadro e non ripetere il suo disegno come una piastrella.`
     : "";
@@ -730,6 +761,26 @@ module.exports = async function handler(req, res) {
     // Bozza scartata (sbaglia le lavorazioni): si genera SEMPRE in qualità piena.
     // La modalità test (?test=max) serve solo a leggere il costo reale di un render.
     const quality = (process.env.OPENAI_IMAGE_QUALITY || "max").trim();
+    // PROVA RISOLUZIONE (solo account di test): immagine in uscita più grande (2K o 4K)
+    // nella stessa proporzione della foto inviata. Per tutti gli altri resta "auto".
+    // Risoluzione in uscita: 2K per tutti (immagine nitida anche su schermi grandi),
+    // modificabile da Vercel con OPENAI_IMAGE_RES = "2k" | "4k" | "std". Gli account di
+    // test possono provarne un'altra con ?test=max&res=std|2k|4k.
+    const resTest = resSel, orient = orientIn;
+    const SIZES = { "2k": { h: "2304x1536", v: "1536x2304", q: "2048x2048" }, "4k": { h: "3504x2336", v: "2336x3504", q: "2880x2880" } };
+    // Formato ESATTO della foto (multipli di 16): niente bande laterali, tutti i pixel per la foto.
+    function exactSize(r, which) {
+      r = Math.min(3, Math.max(1 / 3, r));
+      let W, H;
+      if (which === "4k") { W = Math.sqrt(8294400 * r); H = W / r; if (W > 3840) { W = 3840; H = W / r; } if (H > 3840) { H = 3840; W = H * r; } }
+      else { if (r >= 1) { W = 2048; H = W / r; } else { H = 2048; W = H * r; } }
+      W = Math.floor(W / 16) * 16; H = Math.floor(H / 16) * 16;
+      if (W * H < 655360) return null;
+      return W + "x" + H;
+    }
+    const exact = (!paddedBands && SIZES[resTest]) ? exactSize(ratioIn, resTest) : null;
+    const outSize = exact || (SIZES[resTest] ? SIZES[resTest][orient] : "auto");
+    const outExtra = SIZES[resTest] ? { output_compression: resTest === "4k" ? "85" : "94" } : {};
     const ext = (m) => (m.includes("png") ? "png" : m.includes("webp") ? "webp" : "jpg");
     // Stesso ordine delle immagini descritto nel prompt: 1) foto del cliente,
     // 2) cartella colori (o riferimento boiserie).
@@ -759,7 +810,7 @@ module.exports = async function handler(req, res) {
     };
     try {
       let outMime = "image/jpeg";
-      let r = await sendRetry({ quality, input_fidelity: "high", size: "auto", output_format: "jpeg" });
+      let r = await sendRetry(Object.assign({ quality, input_fidelity: "high", size: outSize, output_format: "jpeg" }, outExtra));
       let txt = await r.text();
       // Se un parametro opzionale non è accettato dal modello, riproviamo con i soli essenziali.
       if (r.status === 400 && /input_fidelity|size|output_format|quality/i.test(txt)) {
@@ -782,18 +833,22 @@ module.exports = async function handler(req, res) {
         const u = data.usage, d = u.input_tokens_details || {};
         const imgIn = d.image_tokens || 0, txtIn = d.text_tokens || Math.max(0, (u.input_tokens || 0) - imgIn), out = u.output_tokens || 0;
         const usd = imgIn * 8e-6 + txtIn * 5e-6 + out * 30e-6; // listino OpenAI per token (stima)
-        test = { quality: quality, inputImageTokens: imgIn, inputTextTokens: txtIn, outputTokens: out, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
+        test = { quality: quality, size: outSize, inputImageTokens: imgIn, inputTextTokens: txtIn, outputTokens: out, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
       }
-      return res.status(200).json({ imageBase64: b64, mimeType: outMime, test: test });
+      const fit = await fitJpeg(b64, outMime);
+      if (test) test.engine = "openai " + model;
+      return res.status(200).json({ imageBase64: fit.b64, mimeType: fit.mime, test: test });
     } catch (err) {
       console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
     }
   }
 
+  // Motore Gemini (Nano Banana Pro). Modello cambiabile da Vercel con GEMINI_IMAGE_MODEL.
+  const geminiModel = (process.env.GEMINI_IMAGE_MODEL || "gemini-3-pro-image-preview").trim();
   let apiUrl;
   try {
     apiUrl = new URL(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-pro-image:generateContent"
+      "https://generativelanguage.googleapis.com/v1beta/models/" + encodeURIComponent(geminiModel) + ":generateContent"
     );
     apiUrl.searchParams.set("key", apiKey);
   } catch (err) {
@@ -836,20 +891,25 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    const response = await fetch(apiUrl, {
+    const imageConfig = {
+      aspectRatio: orientIn === "h" ? "3:2" : orientIn === "v" ? "2:3" : "1:1",
+      imageSize: resSel === "4k" ? "4K" : resSel === "std" ? "1K" : "2K"
+    };
+    const callGemini = (cfg) => fetch(apiUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: contentParts
-          }
-        ],
-        generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
+        contents: [ { parts: contentParts } ],
+        generationConfig: Object.assign({ responseModalities: ["TEXT", "IMAGE"] }, cfg ? { imageConfig: cfg } : {})
       })
     });
-
-    const rawText = await response.text();
+    let response = await callGemini(imageConfig);
+    let rawText = await response.text();
+    // Se il modello non accetta le opzioni di formato, si riprova senza.
+    if (response.status === 400 && /imageConfig|imageSize|aspect/i.test(rawText)) {
+      response = await callGemini(null);
+      rawText = await response.text();
+    }
     let data;
     try {
       data = JSON.parse(rawText);
@@ -877,10 +937,14 @@ module.exports = async function handler(req, res) {
     }
 
     await countUsage();
-    return res.status(200).json({
-      imageBase64: inline.data,
-      mimeType: inline.mime_type || inline.mimeType || "image/png"
-    });
+    let gtest = null;
+    if (isTesterAll && data.usageMetadata) {
+      const um = data.usageMetadata, pin = um.promptTokenCount || 0, pout = (um.candidatesTokenCount || 0) + (um.thoughtsTokenCount || 0);
+      const usd = pin * 2e-6 + pout * 120e-6; // listino Gemini 3 Pro Image (stima)
+      gtest = { quality: "gemini", size: imageConfig.imageSize, engine: "gemini " + geminiModel, inputImageTokens: pin, inputTextTokens: 0, outputTokens: pout, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
+    }
+    const gfit = await fitJpeg(inline.data, inline.mime_type || inline.mimeType || "image/png");
+    return res.status(200).json({ imageBase64: gfit.b64, mimeType: gfit.mime, test: gtest });
   } catch (err) {
     console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
   }
