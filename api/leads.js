@@ -1,6 +1,6 @@
 // api/leads.js — "Trova il tuo artigiano": richieste dei clienti e preventivi ricevuti.
 // Cliente (privato):
-//   POST /api/leads?action=create        -> invia la richiesta a 1-3 artigiani (o lista d'attesa)
+//   POST /api/leads?action=create        -> invia la richiesta agli artigiani scelti dal cliente (o lista d'attesa)
 //   GET  /api/leads?action=mine          -> le mie richieste con stato e preventivi ricevuti
 //   GET  /api/leads?action=quote&id=     -> preventivo ricevuto (dati per il PDF)
 //   POST /api/leads?action=accept        -> { id } accetta il preventivo
@@ -9,6 +9,8 @@
 //   GET  /api/leads?action=pro-get&id=   -> dettaglio (la segna come vista)
 //   POST /api/leads?action=pro-decline   -> { id } non mi interessa
 //   POST /api/leads?action=pro-send      -> { id, quoteId } invia il preventivo al cliente
+// Controllo automatico (Vercel Cron, una volta al giorno):
+//   GET  /api/leads?action=cron48        -> richieste senza preventivo dopo 48 ore: avvisa Rendrum e il cliente
 // Tabella: vedi supabase_richieste.sql
 const { currentAccount, supabaseRequest, getSupabaseConfig, paymentsEnabled, emailEnabled, sendEmail, emailLayout, siteOrigin } = require("./_auth-lib");
 const { uploadPhoto } = require("./_projects-lib");
@@ -37,6 +39,52 @@ async function artisansFor(country, prov, lav) {
   const r = await supabaseRequest(q, { method: "GET" });
   return r.ok && Array.isArray(r.data) ? r.data.filter(a => a.account_type !== "privato") : [];
 }
+// Casella di Rendrum per le richieste che nessuna ditta prende in carico
+function adminEmail() { return (process.env.LEADS_ADMIN_EMAIL || process.env.REQUEST_TO || "info@rendrum.com").trim(); }
+function publicSite() { return (process.env.SITE_URL || "https://www.rendrum.com").replace(/\/+$/, ""); }
+function leadDetailsHtml(prov, lav, d) {
+  const righe = [
+    ["Lavorazione", LAV_NOME[lav] || lav], ["Zona", (d.comune || "") + " (" + prov + ")"], ["Immobile", d.tipo], ["Stato attuale", d.stato],
+    ["Metri quadri", d.mq ? d.mq + " m²" : ""], ["Quando", d.quando], ["Budget", d.budget], ["Cliente", d.nome], ["Telefono", d.telefono], ["Email", d.email],
+    ["Descrizione", d.descrizione], ["Scelte", (d.scelte || []).join(" · ")], ["Foto originale", d.prima ? '<a href="' + esc(d.prima) + '">apri</a>' : ""],
+    ["Anteprima", d.dopo ? '<a href="' + esc(d.dopo) + '">apri</a>' : ""],
+  ].filter(r => r[1]);
+  return righe.map(r => "<b>" + esc(r[0]) + ":</b> " + (/^<a /.test(r[1]) ? r[1] : esc(r[1]))).join("<br>");
+}
+async function cron48(req, res) {
+  const secret = (process.env.CRON_SECRET || "").trim();
+  if (!secret) return res.status(500).json({ error: "CRON_SECRET non configurato." });
+  if ((req.headers.authorization || "") !== "Bearer " + secret) return res.status(401).json({ error: "Non autorizzato" });
+  const from = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+  const to = new Date(Date.now() - 48 * 3600 * 1000).toISOString();
+  const r = await supabaseRequest("/pro_leads?created_at=gte." + encodeURIComponent(from) + "&created_at=lte." + encodeURIComponent(to)
+    + "&select=id,group_id,status,province,lavorazione,data,created_at&order=created_at.asc&limit=2000", { method: "GET" });
+  if (!r.ok || !Array.isArray(r.data)) return res.status(502).json({ error: "Lettura non riuscita" });
+  const groups = {};
+  r.data.forEach(x => { (groups[x.group_id] = groups[x.group_id] || []).push(x); });
+  let avvisi = 0;
+  for (const gid of Object.keys(groups)) {
+    const rows = groups[gid];
+    const d = rows[0].data || {};
+    if (rows.some(x => x.data && x.data.avviso48)) continue;                                   // già avvisato
+    if (rows.every(x => x.status === "in_attesa")) continue;                                  // lista d'attesa: Rendrum è già stato avvisato all'invio
+    if (rows.some(x => x.status === "preventivo_inviato" || x.status === "accettata")) continue; // qualcuno ha risposto
+    const lavN = LAV_NOME[rows[0].lavorazione] || rows[0].lavorazione;
+    const rifiutate = rows.filter(x => x.status === "rifiutata").length;
+    await notify(adminEmail(), "Richiesta senza preventivo da 48 ore: " + lavN + " a " + (d.comune || rows[0].province),
+      "Nessuna ditta ha ancora risposto",
+      "Il cliente l'ha inviata a " + rows.length + " ditt" + (rows.length === 1 ? "a" : "e") + (rifiutate ? " (" + rifiutate + " non interessat" + (rifiutate === 1 ? "a" : "e") + ")" : "") + ", ma dopo 48 ore nessuna ha mandato un preventivo.<br><br>" + leadDetailsHtml(rows[0].province, rows[0].lavorazione, d),
+      "Apri Rendrum", publicSite());
+    await notify(d.email, "La tua richiesta per " + lavN + " – Rendrum", "Nessun preventivo, per ora",
+      "Le ditte che hai scelto non hanno ancora risposto alla tua richiesta per <b>" + esc(lavN) + "</b>. Se vuoi, puoi inviarla anche ad altri artigiani della tua zona: apri la tua anteprima e tocca <b>Trova un artigiano</b>. Ti avvisiamo appena arriva un preventivo.",
+      "Le mie richieste", publicSite() + "/?vai=richieste");
+    await Promise.all(rows.map(x => supabaseRequest("/pro_leads?id=eq." + x.id, { method: "PATCH", headers: { Prefer: "return=minimal" },
+      body: JSON.stringify({ data: Object.assign({}, x.data || {}, { avviso48: new Date().toISOString() }) }) })));
+    avvisi++;
+  }
+  return res.status(200).json({ ok: true, avvisi });
+}
+
 function leadForPro(row, full) {
   const d = row.data || {};
   const out = {
@@ -52,6 +100,7 @@ module.exports = async function handler(req, res) {
   if (!getSupabaseConfig().configured) return res.status(500).json({ error: "Servizio non configurato." });
   const action = (req.query && req.query.action) || "";
   try {
+    if (action === "cron48") return await cron48(req, res);
     const acc = await currentAccount(req).catch(() => null);
     if (!acc) return res.status(401).json({ error: "Accedi al tuo account.", code: "login_required" });
     const isPro = acc.account_type !== "privato";
@@ -93,7 +142,7 @@ module.exports = async function handler(req, res) {
 
       // Artigiani scelti: devono essere visibili per quella provincia e lavorazione
       const available = await artisansFor(country, prov, lav);
-      const ids = Array.from(new Set((Array.isArray(b.artisans) ? b.artisans : []).map(uuid).filter(Boolean))).slice(0, 3);
+      const ids = Array.from(new Set((Array.isArray(b.artisans) ? b.artisans : []).map(uuid).filter(Boolean))).slice(0, 50);
       const chosen = available.filter(a => ids.includes(a.id));
       if (ids.length && chosen.length !== ids.length) return res.status(400).json({ error: "Uno degli artigiani scelti non è più disponibile. Aggiorna l'elenco." });
       if (!ids.length && available.length) return res.status(400).json({ error: "Scegli almeno un artigiano." });
@@ -121,6 +170,12 @@ module.exports = async function handler(req, res) {
         chosen.length ? "Abbiamo inviato la tua richiesta per <b>" + esc(lavN) + "</b> a " + chosen.map(a => "<b>" + esc(a.company_name) + "</b>").join(", ") + ". Ti avviseremo appena riceverai un preventivo."
           : "Al momento non ci sono artigiani per <b>" + esc(lavN) + "</b> nella provincia di " + prov + ". Ti avviseremo appena se ne iscrive uno.",
         "Le mie richieste", origin + "/?vai=richieste");
+      if (!chosen.length) {
+        await notify(adminEmail(), "Richiesta senza ditte in zona: " + lavN + " a " + d.comune + " (" + prov + ")",
+          "Nessuna ditta iscritta in questa zona",
+          "È arrivata una richiesta per <b>" + esc(lavN) + "</b> ma nella provincia di " + prov + " non c'è nessun artigiano iscritto per questo lavoro. Il cliente è in lista d'attesa.<br><br>" + leadDetailsHtml(prov, lav, d),
+          "Apri Rendrum", publicSite());
+      }
       return res.status(200).json({ ok: true, sent: chosen.length, waitlist: !chosen.length });
     }
 

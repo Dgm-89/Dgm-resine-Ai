@@ -105,7 +105,7 @@ module.exports = async function handler(req, res) {
   // Gemini. Si può forzare con la variabile AI_PROVIDER = "openai" | "gemini".
   const openaiKey = (process.env.OPENAI_API_KEY || "").trim();
   const apiKey = (process.env.GEMINI_API_KEY || "").trim();
-  const TEST_EMAILS_ALL = String(process.env.TEST_EMAILS || "info@dgmresine.com,provalo@rendrum.com").toLowerCase().split(",").map(function (x) { return x.trim(); });
+  const TEST_EMAILS_ALL = String(process.env.TEST_EMAILS || "info@rendrum.com,info@dgmresine.com,provalo@rendrum.com").toLowerCase().split(",").map(function (x) { return x.trim(); });
   const isTesterAll = !!(quotaAcc && quotaAcc.email && TEST_EMAILS_ALL.includes(String(quotaAcc.email).toLowerCase()));
   const provider = ((process.env.AI_PROVIDER || "").trim().toLowerCase()) || (openaiKey ? "openai" : "gemini");
   // Risoluzione in uscita (vale per entrambi i motori): 2K per tutti, modificabile da
@@ -770,7 +770,7 @@ module.exports = async function handler(req, res) {
     // MODALITÀ TEST (solo account autorizzati, da rendrum.com/?test=max):
     // genera a qualità ridotta per valutare la "bozza" e restituisce i token usati
     // con il costo stimato. Per tutti gli altri non cambia nulla.
-    const TEST_EMAILS = String(process.env.TEST_EMAILS || "info@dgmresine.com,provalo@rendrum.com").toLowerCase().split(",").map(function (x) { return x.trim(); });
+    const TEST_EMAILS = String(process.env.TEST_EMAILS || "info@rendrum.com,info@dgmresine.com,provalo@rendrum.com").toLowerCase().split(",").map(function (x) { return x.trim(); });
     const isTester = !!(quotaAcc && quotaAcc.email && TEST_EMAILS.includes(String(quotaAcc.email).toLowerCase()));
     // Bozza scartata (sbaglia le lavorazioni): si genera SEMPRE in qualità piena.
     // La modalità test (?test=max) serve solo a leggere il costo reale di un render.
