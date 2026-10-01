@@ -389,6 +389,11 @@
   .lp #landingPrivato .lc-desc{ color:rgba(26,16,6,.78); }
   .lp #landingPrivato .lc-icon{ background:rgba(26,16,6,.14); }
   .lp #landingPrivato .lc-icon svg{ color:#1A1006; }
+  /* iPhone: le caselle sotto 16px fanno ingrandire la pagina quando si tocca; il doppio tocco non zooma più (il pizzico sì) */
+  @supports (-webkit-touch-callout: none){ input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]), select, textarea{ font-size:max(16px, 1em) !important; } }
+  html, body{ touch-action:manipulation; }
+  .landing-card[hidden], #tfWhoFields[hidden], .tf-who[hidden]{ display:none !important; }
+  .tf-who{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:11px 13px; font-size:13.5px; color:var(--ink); margin:10px 0 6px; line-height:1.45; }
   /* Fondo pagina iniziale: fascia scura con logo, social, App Store, contatti */
   .lp-foot{ grid-area:priv; background:#1D1B18; color:#F3EDE6; text-align:center; margin:18px calc(50% - 50vw) -10px; padding:30px 16px calc(36px + env(safe-area-inset-bottom,0px)); display:flex; flex-direction:column; align-items:center; gap:6px; }
   main:has(#panelLanding.active){ padding-bottom:0; }  /* niente spazio vuoto sotto il fondo pagina */
@@ -1066,7 +1071,8 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
         </div>
         <div class="field" hidden><label>Budget indicativo</label><select id="tfBudget"></select></div>
         <div class="field"><label>Descrivi il lavoro *</label><textarea id="tfDesc" rows="3" maxlength="1500" placeholder="Es. Soggiorno e cucina, pavimento in piastrelle da rimuovere, casa abitata: preferisco lavori in una settimana."></textarea></div>
-        <div class="row2">
+        <div class="tf-who" id="tfWho" hidden><span id="tfWhoTxt"></span> <button type="button" class="q-link" id="tfWhoEdit">modifica</button></div>
+        <div class="row2" id="tfWhoFields">
           <div class="field"><label>Nome e cognome *</label><input id="tfNome" type="text" maxlength="120"></div>
           <div class="field"><label>Telefono *</label><input id="tfTel" type="tel" maxlength="30"></div>
         </div>
@@ -1898,6 +1904,8 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     landingPrivatoDesc: { it:"Configura casa, terrazzo o facciata", en:"Configure your home, terrace or facade" },
     landingProTitle: { it:"Professionisti", en:"Professionals" },
     landingProDesc: { it:"Imprese, architetti, rivenditori", en:"Contractors, architects, retailers" },
+    lpNewTitle: { it:"Nuovo progetto", en:"New project" },
+    lpNewProDesc: { it:"Anteprima e preventivo per il tuo cliente", en:"Preview and quote for your client" },
     panel1Title: { it:"Cosa vuoi realizzare?", en:"What do you want to create?" },
     panelResinaAreaTitle: { it:"Dove vuoi applicare la resina?", en:"Where do you want to apply the resin?" },
     panelColorTitle: { it:"Scegli il colore", en:"Choose the color" },
@@ -10902,7 +10910,17 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
       box.hidden = !on.length;
     }catch(e){}
   })();
+  // Dopo l'accesso sappiamo già se è un privato o un'impresa: niente scelta, solo "Nuovo progetto".
+  function lpSyncChoices(){
+    var pr = document.getElementById('landingPrivato'), pp = document.getElementById('landingPro'); if(!pr || !pp) return;
+    var isPriv = !!(proAccount && proAccount.accountType === 'privato'), isPro = !!(proAccount && proAccount.accountType !== 'privato');
+    pr.hidden = isPro; pp.hidden = isPriv;
+    var set = function(card, t, d){ var a = card.querySelector('.lc-title'), b = card.querySelector('.lc-desc'); a.setAttribute('data-i18n', t); b.setAttribute('data-i18n', d); a.textContent = ts(t); b.textContent = ts(d); };
+    set(pr, isPriv ? 'lpNewTitle' : 'landingPrivatoTitle', 'landingPrivatoDesc');
+    set(pp, isPro ? 'lpNewTitle' : 'landingProTitle', isPro ? 'lpNewProDesc' : 'landingProDesc');
+  }
   function proUpdateHeader(){
+    try{ lpSyncChoices(); }catch(e){}
     if(proAccount && proAccount.accountType === 'privato' && typeof rdVoteCheck === 'function') rdVoteCheck();
     if(proAccount && typeof proPendingClick !== 'undefined' && proPendingClick && (!proAccount.paymentsEnabled || subActive())){
       var pid = proPendingClick; proPendingClick = null;
@@ -12306,6 +12324,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     if(!f('tfNome').value) f('tfNome').value = (f('fName') && f('fName').value) || proAccount.companyName || '';
     if(!f('tfTel').value) f('tfTel').value = (f('fPhone') && f('fPhone').value) || proAccount.phone || '';
     f('tfEmailHint').textContent = 'Gli artigiani ti risponderanno anche all\'email del tuo account: ' + (proAccount.email || '') + '.';
+    tfWhoSync(false);
     tf.pv = null;
     try{
       var before = (typeof layerOriginal !== 'undefined' && layerOriginal) ? layerOriginal.img : photoImg;
@@ -12318,6 +12337,14 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     try{ var sub = document.querySelector('#ppViewFind .pro-projects-sub'); if(!sub.dataset.orig) sub.dataset.orig = sub.textContent; sub.textContent = tq ? 'Qualche domanda veloce, poi scegli tu le ditte della tua zona: ti rispondono con un preventivo qui nell\'app.' : sub.dataset.orig; }catch(e){}
     document.getElementById('proProjectsModal').classList.add('open'); qCard(false); ppShowView('find'); qScrollTop();
   }
+  // Se nome e telefono ci sono già (dall'account), non li richiediamo: una riga con "modifica".
+  function tfWhoSync(open){
+    var n = document.getElementById('tfNome').value.trim(), t = document.getElementById('tfTel').value.trim();
+    var known = n.length >= 3 && t.replace(/\D/g,'').length >= 8 && !open;
+    document.getElementById('tfWho').hidden = !known; document.getElementById('tfWhoFields').hidden = known;
+    if(known) document.getElementById('tfWhoTxt').innerHTML = 'Gli artigiani ti contatteranno come <b>' + qEsc(n) + '</b> · ' + qEsc(t);
+  }
+  document.getElementById('tfWhoEdit').addEventListener('click', function(){ tfWhoSync(true); var el = document.getElementById('tfNome'); if(el) el.focus(); });
   function tfData(){
     var f = function(id){ return document.getElementById(id); }, l = tf.lavs[+f('tfLav').value];
     return { lavorazione: l ? l[0] : '', scelte: l ? l[2] : [], provincia: f('tfProv').value, comune: f('tfComune').value.trim(), tipo: f('tfTipo').value, stato: f('tfStato').value,
