@@ -90,6 +90,7 @@ function leadForPro(row, full) {
   const out = {
     id: row.id, status: row.status, createdAt: row.created_at, lavorazione: row.lavorazione, lavorazioneNome: LAV_NOME[row.lavorazione] || row.lavorazione,
     provincia: row.province, comune: d.comune, mq: d.mq, tipo: d.tipo, quando: d.quando, budget: d.budget, quoteId: row.quote_id || null,
+    interesse: d.interesse || null, fase: d.fase || null, contatto: d.contatto || null, extra: d.extra || [],
   };
   if (full) Object.assign(out, { stato: d.stato, descrizione: d.descrizione, scelte: d.scelte || [], prima: d.prima || null, dopo: d.dopo || null,
     nome: d.nome, telefono: d.telefono, email: d.email });
@@ -120,16 +121,27 @@ module.exports = async function handler(req, res) {
         descrizione: str(b.descrizione, 1500), nome: str(b.nome, 120), telefono: str(b.telefono, 30), email: acc.email,
         scelte: (Array.isArray(b.scelte) ? b.scelte : []).slice(0, 30).map(x => str(x, 300)).filter(Boolean),
       };
+      // Questionario (fase, quando, lavori extra, contatto): i campi di dettaglio diventano facoltativi
+      const q = (b.q && typeof b.q === "object") ? b.q : null, qOn = !!q;
+      if (qOn) {
+        const pick = (v, ok) => ok.includes(v) ? v : "";
+        const fase = pick(q.fase, ["pronto", "preventivi", "idea"]), quandoQ = pick(q.quando, ["subito", "3mesi", "anno", "nodata"]), contatto = pick(q.contatto, ["whatsapp", "telefono", "email", "no"]);
+        d.fase = ({ pronto: "Pronto a partire", preventivi: "Raccoglie preventivi", idea: "Si sta facendo un'idea" })[fase] || "";
+        d.contatto = ({ whatsapp: "WhatsApp", telefono: "Telefonata", email: "Email", no: "Per ora no" })[contatto] || "";
+        d.extra = (Array.isArray(b.qExtra) ? b.qExtra : []).slice(0, 8).map(x => str(x, 120)).filter(Boolean);
+        d.interesse = (fase === "idea" || contatto === "no") ? "basso" : ((fase === "pronto" || fase === "preventivi") && (quandoQ === "subito" || quandoQ === "3mesi") && contatto) ? "alto" : "medio";
+        if (d.interesse === "basso") return res.status(200).json({ ok: true, sent: 0, saved: true, skipped: true });
+      }
       const errs = [];
       if (!provinceIndex(country)[prov]) errs.push("provincia");
       if (!LAVORAZIONI.includes(lav)) errs.push("lavorazione");
       if (d.comune.length < 2) errs.push("comune");
-      if (!TIPI.includes(d.tipo)) errs.push("tipo di immobile");
-      if (!STATI.includes(d.stato)) errs.push("stato attuale");
-      if (!(d.mq > 0)) errs.push("metri quadri");
+      if (!TIPI.includes(d.tipo) && !(qOn && !d.tipo)) errs.push("tipo di immobile");
+      if (!STATI.includes(d.stato) && !(qOn && !d.stato)) errs.push("stato attuale");
+      if (!(d.mq > 0) && !qOn) errs.push("metri quadri");
       if (!QUANDO.includes(d.quando)) errs.push("quando vuoi iniziare");
-      if (!BUDGET.includes(d.budget)) errs.push("budget");
-      if (d.descrizione.length < 20) errs.push("descrizione del lavoro (almeno 20 caratteri)");
+      if (!BUDGET.includes(d.budget) && !(qOn && !d.budget)) errs.push("budget");
+      if (d.descrizione.length < 20 && !qOn) errs.push("descrizione del lavoro (almeno 20 caratteri)");
       if (d.nome.length < 3) errs.push("nome e cognome");
       if (d.telefono.replace(/\D/g, "").length < 8) errs.push("telefono");
       if (!b.privacy || !b.condividi) errs.push("consensi");
