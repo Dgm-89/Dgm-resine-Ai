@@ -578,6 +578,56 @@
   .ql-tools{ display:flex; gap:14px; justify-content:flex-end; }
   .pro-bar .pb-badge{ display:inline-block; min-width:18px; padding:1px 5px; border-radius:999px; background:#C0392B; color:#fff; font-size:11px; line-height:16px; text-align:center; }
   .tf-art{ display:flex; gap:10px; border:1.5px solid var(--line); border-radius:12px; padding:10px; margin-bottom:8px; cursor:pointer; align-items:flex-start; }
+  /* Lista artigiani v2: stelle, bollini, scheda */
+  .ta-card{ background:var(--surface); border:1.5px solid var(--line); border-radius:16px; padding:12px; margin-bottom:10px; cursor:pointer; }
+  .ta-card.on{ border-color:var(--accent); }
+  .ta-top{ display:flex; gap:10px; align-items:center; }
+  .ta-logo{ flex:0 0 46px; width:46px; height:46px; border-radius:12px; display:grid; place-items:center; color:#fff; font-weight:800; font-size:16px; overflow:hidden; background:#3E5C6E; }
+  .ta-logo img{ width:100%; height:100%; object-fit:contain; background:#fff; }
+  .ta-main{ flex:1; min-width:0; }
+  .ta-name{ font-weight:700; font-size:14.5px; color:var(--ink); }
+  .ta-city{ font-size:11.5px; color:var(--ink-soft); }
+  .ta-rate{ display:flex; align-items:center; gap:3px; font-size:12px; margin-top:3px; color:var(--ink); }
+  .ta-rate b{ font-size:13px; margin-left:3px; } .ta-rate .n{ color:var(--ink-soft); }
+  .ta-sel{ flex:0 0 28px; width:28px; height:28px; border-radius:8px; border:1.5px solid var(--line); background:var(--surface); display:grid; place-items:center; color:#fff; font-size:15px; padding:0; cursor:pointer; }
+  .ta-card.on .ta-sel{ background:var(--accent); border-color:var(--accent); }
+  .ta-badges{ display:flex; flex-wrap:wrap; gap:5px; margin-top:9px; }
+  .ta-bd{ font-size:10.5px; font-weight:600; border-radius:7px; padding:3px 7px; background:#E3F1E8; color:#2F7D4F; }
+  .ta-bd.fast{ background:#FFF3D6; color:#8A6200; } .ta-bd.new{ background:#EAE6F5; color:#5A4A8A; }
+  .ta-thumbs{ display:flex; gap:5px; margin-top:9px; } .ta-thumbs img{ flex:1; min-width:0; height:52px; object-fit:cover; border-radius:8px; }
+  .ta-cover{ display:grid; grid-template-columns:2fr 1fr; gap:2px; height:130px; border-radius:14px; overflow:hidden; margin-top:6px; }
+  .ta-cover img{ width:100%; height:100%; object-fit:cover; display:block; } .ta-cover div{ display:grid; grid-template-rows:1fr 1fr; gap:2px; min-height:0; }
+  .ta-cover div img{ min-height:0; }
+  .ta-head{ background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px; margin-top:-24px; position:relative; margin-left:8px; margin-right:8px; }
+  .ta-head.nocover{ margin:6px 0 0; }
+  .ta-sec{ font-size:13px; font-weight:700; margin:16px 0 7px; color:var(--ink); }
+  .ta-bio{ font-size:13px; color:var(--ink-soft); line-height:1.5; white-space:pre-line; }
+  .ta-gal{ display:grid; grid-template-columns:repeat(3,1fr); gap:5px; } .ta-gal img{ width:100%; aspect-ratio:1; object-fit:cover; border-radius:9px; display:block; cursor:zoom-in; }
+  .ta-info{ background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:2px 12px; margin-top:14px; }
+  .ta-info div{ display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:8px 0; border-bottom:1px solid var(--line); color:var(--ink); } .ta-info div:last-child{ border:0; } .ta-info span{ color:var(--ink-soft); }
+  .ta-google{ display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:11px 12px; margin-top:10px; font-size:13px; font-weight:600; color:var(--ink); text-decoration:none; }
+  .ta-google i{ font-style:normal; width:26px; height:26px; border-radius:50%; border:1px solid var(--line); display:grid; place-items:center; font-weight:800; color:#4A6FA5; background:#fff; }
+  .ta-note{ font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:8px; line-height:1.4; }
+  .ta-rep{ display:block; margin:12px auto 0; font-size:12px; color:var(--ink-soft); text-decoration:underline; background:none; border:0; cursor:pointer; }
+  .ta-repbox textarea{ width:100%; border:1px solid var(--line); border-radius:11px; padding:9px; font:inherit; font-size:13px; background:var(--surface); color:var(--ink); margin-top:8px; }
+  .mr-vote{ display:flex; align-items:center; gap:6px; width:100%; font-size:12.5px; color:var(--ink-soft); padding-top:4px; }
+  .mr-vote button{ background:none; border:0; padding:2px; cursor:pointer; line-height:0; }
+  /* Foglio voto (stelle) */
+  .rv-wrap{ position:fixed; inset:0; z-index:1500; background:rgba(29,27,24,.45); display:flex; align-items:flex-end; justify-content:center; }
+  .rv-sheet{ width:100%; max-width:460px; background:var(--surface); color:var(--ink); border-radius:24px 24px 0 0; padding:16px 20px calc(22px + env(safe-area-inset-bottom,0px)); text-align:center; animation:rvUp .25s ease-out; }
+  @keyframes rvUp{ from{ transform:translateY(40px); opacity:0; } to{ transform:none; opacity:1; } }
+  .rv-grab{ width:38px; height:4px; border-radius:3px; background:var(--line); margin:0 auto 14px; }
+  .rv-sheet h3{ font-size:18px; margin:8px 0 4px; } .rv-sub{ font-size:13px; color:var(--ink-soft); }
+  .rv-stars{ display:flex; justify-content:center; gap:6px; margin:14px 0 4px; } .rv-stars button{ background:none; border:0; padding:2px; cursor:pointer; line-height:0; }
+  .rv-hint{ font-size:12px; color:var(--ink-soft); }
+  .rv-skip{ background:none; border:0; font-size:13px; color:var(--ink-soft); margin-top:12px; cursor:pointer; padding:6px 12px; }
+  .rv-chips{ display:flex; flex-wrap:wrap; gap:6px; justify-content:center; margin-top:10px; }
+  .rv-chip{ border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:20px; padding:7px 12px; font-size:12.5px; cursor:pointer; }
+  .rv-chip.on{ background:var(--accent-soft); border-color:var(--accent); color:#8A4316; font-weight:600; }
+  .rv-sheet textarea{ width:100%; border:1px solid var(--line); border-radius:11px; padding:9px; font:inherit; font-size:13px; margin-top:10px; background:var(--surface); color:var(--ink); }
+  .rv-priv{ font-size:11px; color:var(--ink-soft); margin-top:8px; }
+  .rv-send{ width:100%; margin-top:12px; background:var(--accent); color:#fff; border:0; border-radius:14px; padding:13px; font-weight:700; font-size:15px; cursor:pointer; }
+  .rv-err{ color:#C0392B; font-size:12.5px; margin-top:6px; min-height:0; }
   .tf-art.on{ border-color:var(--accent); background:var(--accent-soft); }
   .tf-art img.tf-logo{ width:48px; height:48px; object-fit:contain; border-radius:8px; background:#fff; border:1px solid var(--line); flex:none; }
   .tf-art .tf-info{ flex:1; min-width:0; }
@@ -957,7 +1007,7 @@
       </div>
       <div id="tfStep2" hidden>
         <div class="pf-sec" id="tfCount"></div>
-        <div class="pf-hint">Scegli tu a quanti artigiani inviarla: solo quelli che selezioni riceveranno la tua richiesta con foto e dettagli.</div>
+        <div class="pf-hint">Tocca una ditta per vedere la sua scheda. Scegli tu a quanti artigiani inviarla: solo quelli che spunti ricevono la tua richiesta con foto e dettagli.</div>
         <div id="tfList"></div>
         <div class="pp-error" id="tfErr2" style="margin-top:10px"></div>
         <button type="button" class="pro-auth-submit" id="tfSend">Invia la richiesta</button>
@@ -969,6 +1019,12 @@
         <div class="pro-projects-sub" id="tfDoneText"></div>
         <button type="button" class="pp-new-btn" id="tfGoMine">Vai a "Le mie richieste"</button>
       </div>
+    </div>
+
+    <!-- Cliente: scheda dell'artigiano -->
+    <div class="pro-projects-view" id="ppViewArt">
+      <button type="button" class="pp-back-link" id="taBack">← Torna alla lista</button>
+      <div id="taBody"></div>
     </div>
 
     <!-- Cliente: le mie richieste e preventivi ricevuti -->
@@ -1082,19 +1138,21 @@
     <div class="pro-projects-view" id="ppViewProfile">
       <button type="button" class="pp-back-link" id="pfBackBtn">← Torna ai progetti</button>
       <div class="pro-projects-title">Il mio profilo artigiano</div>
-      <div class="pro-projects-sub">È la scheda che vedono i clienti in "Trova il tuo artigiano". Più è completa, più i contatti che ricevi sono giusti per te. I campi con * sono obbligatori.</div>
+      <div class="pro-projects-sub">È la scheda che vedono i clienti in "Trova il tuo artigiano". Bastano i campi con *: logo, descrizione e foto puoi aggiungerli quando vuoi, ma ti fanno scegliere di più.</div>
       <div id="pfStatusTop" style="font-size:12.5px;margin-bottom:10px"></div>
 
       <div class="pf-sec">Chi sei</div>
       <div class="field"><label for="pfCompany">Nome dell'attività *</label><input id="pfCompany" type="text" maxlength="120" placeholder="Es. Rossi Pavimenti"></div>
-      <div class="pf-logo"><img id="pfLogoImg" alt="" hidden><label class="pf-add" for="pfLogoInput">Carica logo (o una tua foto) *</label><input type="file" id="pfLogoInput" accept="image/jpeg,image/png,image/webp" style="display:none"></div>
-      <div class="field"><label for="pfBio">Descrizione della tua attività *</label><textarea id="pfBio" rows="4" maxlength="1500" placeholder="Es. Da 15 anni posiamo resine e microcemento in case e negozi. Sopralluogo gratuito, squadra di 4 persone, garanzia 10 anni."></textarea></div>
+      <div class="pf-logo"><img id="pfLogoImg" alt="" hidden><label class="pf-add" for="pfLogoInput">Carica logo (facoltativo)</label><input type="file" id="pfLogoInput" accept="image/jpeg,image/png,image/webp" style="display:none"></div>
+      <div class="field"><label for="pfBio">Descrizione della tua attività (facoltativa)</label><textarea id="pfBio" rows="4" maxlength="1500" placeholder="Es. Da 15 anni posiamo resine e microcemento in case e negozi. Sopralluogo gratuito, squadra di 4 persone, garanzia 10 anni."></textarea></div>
       <div class="pf-count" id="pfBioCount">0 / almeno 60 caratteri</div>
       <div class="row2">
         <div class="field"><label for="pfCity">Comune della sede *</label><input id="pfCity" type="text" maxlength="80" placeholder="Es. Gallarate"></div>
         <div class="field"><label for="pfPhone">Telefono *</label><input id="pfPhone" type="tel" maxlength="30" placeholder="Es. 333 1234567"></div>
       </div>
       <div class="field"><label for="pfWebsite">Sito web o pagina social (se ce l'hai)</label><input id="pfWebsite" type="url" maxlength="200" placeholder="https://"></div>
+      <div class="field"><label for="pfGoogle">Link alla tua scheda Google (facoltativo)</label><input id="pfGoogle" type="url" maxlength="300" placeholder="https://maps.app.goo.gl/…"></div>
+      <div class="pf-hint" style="margin-top:-4px">Su Google Maps apri la tua attività → Condividi → Copia link. I clienti vedranno il pulsante "Vedi su Google".</div>
 
       <div class="pf-sec">Dove lavori *</div>
       <div class="pf-hint">Apri la tua regione e tocca le province in cui vai a lavorare. Ti arriveranno solo richieste da lì.</div>
@@ -1105,13 +1163,15 @@
       <div class="pf-hint">Riceverai richieste solo per le lavorazioni che selezioni.</div>
       <div id="pfLav"></div>
 
-      <div class="pf-sec">I tuoi lavori * <span style="font-weight:600;color:var(--ink-soft);font-size:12px">(da 3 a 8 foto)</span></div>
+      <div class="pf-sec">I tuoi lavori <span style="font-weight:600;color:var(--ink-soft);font-size:12px">(facoltativo, fino a 8 foto)</span></div>
       <div class="pf-hint">Foto vere di lavori finiti: sono la prima cosa che guarda il cliente.</div>
       <div class="pf-gal" id="pfGallery"></div>
       <label class="pf-add" for="pfPhotoInput" id="pfPhotoAdd">＋ Aggiungi foto</label><input type="file" id="pfPhotoInput" accept="image/jpeg,image/png,image/webp" multiple style="display:none">
 
       <div class="pf-sec">Visibilità</div>
       <label class="pf-check"><input type="checkbox" id="pfVisible" checked> Mostra il mio profilo ai clienti</label>
+      <label class="pf-check" id="pfDeclareBox" style="align-items:flex-start;margin-top:10px"><input type="checkbox" id="pfDeclare"> <span>Dichiaro di essere in regola e di essere l'unico responsabile dei lavori che svolgo. *</span></label>
+      <div class="pf-hint" id="pfDeclared" hidden>✓ Dichiarazione di responsabilità accettata.</div>
 
       <div class="pp-error" id="pfError" style="margin-top:12px"></div>
       <button type="button" class="pro-auth-submit" id="pfSaveBtn">Salva profilo</button>
@@ -10742,6 +10802,7 @@
   }
   function proVerifyText(email){ return 'Ti abbiamo inviato un\'email a ' + email + '. Clicca il link che trovi dentro per attivare l\'account (controlla anche la cartella spam).'; }
   function proUpdateHeader(){
+    if(proAccount && proAccount.accountType === 'privato' && typeof rdVoteCheck === 'function') rdVoteCheck();
     if(proAccount && typeof proPendingClick !== 'undefined' && proPendingClick && (!proAccount.paymentsEnabled || subActive())){
       var pid = proPendingClick; proPendingClick = null;
       setTimeout(function(){ var el = document.getElementById(pid); if(el) el.click(); }, 300);
@@ -11034,7 +11095,7 @@
     document.getElementById('ppViewForm').classList.toggle('active', view === 'form');
     document.getElementById('ppViewProfile').classList.toggle('active', view === 'profile');
     document.getElementById('ppViewAccount').classList.toggle('active', view === 'account');
-    ['quotes','quote','qsettings','listino','find','myreq','leads','lead'].forEach(function(v){ document.getElementById({ quotes:'ppViewQuotes', quote:'ppViewQuote', qsettings:'ppViewQSettings', listino:'ppViewListino', find:'ppViewFind', myreq:'ppViewMyReq', leads:'ppViewLeads', lead:'ppViewLead' }[v]).classList.toggle('active', view === v); });
+    ['quotes','quote','qsettings','listino','find','myreq','leads','lead','art'].forEach(function(v){ document.getElementById({ quotes:'ppViewQuotes', quote:'ppViewQuote', qsettings:'ppViewQSettings', listino:'ppViewListino', find:'ppViewFind', myreq:'ppViewMyReq', leads:'ppViewLeads', lead:'ppViewLead', art:'ppViewArt' }[v]).classList.toggle('active', view === v); });
     if(['quote','qsettings','listino'].indexOf(view) < 0) document.querySelector('#proProjectsModal .pro-projects-card').classList.remove('wide');
   }
 
@@ -11179,7 +11240,7 @@
     document.getElementById('pfPhotoAdd').style.display = items.length >= 8 ? 'none' : '';
   }
   function pfRenderLogo(){ var im = document.getElementById('pfLogoImg'), src = pf.newLogo || pf.logoUrl; im.hidden = !src; if(src) im.src = src; }
-  function pfBioCount(){ var n = document.getElementById('pfBio').value.trim().length, el = document.getElementById('pfBioCount'); el.textContent = n + (n < 60 ? ' / almeno 60 caratteri' : ' caratteri ✓'); el.classList.toggle('bad', n > 0 && n < 60); }
+  function pfBioCount(){ var n = document.getElementById('pfBio').value.trim().length, el = document.getElementById('pfBioCount'); el.textContent = n ? n + ' caratteri' : 'Due righe su chi siete e come lavorate: i clienti le leggono.'; el.classList.remove('bad'); }
   function pfFill(p){
     p = p || {};
     document.getElementById('pfCompany').value = p.companyName || '';
@@ -11187,6 +11248,8 @@
     document.getElementById('pfCity').value = p.city || '';
     document.getElementById('pfPhone').value = p.phone || '';
     document.getElementById('pfWebsite').value = p.website || '';
+    document.getElementById('pfGoogle').value = p.google || '';
+    pf.declared = !!p.declared; document.getElementById('pfDeclareBox').hidden = pf.declared; document.getElementById('pfDeclared').hidden = !pf.declared; document.getElementById('pfDeclare').checked = false;
     document.getElementById('pfVisible').checked = p.visible !== false;
     pf.country = RENDRUM_GEO[p.country] ? p.country : 'IT';
     pf.provinces = {}; (p.provinces || []).forEach(function(c){ pf.provinces[c] = 1; });
@@ -11204,11 +11267,23 @@
         if(!x.ok){ top.style.color = '#C0392B'; top.textContent = (x.d && x.d.error) || 'Profilo non disponibile.'; return; }
         pfFill(x.d.profile);
         var p = x.d.profile || {};
-        var complete = p.bio && p.bio.length >= 60 && (p.provinces || []).length && (p.lavorazioni || []).length && (p.gallery || []).length >= 3;
-        top.style.color = complete ? '' : '#B85F27';
-        top.textContent = complete ? (p.visible ? '✓ Il tuo profilo è visibile ai clienti.' : 'Il tuo profilo è completo ma nascosto.') : 'Profilo da completare: finché non è completo i clienti non ti trovano.';
+        pfStatus(p);
       })
       .catch(function(){ top.style.color = '#C0392B'; top.textContent = 'Connessione non riuscita. Riprova.'; });
+  }
+  // Stato in cima al profilo: visibilità, bollino P.IVA e cosa manca per farsi scegliere di più
+  function pfStatus(p, saved){
+    var top = document.getElementById('pfStatusTop');
+    var ok = (p.provinces || []).length && (p.lavorazioni || []).length && p.city && p.declared;
+    var lines = [];
+    if(!ok){ top.style.color = '#B85F27'; top.innerHTML = 'Completa i campi con * e salva: poi i clienti della tua zona ti trovano.'; return; }
+    top.style.color = '';
+    lines.push(saved ? (p.visible ? '✓ Profilo salvato: ora i clienti della tua zona possono trovarti.' : '✓ Profilo salvato (nascosto ai clienti).') : (p.visible ? '✓ Il tuo profilo è visibile ai clienti.' : 'Il tuo profilo è nascosto ai clienti.'));
+    if(p.pivaOk) lines.push('<span style="color:#2F7D4F;font-weight:600">✔ Partita IVA verificata</span>: il bollino compare nella tua scheda.');
+    else if(p.pivaChecked) lines.push('Partita IVA in verifica da parte di Rendrum: il bollino arriva appena controllata.');
+    var tips = []; if(!p.logoUrl) tips.push('logo'); if(!(p.bio || '').trim()) tips.push('descrizione'); if((p.gallery || []).length < 3) tips.push('qualche foto dei tuoi lavori');
+    if(tips.length) lines.push('<span style="color:var(--ink-soft)">Consiglio: aggiungi ' + tips.join(', ') + '. I clienti scelgono di più chi mostra i suoi lavori.</span>');
+    top.innerHTML = lines.join('<br>');
   }
   document.getElementById('ppProfileBtn').addEventListener('click', pfOpen);
   document.getElementById('pfBackBtn').addEventListener('click', function(){ ppShowView('list'); ppLoadProjects(); });
@@ -11232,6 +11307,8 @@
       city: document.getElementById('pfCity').value.trim(),
       phone: document.getElementById('pfPhone').value.trim(),
       website: document.getElementById('pfWebsite').value.trim(),
+      google: document.getElementById('pfGoogle').value.trim(),
+      declared: pf.declared || document.getElementById('pfDeclare').checked,
       country: pf.country,
       provinces: Object.keys(pf.provinces),
       lavorazioni: Object.keys(pf.lav),
@@ -11241,14 +11318,13 @@
     body.regions = RENDRUM_GEO[pf.country].regions.filter(function(r){ return r.provinces.some(function(p){ return pf.provinces[p[0]]; }); }).map(function(r){ return r.code; });
     var miss = [];
     if(body.companyName.length < 2) miss.push("nome dell'attività");
-    if(!pf.logoUrl && !pf.newLogo) miss.push('logo');
-    if(body.bio.length < 60) miss.push('descrizione (almeno 60 caratteri)');
     if(body.city.length < 2) miss.push('comune della sede');
-    if(body.phone.replace(/\D/g,'').length < 6) miss.push('telefono');
+    if(body.phone.replace(/\D/g,'').length < 8) miss.push('telefono');
+    if(body.google && !/^https:\/\/((www\.|maps\.)?google\.[a-z.]{2,6}|g\.page|maps\.app\.goo\.gl|goo\.gl|g\.co)\/\S*$/i.test(body.google)) miss.push('link Google valido (copialo da Google Maps → Condividi)');
     if(body.website && !/^https?:\/\/[^\s.]+\.[^\s]+$/i.test(body.website)) miss.push('sito web valido (deve iniziare con https://)');
     if(!body.provinces.length) miss.push('province in cui lavori');
     if(!body.lavorazioni.length) miss.push('lavorazioni che fai');
-    if(pf.gallery.length + pf.newPhotos.length < 3) miss.push('almeno 3 foto dei tuoi lavori');
+    if(!body.declared) miss.push('la dichiarazione di responsabilità (in fondo)');
     if(miss.length){ err.textContent = 'Completa: ' + miss.join(', ') + '.'; return; }
     btn.disabled = true; btn.textContent = pf.newPhotos.length ? 'Carico le foto…' : 'Salvo…';
     fetch('/api/pro-profile?action=save', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(body) })
@@ -11261,8 +11337,7 @@
         }
         pfFill(x.d.profile);
         if(proAccount){ proAccount.companyName = x.d.profile.companyName; proAccount.phone = x.d.profile.phone; proAccount.logoUrl = x.d.profile.logoUrl; }
-        var top = document.getElementById('pfStatusTop'); top.style.color = '';
-        top.textContent = x.d.profile.visible ? '✓ Profilo salvato: ora i clienti della tua zona possono trovarti.' : '✓ Profilo salvato (nascosto ai clienti).';
+        pfStatus(x.d.profile, true);
         document.getElementById('proProjectsModal').querySelector('.pro-projects-card').scrollTop = 0;
       })
       .catch(function(){ err.textContent = 'Connessione non riuscita. Riprova.'; })
@@ -12181,6 +12256,17 @@
       }).catch(function(){ err.textContent = 'Connessione non riuscita.'; })
       .finally(function(){ btn.disabled = false; btn.textContent = 'Cerca artigiani nella mia zona'; });
   }
+  // ---------- Artigiani: lista con stelle e bollini, scheda, voti ----------
+  function rdStar(fill, size){ return '<svg viewBox="0 0 24 24" width="' + size + '" height="' + size + '" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.1l-5.7 3.2 1.2-6.4L2.8 9.5l6.4-.8z" fill="' + (fill ? '#C8692E' : 'none') + '" stroke="#C8692E" stroke-width="1.4" stroke-linejoin="round"/></svg>'; }
+  function rdStars(n, size){ var h = ''; for(var i = 1; i <= 5; i++) h += rdStar(i <= Math.round(n), size); return h; }
+  function taInitials(name){ var w = String(name || '?').replace(/[^A-Za-zÀ-ú0-9 ]/g, ' ').trim().split(/\s+/); return ((w[0] || '?')[0] + (w[1] ? w[1][0] : '')).toUpperCase(); }
+  function taLogo(a){ var c = ['#3E5C6E','#7A5A3A','#55705A','#6B4E71','#8A5A44','#4A6670'], h = 0; String(a.companyName || a.name || '').split('').forEach(function(ch){ h = (h * 31 + ch.charCodeAt(0)) >>> 0; });
+    return '<span class="ta-logo" style="background:' + c[h % c.length] + '">' + (a.logoUrl ? '<img alt="" src="' + qEsc(a.logoUrl) + '">' : qEsc(taInitials(a.companyName || a.name))) + '</span>'; }
+  function taRate(a, size){ var r = a.rating || {}; return r.avg ? rdStars(r.avg, size || 12) + '<b>' + String(r.avg).replace('.', ',') + '</b><span class="n">(' + r.count + ' voti)</span>' : '<span class="n">Ancora pochi voti</span>'; }
+  function taBadges(a){ return (a.pivaOk ? '<span class="ta-bd">✔ P.IVA verificata</span>' : '') + (a.fast ? '<span class="ta-bd fast">⚡ Risponde in fretta</span>' : '') + (a.nuovo ? '<span class="ta-bd new">Nuovo su Rendrum</span>' : ''); }
+  function taProvName(code){ var n = code; try{ RENDRUM_GEO.IT.regions.forEach(function(r){ r.provinces.forEach(function(p){ if(p[0] === code) n = p[1]; }); }); }catch(e){} return n; }
+  function taLavs(a){ return (a.lavorazioni || []).map(function(k){ var l = PF_LAV.filter(function(x){ return x[0] === k; })[0]; return l ? l[1] : null; }).filter(Boolean); }
+  function tfToggle(id, on){ if(on) tf.sel[id] = 1; else delete tf.sel[id]; document.getElementById('tfErr2').textContent = ''; }
   function tfRenderArtisans(){
     var box = document.getElementById('tfList'), n = tf.artisans.length, send = document.getElementById('tfSend');
     document.getElementById('tfCount').textContent = n ? (n === 1 ? '1 artigiano nella tua zona' : n + ' artigiani nella tua zona') : 'Nessun artigiano disponibile, per ora';
@@ -12189,19 +12275,122 @@
       box.innerHTML = '<div class="pf-hint" style="font-size:13.5px;color:var(--ink)">Non ci sono ancora artigiani iscritti per questo lavoro nella tua provincia. Invia comunque la richiesta: <b>appena se ne iscrive uno ti avvisiamo</b> e gliela giriamo.</div>';
       send.textContent = 'Avvisami quando c\'è un artigiano'; return;
     }
-    send.textContent = 'Invia la richiesta';
+    var k = Object.keys(tf.sel).length;
+    send.textContent = k ? (k === 1 ? 'Invia a 1 artigiano' : 'Invia a ' + k + ' artigiani') : 'Invia la richiesta';
     tf.artisans.forEach(function(a){
-      var d = document.createElement('label'); d.className = 'tf-art' + (tf.sel[a.id] ? ' on' : '');
-      d.innerHTML = '<input type="checkbox"' + (tf.sel[a.id] ? ' checked' : '') + '>' + (a.logoUrl ? '<img class="tf-logo" alt="">' : '')
-        + '<div class="tf-info"><div class="tf-name">' + qEsc(a.companyName) + '</div><div class="tf-city">' + qEsc(a.city || '') + '</div><div class="tf-bio">' + qEsc(a.bio || '') + '</div><div class="tf-gal"></div></div>';
-      if(a.logoUrl) d.querySelector('.tf-logo').src = a.logoUrl;
-      (a.gallery || []).slice(0, 4).forEach(function(u){ var im = document.createElement('img'); im.src = u; im.alt = ''; d.querySelector('.tf-gal').appendChild(im); });
-      d.querySelector('input').addEventListener('change', function(){
-        document.getElementById('tfErr2').textContent = '';
-        if(this.checked) tf.sel[a.id] = 1; else delete tf.sel[a.id]; d.classList.toggle('on', this.checked);
-      });
+      var on = !!tf.sel[a.id], d = document.createElement('div'); d.className = 'ta-card' + (on ? ' on' : ''); d.dataset.id = a.id;
+      d.innerHTML = '<div class="ta-top">' + taLogo(a) + '<div class="ta-main"><div class="ta-name">' + qEsc(a.companyName) + '</div><div class="ta-city">' + qEsc(a.city || '') + '</div><div class="ta-rate">' + taRate(a, 12) + '</div></div>'
+        + '<button type="button" class="ta-sel" role="checkbox" aria-checked="' + on + '" aria-label="Scegli ' + qEsc(a.companyName) + '">' + (on ? '✓' : '') + '</button></div>'
+        + (taBadges(a) ? '<div class="ta-badges">' + taBadges(a) + '</div>' : '')
+        + ((a.gallery || []).length ? '<div class="ta-thumbs">' + a.gallery.slice(0, 3).map(function(u){ return '<img alt="" loading="lazy" src="' + qEsc(u) + '">'; }).join('') + '</div>' : '');
+      d.querySelector('.ta-sel').addEventListener('click', function(e){ e.stopPropagation(); tfToggle(a.id, !tf.sel[a.id]); tfRenderArtisans(); });
+      d.addEventListener('click', function(){ taOpen(a); });
       box.appendChild(d);
     });
+  }
+  function taOpen(a){
+    var g = a.gallery || [], b = document.getElementById('taBody'), on = !!tf.sel[a.id];
+    var cover = g.length >= 3 ? '<div class="ta-cover"><img alt="" src="' + qEsc(g[0]) + '"><div><img alt="" src="' + qEsc(g[1]) + '"><img alt="" src="' + qEsc(g[2]) + '"></div></div>'
+      : (g.length ? '<div class="ta-cover" style="grid-template-columns:1fr"><img alt="" src="' + qEsc(g[0]) + '"></div>' : '');
+    var lavs = taLavs(a), prov = (a.provinces || []);
+    var rows = [];
+    if(prov.length) rows.push(['Zona', prov.length === 1 ? 'Provincia di ' + taProvName(prov[0]) : prov.length <= 3 ? prov.map(taProvName).join(', ') : prov.length + ' province']);
+    if(a.since){ try{ rows.push(['Su Rendrum da', new Date(a.since).toLocaleDateString('it-IT', { month:'long', year:'numeric' })]); }catch(e){} }
+    if(a.risponde) rows.push(['Risponde di solito', a.risponde]);
+    b.innerHTML = cover
+      + '<div class="ta-head' + (cover ? '' : ' nocover') + '"><div class="ta-top">' + taLogo(a) + '<div class="ta-main"><div class="ta-name">' + qEsc(a.companyName) + '</div><div class="ta-city">' + qEsc([a.city, lavs.slice(0, 3).join(', ')].filter(Boolean).join(' · ')) + '</div><div class="ta-rate">' + taRate(a, 13) + '</div></div></div>'
+      + (taBadges(a) ? '<div class="ta-badges">' + taBadges(a) + '</div>' : '') + '</div>'
+      + (a.bio ? '<div class="ta-sec">Chi siamo</div><div class="ta-bio">' + qEsc(a.bio) + '</div>' : '')
+      + (g.length ? '<div class="ta-sec">Lavori fatti</div><div class="ta-gal">' + g.map(function(u){ return '<img alt="" loading="lazy" src="' + qEsc(u) + '">'; }).join('') + '</div>' : '')
+      + (rows.length ? '<div class="ta-info">' + rows.map(function(r){ return '<div><span>' + qEsc(r[0]) + '</span>' + qEsc(r[1]) + '</div>'; }).join('') + '</div>' : '')
+      + (a.google ? '<a class="ta-google" href="' + qEsc(a.google) + '" target="_blank" rel="noopener nofollow"><i>G</i>Vedi le recensioni su Google ↗</a>' : '')
+      + (a.website ? '<a class="ta-google" href="' + qEsc(a.website) + '" target="_blank" rel="noopener nofollow"><i>↗</i>Sito web</a>' : '')
+      + '<button type="button" class="pro-auth-submit" id="taPick">' + (on ? '✓ Scelto · tocca per togliere' : 'Scegli questo artigiano') + '</button>'
+      + '<div class="ta-note">Rendrum ti mette in contatto: accordi e contratto sono tra te e la ditta.</div>'
+      + '<button type="button" class="ta-rep" id="taRepBtn">Segnala un problema</button><div class="ta-repbox" id="taRepBox" hidden><textarea id="taRepTxt" rows="3" maxlength="1500" placeholder="Cosa è successo? Lo legge solo Rendrum."></textarea><div class="pp-error" id="taRepErr"></div><button type="button" class="q-link" id="taRepSend">Invia la segnalazione</button></div>';
+    b.querySelectorAll('.ta-gal img, .ta-cover img').forEach(function(im){ im.addEventListener('click', function(){ rdZoom(im.src); }); });
+    document.getElementById('taPick').addEventListener('click', function(){ tfToggle(a.id, !tf.sel[a.id]); tfRenderArtisans(); taBack(); });
+    document.getElementById('taRepBtn').addEventListener('click', function(){ var bx = document.getElementById('taRepBox'); bx.hidden = !bx.hidden; if(!bx.hidden) document.getElementById('taRepTxt').focus(); });
+    document.getElementById('taRepSend').addEventListener('click', function(){
+      var btn = this, t = document.getElementById('taRepTxt').value.trim(), er = document.getElementById('taRepErr');
+      if(t.length < 10){ er.textContent = 'Scrivi in breve cosa è successo.'; return; }
+      btn.disabled = true; er.textContent = '';
+      lApi('report', 'POST', { artisanId: a.id, testo: t }).then(function(x){
+        if(!x.ok){ er.textContent = (x.d && x.d.error) || 'Invio non riuscito.'; btn.disabled = false; return; }
+        document.getElementById('taRepBox').innerHTML = '<div class="pf-hint" style="text-align:center">✓ Grazie, abbiamo ricevuto la segnalazione. La controlliamo noi.</div>';
+      }).catch(function(){ er.textContent = 'Connessione non riuscita.'; btn.disabled = false; });
+    });
+    ppShowView('art'); qScrollTop();
+  }
+  function taBack(){ ppShowView('find'); qScrollTop(); }
+  document.getElementById('taBack').addEventListener('click', taBack);
+  function rdZoom(src){
+    var w = document.createElement('div'); w.className = 'rv-wrap'; w.style.alignItems = 'center'; w.style.background = 'rgba(10,10,12,.88)';
+    w.innerHTML = '<img alt="" style="max-width:94vw;max-height:88vh;border-radius:12px" src="' + qEsc(src) + '">';
+    w.addEventListener('click', function(){ w.remove(); }); document.body.appendChild(w);
+  }
+  // Foglio con 5 stelle: un tocco e basta. Sotto la soglia chiede il motivo (lo legge solo Rendrum).
+  function rdRateSheet(o){
+    var w = document.createElement('div'); w.className = 'rv-wrap';
+    w.innerHTML = '<div class="rv-sheet" role="dialog" aria-modal="true"><div class="rv-grab"></div>' + (o.head || '') + '<h3>' + o.title + '</h3><div class="rv-sub">' + (o.sub || '') + '</div>'
+      + '<div class="rv-stars"></div><div class="rv-hint">Tocca una stella</div><div class="rv-low" hidden></div><div class="rv-err"></div><button type="button" class="rv-skip">Salta</button></div>';
+    var sheet = w.querySelector('.rv-sheet'), starsBox = w.querySelector('.rv-stars'), low = w.querySelector('.rv-low'), er = w.querySelector('.rv-err'), cur = 0, closed = false, busy = false;
+    function close(skip){ if(closed) return; closed = true; w.remove(); if(skip && o.skip) o.skip(); }
+    function paint(){ starsBox.innerHTML = ''; for(var i = 1; i <= 5; i++){ (function(i){ var bt = document.createElement('button'); bt.type = 'button'; bt.setAttribute('aria-label', i + (i === 1 ? ' stella' : ' stelle')); bt.innerHTML = rdStar(i <= cur, 40); bt.addEventListener('click', function(){ pick(i); }); starsBox.appendChild(bt); })(i); } }
+    function done(){ sheet.innerHTML = '<div class="rv-grab"></div><div style="font-size:40px;margin:6px 0">🙏</div><h3>Grazie!</h3><div class="rv-sub">' + (o.thanks || 'Il tuo voto è stato registrato.') + '</div>'; setTimeout(function(){ close(false); }, 1600); }
+    function send(motivi, testo){
+      if(busy) return; busy = true; er.textContent = '';
+      Promise.resolve(o.send(cur, motivi || [], testo || '')).then(function(x){ busy = false; if(x && x.ok === false && x.status !== 409){ er.textContent = (x.d && x.d.error) || 'Invio non riuscito. Riprova.'; return; } done(); })
+        .catch(function(){ busy = false; er.textContent = 'Connessione non riuscita. Riprova.'; });
+    }
+    function pick(i){
+      cur = i; paint();
+      if(i > o.lowMax){ low.hidden = true; send(); return; }
+      var sel = {};
+      low.hidden = false;
+      low.innerHTML = '<div style="font-weight:600;font-size:13.5px;margin-top:10px">' + o.lowTitle + '</div><div class="rv-chips">' + o.reasons.map(function(r){ return '<button type="button" class="rv-chip">' + qEsc(r) + '</button>'; }).join('') + '</div>'
+        + (o.withText ? '<textarea rows="2" maxlength="1000" placeholder="Scrivici (facoltativo)…"></textarea>' : '') + '<div class="rv-priv">🔒 ' + (o.priv || 'Lo legge solo Rendrum, non è pubblico.') + '</div><button type="button" class="rv-send">Invia</button>';
+      low.querySelectorAll('.rv-chip').forEach(function(c){ c.addEventListener('click', function(){ var t = c.textContent; if(sel[t]) delete sel[t]; else sel[t] = 1; c.classList.toggle('on', !!sel[t]); }); });
+      low.querySelector('.rv-send').addEventListener('click', function(){ var ta = low.querySelector('textarea'); send(Object.keys(sel), ta ? ta.value.trim() : ''); });
+    }
+    paint();
+    w.querySelector('.rv-skip').addEventListener('click', function(){ close(true); });
+    w.addEventListener('click', function(e){ if(e.target === w) close(true); });
+    document.body.appendChild(w);
+    if(o.preset) pick(o.preset);
+    return w;
+  }
+  var RV_REASONS_ART = ['Ritardi', 'Non ha risposto', 'Lavoro non finito', 'Prezzo cambiato', 'Altro'];
+  function rdRateArtisan(a, preset, after){
+    rdRateSheet({ head: taLogo({ name: a.name, companyName: a.name, logoUrl: a.logoUrl }).replace('class="ta-logo"', 'class="ta-logo" style="display:inline-grid;width:52px;height:52px"'),
+      title: 'Com\'è andata con<br>' + qEsc(a.name || 'l\'artigiano') + '?', sub: 'Il tuo voto aiuta altri clienti a scegliere.', lowMax: 2, lowTitle: 'Cosa non è andato?', reasons: RV_REASONS_ART, preset: preset,
+      send: function(st, m){ return lApi('vote', 'POST', { id: a.leadId, stelle: st, motivi: m }).then(function(x){ if(x.ok && after) setTimeout(after, 1700); return x; }); },
+      skip: function(){ lApi('vote-skip', 'POST', { id: a.leadId }).then(function(){ if(after) after(); }); } });
+  }
+  // Una volta, a lavoro presumibilmente finito (14 giorni dopo aver accettato il preventivo)
+  function rdVoteCheck(){
+    if(window.__rdVoteChecked || !proAccount || proAccount.accountType !== 'privato') return; window.__rdVoteChecked = true;
+    setTimeout(function(){
+      if(document.querySelector('.pro-projects-modal.open, .pro-auth-modal.open, .rv-wrap')) return;
+      lApi('mine').then(function(x){
+        if(!x.ok) return; var due = null;
+        (x.d.requests || []).forEach(function(g){ g.artisans.forEach(function(a){ if(!due && a.canVote && a.acceptedAt && Date.now() - Date.parse(a.acceptedAt) > 14 * 864e5) due = a; }); });
+        if(due && !document.querySelector('.pro-projects-modal.open, .pro-auth-modal.open, .rv-wrap')) rdRateArtisan(due);
+      }).catch(function(){});
+    }, 3000);
+  }
+  // Voto a Rendrum: una volta sola, dopo aver inviato la richiesta (mai insieme al voto dell'artigiano)
+  function rdAskRendrum(){
+    try{ if(localStorage.getItem('rdFbDone')) return; }catch(e){}
+    if(document.querySelector('.rv-wrap')) return;
+    var mark = function(){ try{ localStorage.setItem('rdFbDone', '1'); }catch(e){} };
+    lApi('feedback-status').then(function(x){
+      if(!x.ok || x.d.done){ if(x.ok) mark(); return; }
+      rdRateSheet({ head: '<div style="font-weight:800;font-size:20px;letter-spacing:.5px;color:var(--accent)">Rendrum</div>', title: 'Ti è piaciuto Rendrum?', sub: 'Ci aiuti a migliorare l\'app.',
+        lowMax: 3, lowTitle: 'Cosa possiamo migliorare?', reasons: ['Risultato poco realistico', 'Troppo complicato', 'Lento', 'Altro'], withText: true, priv: 'Lo legge solo Rendrum.',
+        send: function(st, m, t){ mark(); return lApi('feedback', 'POST', { stelle: st, motivi: m, testo: t }); },
+        skip: function(){ mark(); lApi('feedback', 'POST', { stelle: null }); } });
+    }).catch(function(){});
   }
   function tfSend(){
     var d = tfData(), err = document.getElementById('tfErr2'), btn = document.getElementById('tfSend');
@@ -12217,6 +12406,7 @@
       document.getElementById('tfDoneText').textContent = x.d.waitlist ? 'Appena un artigiano per questo lavoro si iscrive nella tua provincia, gli inviamo la tua richiesta e ti avvisiamo per email.'
         : (x.d.sent === 1 ? 'L\'artigiano ha ricevuto' : 'Gli ' + x.d.sent + ' artigiani hanno ricevuto') + ' foto e dettagli. Riceverai i preventivi qui nell\'app e per email.';
       qScrollTop();
+      if(x.d.sent > 0 || x.d.waitlist) setTimeout(rdAskRendrum, 1500);
     }).catch(function(){ err.textContent = 'Connessione non riuscita.'; }).finally(function(){ btn.disabled = false; });
   }
 
@@ -12237,6 +12427,11 @@
           var r = document.createElement('div'); r.className = 'tf-row';
           var left = '<div><b>' + qEsc(a.name || 'Artigiani della zona') + '</b>' + (a.quote ? ' · ' + qEsc(qpEur(a.quote.total)) : '') + '<br><span class="q-chip q-' + qEsc(a.status) + '">' + qEsc(a.status === 'preventivo_inviato' ? 'Preventivo ricevuto' : (LD_STATUS[a.status] || a.status)) + '</span>' + (a.phone ? ' <a href="tel:' + qEsc(a.phone) + '" style="font-size:12.5px">📞 ' + qEsc(a.phone) + '</a>' : '') + '</div>';
           r.innerHTML = left + (a.quote ? '<div class="tf-acts"><button type="button" class="q-link" data-a="pdf">📄 PDF</button>' + (a.status !== 'accettata' ? '<button type="button" class="q-link" data-a="ok">✓ Accetta</button>' : '') + '</div>' : '');
+          if(a.canVote){
+            var v = document.createElement('div'); v.className = 'mr-vote'; v.innerHTML = '<span>Com\'è andata?</span>';
+            for(var si = 1; si <= 5; si++){ (function(si){ var sb = document.createElement('button'); sb.type = 'button'; sb.setAttribute('aria-label', si + ' stelle'); sb.innerHTML = rdStar(false, 20); sb.addEventListener('click', function(){ rdRateArtisan(a, si, mrOpen); }); v.appendChild(sb); })(si); }
+            r.appendChild(v);
+          } else if(a.myVote){ var mv = document.createElement('div'); mv.className = 'mr-vote'; mv.innerHTML = '<span>Il tuo voto:</span> ' + rdStars(a.myVote, 15); r.appendChild(mv); }
           var pb = r.querySelector('[data-a="pdf"]'); if(pb) pb.addEventListener('click', function(){ mrPdf(a.leadId, pb); });
           var ob = r.querySelector('[data-a="ok"]'); if(ob) ob.addEventListener('click', function(){
             if(!ob.dataset.arm){ ob.dataset.arm = 1; ob.textContent = 'Tocca di nuovo per accettare'; setTimeout(function(){ delete ob.dataset.arm; ob.textContent = '✓ Accetta'; }, 4000); return; }
