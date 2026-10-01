@@ -4,6 +4,12 @@
 //   GET  /api/leads?action=mine          -> le mie richieste con stato e preventivi ricevuti
 //   GET  /api/leads?action=quote&id=     -> preventivo ricevuto (dati per il PDF)
 //   POST /api/leads?action=accept        -> { id } accetta il preventivo
+//   POST /api/leads?action=vote          -> { id, stelle, motivi } voto all'artigiano (solo preventivo accettato, una volta)
+//   POST /api/leads?action=vote-skip     -> { id } "Salta": non lo chiediamo più
+//   POST /api/leads?action=report        -> { artisanId, testo } segnala un problema su una ditta (email a Rendrum)
+// Tutti:
+//   GET  /api/leads?action=feedback-status -> { done } ha già votato Rendrum?
+//   POST /api/leads?action=feedback      -> { stelle|null, motivi, testo } voto a Rendrum (una volta sola)
 // Professionista:
 //   GET  /api/leads?action=pro-list      -> richieste ricevute
 //   GET  /api/leads?action=pro-get&id=   -> dettaglio (la segna come vista)
@@ -107,7 +113,74 @@ module.exports = async function handler(req, res) {
     const isPro = acc.account_type !== "privato";
     const origin = siteOrigin(req);
 
+    // ---------------- VOTO A RENDRUM (clienti e artigiani) ----------------
+    if (action === "feedback-status" || action === "feedback") {
+      const prev = await supabaseRequest("/rendrum_feedback?account_id=eq." + acc.id + "&select=id&limit=1", { method: "GET" });
+      const done = prev.ok && Array.isArray(prev.data) && prev.data.length > 0;
+      if (action === "feedback-status") return res.status(200).json({ done: done || !prev.ok });   // tabella assente: non chiediamo
+      if (req.method !== "POST") return res.status(405).json({ error: "Usa POST" });
+      if (!prev.ok) return res.status(200).json({ ok: true, stored: false });
+      if (done) return res.status(409).json({ error: "Hai già votato, grazie!" });
+      const b = req.body || {};
+      const stelle = b.stelle == null ? null : Math.round(+b.stelle);
+      if (stelle != null && !(stelle >= 1 && stelle <= 5)) return res.status(400).json({ error: "Voto non valido." });
+      const motivi = (Array.isArray(b.motivi) ? b.motivi : []).slice(0, 6).map(x => str(x, 60)).filter(Boolean);
+      const testo = str(b.testo, 1000);
+      const ins = await supabaseRequest("/rendrum_feedback", { method: "POST", headers: { Prefer: "return=minimal" }, body: JSON.stringify({ account_id: acc.id, stelle, motivi, testo: testo || null }) });
+      if (!ins.ok) return res.status(502).json({ error: "Invio non riuscito. Riprova." });
+      if (stelle != null && stelle <= 3) {
+        await notify(adminEmail(), "Voto a Rendrum: " + stelle + " stelle", "Un utente ha dato " + stelle + " stell" + (stelle === 1 ? "a" : "e") + " a Rendrum",
+          "<b>" + esc(acc.email) + "</b> (" + (isPro ? "artigiano" : "cliente") + ")<br>Cosa non va: " + esc(motivi.join(", ") || "—") + (testo ? "<br><br>“" + esc(testo) + "”" : ""), "Apri Rendrum", publicSite());
+      }
+      return res.status(200).json({ ok: true, stored: true });
+    }
+
     // ---------------- CLIENTE ----------------
+    if (action === "vote" || action === "vote-skip") {
+      if (req.method !== "POST") return res.status(405).json({ error: "Usa POST" });
+      if (isPro) return res.status(403).json({ error: "Sezione riservata ai clienti." });
+      const b = req.body || {};
+      const id = uuid(b.id);
+      const r = await supabaseRequest("/pro_leads?id=eq." + id + "&client_id=eq." + acc.id + "&select=*", { method: "GET" });
+      const lead = r.ok && Array.isArray(r.data) && r.data[0];
+      if (!lead || lead.status !== "accettata") return res.status(404).json({ error: "Puoi votare solo la ditta di cui hai accettato il preventivo." });
+      const d = lead.data || {};
+      if (d.voto) return res.status(409).json({ error: "Hai già votato questa ditta, grazie!" });
+      const now = new Date().toISOString();
+      if (action === "vote-skip") {
+        if (!d.votoSkip) await supabaseRequest("/pro_leads?id=eq." + id, { method: "PATCH", body: JSON.stringify({ data: Object.assign({}, d, { votoSkip: now }) }) });
+        return res.status(200).json({ ok: true });
+      }
+      const stelle = Math.round(+b.stelle);
+      if (!(stelle >= 1 && stelle <= 5)) return res.status(400).json({ error: "Tocca una stella." });
+      const motivi = stelle <= 2 ? (Array.isArray(b.motivi) ? b.motivi : []).slice(0, 6).map(x => str(x, 60)).filter(Boolean) : [];
+      const u = await supabaseRequest("/pro_leads?id=eq." + id, { method: "PATCH", body: JSON.stringify({ data: Object.assign({}, d, { voto: { s: stelle, m: motivi, at: now } }) }) });
+      if (!u.ok) return res.status(502).json({ error: "Voto non salvato. Riprova." });
+      if (stelle <= 2) {
+        const ar = await supabaseRequest("/pro_accounts?id=eq." + lead.artisan_id + "&select=company_name,email,phone", { method: "GET" });
+        const a = (ar.ok && ar.data && ar.data[0]) || {};
+        await notify(adminEmail(), "Voto basso: " + (a.company_name || "ditta") + " (" + stelle + "★)", "Un cliente ha dato " + stelle + " stell" + (stelle === 1 ? "a" : "e") + " a una ditta",
+          "<b>Ditta:</b> " + esc(a.company_name) + " · " + esc(a.email) + " · " + esc(a.phone) + "<br><b>Cliente:</b> " + esc(d.nome) + " · " + esc(acc.email) + " · " + esc(d.telefono)
+          + "<br><b>Lavoro:</b> " + esc(LAV_NOME[lead.lavorazione]) + " a " + esc(d.comune) + "<br><b>Cosa non è andato:</b> " + esc(motivi.join(", ") || "non indicato")
+          + "<br><br>Il motivo lo vede solo Rendrum. Valuta se sentire la ditta.", "Apri Rendrum", publicSite());
+      }
+      return res.status(200).json({ ok: true });
+    }
+    if (action === "report") {
+      if (req.method !== "POST") return res.status(405).json({ error: "Usa POST" });
+      const b = req.body || {};
+      const aid = uuid(b.artisanId), testo = str(b.testo, 1500);
+      if (!aid || testo.length < 10) return res.status(400).json({ error: "Scrivi in breve cosa è successo (almeno 10 caratteri)." });
+      const ar = await supabaseRequest("/pro_accounts?id=eq." + aid + "&select=company_name,email,phone,profile_city", { method: "GET" });
+      const a = ar.ok && ar.data && ar.data[0];
+      if (!a) return res.status(404).json({ error: "Ditta non trovata." });
+      const sent = await notify(adminEmail(), "Segnalazione su " + (a.company_name || "una ditta"), "Segnalazione di un utente",
+        "<b>Ditta:</b> " + esc(a.company_name) + " (" + esc(a.profile_city) + ") · " + esc(a.email) + " · " + esc(a.phone)
+        + "<br><b>Segnalata da:</b> " + esc(acc.email) + " (" + (isPro ? "artigiano" : "cliente") + ")<br><br>“" + esc(testo) + "”", "Apri Rendrum", publicSite());
+      if (!sent && emailEnabled()) return res.status(502).json({ error: "Invio non riuscito. Riprova o scrivi a info@rendrum.com." });
+      return res.status(200).json({ ok: true });
+    }
+
     if (action === "create") {
       if (req.method !== "POST") return res.status(405).json({ error: "Usa POST" });
       if (isPro) return res.status(403).json({ error: "Le richieste agli artigiani si inviano da un account privato." });
@@ -210,7 +283,9 @@ module.exports = async function handler(req, res) {
         const g = groups[x.group_id] = groups[x.group_id] || { id: x.group_id, createdAt: x.created_at, lavorazione: x.lavorazione, lavorazioneNome: LAV_NOME[x.lavorazione], provincia: x.province, comune: d.comune, mq: d.mq, dopo: d.dopo || null, artisans: [] };
         const a = x.artisan_id ? A[x.artisan_id] : null, q = x.quote_id ? Q[x.quote_id] : null;
         const withQuote = q && ["preventivo_inviato", "accettata"].includes(x.status);
-        g.artisans.push({ leadId: x.id, status: x.status, name: a ? a.company_name : null, logoUrl: a ? a.logo_url : null, city: a ? a.profile_city : null,
+        g.artisans.push({ leadId: x.id, artisanId: x.artisan_id || null, status: x.status, name: a ? a.company_name : null, logoUrl: a ? a.logo_url : null, city: a ? a.profile_city : null,
+          canVote: x.status === "accettata" && !d.voto && !d.votoSkip, myVote: d.voto ? d.voto.s : null,
+          acceptedAt: x.status === "accettata" ? x.updated_at : null,
           phone: withQuote && a ? a.phone : null,
           quote: withQuote ? { number: q.number, year: q.year, total: q.total_cents / 100 } : null });
       });
@@ -283,7 +358,10 @@ module.exports = async function handler(req, res) {
       const qr = await supabaseRequest("/pro_quotes?id=eq." + qid + "&account_id=eq." + acc.id + "&select=id,number,year,total_cents", { method: "GET" });
       const quote = qr.ok && qr.data && qr.data[0];
       if (!quote) return res.status(404).json({ error: "Salva prima il preventivo." });
-      await supabaseRequest("/pro_leads?id=eq." + id, { method: "PATCH", body: JSON.stringify({ status: "preventivo_inviato", quote_id: quote.id, updated_at: now }) });
+      // Tempo di risposta (per il bollino "Risponde in fretta"): ore dalla richiesta al primo preventivo
+      const ld = lead.data || {}, patch = { status: "preventivo_inviato", quote_id: quote.id, updated_at: now };
+      if (ld.rispostaOre == null) patch.data = Object.assign({}, ld, { rispostaOre: Math.round((Date.now() - Date.parse(lead.created_at)) / 36e5 * 10) / 10 });
+      await supabaseRequest("/pro_leads?id=eq." + id, { method: "PATCH", body: JSON.stringify(patch) });
       await supabaseRequest("/pro_quotes?id=eq." + quote.id, { method: "PATCH", body: JSON.stringify({ status: "inviato", updated_at: now }) });
       const cr = await supabaseRequest("/pro_accounts?id=eq." + lead.client_id + "&select=email", { method: "GET" });
       const cEmail = cr.ok && cr.data && cr.data[0] && cr.data[0].email;
