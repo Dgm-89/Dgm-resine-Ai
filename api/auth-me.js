@@ -44,6 +44,13 @@ async function storageRemove(paths) {
     if (!r.ok) throw new Error("storage delete " + r.status);
   }
 }
+async function appleRevoke(token) {
+  const sid = String(process.env.APPLE_SERVICES_ID || "").trim();
+  if (!sid) return;
+  const secret = require("./auth-social")._test.appleClientSecret(sid);
+  const form = new URLSearchParams({ client_id: sid, client_secret: secret, token: token, token_type_hint: "refresh_token" });
+  await fetch("https://appleid.apple.com/auth/revoke", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: form.toString() });
+}
 async function deleteAccount(req, res) {
   const token = readSessionCookie(req);
   const session = token ? verifySession(token) : null;
@@ -53,10 +60,15 @@ async function deleteAccount(req, res) {
   if (!row || !sessionMatches(session, row)) return res.status(401).json({ error: "Accedi di nuovo per eliminare l'account." });
   const body = req.body || {};
   const password = String(body.password || "");
-  if (!password || !verifyPassword(password, row.password_salt, row.password_hash)) {
+  // Account creati con Google/Apple senza password: si conferma scrivendo ELIMINA.
+  if (row.password_set === false) {
+    if (String(body.confirm || "").trim().toUpperCase() !== "ELIMINA") return res.status(403).json({ error: "Scrivi ELIMINA per confermare." });
+  } else if (!password || !verifyPassword(password, row.password_salt, row.password_hash)) {
     return res.status(403).json({ error: "Password non corretta." });
   }
   const id = row.id;
+  // "Accedi con Apple": quando si elimina l'account va scollegato anche da Apple (regola Apple).
+  if (row.apple_refresh_token) await appleRevoke(row.apple_refresh_token).catch(function (e) { console.error("apple revoke", e && e.message); });
 
   // 1) Abbonamenti: si leggono da Stripe (non dal database, che potrebbe non
   //    essere aggiornato) e si disdicono tutti quelli non ancora chiusi.

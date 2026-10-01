@@ -182,6 +182,10 @@ function publicUser(row) {
     usageCount: row.usage_count || 0,
     usageLimit: (PLAN_LIMITS[row.tier] || 0),
     paymentsEnabled: paymentsEnabled(),
+    // Accesso con Google/Apple (colonne di supabase_accesso_social.sql; assenti = valori di sempre)
+    passwordSet: row.password_set !== false,
+    needsOnboarding: row.needs_onboarding === true,
+    social: { google: !!row.google_sub, apple: !!row.apple_sub },
   };
 }
 

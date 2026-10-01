@@ -394,6 +394,22 @@
   html, body{ touch-action:manipulation; }
   .landing-card[hidden], #tfWhoFields[hidden], .tf-who[hidden]{ display:none !important; }
   .tf-who{ background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:11px 13px; font-size:13.5px; color:var(--ink); margin:10px 0 6px; line-height:1.45; }
+  /* Accesso con Apple / Google */
+  .sso{ display:flex; flex-direction:column; align-items:stretch; gap:10px; margin:4px 0 14px; }
+  .sso-apple{ display:flex; justify-content:center; align-items:center; height:44px; border-radius:999px; background:#000; color:#fff; overflow:hidden; text-decoration:none; font-weight:600; font-size:15px; }
+  .sso-apple img{ height:44px; width:auto; max-width:100%; display:block; }
+  .sso-google{ display:flex; justify-content:center; min-height:44px; }
+  .sso-or{ display:flex; align-items:center; gap:10px; color:var(--ink-soft); font-size:12.5px; margin-top:2px; }
+  .sso-or::before, .sso-or::after{ content:""; flex:1; height:1px; background:var(--line); }
+  html.is-app .sso{ display:none !important; }   /* nell'app iPhone arriva con il prossimo aggiornamento dell'app */
+  .ob-hi{ font-family:"Playfair Display","Liberation Serif",Georgia,serif; font-size:24px; color:var(--ink); margin:2px 0 2px; }
+  .ob-sub{ color:var(--ink-soft); font-size:14px; margin:0 0 12px; }
+  .ob-opt{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; font:inherit; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px; margin-bottom:8px; cursor:pointer; color:var(--ink); }
+  .ob-opt.on{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(208,132,79,.18); }
+  .ob-opt b{ display:block; font-size:15.5px; } .ob-opt small{ font-size:12.5px; color:var(--ink-soft); }
+  .ob-ic{ flex:none; width:38px; height:38px; border-radius:11px; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent); font-size:17px; }
+  .ob-mode .pro-auth-tabs, .ob-mode .pro-auth-title, .ob-mode .pro-auth-sub{ display:none !important; }
+  .ob-note{ font-size:11.5px; color:var(--ink-soft); text-align:center; margin-top:10px; }
   /* Fondo pagina iniziale: fascia scura con logo, social, App Store, contatti */
   .lp-foot{ grid-area:priv; background:#1D1B18; color:#F3EDE6; text-align:center; margin:18px calc(50% - 50vw) -10px; padding:30px 16px calc(36px + env(safe-area-inset-bottom,0px)); display:flex; flex-direction:column; align-items:center; gap:6px; }
   main:has(#panelLanding.active){ padding-bottom:0; }  /* niente spazio vuoto sotto il fondo pagina */
@@ -878,6 +894,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
 
     <!-- LOGIN -->
     <div class="pro-auth-section active" id="proSectionLogin">
+      <div class="sso" data-sso hidden><a class="sso-apple" href="/api/auth-social?provider=apple" data-sso-apple hidden><img alt="Continua con Apple" src="https://appleid.cdn-apple.com/appleid/button?height=44&amp;width=320&amp;type=continue&amp;color=black&amp;border=false&amp;border_radius=50&amp;locale=it_IT&amp;scale=2" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'Continua con Apple'}))"></a><div class="sso-google" data-sso-google hidden></div><div class="sso-or">oppure con la tua email</div></div>
       <div class="field"><label for="paLoginEmail" data-i18n="proEmailLabel">Email</label><input id="paLoginEmail" type="email" autocomplete="email" placeholder="nome@azienda.it"></div>
       <div class="field"><label for="paLoginPassword" data-i18n="proPasswordLabel">Password</label><input id="paLoginPassword" type="password" autocomplete="current-password"></div>
       <div class="pro-auth-error" id="paLoginError"></div>
@@ -901,8 +918,25 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
       <button type="button" class="pro-auth-submit" id="paResetSubmit">Salva nuova password</button>
     </div>
 
+    <!-- PRIMO ACCESSO CON GOOGLE / APPLE -->
+    <div class="pro-auth-section" id="proSectionOnboard">
+      <div class="ob-hi" id="obHi">Benvenuto!</div>
+      <p class="ob-sub">Un'ultima cosa: come userai Rendrum?</p>
+      <button type="button" class="ob-opt on" data-ob="privato"><span class="ob-ic">⌂</span><span><b>Sono un privato</b><small>Voglio vedere i lavori a casa mia</small></span></button>
+      <button type="button" class="ob-opt" data-ob="professionista"><span class="ob-ic">▣</span><span><b>Sono un'impresa</b><small>Faccio preventivi ai miei clienti</small></span></button>
+      <div class="field"><label for="obName" id="obNameLabel">Nome e cognome</label><input id="obName" type="text" maxlength="120" autocomplete="name"></div>
+      <div class="row2" id="obProRow" hidden>
+        <div class="field"><label for="obPiva">P.IVA (facoltativa)</label><input id="obPiva" type="text" autocomplete="off"></div>
+        <div class="field"><label for="obPhone">Telefono</label><input id="obPhone" type="tel" autocomplete="tel"></div>
+      </div>
+      <div class="pro-auth-error" id="obErr"></div>
+      <button type="button" class="pro-auth-submit" id="obSubmit">Continua</button>
+      <div class="ob-note">Te lo chiediamo solo la prima volta.</div>
+    </div>
+
     <!-- REGISTRAZIONE -->
     <div class="pro-auth-section" id="proSectionRegister">
+      <div class="sso" data-sso hidden><a class="sso-apple" href="/api/auth-social?provider=apple" data-sso-apple hidden><img alt="Continua con Apple" src="https://appleid.cdn-apple.com/appleid/button?height=44&amp;width=320&amp;type=continue&amp;color=black&amp;border=false&amp;border_radius=50&amp;locale=it_IT&amp;scale=2" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'Continua con Apple'}))"></a><div class="sso-google" data-sso-google hidden></div><div class="sso-or">oppure con la tua email</div></div>
       <div class="pro-auth-tier-label" data-i18n="proAccountTypeLabel" style="font-size:15px;font-weight:800;color:var(--ink)">Sei un privato o un professionista?</div>
       <div class="pro-auth-tier-row" id="proAccountTypeRow">
         <button type="button" class="pro-auth-tier" data-account-type="privato"><span class="t-name" data-i18n="proAccountTypePrivato">Privato</span></button>
@@ -10871,6 +10905,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     proSelectedAccountType = state.userType === 'privato' ? 'privato' : (state.userType === 'professionista' ? 'professionista' : null);
     proApplyAccountType();
     document.getElementById('proAuthModal').classList.add('open');
+    try{ ssoSetup(); }catch(e){}
   }
   function proAuthClose(){ document.getElementById('proAuthModal').classList.remove('open'); }
   function proSwitchTab(tab){
@@ -10881,9 +10916,11 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     document.getElementById('proSectionRegister').classList.toggle('active', !isLogin);
     document.getElementById('proSectionMsg').classList.remove('active');
     document.getElementById('proSectionReset').classList.remove('active');
+    document.getElementById('proSectionOnboard').classList.remove('active');
+    document.querySelector('#proAuthModal .pro-auth-card').classList.remove('ob-mode');
   }
   function proShowSection(id){
-    ['proSectionLogin','proSectionRegister','proSectionMsg','proSectionReset'].forEach(function(x){ document.getElementById(x).classList.toggle('active', x===id); });
+    ['proSectionLogin','proSectionRegister','proSectionMsg','proSectionReset','proSectionOnboard'].forEach(function(x){ document.getElementById(x).classList.toggle('active', x===id); });
   }
   var paPendingEmail = '';
   function proShowMsg(text, withResend, email){
@@ -10921,6 +10958,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
   }
   function proUpdateHeader(){
     try{ lpSyncChoices(); }catch(e){}
+    if(proAccount && proAccount.needsOnboarding && typeof obOpen === 'function' && !window.__rdObShown){ window.__rdObShown = true; setTimeout(obOpen, 400); }
     if(proAccount && proAccount.accountType === 'privato' && typeof rdVoteCheck === 'function') rdVoteCheck();
     if(proAccount && typeof proPendingClick !== 'undefined' && proPendingClick && (!proAccount.paymentsEnabled || subActive())){
       var pid = proPendingClick; proPendingClick = null;
@@ -11165,6 +11203,66 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
       proShowMsg('Password aggiornata! Ora sei dentro al tuo account.', false);
     }).catch(function(){ btn.disabled = false; errEl.textContent = 'Errore di rete, riprova.'; });
   });
+
+  // ---------- Accesso con Google / Apple ----------
+  var ssoCfg = null, ssoGisLoading = false;
+  function ssoSetup(){
+    if(document.documentElement.classList.contains('is-app')) return;   // app: prossimo aggiornamento
+    var go = function(cfg){
+      if(!cfg || (!cfg.google && !cfg.apple)) return;
+      document.querySelectorAll('[data-sso]').forEach(function(b){ b.hidden = false; });
+      document.querySelectorAll('[data-sso-apple]').forEach(function(a){ a.hidden = !cfg.apple; });
+      if(cfg.google){
+        var render = function(){
+          try{
+            google.accounts.id.initialize({ client_id: cfg.google, ux_mode: 'redirect', login_uri: location.origin + '/api/auth-social' });
+            document.querySelectorAll('[data-sso-google]').forEach(function(el){
+              el.hidden = false; if(el.dataset.done) return; el.dataset.done = '1';
+              google.accounts.id.renderButton(el, { type:'standard', theme:'outline', size:'large', shape:'pill', text:'continue_with', locale: LANG === 'en' ? 'en' : 'it', width: Math.min(360, Math.max(240, (el.closest('.pro-auth-card') || document.body).clientWidth - 48)) });
+            });
+          }catch(e){}
+        };
+        if(window.google && google.accounts && google.accounts.id) render();
+        else if(!ssoGisLoading){ ssoGisLoading = true; var sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = render; document.head.appendChild(sc); }
+      }
+    };
+    if(ssoCfg) return go(ssoCfg);
+    fetch('/api/auth-social?action=config').then(function(r){ return r.ok ? r.json() : null; }).then(function(c){ ssoCfg = c; go(c); }).catch(function(){});
+  }
+  // Primo accesso con Google/Apple: "privato o impresa?"
+  var obType = 'privato';
+  function obOpen(){
+    if(!proAccount) return;
+    var n = proAccount.companyName || '';
+    document.getElementById('obHi').textContent = n ? 'Ciao ' + n.split(' ')[0] + ' 👋' : 'Benvenuto in Rendrum 👋';
+    document.getElementById('obName').value = n; document.getElementById('obErr').textContent = '';
+    obPick(proAccount.accountType === 'professionista' ? 'professionista' : 'privato');
+    document.querySelector('#proAuthModal .pro-auth-card').classList.add('ob-mode');
+    document.getElementById('proAuthModal').classList.add('open'); proShowSection('proSectionOnboard');
+  }
+  function obPick(t){
+    obType = t;
+    document.querySelectorAll('#proSectionOnboard [data-ob]').forEach(function(b){ b.classList.toggle('on', b.dataset.ob === t); });
+    document.getElementById('obProRow').hidden = t !== 'professionista';
+    document.getElementById('obNameLabel').textContent = t === 'professionista' ? 'Nome dell\'impresa' : 'Nome e cognome';
+  }
+  document.querySelectorAll('#proSectionOnboard [data-ob]').forEach(function(b){ b.addEventListener('click', function(){ obPick(b.dataset.ob); }); });
+  document.getElementById('obSubmit').addEventListener('click', function(){
+    var btn = this, err = document.getElementById('obErr'); err.textContent = ''; btn.disabled = true;
+    fetch('/api/auth-social?action=onboard', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({ accountType: obType, companyName: document.getElementById('obName').value, piva: document.getElementById('obPiva').value, phone: document.getElementById('obPhone').value }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, d:d }; }); })
+      .then(function(x){
+        if(!x.ok){ err.textContent = (x.d && x.d.error) || 'Non riuscito. Riprova.'; return; }
+        proAccount = x.d.user; proUpdateHeader(); document.getElementById('proAuthModal').classList.remove('open'); proSwitchTab('login');
+      }).catch(function(){ err.textContent = 'Connessione non riuscita.'; }).finally(function(){ btn.disabled = false; });
+  });
+  (function(){
+    var q = new URLSearchParams(location.search), ac = q.get('accesso');
+    if(!ac) return;
+    history.replaceState(null, '', location.pathname);
+    if(ac === 'errore'){ setTimeout(function(){ proAuthOpen(); var er = document.getElementById('paLoginError'); if(er) er.textContent = q.get('msg') || 'Accesso non riuscito. Riprova.'; }, 600); }
+  })();
 
   (function(){
     var q = new URLSearchParams(location.search);
@@ -12934,6 +13032,9 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     document.getElementById('accInfo').innerHTML = rows.map(function(r){ return '<div class="acc-row"><span>' + ppEscapeHtml(r[0]) + '</span><span>' + ppEscapeHtml(r[1]) + '</span></div>'; }).join('');
     document.getElementById('accPassword').value = '';
     document.getElementById('accErr').textContent = '';
+    var noPw = a.passwordSet === false, pl = document.querySelector('label[for="accPassword"]'), pi = document.getElementById('accPassword');
+    if(pl) pl.textContent = noPw ? 'Per confermare scrivi ELIMINA' : 'Per confermare scrivi la tua password';
+    pi.type = noPw ? 'text' : 'password'; pi.placeholder = noPw ? 'ELIMINA' : '';
     var c = document.querySelector('#proProjectsModal .pro-projects-card'); if(c) c.scrollTop = 0;
   }
   document.getElementById('proAccountBtn').addEventListener('click', accOpen);
@@ -12941,10 +13042,11 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
   document.getElementById('accDeleteBtn').addEventListener('click', function(){
     var btn = this, err = document.getElementById('accErr'), pw = document.getElementById('accPassword').value;
     err.textContent = '';
-    if(!pw){ err.textContent = 'Scrivi la tua password per confermare.'; return; }
+    var noPw = proAccount && proAccount.passwordSet === false;
+    if(!pw){ err.textContent = noPw ? 'Scrivi ELIMINA per confermare.' : 'Scrivi la tua password per confermare.'; return; }
     if(!confirm('Vuoi davvero eliminare il tuo account Rendrum? Tutti i tuoi dati verranno cancellati per sempre.')) return;
     btn.disabled = true; var old = btn.textContent; btn.textContent = 'Eliminazione in corso…';
-    fetch('/api/auth-me?action=delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ password: pw }) })
+    fetch('/api/auth-me?action=delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(noPw ? { confirm: pw } : { password: pw }) })
       .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok: r.ok, d: d }; }); })
       .then(function(x){
         btn.disabled = false; btn.textContent = old;

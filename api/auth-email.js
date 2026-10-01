@@ -72,6 +72,7 @@ module.exports = async function handler(req, res) {
       }
       const { hash, salt } = hashPassword(password);
       await update(acc.id, { password_hash: hash, password_salt: salt, reset_token: null, reset_expires: null, email_verified: true });
+      await update(acc.id, { password_set: true }).catch(function () {});   // account nati con Google/Apple: ora hanno una password
       // Nuova password: le sessioni aperte su altri dispositivi vengono chiuse.
       const newVersion = (Number(acc.session_version) || 0) + 1;
       const bumped = await update(acc.id, { session_version: newVersion }).catch(function () { return null; });
