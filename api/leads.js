@@ -140,7 +140,7 @@ module.exports = async function handler(req, res) {
       if (!STATI.includes(d.stato) && !(qOn && !d.stato)) errs.push("stato attuale");
       if (!(d.mq > 0) && !qOn) errs.push("metri quadri");
       if (!QUANDO.includes(d.quando)) errs.push("quando vuoi iniziare");
-      if (!BUDGET.includes(d.budget) && !(qOn && !d.budget)) errs.push("budget");
+      if (d.budget && !BUDGET.includes(d.budget)) d.budget = "";   // il budget non si chiede più al cliente
       if (d.descrizione.length < 20 && !qOn) errs.push("descrizione del lavoro (almeno 20 caratteri)");
       if (d.nome.length < 3) errs.push("nome e cognome");
       if (d.telefono.replace(/\D/g, "").length < 8) errs.push("telefono");
