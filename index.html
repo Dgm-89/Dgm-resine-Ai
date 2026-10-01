@@ -26,7 +26,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Rendrum">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@500;600&display=swap');
 
   :root{
     --bg:#F7F5F1; --surface:#FFFFFF; --ink:#1D1B18; --ink-soft:#6F685F;
@@ -389,6 +389,20 @@
   .lp #landingPrivato .lc-desc{ color:rgba(26,16,6,.78); }
   .lp #landingPrivato .lc-icon{ background:rgba(26,16,6,.14); }
   .lp #landingPrivato .lc-icon svg{ color:#1A1006; }
+  /* Fondo pagina iniziale: fascia scura con logo, social, App Store, contatti */
+  .lp-foot{ grid-area:priv; background:#1D1B18; color:#F3EDE6; text-align:center; margin:18px calc(50% - 50vw) -10px; padding:30px 16px calc(36px + env(safe-area-inset-bottom,0px)); display:flex; flex-direction:column; align-items:center; gap:6px; }
+  main:has(#panelLanding.active){ padding-bottom:0; }  /* niente spazio vuoto sotto il fondo pagina */
+  .lp-foot-logo{ width:52px; height:52px; border-radius:13px; object-fit:cover; box-shadow:0 6px 18px rgba(0,0,0,.35); }
+  .lp-foot-logo:not([src]){ display:none; }
+  .lp-foot-name{ font-weight:800; font-size:17px; margin-top:4px; }
+  .lp-foot-tag{ font-size:12.5px; opacity:.72; }
+  .lp-foot-social{ display:flex; gap:12px; justify-content:center; margin:10px 0 2px; flex-wrap:wrap; }
+  .lp-foot-social a{ width:42px; height:42px; border-radius:50%; border:1px solid rgba(255,255,255,.25); display:grid; place-items:center; background:rgba(255,255,255,.06); }
+  .lp-foot-social img{ width:22px; height:22px; object-fit:contain; }
+  .lp-foot-store{ border:1px solid rgba(255,255,255,.45); border-radius:10px; padding:7px 14px; font-size:12px; margin:10px 0 6px; }
+  .lp-foot-links{ font-size:12.5px; opacity:.9; }
+  .lp-foot-links a, .lp-foot .landing-privacy{ display:inline; margin:0; color:#E0915A; text-decoration:underline; background:none; border:0; font:inherit; padding:0; cursor:pointer; }
+  .lp-foot-copy{ font-size:11px; opacity:.55; margin-top:4px; }
   .lp-trust{ font-size:12.5px; color:var(--ink-soft); display:flex; align-items:center; gap:8px; }
   .lp-trust::before{ content:""; width:8px; height:8px; border-radius:50%; background:#6FBF73; box-shadow:0 0 0 4px rgba(111,191,115,.15); flex:none; }
   .lp-how{ grid-area:how; margin-top:10px; }
@@ -748,6 +762,63 @@
   .how-ico{ display:none !important; }
   .how-num{ position:static !important; width:26px !important; height:26px !important; font-size:13px !important; flex:none; }
   .how-steps{ gap:4px !important; }
+</style>
+
+<style id="rdElegante">
+/* Stile elegante arancio (colori del logo, pulsanti effetto vetro, titoli Playfair).
+   Vale per il tema chiaro (quello normale); il tema scuro ?tema=scuro resta com'era. */
+:root:not([data-theme="dark"]){--bg:#F8F4EE; --surface:#FFFDF9; --ink:#2B241C; --ink-soft:#8A7F72; --line:#EAE2D6;
+  --accent:#D0844F; --accent-soft:#F8E8DA; --accent-ink:#3A2210; --accent-gradient:#E9AE7E; --radius:14px;}
+html:not([data-theme="dark"]) body{background:radial-gradient(900px 500px at 100% -10%, #F8E6D6 0%, transparent 60%), #F8F4EE !important; background-attachment:fixed !important;}
+html:not([data-theme="dark"]) h1, html:not([data-theme="dark"]) .title, html:not([data-theme="dark"]) .lp-title, html:not([data-theme="dark"]) .how-title, html:not([data-theme="dark"]) .lc-title, html:not([data-theme="dark"]) .sf-card b, html:not([data-theme="dark"]) .pro-projects-title{font-family:"Playfair Display","Cormorant Garamond","Iowan Old Style",Palatino,"Liberation Serif",Georgia,serif !important; font-weight:600 !important; letter-spacing:-.01em !important;}
+html:not([data-theme="dark"]) .lp-title{font-weight:500 !important;}
+html:not([data-theme="dark"]) .lp-kicker{color:#B86A35 !important; letter-spacing:.18em !important; font-weight:600 !important;}
+html:not([data-theme="dark"]) .lp-kicker::before{background:#D0844F !important;}
+html:not([data-theme="dark"]) .btn-primary, html:not([data-theme="dark"]) .pro-bar button.primary, html:not([data-theme="dark"]) .cpm-select, html:not([data-theme="dark"]) .pro-auth-submit, html:not([data-theme="dark"]) .pp-new-btn, html:not([data-theme="dark"]) .rv-send, html:not([data-theme="dark"]) .seg-control button.active, html:not([data-theme="dark"]) .family-row button.active, html:not([data-theme="dark"]) .family-row button.all.active, html:not([data-theme="dark"]) .family-row.text-fam button.active, html:not([data-theme="dark"]) .pf-chip.on{background:linear-gradient(135deg, rgba(240,190,146,.92), rgba(214,132,78,.86)) !important;
+  -webkit-backdrop-filter:blur(14px) saturate(140%); backdrop-filter:blur(14px) saturate(140%);
+  border:1px solid rgba(255,255,255,.7) !important; color:#3A2210 !important; font-weight:600 !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 8px 22px rgba(180,95,40,.20) !important;}
+html:not([data-theme="dark"]) .btn-primary{border-radius:999px !important; letter-spacing:.01em;}
+html:not([data-theme="dark"]) .btn-primary:disabled, html:not([data-theme="dark"]) .btn-primary[disabled]{background:rgba(240,190,146,.42) !important; color:rgba(58,34,16,.45) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.6) !important; opacity:1 !important;}
+html:not([data-theme="dark"]) .btn-ghost{background:rgba(255,253,249,.7) !important; border:1px solid #E2D8C9 !important; border-radius:999px !important; -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);}
+html:not([data-theme="dark"]) .bar{background:linear-gradient(to top, rgba(248,244,238,.96) 65%, rgba(248,244,238,0)) !important;}
+html:not([data-theme="dark"]) .pro-bar button:not(.primary){color:#8A7F72 !important;}
+html:not([data-theme="dark"]) #landingPrivato{background:linear-gradient(135deg, rgba(240,190,146,.95), rgba(214,132,78,.9)) !important; border:1px solid rgba(255,255,255,.7) !important; box-shadow:inset 0 1px 0 rgba(255,255,255,.75), 0 10px 26px rgba(180,95,40,.20) !important;}
+html:not([data-theme="dark"]) #landingPrivato .lc-title, html:not([data-theme="dark"]) #landingPrivato .lc-arrow{color:#3A2210 !important;}
+html:not([data-theme="dark"]) #landingPrivato .lc-desc{color:rgba(58,34,16,.72) !important;}
+html:not([data-theme="dark"]) .landing-card{background:rgba(255,253,249,.75) !important; border:1px solid #EAE2D6 !important; box-shadow:none !important; border-radius:18px !important;}
+html:not([data-theme="dark"]) .landing-card .lc-icon{background:rgba(255,255,255,.35) !important; border:1px solid rgba(255,255,255,.8) !important; box-shadow:inset 0 1px 0 #fff, 0 4px 12px rgba(180,95,40,.15); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);}
+html:not([data-theme="dark"]) .lp-trust::before{background:#D0844F !important; box-shadow:0 0 0 4px rgba(208,132,79,.18) !important;}
+html:not([data-theme="dark"]) .how-num, html:not([data-theme="dark"]) .how-ico, html:not([data-theme="dark"]) .lp-how .how-step span:first-child{background:rgba(255,255,255,.5) !important; border:1px solid #EBC7A8 !important; color:#B4622C !important;}
+html:not([data-theme="dark"]) .lp-foot{background:#2B241C !important;}
+html:not([data-theme="dark"]) .lp-foot-links a, html:not([data-theme="dark"]) .lp-foot .landing-privacy{color:#F0B98C !important;}
+html:not([data-theme="dark"]) .sf-mi{background:none !important; width:auto !important; height:auto !important; border-radius:0 !important; margin:0 0 10px !important; justify-content:start; color:rgba(196,108,50,.92) !important;}
+html:not([data-theme="dark"]) .sf-mi svg, html:not([data-theme="dark"]) .landing-card .lc-icon svg, html:not([data-theme="dark"]) .how-ico svg{stroke-width:1.35 !important; color:rgba(196,108,50,.92) !important;
+  fill:rgba(240,170,115,.26) !important; filter:drop-shadow(0 1px 0 rgba(255,255,255,.95)) drop-shadow(0 5px 8px rgba(180,95,40,.25));}
+html:not([data-theme="dark"]) .sf-mi svg{width:34px !important; height:34px !important;}
+html:not([data-theme="dark"]) .pro-bar button svg{color:#B86A35;}
+html:not([data-theme="dark"]) .pro-bar button.primary svg{color:#3A2210;}
+html:not([data-theme="dark"]) .sf-card{background:rgba(255,253,249,.8) !important; border:1px solid #EAE2D6 !important; border-radius:18px !important; box-shadow:0 6px 18px rgba(180,95,40,.06) !important; position:relative; padding:14px !important;}
+html:not([data-theme="dark"]) .sf-card.sel{border:1px solid #D0844F !important; box-shadow:0 0 0 3px rgba(208,132,79,.18), 0 8px 22px rgba(180,95,40,.12) !important;}
+html:not([data-theme="dark"]) .sf-card.sel::after{content:"✓"; position:absolute; top:10px; right:10px; width:22px; height:22px; border-radius:50%; background:linear-gradient(135deg,#F2C29A,#D3814A); color:#3A2210; font-size:12px; display:grid; place-items:center; box-shadow:inset 0 1px 0 rgba(255,255,255,.8);}
+html:not([data-theme="dark"]) .sf-pic{border-radius:14px !important;}
+html:not([data-theme="dark"]) .sf-pic svg{filter:saturate(.8) brightness(1.04);}
+html:not([data-theme="dark"]) .sf-chip{background:#F8E8DA !important; border:none !important; color:#7A4A2A !important;}
+html:not([data-theme="dark"]) .sf-upload{border:1.5px dashed #E9AE7E !important; color:#B4622C !important; border-radius:18px !important; background:rgba(255,253,249,.6);}
+html:not([data-theme="dark"]) .sf-topback{border:none !important; padding-left:0 !important; color:#8A7F72 !important; font-weight:500 !important; background:none !important;}
+html:not([data-theme="dark"]) .sf-adv-btn{border:1px solid #EAE2D6 !important; border-style:solid !important; background:rgba(255,253,249,.8) !important;}
+html:not([data-theme="dark"]) .progress-track{height:2px !important; background:#EAE2D6 !important;}
+html:not([data-theme="dark"]) .progress-fill{background:linear-gradient(90deg,#F0B98C,#D0844F) !important;}
+html:not([data-theme="dark"]) .swatch.selected .sw-check{background:#D3814A !important; border-color:#fff !important; color:#2B241C !important;}
+html:not([data-theme="dark"]) .lp-how{border-top:none !important;}
+html:not([data-theme="dark"]) .hw-k{display:block; font-size:11px; letter-spacing:.18em; color:#B86A35; font-weight:600; text-transform:uppercase;}
+html:not([data-theme="dark"]) .hw-h{font-family:"Playfair Display","Liberation Serif",Georgia,serif; font-weight:500; font-size:26px; letter-spacing:-.01em; color:#2B241C; margin:4px 0 16px;}
+html:not([data-theme="dark"]) .hwA .s{display:flex; gap:16px; align-items:flex-start; position:relative; padding:0 0 22px;}
+html:not([data-theme="dark"]) .hwA .s:not(:last-child)::before{content:""; position:absolute; left:14px; top:38px; bottom:6px; width:1px; background:linear-gradient(#E9AE7E,rgba(233,174,126,.15));}
+html:not([data-theme="dark"]) .hwA .n{font-family:"Playfair Display","Liberation Serif",Georgia,serif; font-size:30px; line-height:1; color:#D0844F; width:44px; flex:none; opacity:.9;}
+html:not([data-theme="dark"]) .hwA b{font-family:"Playfair Display","Liberation Serif",Georgia,serif; font-weight:600; font-size:18px; color:#2B241C; display:block; margin-bottom:3px;}
+html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:1.45; margin:0;}
+@media (min-width:720px){ html:not([data-theme="dark"]) .hwA{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; } html:not([data-theme="dark"]) .hwA .s{ padding:0; } html:not([data-theme="dark"]) .hwA .s::before{ display:none; } }
 </style>
 </head>
 <body>
@@ -1242,17 +1313,26 @@
           <span class="lc-arrow">›</span>
         </button>
         </div>
-        <div class="lp-trust" data-i18n="landingTrust">Abbonamenti da 19 €/mese · Disdici quando vuoi</div>
+        <div class="lp-trust" data-i18n="landingTrust">Vedi il risultato prima di spendere un euro</div>
       </div>
       <div class="lp-how">
-        <div class="how-title" data-i18n="howTitle">Come funziona</div>
-        <div class="how-steps">
-          <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.5-.8 1.5-1.5 0-1.2-1-1.5-1-2.5s.8-1.5 2-1.5h2A4.5 4.5 0 0 0 21 11c0-4.4-4-8-9-8z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/></svg></span><span class="how-num">1</span><span class="how-txt" data-i18n="how1">Scegli lavorazione, colori e finiture</span></div>
-          <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.5"/></svg></span><span class="how-num">2</span><span class="how-txt" data-i18n="how2">Carica una foto del tuo ambiente o della facciata</span></div>
-          <div class="how-step"><span class="how-ico"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12l16-8-6 16-3-7-7-1z"/></svg></span><span class="how-num">3</span><span class="how-txt" data-i18n="how3">Guarda l'anteprima e richiedi il preventivo</span></div>
+        <span class="hw-k" data-i18n="howTitle">Come funziona</span>
+        <h3 class="hw-h" data-i18n="howSub">Tre passi, due minuti</h3>
+        <div class="hwA">
+          <div class="s"><div class="n">01</div><div><b data-i18n="how1">Scegli il lavoro</b><p data-i18n="how1d">Resina, parquet, pittura… e il colore che ti piace.</p></div></div>
+          <div class="s"><div class="n">02</div><div><b data-i18n="how2">Fotografa l'ambiente</b><p data-i18n="how2d">Basta una foto fatta con il telefono.</p></div></div>
+          <div class="s"><div class="n">03</div><div><b data-i18n="how3">Guarda il risultato</b><p data-i18n="how3d">Vedi il lavoro finito e chiedi il preventivo alle ditte della zona.</p></div></div>
         </div>
       </div>
-      <button type="button" class="privacy-link landing-privacy" data-open-privacy data-i18n="privacyShort">Privacy</button>
+      <footer class="lp-foot" id="lpFoot">
+        <img class="lp-foot-logo" id="lpFootLogo" alt="Rendrum">
+        <div class="lp-foot-name">Rendrum</div>
+        <div class="lp-foot-tag" data-i18n="lpFootTag">Vedi il lavoro finito prima di iniziare</div>
+        <div class="lp-foot-social" id="lpSocial" hidden></div>
+        <div class="lp-foot-store" data-i18n="lpFootStore">Presto su App Store</div>
+        <div class="lp-foot-links"><button type="button" class="privacy-link landing-privacy" data-open-privacy data-i18n="privacyShort">Privacy</button> · <a href="mailto:info@rendrum.com">info@rendrum.com</a></div>
+        <div class="lp-foot-copy">© <span id="lpYear">2026</span> Rendrum</div>
+      </footer>
     </div>
   </section>
 
@@ -2043,10 +2123,16 @@
     consentRequired: { it:"Per inviare la richiesta devi accettare l'informativa privacy.", en:"To send the request you must accept the privacy notice." },
     landingTitle: { it:"Vedi il lavoro finito sulla tua casa, prima di iniziare", en:"See the finished work on your home, before you start" },
     howTitle: { it:"Come funziona", en:"How it works" },
-    how1: { it:"Scegli lavorazione, colori e finiture", en:"Choose the work, colors and finishes" },
-    how2: { it:"Carica una foto del tuo ambiente o della facciata", en:"Upload a photo of your room or facade" },
-    how3: { it:"Guarda l'anteprima e richiedi il preventivo", en:"See the preview and request a quote" },
-    landingTrust: { it:"Abbonamenti da 19 €/mese · Disdici quando vuoi", en:"Plans from €19/month · Cancel anytime" },
+    howSub: { it:"Tre passi, due minuti", en:"Three steps, two minutes" },
+    how1: { it:"Scegli il lavoro", en:"Choose the work" },
+    how1d: { it:"Resina, parquet, pittura… e il colore che ti piace.", en:"Resin, parquet, paint… and the color you like." },
+    how2: { it:"Fotografa l'ambiente", en:"Photograph the room" },
+    how2d: { it:"Basta una foto fatta con il telefono.", en:"A photo taken with your phone is enough." },
+    how3: { it:"Guarda il risultato", en:"See the result" },
+    how3d: { it:"Vedi il lavoro finito e chiedi il preventivo alle ditte della zona.", en:"See the finished job and ask local companies for a quote." },
+    landingTrust: { it:"Vedi il risultato prima di spendere un euro", en:"See the result before spending a cent" },
+    lpFootTag: { it:"Vedi il lavoro finito prima di iniziare", en:"See the finished job before you start" },
+    lpFootStore: { it:"Presto su App Store", en:"Coming soon to the App Store" },
     summaryEdit: { it:"modifica selezione", en:"edit selection" },
     effettoWord: { it:"Effetto", en:"Effect" },
     shareCanvasHeading: { it:"La tua selezione", en:"Your selection" },
@@ -10801,6 +10887,21 @@
     proShowSection('proSectionMsg');
   }
   function proVerifyText(email){ return 'Ti abbiamo inviato un\'email a ' + email + '. Clicca il link che trovi dentro per attivare l\'account (controlla anche la cartella spam).'; }
+  // Social del fondo pagina: compaiono solo quando hanno sia il link sia l'icona ufficiale.
+  var RD_SOCIAL = [
+    { name:'Instagram', url:'', icon:'' },
+    { name:'Facebook',  url:'', icon:'' },
+    { name:'WhatsApp',  url:'', icon:'' }
+  ];
+  (function lpFootInit(){
+    try{
+      var bl = document.querySelector('img.brand-logo'), fl = document.getElementById('lpFootLogo'); if(bl && fl) fl.src = bl.src;
+      document.getElementById('lpYear').textContent = new Date().getFullYear();
+      var box = document.getElementById('lpSocial'), on = RD_SOCIAL.filter(function(x){ return x.url && x.icon; });
+      box.innerHTML = on.map(function(x){ return '<a href="' + x.url + '" target="_blank" rel="noopener" aria-label="' + x.name + '"><img alt="' + x.name + '" src="' + x.icon + '"></a>'; }).join('');
+      box.hidden = !on.length;
+    }catch(e){}
+  })();
   function proUpdateHeader(){
     if(proAccount && proAccount.accountType === 'privato' && typeof rdVoteCheck === 'function') rdVoteCheck();
     if(proAccount && typeof proPendingClick !== 'undefined' && proPendingClick && (!proAccount.paymentsEnabled || subActive())){
