@@ -943,7 +943,7 @@
           <div class="field"><label>Metri quadri (circa) *</label><input id="tfMq" type="text" inputmode="decimal" placeholder="Es. 45"></div>
           <div class="field"><label>Quando vuoi iniziare *</label><select id="tfQuando"></select></div>
         </div>
-        <div class="field"><label>Budget indicativo *</label><select id="tfBudget"></select></div>
+        <div class="field" hidden><label>Budget indicativo</label><select id="tfBudget"></select></div>
         <div class="field"><label>Descrivi il lavoro *</label><textarea id="tfDesc" rows="3" maxlength="1500" placeholder="Es. Soggiorno e cucina, pavimento in piastrelle da rimuovere, casa abitata: preferisco lavori in una settimana."></textarea></div>
         <div class="row2">
           <div class="field"><label>Nome e cognome *</label><input id="tfNome" type="text" maxlength="120"></div>
@@ -12149,7 +12149,7 @@
       privacy: f('tfPrivacy').checked, condividi: f('tfShare').checked };
   }
   function tfOptionalMarks(on){
-    ['tfTipo','tfStato','tfMq','tfBudget','tfDesc'].forEach(function(id){ var el = document.getElementById(id), lb = el && el.closest('.field') && el.closest('.field').querySelector('label'); if(!lb) return;
+    ['tfTipo','tfStato','tfMq','tfDesc'].forEach(function(id){ var el = document.getElementById(id), lb = el && el.closest('.field') && el.closest('.field').querySelector('label'); if(!lb) return;
       if(!lb.dataset.orig) lb.dataset.orig = lb.textContent; lb.textContent = on ? lb.dataset.orig.replace(/\s*\*$/, '') + ' (facoltativo)' : lb.dataset.orig; });
   }
   function tfCheck(d){
@@ -12163,7 +12163,7 @@
     }
     if(!d.lavorazione) m.push('lavoro (fai prima un\'anteprima)'); if(!d.provincia) m.push('provincia'); if(d.comune.length < 2) m.push('comune');
     if(!d.tipo) m.push('tipo di immobile'); if(!d.stato) m.push('situazione attuale'); if(!(qParse(d.mq) > 0)) m.push('metri quadri');
-    if(!d.quando) m.push('quando iniziare'); if(!d.budget) m.push('budget'); if(d.descrizione.length < 20) m.push('descrizione (almeno 20 caratteri)');
+    if(!d.quando) m.push('quando iniziare'); if(d.descrizione.length < 20) m.push('descrizione (almeno 20 caratteri)');
     if(d.nome.length < 3) m.push('nome e cognome'); if(d.telefono.replace(/\D/g,'').length < 8) m.push('telefono');
     if(!d.privacy || !d.condividi) m.push('i due consensi');
     return m;
@@ -12292,7 +12292,7 @@
       var l = ld.cur = x.d.lead;
       document.getElementById('ldTitle').textContent = l.lavorazioneNome + ' · ' + (l.comune || '') + ' (' + l.provincia + ')';
       var rows = [['Stato', LD_STATUS[l.status] || l.status], ['Cliente', l.nome], ['Telefono', '<a href="tel:' + qEsc(l.telefono) + '">' + qEsc(l.telefono) + '</a>'], ['Email', '<a href="mailto:' + qEsc(l.email) + '">' + qEsc(l.email) + '</a>'],
-        ['Immobile', qEsc(l.tipo || '—')], ['Situazione', qEsc(l.stato || '—')], ['Metri quadri', qEsc(l.mq ? l.mq + ' m²' : '—')], ['Inizio', qEsc(l.quando)], ['Budget', qEsc(l.budget || '—')]];
+        ['Immobile', qEsc(l.tipo || '—')], ['Situazione', qEsc(l.stato || '—')], ['Metri quadri', qEsc(l.mq ? l.mq + ' m²' : '—')], ['Inizio', qEsc(l.quando)]].concat(l.budget ? [['Budget', qEsc(l.budget)]] : []);
       if(l.interesse) rows.splice(1, 0, ['Interesse', '<span class="ld-int ' + qEsc(l.interesse) + '"><i></i>' + qEsc(l.interesse.charAt(0).toUpperCase() + l.interesse.slice(1)) + '</span>']);
       if(l.fase) rows.push(['A che punto è', qEsc(l.fase)]);
       if(l.contatto) rows.push(['Preferisce', qEsc(l.contatto)]);
