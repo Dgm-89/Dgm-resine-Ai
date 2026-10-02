@@ -34,6 +34,7 @@ const { paymentsEnabled, currentAccount, supabaseRequest, PLAN_LIMITS } = requir
 const PLANS_LIMIT = (tier) => PLAN_LIMITS[tier] || 0;
 
 module.exports = async function handler(req, res) {
+  const tStart = Date.now();   // misura dei tempi (visibile solo agli account di test)
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
@@ -47,7 +48,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { muro, porteInterne, imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, lavoriPrecedenti, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands } = req.body || {};
+  const { muro, porteInterne, imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, lavoriPrecedenti, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands, motore } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -107,7 +108,10 @@ module.exports = async function handler(req, res) {
   const apiKey = (process.env.GEMINI_API_KEY || "").trim();
   const TEST_EMAILS_ALL = String(process.env.TEST_EMAILS || "prova@rendrum.com,info@rendrum.com,info@dgmresine.com,provalo@rendrum.com").toLowerCase().split(",").map(function (x) { return x.trim(); });
   const isTesterAll = !!(quotaAcc && quotaAcc.email && TEST_EMAILS_ALL.includes(String(quotaAcc.email).toLowerCase()));
-  const provider = ((process.env.AI_PROVIDER || "").trim().toLowerCase()) || (openaiKey ? "openai" : "gemini");
+  let provider = ((process.env.AI_PROVIDER || "").trim().toLowerCase()) || (openaiKey ? "openai" : "gemini");
+  // Prova motori (solo account di test, rendrum.com/?test=max&motore=gemini|openai)
+  if (isTesterAll && motore === "gemini" && apiKey) provider = "gemini";
+  if (isTesterAll && motore === "openai" && openaiKey) provider = "openai";
   // Risoluzione in uscita (vale per entrambi i motori): 2K per tutti, modificabile da
   // Vercel con IMAGE_RES = "std" | "2k" | "4k"; i tester possono provarne un'altra.
   const resDefaultAll = String(process.env.IMAGE_RES || process.env.OPENAI_IMAGE_RES || "2k").trim().toLowerCase();
@@ -853,6 +857,7 @@ module.exports = async function handler(req, res) {
       // Parametri già rifiutati da questo modello (memoria per istanza): non si rimandano.
       const memo = (global.__rdRejected = global.__rdRejected || {})[model] = (global.__rdRejected[model] || {});
       Object.keys(memo).forEach(function (k) { if (k in params) { delete params[k]; dropped.push(k); } });
+      const tAi0 = Date.now(); let sends = 1;
       let r = await sendRetry(params);
       let txt = await r.text();
       let fallbackWhy = "";
@@ -869,9 +874,10 @@ module.exports = async function handler(req, res) {
         else if (key === "quality" && params.quality !== "high") params.quality = "high";
         else if (key === "output_format") { delete params.output_format; delete params.output_compression; outMime = "image/png"; dropped.push("output_format"); }
         else { delete params[key]; dropped.push(key); if (key === "input_fidelity" || key === "output_compression") memo[key] = 1; }
-        r = await sendRetry(params);
+        r = await sendRetry(params); sends++;
         txt = await r.text();
       }
+      const msAi = Date.now() - tAi0;
       let data;
       try { data = JSON.parse(txt); } catch (e) {
         return res.status(502).json({ error: "Risposta non valida dal servizio AI (OpenAI)", details: txt.slice(0, 500) });
@@ -890,6 +896,7 @@ module.exports = async function handler(req, res) {
         test = { quality: quality, size: outSize, inputImageTokens: imgIn, inputTextTokens: txtIn, outputTokens: out, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
       }
       const fit = await fitJpeg(b64, outMime);
+      if (isTesterAll) { test = test || {}; test.msAi = msAi; test.msServer = Date.now() - tStart; test.sends = sends; test.engine = "openai " + model; }
       if (test) { test.engine = "openai " + model; test.sizeSent = params.size || "auto"; test.quality = params.quality || quality; if (dropped.length) test.dropped = dropped.join(", "); if (fallbackWhy) test.fallback = fallbackWhy; }
       return res.status(200).json({ imageBase64: fit.b64, mimeType: fit.mime, test: test });
     } catch (err) {
@@ -957,13 +964,15 @@ module.exports = async function handler(req, res) {
         generationConfig: Object.assign({ responseModalities: ["TEXT", "IMAGE"] }, cfg ? { imageConfig: cfg } : {})
       })
     });
+    const tAi0 = Date.now(); let sends = 1;
     let response = await callGemini(imageConfig);
     let rawText = await response.text();
     // Se il modello non accetta le opzioni di formato, si riprova senza.
     if (response.status === 400 && /imageConfig|imageSize|aspect/i.test(rawText)) {
-      response = await callGemini(null);
+      response = await callGemini(null); sends++;
       rawText = await response.text();
     }
+    const msAi = Date.now() - tAi0;
     let data;
     try {
       data = JSON.parse(rawText);
@@ -998,6 +1007,7 @@ module.exports = async function handler(req, res) {
       gtest = { quality: "gemini", size: imageConfig.imageSize, engine: "gemini " + geminiModel, inputImageTokens: pin, inputTextTokens: 0, outputTokens: pout, costEur: Math.round(usd / 1.13 * 1000) / 1000 };
     }
     const gfit = await fitJpeg(inline.data, inline.mime_type || inline.mimeType || "image/png");
+    if (isTesterAll) { gtest = gtest || { engine: "gemini " + geminiModel, size: imageConfig.imageSize }; gtest.msAi = msAi; gtest.msServer = Date.now() - tStart; gtest.sends = sends; }
     return res.status(200).json({ imageBase64: gfit.b64, mimeType: gfit.mime, test: gtest });
   } catch (err) {
     console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });

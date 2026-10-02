@@ -9390,6 +9390,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
         materialSampleImage: buildMaterialSample(),
         qualita: RD_TEST_Q || null,
         risoluzione: (RD_TEST_Q && RD_TEST_RES) || null,
+        motore: (RD_TEST_Q && RD_TEST_MOTORE) || null,
         stile: (RD_TEST_Q && RD_TEST_STILE) || null,
         lavoriPrecedenti: layers.map(function(l){ return l.title; }),
         scaleTipo: (state.material && state.material.id === 'scale') ? state.scaleTipo : null,
@@ -9538,6 +9539,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
       });
     }
     function callAIRaw(body){
+      var tReq = Date.now();
       return fetch(AI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
       .then(function(r){
         return r.text().then(function(text){
@@ -9558,6 +9560,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
         }
         if(!res.data || !res.data.imageBase64) throw new Error('Risposta AI incompleta');
         window.__rdLastTest = res.data.test || null;
+        if(window.__rdLastTest) window.__rdLastTest.msTot = Date.now() - tReq;
         return new Promise(function(resolve, reject){
           var img = new Image();
           img.onload = function(){ resolve({ img: img, base64: res.data.imageBase64, mime: res.data.mimeType }); };
@@ -9615,7 +9618,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
         statusEl.textContent = ts('aiStatusDone');
         if(RD_TEST_Q){
           var tq = window.__rdLastTest;
-          rdTestBadge((tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account') + ' · ' + result.img.naturalWidth + '×' + result.img.naturalHeight + ' px' + (tq && tq.sizeSent ? ' · chiesto ' + tq.sizeSent : '') + (tq && tq.fallback ? ' · ⚠ OpenAI ha rifiutato: ' + tq.fallback : ''));
+          rdTestBadge((tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account') + ' · ' + result.img.naturalWidth + '×' + result.img.naturalHeight + ' px' + (tq && tq.sizeSent ? ' · chiesto ' + tq.sizeSent : '') + (tq && tq.fallback ? ' · ⚠ OpenAI ha rifiutato: ' + tq.fallback : '') + (tq && tq.msAi ? ' · ⏱ totale ' + (tq.msTot/1000).toFixed(1) + ' s (AI ' + (tq.msAi/1000).toFixed(1) + ' s, server ' + (tq.msServer/1000).toFixed(1) + ' s, invii ' + tq.sends + ') · ' + tq.engine : ''));
           statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' + (tq.engine ? ' · motore ' + tq.engine : '') + (tq.size ? ' · formato chiesto ' + tq.size : '') + (tq.fallback ? ' · ⚠ OpenAI ha rifiutato il formato: ' + tq.fallback : '') : ' · modalità test non attiva per questo account';
         }
         stopAiProgress(true);
@@ -11006,6 +11009,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
   // Prova risoluzione (solo test): rendrum.com/?test=max&res=2k oppure &res=4k; &res=off per tornare normale.
   // Stile foto (solo test): &stile=reale (come il telefono) oppure &stile=pro (predefinito).
   var RD_TEST_STILE = (function(){ try{ var r = new URLSearchParams(location.search).get('stile'); if(r){ sessionStorage.setItem('rdTestStile', r); } else { r = sessionStorage.getItem('rdTestStile'); } return (r === 'reale' || r === 'pro') ? r : ''; }catch(e){ return ''; } })();
+  var RD_TEST_MOTORE = (function(){ try{ var r = new URLSearchParams(location.search).get('motore'); if(r){ sessionStorage.setItem('rdTestMotore', r); } else { r = sessionStorage.getItem('rdTestMotore'); } return (r === 'gemini' || r === 'openai') ? r : ''; }catch(e){ return ''; } })();
   var RD_TEST_RES = (function(){ try{ var r = new URLSearchParams(location.search).get('res'); if(r){ sessionStorage.setItem('rdTestRes', r); } else { r = sessionStorage.getItem('rdTestRes'); } return (r === '2k' || r === '4k' || r === 'std') ? r : ''; }catch(e){ return ''; } })();
   var RD_TEST_Q = (function(){ try{ var t = new URLSearchParams(location.search).get('test'); if(t){ sessionStorage.setItem('rdTestQ', t); } else { t = sessionStorage.getItem('rdTestQ'); } return t === 'max' ? t : ''; }catch(e){ return ''; } })();
   // Etichetta sempre visibile quando la modalità test è attiva.
@@ -11017,7 +11021,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
       b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);top:calc(2px + env(safe-area-inset-top,0px));z-index:10050;max-width:92vw;background:#E0915A;color:#1A120C;font:700 11px/1.3 Inter,system-ui,sans-serif;padding:3px 10px;border-radius:0 0 10px 10px;box-shadow:0 6px 20px rgba(0,0,0,.45);text-align:center;pointer-events:none';
       document.body.appendChild(b);
     }
-    b.textContent = 'TEST · ' + RD_TEST_NAME[RD_TEST_Q] + (RD_TEST_RES ? ' · ' + RD_TEST_RES.toUpperCase() : '') + (RD_TEST_STILE ? ' · stile ' + RD_TEST_STILE : '') + (extra ? ' · ' + extra : ' · per uscire apri rendrum.com/?test=off');
+    b.textContent = 'TEST · ' + RD_TEST_NAME[RD_TEST_Q] + (RD_TEST_RES ? ' · ' + RD_TEST_RES.toUpperCase() : '') + (RD_TEST_MOTORE ? ' · motore ' + RD_TEST_MOTORE : '') + (RD_TEST_STILE ? ' · stile ' + RD_TEST_STILE : '') + (extra ? ' · ' + extra : ' · per uscire apri rendrum.com/?test=off');
   }
   rdTestBadge();
   // Salva un PDF creato con jsPDF. Nel browser lo scarica; nell'app (dove i
