@@ -401,7 +401,10 @@
   .sso-google{ display:flex; justify-content:center; min-height:44px; }
   .sso-or{ display:flex; align-items:center; gap:10px; color:var(--ink-soft); font-size:12.5px; margin-top:2px; }
   .sso-or::before, .sso-or::after{ content:""; flex:1; height:1px; background:var(--line); }
-  html.is-app .sso{ display:none !important; }   /* nell'app iPhone arriva con il prossimo aggiornamento dell'app */
+  html.is-app:not(.sso-app) .sso{ display:none !important; }   /* app vecchie (senza browser di sistema): solo email */
+  .sso-gapp{ display:flex; justify-content:center; align-items:center; gap:10px; height:44px; border-radius:999px; background:#fff; color:#1f1f1f; border:1px solid #747775; font:600 15px/1 Roboto,-apple-system,"Segoe UI",sans-serif; cursor:pointer; width:100%; }
+  .sso-gapp img{ width:18px; height:18px; display:block; }
+  .sso-gapp[hidden]{ display:none !important; }
   .ob-hi{ font-family:"Playfair Display","Liberation Serif",Georgia,serif; font-size:24px; color:var(--ink); margin:2px 0 2px; }
   .ob-sub{ color:var(--ink-soft); font-size:14px; margin:0 0 12px; }
   .ob-opt{ width:100%; display:flex; align-items:center; gap:12px; text-align:left; font:inherit; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:12px; margin-bottom:8px; cursor:pointer; color:var(--ink); }
@@ -894,7 +897,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
 
     <!-- LOGIN -->
     <div class="pro-auth-section active" id="proSectionLogin">
-      <div class="sso" data-sso hidden><a class="sso-apple" href="/api/auth-social?provider=apple" data-sso-apple hidden><img alt="Continua con Apple" src="https://appleid.cdn-apple.com/appleid/button?height=44&amp;width=320&amp;type=continue&amp;color=black&amp;border=false&amp;border_radius=50&amp;locale=it_IT&amp;scale=2" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'Continua con Apple'}))"></a><div class="sso-google" data-sso-google hidden></div><div class="sso-or">oppure con la tua email</div></div>
+      <div class="sso" data-sso hidden><a class="sso-apple" href="/api/auth-social?provider=apple" data-sso-apple hidden><img alt="Continua con Apple" src="https://appleid.cdn-apple.com/appleid/button?height=44&amp;width=320&amp;type=continue&amp;color=black&amp;border=false&amp;border_radius=50&amp;locale=it_IT&amp;scale=2" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'Continua con Apple'}))"></a><div class="sso-google" data-sso-google hidden></div><button type="button" class="sso-gapp" data-sso-gapp hidden><img alt="" src="https://developers.google.com/identity/images/g-logo.png" onerror="this.remove()">Continua con Google</button><div class="sso-or">oppure con la tua email</div></div>
       <div class="field"><label for="paLoginEmail" data-i18n="proEmailLabel">Email</label><input id="paLoginEmail" type="email" autocomplete="email" placeholder="nome@azienda.it"></div>
       <div class="field"><label for="paLoginPassword" data-i18n="proPasswordLabel">Password</label><input id="paLoginPassword" type="password" autocomplete="current-password"></div>
       <div class="pro-auth-error" id="paLoginError"></div>
@@ -936,7 +939,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
 
     <!-- REGISTRAZIONE -->
     <div class="pro-auth-section" id="proSectionRegister">
-      <div class="sso" data-sso hidden><a class="sso-apple" href="/api/auth-social?provider=apple" data-sso-apple hidden><img alt="Continua con Apple" src="https://appleid.cdn-apple.com/appleid/button?height=44&amp;width=320&amp;type=continue&amp;color=black&amp;border=false&amp;border_radius=50&amp;locale=it_IT&amp;scale=2" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'Continua con Apple'}))"></a><div class="sso-google" data-sso-google hidden></div><div class="sso-or">oppure con la tua email</div></div>
+      <div class="sso" data-sso hidden><a class="sso-apple" href="/api/auth-social?provider=apple" data-sso-apple hidden><img alt="Continua con Apple" src="https://appleid.cdn-apple.com/appleid/button?height=44&amp;width=320&amp;type=continue&amp;color=black&amp;border=false&amp;border_radius=50&amp;locale=it_IT&amp;scale=2" onerror="this.replaceWith(Object.assign(document.createElement('span'),{textContent:'Continua con Apple'}))"></a><div class="sso-google" data-sso-google hidden></div><button type="button" class="sso-gapp" data-sso-gapp hidden><img alt="" src="https://developers.google.com/identity/images/g-logo.png" onerror="this.remove()">Continua con Google</button><div class="sso-or">oppure con la tua email</div></div>
       <div class="pro-auth-tier-label" data-i18n="proAccountTypeLabel" style="font-size:15px;font-weight:800;color:var(--ink)">Sei un privato o un professionista?</div>
       <div class="pro-auth-tier-row" id="proAccountTypeRow">
         <button type="button" class="pro-auth-tier" data-account-type="privato"><span class="t-name" data-i18n="proAccountTypePrivato">Privato</span></button>
@@ -11206,9 +11209,47 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
 
   // ---------- Accesso con Google / Apple ----------
   var ssoCfg = null, ssoGisLoading = false;
+  // Nell'app: il login si fa nel browser di sistema (Google non permette il login dentro le app),
+  // poi si torna nell'app con com.rendrum.app://auth?t=... e un codice di verifica rimasto qui.
+  function ssoAppOk(){
+    try{ var C = window.Capacitor; return !!(C && C.isPluginAvailable && C.isPluginAvailable('Browser') && C.isPluginAvailable('App') && window.crypto && crypto.subtle); }catch(e){ return false; }
+  }
+  function ssoB64(buf){ var b = ''; new Uint8Array(buf).forEach(function(x){ b += String.fromCharCode(x); }); return btoa(b).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+  function ssoAppStart(provider){
+    var v = ssoB64(crypto.getRandomValues(new Uint8Array(32)));
+    try{ localStorage.setItem('rdSsoV', v); }catch(e){}
+    crypto.subtle.digest('SHA-256', new TextEncoder().encode(v)).then(function(h){
+      var url = location.origin + '/api/auth-social?provider=' + provider + '&app=1&c=' + ssoB64(h);
+      return window.Capacitor.Plugins.Browser.open({ url: url, presentationStyle: 'popover' });
+    }).catch(function(){ var er = document.getElementById('paLoginError'); if(er) er.textContent = 'Non riesco ad aprire la pagina di accesso. Riprova.'; });
+  }
+  function ssoAppReturn(url){
+    if(!/^com\.rendrum\.app:\/\/auth/i.test(url || '')) return;
+    try{ window.Capacitor.Plugins.Browser.close(); }catch(e){}
+    var q = new URLSearchParams(String(url).split('?')[1] || ''), v = null;
+    try{ v = localStorage.getItem('rdSsoV'); localStorage.removeItem('rdSsoV'); }catch(e){}
+    if(q.get('t') && v){ location.href = '/api/auth-social?action=app-login&t=' + encodeURIComponent(q.get('t')) + '&v=' + encodeURIComponent(v); return; }
+    var msg = q.get('err') || 'Accesso non riuscito. Riprova.';
+    proAuthOpen(); proSwitchTab('login'); var er = document.getElementById('paLoginError'); if(er) er.textContent = msg;
+  }
+  if(document.documentElement.classList.contains('is-app') && ssoAppOk()){
+    document.documentElement.classList.add('sso-app');
+    try{ window.Capacitor.Plugins.App.addListener('appUrlOpen', function(e){ ssoAppReturn(e && e.url); }); }catch(e){}
+    document.querySelectorAll('[data-sso-apple]').forEach(function(a){ a.addEventListener('click', function(ev){ ev.preventDefault(); ssoAppStart('apple'); }); });
+    document.querySelectorAll('[data-sso-gapp]').forEach(function(b){ b.addEventListener('click', function(){ ssoAppStart('google'); }); });
+  }
   function ssoSetup(){
-    if(document.documentElement.classList.contains('is-app')) return;   // app: prossimo aggiornamento
+    var inApp = document.documentElement.classList.contains('is-app');
+    if(inApp && !document.documentElement.classList.contains('sso-app')) return;   // app vecchia: solo email
     var go = function(cfg){
+      if(inApp){
+        var a = cfg && cfg.app;
+        if(!a || (!a.google && !a.apple)) return;
+        document.querySelectorAll('[data-sso]').forEach(function(b){ b.hidden = false; });
+        document.querySelectorAll('[data-sso-apple]').forEach(function(x){ x.hidden = !a.apple; });
+        document.querySelectorAll('[data-sso-gapp]').forEach(function(x){ x.hidden = !a.google; });
+        return;
+      }
       if(!cfg || (!cfg.google && !cfg.apple)) return;
       document.querySelectorAll('[data-sso]').forEach(function(b){ b.hidden = false; });
       document.querySelectorAll('[data-sso-apple]').forEach(function(a){ a.hidden = !cfg.apple; });
