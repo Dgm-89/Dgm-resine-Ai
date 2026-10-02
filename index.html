@@ -737,6 +737,37 @@
   .ai-busy .ab-msg{ color:var(--ink-soft); font-size:14px; min-height:20px; }
   .ai-busy .ai-progress{ width:min(78vw,420px); margin-top:4px; }
   .ai-busy .ab-note{ color:var(--ink-soft); font-size:12.5px; max-width:340px; }
+  /* Attesa: la casa prende forma + domande del preventivo + "chiudi, avvisami" */
+  .ai-busy{ overflow-y:auto; -webkit-overflow-scrolling:touch; justify-content:flex-start; }
+  .ai-busy .ab-main, .ai-busy .ab-det{ width:min(100%,440px); margin:auto; display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .ai-busy .ab-main[hidden], .ai-busy .ab-det[hidden], .ai-busy .ab-q[hidden], .ai-busy .ab-close[hidden], .ai-busy .ab-sp[hidden]{ display:none !important; }
+  .ai-busy .ab-img{ position:relative; width:100%; aspect-ratio:4/3; border-radius:18px; overflow:hidden; background:#E9E1D6; box-shadow:0 12px 30px rgba(60,35,15,.16); flex:none; }
+  .ai-busy .ab-img img, .ai-busy.ab-has-sp .ab-img img#aiBusyImg{ position:absolute; inset:0; width:100%; height:100%; aspect-ratio:auto; object-fit:cover; border-radius:0; opacity:1; filter:saturate(.85); }
+  .ai-busy .ab-img img#abPartial{ opacity:0; filter:none; transition:opacity 1.2s ease; } .ai-busy .ab-img img#abPartial.on{ opacity:1; }
+  .ai-busy .ab-img img#abPartial[hidden]{ display:none; }
+  .ai-busy .ab-tint{ position:absolute; left:0; top:0; bottom:0; width:0; mix-blend-mode:color; opacity:.62; transition:width .7s linear, opacity .8s; pointer-events:none; }
+  .ai-busy .ab-roll{ position:absolute; top:0; bottom:0; left:0; width:2px; background:rgba(255,255,255,.95); box-shadow:0 0 14px 2px rgba(255,255,255,.8); transition:left .7s linear, opacity .8s; pointer-events:none; }
+  .ai-busy .ab-tag{ position:absolute; top:10px; left:10px; background:rgba(20,16,12,.62); color:#fff; font-size:10.5px; font-weight:700; letter-spacing:.1em; padding:4px 9px; border-radius:20px; }
+  .ai-busy .ai-progress{ width:100%; }
+  .ai-busy .ab-row{ width:100%; display:flex; justify-content:space-between; align-items:baseline; gap:10px; font-size:13px; }
+  .ai-busy .ab-row .ab-msg{ text-align:left; color:var(--ink); font-weight:600; font-size:13.5px; } .ai-busy .ab-eta{ color:var(--ink-soft); white-space:nowrap; font-size:12.5px; }
+  .ai-busy .ab-q{ width:100%; text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:14px; }
+  .ai-busy .abq-k{ font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:700; }
+  .ai-busy .abq-t{ font-size:16px; font-weight:700; margin:4px 0 10px; color:var(--ink); }
+  .ai-busy .abq-o{ display:flex; flex-wrap:wrap; gap:8px; }
+  .ai-busy .abq-o button{ border:1px solid var(--line); background:var(--bg); border-radius:999px; padding:9px 13px; font:inherit; font-size:13.5px; color:var(--ink); cursor:pointer; }
+  .ai-busy .abq-o button:hover{ border-color:var(--accent); }
+  .ai-busy .abq-s{ font-size:12.5px; color:#5E8A4E; font-weight:600; line-height:1.45; } .ai-busy .abq-done{ margin-bottom:8px; } .ai-busy .abq-ok{ font-weight:700; color:#5E8A4E; font-size:14px; margin-bottom:3px; }
+  .ai-busy .abq-skip, .ai-busy .abq-edit{ background:none; border:none; color:var(--ink-soft); font:inherit; font-size:12.5px; text-decoration:underline; cursor:pointer; padding:10px 0 0; }
+  .ai-busy .ab-close{ width:100%; display:flex; flex-direction:column; gap:8px; align-items:center; font-size:13px; color:var(--ink-soft); }
+  .ai-busy .ab-close button{ width:100%; border:1px solid var(--line); background:var(--surface); border-radius:999px; padding:13px; font:inherit; font-weight:700; font-size:14px; color:var(--ink); cursor:pointer; }
+  .ai-busy .ab-det{ gap:14px; }
+  .ai-busy .ab-det-ic{ width:58px; height:58px; border-radius:50%; display:grid; place-items:center; background:var(--accent-soft); color:var(--accent); font-size:28px; font-weight:700; }
+  .ai-busy .ab-det p{ margin:0; color:var(--ink); font-size:15px; line-height:1.45; } .ai-busy .ab-det .ab-det-s{ color:var(--ink-soft); font-size:13.5px; }
+  .ai-busy #abHomeBtn{ width:100%; border:none; border-radius:999px; padding:14px; font:inherit; font-weight:700; font-size:15px; background:var(--accent-gradient); color:var(--accent-ink); cursor:pointer; margin-top:6px; }
+  .ai-busy .ab-det-back{ background:none; border:none; color:var(--ink-soft); text-decoration:underline; font:inherit; font-size:13px; cursor:pointer; }
+  .rd-toast{ position:fixed; left:50%; bottom:calc(18px + env(safe-area-inset-bottom,0px)); transform:translate(-50%,160%); z-index:9500; width:min(92vw,420px); text-align:left; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-radius:16px; padding:13px 16px; box-shadow:0 14px 34px rgba(40,25,10,.22); font:inherit; cursor:pointer; transition:transform .35s cubic-bezier(.2,.8,.2,1); }
+  .rd-toast.on{ transform:translate(-50%,0); } .rd-toast b{ display:block; font-size:14.5px; } .rd-toast span{ display:block; font-size:13px; color:var(--ink-soft); margin-top:2px; }
   .ai-progress{ height:8px; border-radius:6px; background:var(--accent-soft); overflow:hidden; margin-top:12px; }
   .ai-progress-fill{ height:100%; width:0; border-radius:6px; background:linear-gradient(90deg, var(--accent), #F3B27A); transition:width .8s ease; }
   .ai-progress-msg{ font-size:12.5px; color:var(--ink); margin-top:8px; text-align:center; }
@@ -1792,17 +1823,29 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     </div>
     <button class="ai-btn" id="aiGenerateBtn" disabled data-i18n="aiGenerateBtn">Genera anteprima AI fotorealistica</button>
     <div class="ai-busy" id="aiBusy" role="status" aria-live="polite">
-      <img id="aiBusyImg" alt="">
-      <h2>Sto creando la tua anteprima…</h2>
-      <div class="ab-step" id="aiBusyStep"></div>
-      <div class="ai-progress"><div class="ai-progress-fill" id="aiBusyFill"></div></div>
-      <div class="ab-msg" id="aiBusyMsg"></div>
-      <div class="ab-sp" id="abSp" hidden>
+      <div class="ab-main" id="abMain">
+        <div class="ab-img"><img id="aiBusyImg" alt=""><div class="ab-tint" id="abTint"></div><div class="ab-roll" id="abRoll"></div><img id="abPartial" alt="" hidden><span class="ab-tag" id="abTag">STO PREPARANDO</span></div>
+        <h2 id="abTitle">Sto creando la tua anteprima…</h2>
+        <div class="ab-step" id="aiBusyStep"></div>
+        <div class="ai-progress"><div class="ai-progress-fill" id="aiBusyFill"></div></div>
+        <div class="ab-row"><span class="ab-msg" id="aiBusyMsg"></span><span class="ab-eta" id="abEta"></span></div>
+        <div class="ab-q" id="abQ" hidden></div>
+        <div class="ab-close" id="abCloseBox" hidden><span>Non devi restare qui: continuiamo noi.</span><button type="button" id="abCloseBtn">Chiudi, avvisami quando è pronta</button></div>
+        <div class="ab-sp" id="abSp" hidden>
         <div class="ab-sp-h"><span>In vetrina · esempio</span><span id="abSpCnt"></span></div>
         <div class="ab-sp-stage" id="abSpStage"></div>
         <div class="ab-sp-tick"><div class="ab-sp-row" id="abSpRow"></div></div>
       </div>
-      <div class="ab-note">Non chiudere la pagina: ci vuole circa un minuto per ogni lavorazione.</div>
+        <div class="ab-note" id="abNote">Non chiudere la pagina: ci vuole circa un minuto e mezzo per ogni lavorazione.</div>
+      </div>
+      <div class="ab-det" id="abDetached" hidden>
+        <div class="ab-det-ic">✓</div>
+        <h2>Perfetto, ci pensiamo noi</h2>
+        <p id="abDetMail">Ti avvisiamo appena l'anteprima è pronta.</p>
+        <p class="ab-det-s">La ritrovi anche riaprendo Rendrum.</p>
+        <button type="button" id="abHomeBtn">Torna alla home</button>
+        <button type="button" class="ab-det-back" id="abStayBtn">Resto qui ad aspettare</button>
+      </div>
     </div>
     <div class="ai-progress" id="aiProgress" hidden><div class="ai-progress-fill" id="aiProgressFill"></div></div>
     <div class="ai-progress-msg" id="aiProgressMsg" hidden></div>
@@ -1814,9 +1857,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
       <button type="button" id="layerUndoBtn" hidden style="margin-top:8px;background:none;border:none;color:var(--ink-soft);text-decoration:underline;cursor:pointer;font-family:inherit;font-size:13px">↩ Togli l'ultima lavorazione</button>
     </div>
     <div id="spResBox" hidden style="margin-top:14px">
-      <div style="font-weight:700;font-size:14.5px;margin-bottom:8px">Ditte che hai salvato</div>
-      <div id="spSaved"></div>
-      <div style="font-weight:700;font-size:14.5px;margin:12px 0 8px">In vetrina · esempio</div>
+      <div style="font-weight:700;font-size:14.5px;margin:0 0 8px">In vetrina · esempio</div>
       <div class="sp-hs" id="spHs"></div>
     </div>
     <div id="pdfBox" hidden style="margin-top:14px;padding:12px;border:1.5px solid var(--line);border-radius:12px">
@@ -8173,6 +8214,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
   });
   document.getElementById('photoInput').addEventListener('change', function(e){
     var file = e.target.files[0]; if(!file) return;
+    rdWaitQ = {}; rdLs('rdWaitQ', null);   // foto nuova: le risposte per il preventivo ripartono da zero
     var reader = new FileReader();
     reader.onload = function(ev){
       var rawDataUrl = ev.target.result;
@@ -9261,24 +9303,23 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
   var spTimer = null, spIdx = 0, spSaved = {};
   function spBuild(){
     var st = document.getElementById('abSpStage'); if(!st || st.childNodes.length) return;
-    RD_DEMO_SP.forEach(function(o){ var c = document.createElement('div'); c.className = 'ab-sp-card wait' + (o.full ? ' full' : ''); c.innerHTML = '<div class="lg"><img alt=""></div><div class="ft"><b></b><span class="tg">Esempio</span><button type="button" class="sv"></button></div>';
-      c.querySelector('img').src = o.src; c.querySelector('b').innerHTML = qEscSp(o.n) + '<small>' + qEscSp(o.c) + '</small>'; var sv = c.querySelector('.sv'); sv.dataset.k = o.k; o.el = c; st.appendChild(c); });
+    RD_DEMO_SP.forEach(function(o){ var c = document.createElement('div'); c.className = 'ab-sp-card wait' + (o.full ? ' full' : ''); c.innerHTML = '<div class="lg"><img alt=""></div><div class="ft"><b></b><span class="tg">Esempio</span></div>';
+      c.querySelector('img').src = o.src; c.querySelector('b').innerHTML = qEscSp(o.n) + '<small>' + qEscSp(o.c) + '</small>'; o.el = c; st.appendChild(c); });
     var row = document.getElementById('abSpRow'); RD_DEMO_SP.concat(RD_DEMO_SP).forEach(function(o){ var im = document.createElement('img'); im.src = o.src; im.alt = ''; row.appendChild(im); });
-    st.addEventListener('click', function(e){ var b = e.target.closest('.sv'); if(!b) return; var k = b.dataset.k; if(spSaved[k]) delete spSaved[k]; else spSaved[k] = 1; spShow(); spRenderRes(); });
   }
   function qEscSp(t){ return String(t || '').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
   function spShow(){
     var n = RD_DEMO_SP.length;
     RD_DEMO_SP.forEach(function(o, k){ o.el.className = 'ab-sp-card ' + (o.full ? 'full ' : '') + (k === spIdx ? 'in' : (k === (spIdx - 1 + n) % n ? 'out' : 'wait'));
-      var sv = o.el.querySelector('.sv'); sv.classList.toggle('on', !!spSaved[o.k]); sv.textContent = spSaved[o.k] ? '★ Salvata' : '☆ Salva'; });
+    });
     document.getElementById('abSpCnt').textContent = (spIdx + 1) + '/' + n;
   }
   function spRenderRes(){
     var box = document.getElementById('spResBox'); if(!box) return;
     box.hidden = !(rdIsTester() && aiResultImage);
     if(box.hidden) return;
-    var sv = RD_DEMO_SP.filter(function(o){ return spSaved[o.k]; });
-    document.getElementById('spSaved').innerHTML = sv.length ? sv.map(function(o){ return '<div class="sp-mini"><div class="lgm" style="background-image:url(' + o.src + ')"></div><div style="flex:1"><b>' + qEscSp(o.n) + '</b><span>' + qEscSp(o.c) + ' · esempio</span></div></div>'; }).join('') : '<div style="font-size:12.5px;color:var(--ink-soft);border:1px dashed var(--line);border-radius:12px;padding:10px">Durante la generazione tocca "☆ Salva" su una ditta: la ritrovi qui.</div>';
+    var sv = [];
+    if(document.getElementById('spSaved')) document.getElementById('spSaved').innerHTML = sv.length ? sv.map(function(o){ return '<div class="sp-mini"><div class="lgm" style="background-image:url(' + o.src + ')"></div><div style="flex:1"><b>' + qEscSp(o.n) + '</b><span>' + qEscSp(o.c) + ' · esempio</span></div></div>'; }).join('') : '<div style="font-size:12.5px;color:var(--ink-soft);border:1px dashed var(--line);border-radius:12px;padding:10px">Durante la generazione tocca "☆ Salva" su una ditta: la ritrovi qui.</div>';
     document.getElementById('spHs').innerHTML = RD_DEMO_SP.map(function(o){ return '<div style="background-image:url(' + o.src + ');' + (o.full ? 'background-size:cover' : '') + '"></div>'; }).join('');
   }
   function spRun(on){
@@ -9294,6 +9335,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     try{ spRun(on); if(!on) setTimeout(spRenderRes, 50); }catch(e){}
     document.body.classList.toggle('ai-busy-on', !!on);
     if(on){
+      try{ rdBusyReset(); }catch(e){}
       var im = document.getElementById('aiBusyImg'); try{ if(photoImg && im.src !== photoImg.src) im.src = photoImg.src; }catch(e){}
       document.getElementById('aiBusyStep').textContent = stepText || '';
     }
@@ -9311,28 +9353,376 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     { it:'Rifinisco luci e ombre…', en:'Refining light and shadows…' },
     { it:'Quasi pronto…', en:'Almost ready…' }
   ];
-  function startAiProgress(){
+  // durata media delle ultime generazioni (per il "mancano circa …")
+  function rdAvg(){ var a = Number(rdLs('rdGenAvg')); return (a > 20 && a < 400) ? a : 90; }
+  function startAiProgress(startTs){
     var bar = document.getElementById('aiProgress'), fill = document.getElementById('aiProgressFill'), msg = document.getElementById('aiProgressMsg');
     bar.hidden = false; msg.hidden = false; fill.style.width = '2%';
     var bfi = document.getElementById('aiBusyFill'); if(bfi) bfi.style.width = '2%';
-    aiProgStart = Date.now();
+    aiProgStart = startTs || Date.now();
+    var avg = rdAvg();
     clearInterval(aiProgTimer);
     aiProgTimer = setInterval(function(){
       var t = (Date.now() - aiProgStart) / 1000;
-      var pct = 95 * (1 - Math.exp(-t / 35));
+      var pct = 95 * (1 - Math.exp(-t / (avg / 2.6)));
       fill.style.width = pct.toFixed(1) + '%';
-      var i = Math.min(AI_PROGRESS_MSGS.length - 1, Math.floor(t / 15));
+      var i = Math.min(AI_PROGRESS_MSGS.length - 1, Math.floor(t / avg * AI_PROGRESS_MSGS.length));
+      var left = avg - t, eta = document.getElementById('abEta');
+      if(eta) eta.textContent = left > 8 ? 'ancora circa ' + (Math.ceil(left / 5) * 5) + ' s' : 'quasi pronta…';
+      // il colore scelto "passa" sulla foto mentre l'AI lavora (finché non arriva una bozza vera)
+      var w = Math.min(100, pct * 1.25).toFixed(1) + '%', tn = document.getElementById('abTint'), rl = document.getElementById('abRoll');
+      if(tn) tn.style.width = w; if(rl){ rl.style.left = w; rl.style.opacity = (pct * 1.25 >= 100 || !rdTintOn) ? '0' : '1'; }
       msg.textContent = (RD_TEST_Q ? 'TEST ' + RD_TEST_NAME[RD_TEST_Q] + ' · ' : '') + tr(AI_PROGRESS_MSGS[i]);
       var bf = document.getElementById('aiBusyFill'), bm = document.getElementById('aiBusyMsg'); if(bf) bf.style.width = pct.toFixed(1) + '%'; if(bm) bm.textContent = tr(AI_PROGRESS_MSGS[i]);
     }, 700);
   }
   function stopAiProgress(ok){
     clearInterval(aiProgTimer);
+    var dur = (Date.now() - aiProgStart) / 1000;
+    if(ok && aiProgStart && dur > 20 && dur < 400) rdLs('rdGenAvg', Math.round(rdAvg() * 0.6 + dur * 0.4));
+    aiProgStart = 0;
     var bar = document.getElementById('aiProgress'), fill = document.getElementById('aiProgressFill'), msg = document.getElementById('aiProgressMsg');
     if(ok){ fill.style.width = '100%'; setTimeout(function(){ bar.hidden = true; msg.hidden = true; }, 900); }
     else { bar.hidden = true; msg.hidden = true; }
   }
 
+  // ---------- Anteprime salvate: chiudi e riapri, bozze, domande del preventivo ----------
+  // Ogni generazione è un "lavoro" salvato sul server: se il cliente chiude l'app o
+  // blocca il telefono, la generazione continua e la ritrova riaprendo Rendrum.
+  var rdJobCur = null, rdJobsOff = false, rdResumeDone = false, rdPendingJob = null, rdTintOn = false;
+  // la schermata di attesa sta sopra tutto, qualunque sia la pagina aperta (serve anche riaprendo l'app)
+  try{ document.body.appendChild(document.getElementById('aiBusy')); }catch(e){}
+  function rdLs(k, v){ try{ if(v === undefined) return JSON.parse(localStorage.getItem(k) || 'null'); if(v === null) localStorage.removeItem(k); else localStorage.setItem(k, JSON.stringify(v)); }catch(e){ return null; } }
+  function rdUuid(){ try{ if(window.crypto && crypto.randomUUID) return crypto.randomUUID(); }catch(e){}
+    var h = '0123456789abcdef', out = ''; for(var i = 0; i < 32; i++){ var r = Math.floor(Math.random() * 16); if(i === 12) r = 4; if(i === 16) r = (r & 3) | 8; out += h[r]; if(i === 7 || i === 11 || i === 15 || i === 19) out += '-'; } return out; }
+  function rdSnap(){ try{ return JSON.parse(JSON.stringify(state, function(k, v){ if(k === 'photoBase64' || k === 'photoMime') return undefined; if(typeof v === 'string' && v.length > 20000) return undefined; return v; })); }catch(e){ return null; } }
+  function rdJobGet(id, full){
+    return fetch(AI_ENDPOINT + '?job=' + encodeURIComponent(id) + (full ? '&full=1' : ''), { credentials:'same-origin', cache:'no-store' })
+      .then(function(r){ return r.json().catch(function(){ return {}; }).then(function(d){ return { ok:r.ok, status:r.status, d:d }; }); });
+  }
+  function rdLoadUrl(url){
+    if(!url) return Promise.resolve(null);
+    return fetch(url).then(function(r){ if(!r.ok) throw new Error('img'); return r.blob(); })
+      .then(function(b){ return new Promise(function(res, rej){ var fr = new FileReader(); fr.onload = function(){ res(fr.result); }; fr.onerror = rej; fr.readAsDataURL(b); }); })
+      .then(function(u){ var m = /^data:(.+?);base64,(.*)$/.exec(u); return loadImg(u).then(function(i){ return { img:i, base64:m[2], mime:m[1] }; }); });
+  }
+  // Controlla il lavoro sul server finché non è finito (bozze comprese).
+  function rdPollJob(id, hooks){
+    hooks = hooks || {};
+    var t0 = Date.now(), seen = false, lastPartial = null;
+    return new Promise(function(resolve){
+      function tick(){
+        if(hooks.stop && hooks.stop()) return;
+        rdJobGet(id).then(function(x){
+          if(hooks.stop && hooks.stop()) return;
+          if(x.status === 404 && x.d && x.d.code === 'nojobs'){ rdJobsOff = true; return; }
+          if(!x.ok && !seen && Date.now() - t0 > 45000) return;
+          var j = x.ok && x.d && x.d.job;
+          if(j){
+            if(!seen){ seen = true; if(hooks.onSeen) hooks.onSeen(j); }
+            if(j.partialUrl && j.partialUrl !== lastPartial){ lastPartial = j.partialUrl; if(hooks.onPartial) hooks.onPartial(j.partialUrl); }
+            if(j.status === 'done' || j.status === 'error'){ resolve(j); return; }
+          }
+          setTimeout(tick, 2500);
+        }).catch(function(){ setTimeout(tick, 4000); });
+      }
+      setTimeout(tick, hooks.delay || 1500);
+    });
+  }
+  function rdJobToResult(j){
+    if(j.status !== 'done') return Promise.resolve({ ok:false, status:500, data:{ error: j.error || 'La generazione non è riuscita: l\'anteprima non ti è stata scalata.' } });
+    return rdLoadUrl(j.resultUrl).then(function(r){ return { ok:true, status:200, data:{ imageBase64:r.base64, mimeType:r.mime, test:null, jobId:j.id } }; })
+      .catch(function(){ return { ok:false, status:500, data:{ error:'L\'anteprima è pronta ma non riesco a scaricarla: riapri Rendrum tra poco.' } }; });
+  }
+  // ---- schermata di attesa ----
+  function rdBusyReset(){
+    var p = document.getElementById('abPartial'); if(p){ p.hidden = true; p.classList.remove('on'); p.onload = null; p.removeAttribute('src'); }
+    var t = document.getElementById('abTag'); if(t) t.textContent = 'STO PREPARANDO';
+    var ti = document.getElementById('abTitle'); if(ti) ti.textContent = 'Sto creando la tua anteprima…';
+    var c = state.colorA && state.colorA.hex; rdTintOn = !!c;
+    var tn = document.getElementById('abTint'); if(tn){ tn.style.background = c || 'transparent'; tn.style.opacity = c ? '' : '0'; tn.style.width = '0'; }
+    var rl = document.getElementById('abRoll'); if(rl){ rl.style.left = '0'; rl.style.opacity = c ? '1' : '0'; }
+    var eta = document.getElementById('abEta'); if(eta) eta.textContent = '';
+    document.getElementById('abCloseBox').hidden = true; document.getElementById('abDetached').hidden = true; document.getElementById('abMain').hidden = false;
+    var n = document.getElementById('abNote'); if(n){ n.hidden = false; n.textContent = 'Non chiudere la pagina: ci vuole circa un minuto e mezzo per ogni lavorazione.'; }
+    rdQRender();
+  }
+  function rdBusyPartial(url){
+    var p = document.getElementById('abPartial'); if(!p) return;
+    p.onload = function(){ p.hidden = false; requestAnimationFrame(function(){ p.classList.add('on'); });
+      rdTintOn = false; var t = document.getElementById('abTag'); if(t) t.textContent = 'PRENDE FORMA';
+      var tn = document.getElementById('abTint'); if(tn) tn.style.opacity = '0'; var rl = document.getElementById('abRoll'); if(rl) rl.style.opacity = '0'; };
+    p.src = url;
+  }
+  function rdBusySeen(){
+    document.getElementById('abCloseBox').hidden = false;
+    var n = document.getElementById('abNote'); if(n) n.textContent = IS_APP ? 'Puoi anche uscire dall\'app: la generazione continua e la ritrovi qui.' : 'Puoi anche chiudere la pagina: la generazione continua e la ritrovi qui.';
+  }
+  function rdToast(html, onClick){
+    var t = document.getElementById('rdToast');
+    if(!t){ t = document.createElement('button'); t.type = 'button'; t.id = 'rdToast'; t.className = 'rd-toast'; document.body.appendChild(t); }
+    t.innerHTML = html; t.onclick = function(){ t.classList.remove('on'); if(onClick) onClick(); };
+    requestAnimationFrame(function(){ t.classList.add('on'); });
+    clearTimeout(t._tm); t._tm = setTimeout(function(){ t.classList.remove('on'); }, 20000);
+  }
+  function rdDetachedDone(ok, id, err){
+    if(ok) rdToast('<b>La tua anteprima è pronta ✓</b><span>Tocca qui per vederla.</span>', function(){ rdOpenJob(id); });
+    else { rdLs('rdJob', null); rdToast('<b>L\'anteprima non è riuscita</b><span>' + qEscSp((err && err.message) || '') + ' Non ti è stata scalata: puoi riprovare.</span>'); }
+  }
+  document.getElementById('abCloseBtn').addEventListener('click', function(){
+    var id = rdJobCur && rdJobCur.id; if(!id) return;
+    var b = this, mail = document.getElementById('abDetMail'); b.disabled = true;
+    fetch(AI_ENDPOINT + '?action=notify', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ job:id }) })
+      .then(function(r){ return r.json().catch(function(){ return {}; }); })
+      .then(function(d){ mail.innerHTML = d && d.email ? 'Ti scriviamo a <b>' + qEscSp(d.email) + '</b> appena l\'anteprima è pronta.' : 'Ti avvisiamo appena l\'anteprima è pronta.'; })
+      .catch(function(){ mail.textContent = 'Ti avvisiamo appena l\'anteprima è pronta.'; })
+      .finally(function(){ b.disabled = false; document.getElementById('abMain').hidden = true; document.getElementById('abDetached').hidden = false; document.getElementById('aiBusy').scrollTop = 0; });
+  });
+  document.getElementById('abStayBtn').addEventListener('click', function(){ document.getElementById('abDetached').hidden = true; document.getElementById('abMain').hidden = false; });
+  document.getElementById('abHomeBtn').addEventListener('click', function(){
+    if(rdJobCur && rdJobCur.run) rdJobCur.run.detached = true;
+    chainRun = null; stopAiProgress(false); setAiBusy(false);
+    var st = document.getElementById('aiStatus'); if(st){ st.classList.remove('error'); st.textContent = ''; }
+    goTo('panelLanding'); window.scrollTo(0, 0);
+  });
+  // ---- domande lampo del preventivo (solo privati) ----
+  var rdWaitQ = rdLs('rdWaitQ') || {};
+  function rdWQ(){
+    var fac = state.material && state.material.id === 'imbiancatura' && state.context === 'esterno';
+    return [
+      { k:'mq', t: fac ? 'Quanti m² di facciata, più o meno?' : 'Quanti m² sono, più o meno?', o:[['20','meno di 30'],['45','30–60'],['80','60–100'],['150','100–200'],['250','oltre 200'],['?','non lo so']] },
+      { k:'quando', t:'Quando vorresti iniziare?', o:[['subito','Il prima possibile'],['3mesi','Nei prossimi 3 mesi'],['anno','Entro l\'anno'],['nodata','Non ho ancora una data']] },
+      { k:'tipo', t:'Che tipo di immobile è?', o:[['Appartamento','Appartamento'],['Casa indipendente / villa','Casa / villa'],['Negozio / ufficio','Negozio / ufficio'],['Condominio (parti comuni)','Condominio']] }
+    ];
+  }
+  function rdQRender(){
+    var box = document.getElementById('abQ'); if(!box) return;
+    var show = !!(proAccount && proAccount.accountType === 'privato'); box.hidden = !show; if(!show) return;
+    var Q = rdWQ(), i = 0; while(i < Q.length && rdWaitQ[Q[i].k]) i++;
+    var done = Q.filter(function(q){ return rdWaitQ[q.k] && rdWaitQ[q.k] !== '-'; }).map(function(q){ var o = q.o.filter(function(x){ return x[0] === rdWaitQ[q.k]; })[0]; return '✓ ' + (o ? o[1] : rdWaitQ[q.k]) + (q.k === 'mq' && rdWaitQ.mq !== '?' ? ' m²' : ''); });
+    if(i >= Q.length){
+      if(!done.length){ box.hidden = true; return; }
+      box.innerHTML = '<div class="abq-ok">✓ Richiesta di preventivo già preparata</div><div class="abq-s">' + qEscSp(done.join(' · ')) + '</div><button type="button" class="abq-edit" data-wq="reset">Modifica le risposte</button>';
+      return;
+    }
+    var q = Q[i];
+    box.innerHTML = (done.length ? '<div class="abq-s abq-done">' + qEscSp(done.join(' · ')) + '</div>' : '')
+      + '<div class="abq-k">Intanto, per il preventivo (' + (i + 1) + '/' + Q.length + ')</div><div class="abq-t">' + qEscSp(q.t) + '</div>'
+      + '<div class="abq-o">' + q.o.map(function(o){ return '<button type="button" data-wq="' + q.k + '" data-v="' + qEscSp(o[0]) + '">' + qEscSp(o[1]) + '</button>'; }).join('') + '</div>'
+      + '<button type="button" class="abq-skip" data-wq="skip">Salta, rispondo dopo</button>';
+  }
+  document.getElementById('abQ').addEventListener('click', function(e){
+    var b = e.target.closest('[data-wq]'); if(!b) return; var k = b.dataset.wq;
+    if(k === 'reset') rdWaitQ = {};
+    else if(k === 'skip') rdWQ().forEach(function(q){ if(!rdWaitQ[q.k]) rdWaitQ[q.k] = '-'; });
+    else rdWaitQ[k] = b.dataset.v;
+    rdLs('rdWaitQ', rdWaitQ); rdQRender();
+  });
+  // ---- riapertura: risultato ritrovato o attesa che riprende ----
+  function rdShowJob(j){
+    var meta = j.meta || {};
+    return Promise.all([rdLoadUrl(j.inputUrl).catch(function(){ return null; }), rdLoadUrl(j.resultUrl)]).then(function(arr){
+      var inp = arr[0], out = arr[1], box = meta.box || null;
+      if(meta.snap) restoreSnap(Object.assign({}, meta.snap, { photoBase64:null, photoMime:null }));
+      if(meta.sf && typeof meta.sf === 'object'){ try{ SF = meta.sf; }catch(e){} }
+      return (inp ? unpadFromAI(inp.img, box, meta.w0, meta.h0).then(function(c){ return c || inp; }) : Promise.resolve(null)).then(function(o){
+        if(o){ photoImg = o.img; state.photoBase64 = o.base64; state.photoMime = o.mime; }
+        return unpadFromAI(out.img, box, meta.w0, meta.h0).then(function(c){ return c || out; }).then(function(res){
+          if(o && meta.step !== 'righe' && ['imbiancatura','decorazioni'].indexOf(meta.materialId) > -1) return refinePhoto(o.base64, o.mime, res);
+          return res;
+        });
+      }).then(function(res){
+        chainRun = null; layers = []; layerOriginal = null;
+        setAiBusy(false);
+        goTo('panelResult');
+        aiOnResult(res);
+        try{ renderLayerBox(); renderQueue(); }catch(e){}
+        window.scrollTo(0, 0);
+      });
+    }).catch(function(){ stopAiProgress(false); setAiBusy(false); rdToast('<b>Non riesco ad aprire l\'anteprima</b><span>Controlla la connessione e riprova.</span>', function(){ rdOpenJob(j.id); }); });
+  }
+  function rdOpenJob(id, opts){
+    opts = opts || {};
+    return rdJobGet(id, true).then(function(x){
+      var j = x.ok && x.d && x.d.job;
+      if(!j){
+        if(x.status === 401){ rdPendingJob = id; proAuthOpen(); var er = document.getElementById('paLoginError'); if(er) er.textContent = 'Accedi per vedere la tua anteprima.'; }
+        else { rdLs('rdJob', null); if(opts.fromLink) rdToast('<b>Anteprima non trovata</b><span>Forse è di un altro account.</span>'); }
+        return;
+      }
+      if(j.status === 'error'){ rdLs('rdJob', null); rdToast('<b>L\'anteprima non è riuscita</b><span>Non ti è stata scalata: puoi riprovare quando vuoi.</span>'); return; }
+      if(j.status === 'done') return rdShowJob(j);
+      rdResumeWait(j);
+    }).catch(function(){});
+  }
+  function rdResumeWait(j){
+    var run = { detached:false }; rdJobCur = { id:j.id, run:run };
+    setAiBusy(true, j.title || '');
+    document.getElementById('abTitle').textContent = 'Bentornato! La tua anteprima è quasi pronta';
+    if(j.inputUrl) document.getElementById('aiBusyImg').src = j.inputUrl;
+    rdTintOn = false; var tn = document.getElementById('abTint'); if(tn) tn.style.opacity = '0'; var rl = document.getElementById('abRoll'); if(rl) rl.style.opacity = '0';
+    if(j.partialUrl) rdBusyPartial(j.partialUrl);
+    rdBusySeen(); startAiProgress(new Date(j.createdAt).getTime() || Date.now());
+    rdPollJob(j.id, { delay:600, onPartial: rdBusyPartial, stop: function(){ return run.detached; } }).then(function(fin){
+      if(run.detached){ rdDetachedDone(fin.status === 'done', fin.id, fin.error ? new Error(fin.error) : null); return; }
+      if(fin.status === 'done') return rdJobGet(j.id, true).then(function(x){ return rdShowJob(x.d.job); });
+      stopAiProgress(false); setAiBusy(false); rdLs('rdJob', null);
+      rdToast('<b>L\'anteprima non è riuscita</b><span>' + qEscSp(fin.error || '') + '</span>');
+    });
+  }
+  function rdResumeCheck(){
+    if(rdResumeDone || !proAccount) return; rdResumeDone = true;
+    if(rdPendingJob){ var pj = rdPendingJob; rdPendingJob = null; return rdOpenJob(pj, { fromLink:true }); }
+    var lid = null; try{ lid = new URLSearchParams(location.search).get('lavoro'); }catch(e){}
+    if(lid){ try{ history.replaceState(null, '', location.pathname); }catch(e){} return rdOpenJob(lid, { fromLink:true }); }
+    var lj = rdLs('rdJob');
+    if(lj && lj.id && Date.now() - lj.t < 6 * 3600 * 1000){ if(!document.body.classList.contains('ai-busy-on')) rdOpenJob(lj.id); }
+    else if(lj) rdLs('rdJob', null);
+  }
+  (function(){
+    var lid = null; try{ lid = new URLSearchParams(location.search).get('lavoro'); }catch(e){}
+    if(!lid) return;
+    setTimeout(function(){ if(!proAccount && !rdResumeDone){ rdPendingJob = lid; try{ history.replaceState(null, '', location.pathname); }catch(e){} proAuthOpen(); var er = document.getElementById('paLoginError'); if(er) er.textContent = 'Accedi per vedere la tua anteprima.'; } }, 3000);
+  })();
+  // ---------- strumenti per le immagini dell'AI (bande, ritaglio, rifinitura) ----------
+  function loadImg(src){ return new Promise(function(res, rej){ var i = new Image(); i.onload = function(){ res(i); }; i.onerror = rej; i.src = src; }); }
+  function padForAI(b64, mime){
+    return loadImg('data:' + mime + ';base64,' + b64).then(function(im){
+      var ow = im.naturalWidth, oh = im.naturalHeight;
+      // Si invia al massimo 2048 px di lato (limite dimensione richiesta): il risultato torna comunque alla risoluzione piena.
+      var ks = Math.min(1, 2048 / Math.max(ow, oh)), w = Math.round(ow * ks), h = Math.round(oh * ks), r = w / h;
+      // In 2K/4K l'AI lavora nel formato esatto della foto: nessuna banda aggiunta.
+      if(!(RD_TEST_Q && RD_TEST_RES === 'std')){
+        if(ks === 1) return { b64:b64, mime:mime, box:null, ratio: w / h, w0:ow, h0:oh };
+        var sc = document.createElement('canvas'); sc.width = w; sc.height = h; var sg = sc.getContext('2d'); sg.imageSmoothingQuality = 'high'; sg.drawImage(im, 0, 0, w, h);
+        var sm = /^data:(.+);base64,(.*)$/.exec(sc.toDataURL('image/jpeg', 0.92));
+        return { b64:sm[2], mime:sm[1], box:{ x:0, y:0, w:1, h:1, ow:ow, oh:oh }, ratio: w / h, w0:ow, h0:oh };
+      }
+      var best = null;
+      [1, 1.5, 2/3].forEach(function(t){
+        var W = t >= r ? Math.round(h * t) : w, H = t >= r ? h : Math.round(w / t);
+        var area = W * H; if(!best || area < best.area) best = { W:W, H:H, area:area };
+      });
+      var W = best.W, H = best.H;
+      if(W === w && H === h && ks === 1) return { b64:b64, mime:mime, box:null, ratio: w / h, w0:ow, h0:oh };
+      var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+      var cx = cv.getContext('2d');
+      try { cx.filter = 'blur(40px) brightness(0.8)'; } catch(e){}
+      cx.drawImage(im, 0, 0, W, H);
+      try { cx.filter = 'none'; } catch(e){}
+      var x = Math.round((W - w) / 2), y = Math.round((H - h) / 2);
+      cx.drawImage(im, x, y, w, h);
+      var m = /^data:(.+);base64,(.*)$/.exec(cv.toDataURL('image/jpeg', 0.9));
+      return { b64:m[2], mime:m[1], box:{ x:x/W, y:y/H, w:w/W, h:h/H, ow:ow, oh:oh }, ratio: W / H };
+    });
+  }
+  function unpadFromAI(img, box, srcW, srcH){
+    var rw = img.naturalWidth, rh = img.naturalHeight;
+    if(!box){
+      // Nessun ritaglio da fare, salvo che l'AI abbia risposto in un formato diverso: allora si ritaglia al centro.
+      if(!srcW || Math.abs(rw / rh - srcW / srcH) < 0.01) return Promise.resolve(null);
+      box = { x:0, y:0, w:1, h:1, ow:srcW, oh:srcH };
+    }
+    // Si tiene la risoluzione più alta tra quella della foto e quella restituita dall'AI.
+    var sx = box.x*rw, sy = box.y*rh, sw = box.w*rw, sh = box.h*rh, want = box.ow / box.oh;
+    if(Math.abs(sw / sh - want) > 0.01){ if(sw / sh > want){ var nw = sh * want; sx += (sw - nw) / 2; sw = nw; } else { var nh = sw / want; sy += (sh - nh) / 2; sh = nh; } }
+    var k = Math.max(1, sw / box.ow), tw = Math.round(box.ow * k), th = Math.round(box.oh * k);
+    var cv = document.createElement('canvas'); cv.width = tw; cv.height = th;
+    var cg = cv.getContext('2d'); cg.imageSmoothingQuality = 'high';
+    cg.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
+    var url = cv.toDataURL('image/jpeg', 0.95), m = /^data:(.+);base64,(.*)$/.exec(url);
+    return loadImg(url).then(function(i){ return { img:i, base64:m[2], mime:m[1] }; });
+  }
+  // Rifinitura fotografica: dove l'AI NON doveva cambiare niente (mobili, finestre,
+  // oggetti, zone non trattate) rimettiamo i pixel della foto originale, con la sua
+  // nitidezza e la sua grana; sulle zone modificate aggiungiamo la stessa grana
+  // della foto, così il risultato sembra una foto vera e non un'immagine generata.
+  function refinePhoto(origB64, origMime, res){
+    return loadImg('data:' + origMime + ';base64,' + origB64).then(function(orig){
+      var W = Math.max(orig.naturalWidth, res.img.naturalWidth), H = Math.round(W * orig.naturalHeight / orig.naturalWidth);
+      var A = document.createElement('canvas'); A.width = W; A.height = H; var ax = A.getContext('2d');
+      ax.imageSmoothingQuality = 'high'; ax.drawImage(res.img, 0, 0, W, H);
+      var O = document.createElement('canvas'); O.width = W; O.height = H; var ox = O.getContext('2d'); ox.drawImage(orig, 0, 0, W, H);
+      // maschera delle zone cambiate, calcolata in piccolo e sfumata
+      var s = Math.min(1, 256 / Math.max(W, H)), w = Math.max(8, Math.round(W*s)), h = Math.max(8, Math.round(H*s));
+      function small(src){ var c = document.createElement('canvas'); c.width = w; c.height = h; var g = c.getContext('2d'); try{ g.filter = 'blur(1.5px)'; }catch(e){} g.drawImage(src, 0, 0, w, h); return g.getImageData(0, 0, w, h).data; }
+      var sa = small(A), so = small(O), mask = new Float32Array(w*h), changed = 0;
+      for(var i = 0, p = 0; i < sa.length; i += 4, p++){
+        var d = (Math.abs(sa[i]-so[i]) + Math.abs(sa[i+1]-so[i+1]) + Math.abs(sa[i+2]-so[i+2])) / 3;
+        var m = Math.max(0, Math.min(1, (d - 7) / 8)); mask[p] = m; if(m > 0.5) changed++;
+      }
+      var frac = changed / (w*h);
+      // Si rifinisce solo quando il lavoro tocca una parte piccola della foto (es. colonne, davanzali).
+      // Su superfici grandi (pavimento, pareti) il colore nuovo può somigliare a quello vecchio in
+      // alcune zone: in quel caso si rischierebbe di rimettere pezzi della foto originale (angoli
+      // non finiti, nastri, macchie). Meglio lasciare il risultato dell'AI intero.
+      if(frac < 0.03 || frac > 0.25) return res;
+      // allarga un po' la maschera (le zone cambiate vincono ai bordi)
+      var m2 = new Float32Array(w*h);
+      for(var y = 0; y < h; y++) for(var x = 0; x < w; x++){ var mx = 0;
+        for(var dy = -2; dy <= 2; dy++) for(var dx = -2; dx <= 2; dx++){ var yy = y+dy, xx = x+dx; if(yy>=0&&yy<h&&xx>=0&&xx<w){ var v = mask[yy*w+xx]; if(v > mx) mx = v; } }
+        m2[y*w+x] = mx; }
+      var mc = document.createElement('canvas'); mc.width = w; mc.height = h; var mg = mc.getContext('2d'), md = mg.createImageData(w, h);
+      for(var q = 0; q < w*h; q++){ md.data[q*4] = md.data[q*4+1] = md.data[q*4+2] = 255; md.data[q*4+3] = Math.round(m2[q]*255); }
+      mg.putImageData(md, 0, 0);
+      var MB = document.createElement('canvas'); MB.width = W; MB.height = H; var mbx = MB.getContext('2d');
+      try{ mbx.filter = 'blur(' + Math.max(2, Math.round(3/s)) + 'px)'; }catch(e){}
+      mbx.drawImage(mc, 0, 0, W, H);
+      // stima della grana della foto originale (differenza tra foto e foto sfocata)
+      var od = ox.getImageData(0, 0, W, H), bl = document.createElement('canvas'); bl.width = W; bl.height = H; var bx = bl.getContext('2d');
+      try{ bx.filter = 'blur(1px)'; }catch(e){} bx.drawImage(O, 0, 0); var bd = bx.getImageData(0, 0, W, H).data;
+      var acc = 0, n = 0; for(var k = 0; k < od.data.length; k += 4*97){ acc += Math.abs(od.data[k+1] - bd[k+1]); n++; }
+      var grain = Math.min(6, (acc / Math.max(1, n)) * 0.9);
+      var ad = ax.getImageData(0, 0, W, H), mk = mbx.getImageData(0, 0, W, H).data, out = ad.data, seed = 12345;
+      for(var j = 0; j < out.length; j += 4){
+        var a = mk[j+3] / 255;
+        seed = (seed * 1103515245 + 12345) & 0x7fffffff; var nz = ((seed / 0x7fffffff) - 0.5) * 2 * grain * a;
+        out[j]   = od.data[j]   * (1-a) + (out[j]   + nz) * a;
+        out[j+1] = od.data[j+1] * (1-a) + (out[j+1] + nz) * a;
+        out[j+2] = od.data[j+2] * (1-a) + (out[j+2] + nz) * a;
+      }
+      ax.putImageData(ad, 0, 0);
+      var url = A.toDataURL('image/jpeg', 0.93), mm = /^data:(.+);base64,(.*)$/.exec(url);
+      return loadImg(url).then(function(i){ return { img:i, base64:mm[2], mime:mm[1] }; });
+    }).catch(function(){ return res; });
+  }
+
+  // Mostra il risultato dell'AI (dopo la generazione o riaprendo un'anteprima salvata).
+  function aiOnResult(result){
+    var statusEl = document.getElementById('aiStatus');
+    rdLs('rdJob', null);
+    aiResultImage = result.img;
+    aiResultImageBase64 = result.base64;
+    aiResultImageMime = result.mime;
+    document.getElementById('pdfBox').hidden = false;
+    document.getElementById('qFromPreviewBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
+    document.getElementById('tfBtn').hidden = !!(proAccount && proAccount.accountType !== 'privato');
+    var spb = document.getElementById('panel3SaveProjectBtn'); if(spb) spb.style.display = proAccount ? 'block' : 'none';
+    document.getElementById('layerBox').hidden = false; renderLayerBox();
+    if(chainRun){
+      if(chainIdx < chainRun.length - 1){
+        // salva questa lavorazione come strato e passa alla successiva sulla foto appena ottenuta
+        layers.push({ title: layerTitle(), lines: pdfChoiceLines(), stateSnap: Object.assign({}, state), basePhoto: { img: photoImg, b64: state.photoBase64, mime: state.photoMime }, result: { img: result.img, b64: result.base64, mime: result.mime } });
+        if(!layerOriginal) layerOriginal = layers[0].basePhoto;
+        var base = { img: result.img, b64: result.base64, mime: result.mime };
+        chainIdx++;
+        restoreSnap(chainRun[chainIdx].snap);
+        photoImg = base.img; state.photoBase64 = base.b64; state.photoMime = base.mime;
+        aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
+        setTimeout(function(){ document.getElementById('aiGenerateBtn').disabled = false; document.getElementById('aiGenerateBtn').click(); }, 300);
+      } else { chainRun = null; renderQueue(); renderLayerBox(); }
+    }
+    if(!chainRun) setAiBusy(false);
+    renderHeroPreview();
+    setTimeout(syncResultCta, 0);
+    statusEl.textContent = ts('aiStatusDone');
+    if(RD_TEST_Q){
+      var tq = window.__rdLastTest;
+      rdTestBadge((tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account') + ' · ' + result.img.naturalWidth + '×' + result.img.naturalHeight + ' px' + (tq && tq.sizeSent ? ' · chiesto ' + tq.sizeSent : '') + (tq && tq.fallback ? ' · ⚠ OpenAI ha rifiutato: ' + tq.fallback : '') + (tq && tq.msAi ? ' · ⏱ totale ' + (tq.msTot/1000).toFixed(1) + ' s (AI ' + (tq.msAi/1000).toFixed(1) + ' s, server ' + (tq.msServer/1000).toFixed(1) + ' s, invii ' + tq.sends + ') · ' + tq.engine : ''));
+      statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' + (tq.engine ? ' · motore ' + tq.engine : '') + (tq.size ? ' · formato chiesto ' + tq.size : '') + (tq.fallback ? ' · ⚠ OpenAI ha rifiutato il formato: ' + tq.fallback : '') : ' · modalità test non attiva per questo account';
+    }
+    stopAiProgress(true);
+  }
   document.getElementById('aiGenerateBtn').addEventListener('click', function(){
     // Avvio di una catena di lavorazioni: si parte dalla prima in coda.
     if(genQueue.length && !chainRun){
@@ -9344,6 +9734,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     var btn = this; var statusEl = document.getElementById('aiStatus');
     btn.disabled = true; statusEl.classList.remove('error');
     statusEl.textContent = ts('aiStatusGenerating') + (chainRun ? ' — lavorazione ' + (chainIdx+1) + ' di ' + chainRun.length + ': ' + layerTitle() : '');
+    var myRun = { detached:false }; rdJobCur = { id:null, run:myRun };
     setAiBusy(true, (chainRun ? 'Lavorazione ' + (chainIdx+1) + ' di ' + chainRun.length + ' · ' : '') + layerTitle());
     startAiProgress();
     // Foto di riferimento dello stile di boiserie scelto (una delle 10 miniature già
@@ -9423,110 +9814,12 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     // combaciava più con l'originale. Qui la foto viene portata al formato giusto
     // con bande laterali sfocate e, al ritorno, il risultato viene ritagliato
     // esattamente sulla zona della foto originale e riportato alle sue dimensioni.
-    function loadImg(src){ return new Promise(function(res, rej){ var i = new Image(); i.onload = function(){ res(i); }; i.onerror = rej; i.src = src; }); }
-    function padForAI(b64, mime){
-      return loadImg('data:' + mime + ';base64,' + b64).then(function(im){
-        var ow = im.naturalWidth, oh = im.naturalHeight;
-        // Si invia al massimo 2048 px di lato (limite dimensione richiesta): il risultato torna comunque alla risoluzione piena.
-        var ks = Math.min(1, 2048 / Math.max(ow, oh)), w = Math.round(ow * ks), h = Math.round(oh * ks), r = w / h;
-        // In 2K/4K l'AI lavora nel formato esatto della foto: nessuna banda aggiunta.
-        if(!(RD_TEST_Q && RD_TEST_RES === 'std')){
-          if(ks === 1) return { b64:b64, mime:mime, box:null, ratio: w / h, w0:ow, h0:oh };
-          var sc = document.createElement('canvas'); sc.width = w; sc.height = h; var sg = sc.getContext('2d'); sg.imageSmoothingQuality = 'high'; sg.drawImage(im, 0, 0, w, h);
-          var sm = /^data:(.+);base64,(.*)$/.exec(sc.toDataURL('image/jpeg', 0.92));
-          return { b64:sm[2], mime:sm[1], box:{ x:0, y:0, w:1, h:1, ow:ow, oh:oh }, ratio: w / h, w0:ow, h0:oh };
-        }
-        var best = null;
-        [1, 1.5, 2/3].forEach(function(t){
-          var W = t >= r ? Math.round(h * t) : w, H = t >= r ? h : Math.round(w / t);
-          var area = W * H; if(!best || area < best.area) best = { W:W, H:H, area:area };
-        });
-        var W = best.W, H = best.H;
-        if(W === w && H === h && ks === 1) return { b64:b64, mime:mime, box:null, ratio: w / h, w0:ow, h0:oh };
-        var cv = document.createElement('canvas'); cv.width = W; cv.height = H;
-        var cx = cv.getContext('2d');
-        try { cx.filter = 'blur(40px) brightness(0.8)'; } catch(e){}
-        cx.drawImage(im, 0, 0, W, H);
-        try { cx.filter = 'none'; } catch(e){}
-        var x = Math.round((W - w) / 2), y = Math.round((H - h) / 2);
-        cx.drawImage(im, x, y, w, h);
-        var m = /^data:(.+);base64,(.*)$/.exec(cv.toDataURL('image/jpeg', 0.9));
-        return { b64:m[2], mime:m[1], box:{ x:x/W, y:y/H, w:w/W, h:h/H, ow:ow, oh:oh }, ratio: W / H };
-      });
-    }
-    function unpadFromAI(img, box, srcW, srcH){
-      var rw = img.naturalWidth, rh = img.naturalHeight;
-      if(!box){
-        // Nessun ritaglio da fare, salvo che l'AI abbia risposto in un formato diverso: allora si ritaglia al centro.
-        if(!srcW || Math.abs(rw / rh - srcW / srcH) < 0.01) return Promise.resolve(null);
-        box = { x:0, y:0, w:1, h:1, ow:srcW, oh:srcH };
-      }
-      // Si tiene la risoluzione più alta tra quella della foto e quella restituita dall'AI.
-      var sx = box.x*rw, sy = box.y*rh, sw = box.w*rw, sh = box.h*rh, want = box.ow / box.oh;
-      if(Math.abs(sw / sh - want) > 0.01){ if(sw / sh > want){ var nw = sh * want; sx += (sw - nw) / 2; sw = nw; } else { var nh = sw / want; sy += (sh - nh) / 2; sh = nh; } }
-      var k = Math.max(1, sw / box.ow), tw = Math.round(box.ow * k), th = Math.round(box.oh * k);
-      var cv = document.createElement('canvas'); cv.width = tw; cv.height = th;
-      var cg = cv.getContext('2d'); cg.imageSmoothingQuality = 'high';
-      cg.drawImage(img, sx, sy, sw, sh, 0, 0, tw, th);
-      var url = cv.toDataURL('image/jpeg', 0.95), m = /^data:(.+);base64,(.*)$/.exec(url);
-      return loadImg(url).then(function(i){ return { img:i, base64:m[2], mime:m[1] }; });
-    }
-    // Rifinitura fotografica: dove l'AI NON doveva cambiare niente (mobili, finestre,
-    // oggetti, zone non trattate) rimettiamo i pixel della foto originale, con la sua
-    // nitidezza e la sua grana; sulle zone modificate aggiungiamo la stessa grana
-    // della foto, così il risultato sembra una foto vera e non un'immagine generata.
-    function refinePhoto(origB64, origMime, res){
-      return loadImg('data:' + origMime + ';base64,' + origB64).then(function(orig){
-        var W = Math.max(orig.naturalWidth, res.img.naturalWidth), H = Math.round(W * orig.naturalHeight / orig.naturalWidth);
-        var A = document.createElement('canvas'); A.width = W; A.height = H; var ax = A.getContext('2d');
-        ax.imageSmoothingQuality = 'high'; ax.drawImage(res.img, 0, 0, W, H);
-        var O = document.createElement('canvas'); O.width = W; O.height = H; var ox = O.getContext('2d'); ox.drawImage(orig, 0, 0, W, H);
-        // maschera delle zone cambiate, calcolata in piccolo e sfumata
-        var s = Math.min(1, 256 / Math.max(W, H)), w = Math.max(8, Math.round(W*s)), h = Math.max(8, Math.round(H*s));
-        function small(src){ var c = document.createElement('canvas'); c.width = w; c.height = h; var g = c.getContext('2d'); try{ g.filter = 'blur(1.5px)'; }catch(e){} g.drawImage(src, 0, 0, w, h); return g.getImageData(0, 0, w, h).data; }
-        var sa = small(A), so = small(O), mask = new Float32Array(w*h), changed = 0;
-        for(var i = 0, p = 0; i < sa.length; i += 4, p++){
-          var d = (Math.abs(sa[i]-so[i]) + Math.abs(sa[i+1]-so[i+1]) + Math.abs(sa[i+2]-so[i+2])) / 3;
-          var m = Math.max(0, Math.min(1, (d - 7) / 8)); mask[p] = m; if(m > 0.5) changed++;
-        }
-        var frac = changed / (w*h);
-        // Si rifinisce solo quando il lavoro tocca una parte piccola della foto (es. colonne, davanzali).
-        // Su superfici grandi (pavimento, pareti) il colore nuovo può somigliare a quello vecchio in
-        // alcune zone: in quel caso si rischierebbe di rimettere pezzi della foto originale (angoli
-        // non finiti, nastri, macchie). Meglio lasciare il risultato dell'AI intero.
-        if(frac < 0.03 || frac > 0.25) return res;
-        // allarga un po' la maschera (le zone cambiate vincono ai bordi)
-        var m2 = new Float32Array(w*h);
-        for(var y = 0; y < h; y++) for(var x = 0; x < w; x++){ var mx = 0;
-          for(var dy = -2; dy <= 2; dy++) for(var dx = -2; dx <= 2; dx++){ var yy = y+dy, xx = x+dx; if(yy>=0&&yy<h&&xx>=0&&xx<w){ var v = mask[yy*w+xx]; if(v > mx) mx = v; } }
-          m2[y*w+x] = mx; }
-        var mc = document.createElement('canvas'); mc.width = w; mc.height = h; var mg = mc.getContext('2d'), md = mg.createImageData(w, h);
-        for(var q = 0; q < w*h; q++){ md.data[q*4] = md.data[q*4+1] = md.data[q*4+2] = 255; md.data[q*4+3] = Math.round(m2[q]*255); }
-        mg.putImageData(md, 0, 0);
-        var MB = document.createElement('canvas'); MB.width = W; MB.height = H; var mbx = MB.getContext('2d');
-        try{ mbx.filter = 'blur(' + Math.max(2, Math.round(3/s)) + 'px)'; }catch(e){}
-        mbx.drawImage(mc, 0, 0, W, H);
-        // stima della grana della foto originale (differenza tra foto e foto sfocata)
-        var od = ox.getImageData(0, 0, W, H), bl = document.createElement('canvas'); bl.width = W; bl.height = H; var bx = bl.getContext('2d');
-        try{ bx.filter = 'blur(1px)'; }catch(e){} bx.drawImage(O, 0, 0); var bd = bx.getImageData(0, 0, W, H).data;
-        var acc = 0, n = 0; for(var k = 0; k < od.data.length; k += 4*97){ acc += Math.abs(od.data[k+1] - bd[k+1]); n++; }
-        var grain = Math.min(6, (acc / Math.max(1, n)) * 0.9);
-        var ad = ax.getImageData(0, 0, W, H), mk = mbx.getImageData(0, 0, W, H).data, out = ad.data, seed = 12345;
-        for(var j = 0; j < out.length; j += 4){
-          var a = mk[j+3] / 255;
-          seed = (seed * 1103515245 + 12345) & 0x7fffffff; var nz = ((seed / 0x7fffffff) - 0.5) * 2 * grain * a;
-          out[j]   = od.data[j]   * (1-a) + (out[j]   + nz) * a;
-          out[j+1] = od.data[j+1] * (1-a) + (out[j+1] + nz) * a;
-          out[j+2] = od.data[j+2] * (1-a) + (out[j+2] + nz) * a;
-        }
-        ax.putImageData(ad, 0, 0);
-        var url = A.toDataURL('image/jpeg', 0.93), mm = /^data:(.+);base64,(.*)$/.exec(url);
-        return loadImg(url).then(function(i){ return { img:i, base64:mm[2], mime:mm[1] }; });
-      }).catch(function(){ return res; });
-    }
     function callAI(body){
       return padForAI(body.imageBase64, body.mimeType || 'image/jpeg').then(function(pad){
-        var sendBody = Object.assign({}, body, { imageBase64: pad.b64, mimeType: pad.mime, paddedBands: !!(pad.box && (pad.box.w < 0.999 || pad.box.h < 0.999)), rapporto: pad.ratio });
+        var jid = rdJobsOff ? null : rdUuid();
+        var sendBody = Object.assign({}, body, { imageBase64: pad.b64, mimeType: pad.mime, paddedBands: !!(pad.box && (pad.box.w < 0.999 || pad.box.h < 0.999)), rapporto: pad.ratio,
+          jobId: jid, jobMeta: jid ? { title: layerTitle(), materialId: body.materialId, step: body.step || null, box: pad.box || null, w0: pad.w0 || null, h0: pad.h0 || null, snap: rdSnap(), sf: (typeof SF === 'object' ? SF : null) } : null });
+        if(jid){ rdJobCur = { id:jid, run:myRun }; rdLs('rdJob', { id:jid, t:Date.now() }); }
         return callAIRaw(sendBody).then(function(result){
           return unpadFromAI(result.img, pad.box, pad.w0, pad.h0).then(function(cut){ return cut || result; });
         }).then(function(res){
@@ -9539,17 +9832,34 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
       });
     }
     function callAIRaw(body){
-      var tReq = Date.now();
-      return fetch(AI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+      var tReq = Date.now(), jid = body.jobId;
+      var direct = fetch(AI_ENDPOINT, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
       .then(function(r){
         return r.text().then(function(text){
           var data = null;
           try { data = JSON.parse(text); }
           catch(e){ data = { error: 'Risposta non valida dal server (status ' + r.status + ')' }; }
-          return { ok:r.ok, data:data };
+          return { ok:r.ok, status:r.status, data:data };
         });
-      })
-      .then(function(res){
+      });
+      // Con il lavoro salvato si guarda anche il server: se la connessione cade (app in secondo
+      // piano, schermo bloccato, rete) il risultato arriva lo stesso. Intanto arrivano le bozze.
+      var raced = !jid ? direct : new Promise(function(resolve, reject){
+        var settled = false, seen = false;
+        function fin(x){ if(!settled){ settled = true; resolve(x); } }
+        rdPollJob(jid, {
+          stop: function(){ return settled || myRun.detached; },
+          onSeen: function(){ seen = true; if(rdJobCur && rdJobCur.id === jid && !myRun.detached) rdBusySeen(); },
+          onPartial: function(u){ if(rdJobCur && rdJobCur.id === jid) rdBusyPartial(u); }
+        }).then(function(j){ if(!settled) rdJobToResult(j).then(fin); });
+        direct.then(function(x){
+          if(x.ok || x.status < 500) return fin(x);
+          setTimeout(function(){ if(!seen) fin(x); }, 6000);            // errore del server: se il lavoro è salvato aspettiamo lui
+        }, function(err){
+          setTimeout(function(){ if(!seen && !settled){ settled = true; reject(err); } }, 8000);   // connessione persa
+        });
+      });
+      return raced.then(function(res){
         if(!res.ok){
           var msg = (res.data && res.data.error) ? res.data.error : 'Errore sconosciuto';
           if(res.data && res.data.details){
@@ -9591,39 +9901,11 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     }
     job
       .then(function(result){
-        aiResultImage = result.img;
-        aiResultImageBase64 = result.base64;
-        aiResultImageMime = result.mime;
-        document.getElementById('pdfBox').hidden = false;
-        document.getElementById('qFromPreviewBtn').hidden = !(proAccount && proAccount.accountType !== 'privato');
-        document.getElementById('tfBtn').hidden = !!(proAccount && proAccount.accountType !== 'privato');
-        var spb = document.getElementById('panel3SaveProjectBtn'); if(spb) spb.style.display = proAccount ? 'block' : 'none';
-        document.getElementById('layerBox').hidden = false; renderLayerBox();
-        if(chainRun){
-          if(chainIdx < chainRun.length - 1){
-            // salva questa lavorazione come strato e passa alla successiva sulla foto appena ottenuta
-            layers.push({ title: layerTitle(), lines: pdfChoiceLines(), stateSnap: Object.assign({}, state), basePhoto: { img: photoImg, b64: state.photoBase64, mime: state.photoMime }, result: { img: result.img, b64: result.base64, mime: result.mime } });
-            if(!layerOriginal) layerOriginal = layers[0].basePhoto;
-            var base = { img: result.img, b64: result.base64, mime: result.mime };
-            chainIdx++;
-            restoreSnap(chainRun[chainIdx].snap);
-            photoImg = base.img; state.photoBase64 = base.b64; state.photoMime = base.mime;
-            aiResultImage = null; aiResultImageBase64 = null; aiResultImageMime = null;
-            setTimeout(function(){ document.getElementById('aiGenerateBtn').disabled = false; document.getElementById('aiGenerateBtn').click(); }, 300);
-          } else { chainRun = null; renderQueue(); renderLayerBox(); }
-        }
-        if(!chainRun) setAiBusy(false);
-        renderHeroPreview();
-        setTimeout(syncResultCta, 0);
-        statusEl.textContent = ts('aiStatusDone');
-        if(RD_TEST_Q){
-          var tq = window.__rdLastTest;
-          rdTestBadge((tq ? 'costo stimato ' + String(tq.costEur).replace('.', ',') + ' €' : 'NON attiva per questo account') + ' · ' + result.img.naturalWidth + '×' + result.img.naturalHeight + ' px' + (tq && tq.sizeSent ? ' · chiesto ' + tq.sizeSent : '') + (tq && tq.fallback ? ' · ⚠ OpenAI ha rifiutato: ' + tq.fallback : '') + (tq && tq.msAi ? ' · ⏱ totale ' + (tq.msTot/1000).toFixed(1) + ' s (AI ' + (tq.msAi/1000).toFixed(1) + ' s, server ' + (tq.msServer/1000).toFixed(1) + ' s, invii ' + tq.sends + ') · ' + tq.engine : ''));
-          statusEl.textContent += tq ? ' · TEST qualità ' + ({low:'BOZZA (bassa)', medium:'MEDIA', high:'ALTA', max:'MASSIMA (render)'}[tq.quality] || tq.quality) + ' · costo stimato ' + String(tq.costEur).replace('.', ',') + ' € (token: foto ' + tq.inputImageTokens + ', testo ' + tq.inputTextTokens + ', risultato ' + tq.outputTokens + ')' + (tq.engine ? ' · motore ' + tq.engine : '') + (tq.size ? ' · formato chiesto ' + tq.size : '') + (tq.fallback ? ' · ⚠ OpenAI ha rifiutato il formato: ' + tq.fallback : '') : ' · modalità test non attiva per questo account';
-        }
-        stopAiProgress(true);
+        if(myRun.detached){ rdDetachedDone(true, rdJobCur && rdJobCur.id); return; }
+        aiOnResult(result);
       })
       .catch(function(err){
+        if(myRun.detached){ rdDetachedDone(false, null, err); return; }
         if(err && err.code === 'login_required'){ proAuthOpen(); proSwitchTab('register'); }
         else if(err && err.code === 'subscription_required' && !IS_APP){ startCheckout(); }
         statusEl.classList.add('error');
@@ -10964,6 +11246,7 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
   }
   function proUpdateHeader(){
     try{ lpSyncChoices(); }catch(e){}
+    if(proAccount && typeof rdResumeCheck === 'function'){ if(rdPendingJob && rdResumeDone){ var pjb = rdPendingJob; rdPendingJob = null; setTimeout(function(){ rdOpenJob(pjb, { fromLink:true }); }, 300); } else setTimeout(rdResumeCheck, 300); }
     if(proAccount && proAccount.needsOnboarding && typeof obOpen === 'function' && !window.__rdObShown){ window.__rdObShown = true; setTimeout(obOpen, 400); }
     if(proAccount && proAccount.accountType === 'privato' && typeof rdVoteCheck === 'function') rdVoteCheck();
     if(proAccount && typeof proPendingClick !== 'undefined' && proPendingClick && (!proAccount.paymentsEnabled || subActive())){
@@ -12475,7 +12758,13 @@ html:not([data-theme="dark"]) .hwA p{font-size:14px; color:#8A7F72; line-height:
     }catch(e){ tf.pv = null; }
     f('tfPrevBox').hidden = !tf.pv; if(tf.pv){ f('tfDopo').src = tf.pv.dopo; f('tfPrima').src = tf.pv.prima || tf.pv.dopo; }
     f('tfStep1').hidden = false; f('tfStep2').hidden = true; f('tfDone').hidden = true; f('tfErr1').textContent = '';
-    tf.q = {}; tf.qi = 0; var tq = rdIsTester(); f('tfQuiz').hidden = !tq; if(tq){ f('tfStep1').hidden = true; tqRender(); }
+    tf.q = {}; tf.qi = 0; var tq = rdIsTester();
+    // risposte date durante l'attesa dell'anteprima: richiesta già compilata
+    try{ var wq = rdWaitQ || {}, QM = { subito:'Entro 1 mese', '3mesi':'Tra 1 e 3 mesi', anno:'Tra 3 e 6 mesi', nodata:'Oltre 6 mesi' };
+      if(wq.mq && /^\d+$/.test(wq.mq) && !f('tfMq').value) f('tfMq').value = wq.mq;
+      if(wq.quando && QM[wq.quando]){ if(!f('tfQuando').value) f('tfQuando').value = QM[wq.quando]; tf.q.quando = wq.quando; }
+      if(wq.tipo && wq.tipo !== '-' && !f('tfTipo').value) f('tfTipo').value = wq.tipo; }catch(e){}
+    f('tfQuiz').hidden = !tq; if(tq){ f('tfStep1').hidden = true; tqRender(); }
     tfOptionalMarks(tq);
     try{ var sub = document.querySelector('#ppViewFind .pro-projects-sub'); if(!sub.dataset.orig) sub.dataset.orig = sub.textContent; sub.textContent = tq ? 'Qualche domanda veloce, poi scegli tu le ditte della tua zona: ti rispondono con un preventivo qui nell\'app.' : sub.dataset.orig; }catch(e){}
     document.getElementById('proProjectsModal').classList.add('open'); qCard(false); ppShowView('find'); qScrollTop();

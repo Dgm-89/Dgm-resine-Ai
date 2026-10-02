@@ -31,10 +31,14 @@
 //    (questa parte la collego io appena il backend è online: mandami l'URL).
 
 const { paymentsEnabled, currentAccount, supabaseRequest, PLAN_LIMITS } = require("./_auth-lib");
+const jobs = require("./_jobs");   // anteprime salvate: si ritrovano anche chiudendo l'app
 const PLANS_LIMIT = (tier) => PLAN_LIMITS[tier] || 0;
 
 module.exports = async function handler(req, res) {
   const tStart = Date.now();   // misura dei tempi (visibile solo agli account di test)
+  const qs = req.query || {};
+  if (req.method === "GET" && qs.job) return jobs.handleGet(req, res);
+  if (req.method === "POST" && qs.action === "notify") return jobs.handleNotify(req, res);
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Usa una richiesta POST" });
   }
@@ -48,7 +52,7 @@ module.exports = async function handler(req, res) {
       if (typeof req.body[k] === "string") req.body[k] = req.body[k].replace(/[\r\n\t]+/g, " ").replace(/[<>{}]/g, "").slice(0, 80);
     });
   }
-  const { muro, porteInterne, imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, lavoriPrecedenti, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands, motore } = req.body || {};
+  const { muro, porteInterne, imageBase64, mimeType, material, materialId, colorA, colorAHex, colorB, colorBHex, colorC, colorCHex, colorDavanzali, colorDavanzaliHex, colorSottotetto, colorSottotettoHex, colorPlafone, colorPlafoneHex, effettoScatola, colorTetto, colorTettoHex, colorCornici, colorCorniciHex, colorBalconi, colorBalconiHex, colorSerramenti, colorSerramentiHex, colorRighe, colorRigheHex, effetto, finitura, facadeLayout, righeExtent, righeOrientamento, righeZona, context, boiserieStyle, boiserieHeight, addDavanzali, addMarcapiano, addSottotetto, addTetto, addCornici, addBalconi, addSerramenti, addRighe, boiserieStyleRefImage, resinaArea, granigliaLayout, granigliaScale, risoluzione, rapporto, stile, lavoriPrecedenti, parquetPosa, grana, righeSpessore, colorCardImage, posaRefImage, spcLine, collezione, accentoTipo, colorAccento, colorAccentoHex, accentoRefImage, segni, colonne, plafoneTipo, materialSampleImage, qualita, scaleTipo, piaDove, piaAlt, piaFmtPav, piaFmtRiv, piaRivTile, piaDoccia, piaDocciaTile, piaFmtDoccia, colorDoccia, colorDocciaHex, bordatura, colorBordatura, colorBordaturaHex, step, paddedBands, motore, jobId, jobMeta } = req.body || {};
 
   if (!imageBase64 || !material || !colorA) {
     return res.status(400).json({ error: "Dati mancanti: servono almeno imageBase64, material, colorA" });
@@ -92,6 +96,18 @@ module.exports = async function handler(req, res) {
     };
   }
   async function countUsage() { /* già conteggiata all'inizio */ }
+
+  // Lavoro salvato: foto, bozze e risultato restano anche se il cliente chiude l'app.
+  const job = jobs.validId(jobId) ? await jobs.start(req, quotaAcc, jobId, jobMeta, imageBase64, mimeType).catch(function () { return null; }) : null;
+  if (job) {
+    const prevJson = res.json.bind(res);
+    res.json = function (payload) {
+      if (res.statusCode >= 400 && !job.closed) {
+        return jobs.fail(job, payload && payload.error).catch(function () {}).then(function () { return prevJson(payload); });
+      }
+      return prevJson(payload);
+    };
+  }
 
   // Riferimento colore per il prompt: include il codice esadecimale esatto quando
   // disponibile, così l'AI ha un target numerico preciso invece di dover indovinare
@@ -853,19 +869,24 @@ module.exports = async function handler(req, res) {
       // Parametri della richiesta. Se OpenAI ne rifiuta uno, si toglie SOLO quello e si riprova
       // (prima si ripiegava su "auto" togliendo tutto: il formato 2K/4K andava perso).
       const params = Object.assign({ quality, input_fidelity: "high", size: outSize, output_format: "jpeg" }, outExtra);
+      // Bozze intermedie (l'immagine "prende forma" mentre il cliente aspetta). Variabile AI_BOZZE su Vercel:
+      // "tutti" = per tutti, "off" = spente; se non c'è, solo per gli account di prova.
+      const bozzeMode = String(process.env.AI_BOZZE || "").trim().toLowerCase();
+      if (job && bozzeMode !== "off" && (bozzeMode === "tutti" || isTesterAll)) { params.stream = "true"; params.partial_images = "2"; }
       const dropped = [];
       // Parametri già rifiutati da questo modello (memoria per istanza): non si rimandano.
       const memo = (global.__rdRejected = global.__rdRejected || {})[model] = (global.__rdRejected[model] || {});
       Object.keys(memo).forEach(function (k) { if (k in params) { delete params[k]; dropped.push(k); } });
       const tAi0 = Date.now(); let sends = 1;
+      const isSSE = (resp) => !!(resp.ok && resp.headers && resp.headers.get && /event-stream/i.test(resp.headers.get("content-type") || ""));
       let r = await sendRetry(params);
-      let txt = await r.text();
+      let txt = isSSE(r) ? null : await r.text();
       let fallbackWhy = "";
       for (let tries = 0; tries < 4 && r.status === 400; tries++) {
         let msg = txt;
         try { const ej = JSON.parse(txt); msg = String((ej && ej.error && (ej.error.param ? ej.error.param + ": " : "") + ej.error.message) || txt); } catch (e) {}
         const low = msg.toLowerCase();
-        let key = ["input_fidelity", "output_compression", "output_format", "size", "quality"].find(function (k) { return k in params && low.indexOf(k) > -1; });
+        let key = ["partial_images", "stream", "input_fidelity", "output_compression", "output_format", "size", "quality"].find(function (k) { return k in params && low.indexOf(k) > -1; });
         if (!key) break;
         fallbackWhy = (fallbackWhy ? fallbackWhy + " | " : "") + msg.slice(0, 200);
         console.error("openai parametro rifiutato (" + key + "), riprovo senza:", msg.slice(0, 300));
@@ -873,14 +894,21 @@ module.exports = async function handler(req, res) {
         else if (key === "size") { delete params.size; dropped.push("size"); }
         else if (key === "quality" && params.quality !== "high") params.quality = "high";
         else if (key === "output_format") { delete params.output_format; delete params.output_compression; outMime = "image/png"; dropped.push("output_format"); }
+        else if (key === "stream" || key === "partial_images") { delete params.stream; delete params.partial_images; dropped.push("stream"); memo.stream = 1; memo.partial_images = 1; }
         else { delete params[key]; dropped.push(key); if (key === "input_fidelity" || key === "output_compression") memo[key] = 1; }
         r = await sendRetry(params); sends++;
-        txt = await r.text();
+        txt = isSSE(r) ? null : await r.text();
       }
       const msAi = Date.now() - tAi0;
       let data;
-      try { data = JSON.parse(txt); } catch (e) {
-        return res.status(502).json({ error: "Risposta non valida dal servizio AI (OpenAI)", details: txt.slice(0, 500) });
+      if (txt === null) {
+        // Risposta a flusso: bozze intermedie e poi l'immagine finale.
+        data = await readImageStream(r, function (b64) { jobs.partial(job, b64); });
+        if (!data) return res.status(502).json({ error: "Il servizio AI ha interrotto la generazione. Riprova: l'anteprima non ti è stata scalata." });
+      } else {
+        try { data = JSON.parse(txt); } catch (e) {
+          return res.status(502).json({ error: "Risposta non valida dal servizio AI (OpenAI)", details: txt.slice(0, 500) });
+        }
       }
       if (!r.ok) {
         return res.status(r.status).json({ error: "Errore dal servizio AI (OpenAI)", details: (data && data.error && data.error.message) || data });
@@ -898,7 +926,8 @@ module.exports = async function handler(req, res) {
       const fit = await fitJpeg(b64, outMime);
       if (isTesterAll) { test = test || {}; test.msAi = msAi; test.msServer = Date.now() - tStart; test.sends = sends; test.engine = "openai " + model; }
       if (test) { test.engine = "openai " + model; test.sizeSent = params.size || "auto"; test.quality = params.quality || quality; if (dropped.length) test.dropped = dropped.join(", "); if (fallbackWhy) test.fallback = fallbackWhy; }
-      return res.status(200).json({ imageBase64: fit.b64, mimeType: fit.mime, test: test });
+      if (job) await jobs.done(job, fit.b64, fit.mime).catch(function () {});
+      return res.status(200).json({ imageBase64: fit.b64, mimeType: fit.mime, test: test, jobId: job ? job.id : null });
     } catch (err) {
       console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
     }
@@ -1008,8 +1037,36 @@ module.exports = async function handler(req, res) {
     }
     const gfit = await fitJpeg(inline.data, inline.mime_type || inline.mimeType || "image/png");
     if (isTesterAll) { gtest = gtest || { engine: "gemini " + geminiModel, size: imageConfig.imageSize }; gtest.msAi = msAi; gtest.msServer = Date.now() - tStart; gtest.sends = sends; }
-    return res.status(200).json({ imageBase64: gfit.b64, mimeType: gfit.mime, test: gtest });
+    if (job) await jobs.done(job, gfit.b64, gfit.mime).catch(function () {});
+    return res.status(200).json({ imageBase64: gfit.b64, mimeType: gfit.mime, test: gtest, jobId: job ? job.id : null });
   } catch (err) {
     console.error("generate-preview", err && err.cause || err); return res.status(503).json({ error: "Il servizio AI non ha risposto in tempo. Riprova tra un minuto: l'anteprima non ti è stata scalata." });
   }
+}
+
+// Legge la risposta a flusso (SSE) di OpenAI: chiama onPartial per ogni bozza e restituisce
+// { data:[{ b64_json }], usage } con l'immagine finale (o null se il flusso si interrompe).
+async function readImageStream(resp, onPartial) {
+  if (!resp.body || !resp.body.getReader) return null;
+  const reader = resp.body.getReader(), dec = new TextDecoder();
+  let buf = "", final = null;
+  const handle = (block) => {
+    const lines = block.split(/\r?\n/).filter((l) => l.startsWith("data:"));
+    if (!lines.length) return;
+    const raw = lines.map((l) => l.slice(5).trim()).join("");
+    if (!raw || raw === "[DONE]") return;
+    let ev; try { ev = JSON.parse(raw); } catch (e) { return; }
+    const type = String(ev.type || "");
+    if (ev.b64_json && /partial/.test(type)) { try { onPartial(ev.b64_json); } catch (e) {} }
+    else if (ev.b64_json) final = { data: [{ b64_json: ev.b64_json }], usage: ev.usage || null };
+  };
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (value) buf += dec.decode(value, { stream: true });
+    let i;
+    while ((i = buf.search(/\r?\n\r?\n/)) > -1) { handle(buf.slice(0, i)); buf = buf.slice(i).replace(/^\r?\n\r?\n/, ""); }
+    if (done) break;
+  }
+  if (buf.trim()) handle(buf);
+  return final;
 }
